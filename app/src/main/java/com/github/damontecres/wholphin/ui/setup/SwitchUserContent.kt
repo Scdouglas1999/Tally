@@ -104,6 +104,17 @@ fun SwitchUserContent(
         }
     }
 
+    // JELLYTV: begin
+    // Nobody has signed in on this TV yet: go straight to the Quick Connect code instead of an empty list.
+    var jellyTvOfferedSignIn by remember { mutableStateOf(false) }
+    LaunchedEffect(state.loading, state.users.isEmpty(), state.quickConnectEnabled) {
+        if (!jellyTvOfferedSignIn && state.loading == LoadingState.Success && state.users.isEmpty() && state.quickConnectEnabled) {
+            jellyTvOfferedSignIn = true
+            showAddUserDialog(null)
+        }
+    }
+    // JELLYTV: end
+
     LaunchedEffect(state.switchUserState) {
         if (!showAddUser) {
             when (val s = state.switchUserState) {

@@ -38,6 +38,8 @@ file is a future merge conflict.** Therefore:
 | W7 | `MainActivity.kt` | inject `JellyTvUpdatePrompt`, call it after upstream's update check |
 | W8 | `preferences/AppPreference.kt` (`UpdateUrl.defaultValue` ONLY) | self-update from this fork's releases |
 | W9 | `ui/setup/InstallUpdatePage.kt` | initial focus on "Download & Update" |
+| W10 | `ui/setup/SwitchServerViewModel.kt` (`init`) | no servers yet: add the one stamped into the APK (`JellyTvStampedServer`) |
+| W11 | `ui/setup/SwitchUserContent.kt` | no users yet: open the Quick Connect dialog straight away |
 
 ## Releases and self-update
 

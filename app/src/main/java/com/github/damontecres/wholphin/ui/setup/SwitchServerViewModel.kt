@@ -84,6 +84,14 @@ class SwitchServerViewModel
                 allServers.forEach { server ->
                     internalTestServer(server.server)
                 }
+                // JELLYTV: begin
+                // First launch of an APK handed out by a JellyTV server: it carries that server's address.
+                if (allServers.isEmpty()) {
+                    com.github.damontecres.wholphin.jellytv.JellyTvStampedServer
+                        .read(context)
+                        ?.let { addServer(it, showToast = false) }
+                }
+                // JELLYTV: end
             }
         }
 
