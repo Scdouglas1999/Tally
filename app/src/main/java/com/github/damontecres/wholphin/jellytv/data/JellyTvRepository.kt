@@ -8,6 +8,8 @@ import com.github.damontecres.wholphin.jellytv.api.JtvEvent
 import com.github.damontecres.wholphin.jellytv.api.JtvInfo
 import com.github.damontecres.wholphin.jellytv.api.JtvSettings
 import com.github.damontecres.wholphin.services.hilt.DefaultCoroutineScope
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -25,8 +27,6 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Read-modify-write helpers for the shared settings document.

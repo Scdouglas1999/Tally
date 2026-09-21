@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -83,10 +85,21 @@ fun FocusedGamePanel(
                         modifier =
                             Modifier
                                 .weight(0.45f)
-                                .fillMaxHeight(),
+                                .fillMaxHeight()
+                                .padding(start = 28.dp)
+                                .drawBehind {
+                                    drawRect(JtvColors.rule, size = Size(1.dp.toPx(), size.height))
+                                }.padding(start = 28.dp),
                     ) {
                         Text(
-                            text = stringResource(R.string.jtv_situation).uppercase(),
+                            text =
+                                stringResource(
+                                    when {
+                                        game.isLive -> R.string.jtv_situation
+                                        game.isFinal -> R.string.jtv_hero_final
+                                        else -> R.string.jtv_hero_starts
+                                    },
+                                ).uppercase(),
                             style = JtvType.label,
                             color = JtvColors.muted,
                             maxLines = 1,
@@ -98,6 +111,24 @@ fun FocusedGamePanel(
                                 style = JtvType.body,
                                 color = JtvColors.muted,
                             )
+                        } else if (!game.isLive) {
+                            Text(
+                                text = gameStatusLabel(game).uppercase(),
+                                style = JtvType.situation,
+                                color = if (game.isFinal) JtvColors.textSecondary else JtvColors.accent,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            if (game.broadcasts.isNotEmpty()) {
+                                Spacer(Modifier.height(10.dp))
+                                Text(
+                                    text = stringResource(R.string.jtv_hero_on, game.broadcasts.joinToString(", ")),
+                                    style = JtvType.body,
+                                    color = JtvColors.textSecondary,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         } else {
                             Situation(game)
                             Spacer(Modifier.height(10.dp))

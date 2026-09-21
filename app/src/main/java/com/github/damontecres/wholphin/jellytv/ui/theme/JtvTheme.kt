@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.LocalContentColor
@@ -187,15 +190,32 @@ fun JtvSurface(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    CompositionLocalProvider(LocalContentColor provides JtvColors.text) {
-        ProvideTextStyle(JtvType.body) {
-            Box(
-                modifier =
-                    modifier
-                        .fillMaxSize()
-                        .background(JtvColors.ground),
-                content = content,
-            )
+    JtvScale {
+        CompositionLocalProvider(LocalContentColor provides JtvColors.text) {
+            ProvideTextStyle(JtvType.body) {
+                Box(
+                    modifier =
+                        modifier
+                            .fillMaxSize()
+                            .background(JtvColors.ground),
+                    content = content,
+                )
+            }
         }
     }
 }
+
+/**
+ * Every JellyTV dimension (dp and sp) is authored against a 1200 x 675 canvas: the 1920 x 1080 mockups at
+ * 0.625, i.e. 20% larger than drawn, for reading from a sofa. A TV is 960 x 540 dp, so JellyTV UI is laid out
+ * at 0.8 of the real density. Anything drawn outside a [JtvSurface] (the overlays on top of the upstream
+ * player) must be wrapped in this too.
+ */
+@Composable
+fun JtvScale(content: @Composable () -> Unit) {
+    val density = LocalDensity.current
+    val scaled = remember(density) { Density(density.density * JTV_SCALE, density.fontScale) }
+    CompositionLocalProvider(LocalDensity provides scaled, content = content)
+}
+
+private const val JTV_SCALE = 0.8f

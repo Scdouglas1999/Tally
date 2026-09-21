@@ -75,4 +75,7 @@
     <string name="jtv_server_version">Build %1$s \u00b7 API v%2$d</string>
     <string name="jtv_server_features">Features: %1$s</string>
     <string name="jtv_server_unavailable">No response from the JellyTV plugin</string>
+    <string name="jtv_hero_starts">Starts</string>
+    <string name="jtv_hero_final">Final</string>
+    <string name="jtv_hero_on">On %1$s</string>
 </resources>

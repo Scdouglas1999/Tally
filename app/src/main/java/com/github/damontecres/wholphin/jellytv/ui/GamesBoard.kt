@@ -18,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -44,6 +45,7 @@ import com.github.damontecres.wholphin.ui.ifElse
 import com.github.damontecres.wholphin.ui.rememberInt
 import com.github.damontecres.wholphin.ui.rememberPosition
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import kotlinx.coroutines.launch
 
 /**
  * The games board: the large [FocusedGamePanel] mirroring the focused card on top,
@@ -152,8 +154,10 @@ fun GamesBoard(
                     } else {
                         0
                     }
+                val listState = rememberLazyListState()
+                val scope = rememberCoroutineScope()
                 LazyColumn(
-                    state = rememberLazyListState(),
+                    state = listState,
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                     contentPadding = PaddingValues(bottom = JtvDimens.marginVertical),
                     modifier =
@@ -172,6 +176,8 @@ fun GamesBoard(
                             onCardFocused = { index, game ->
                                 focusedGameId = game.id
                                 focusedPosition = RowColumn(rowIndex, index)
+                                // Keep the focused row's header at the top of the list, not its card at the bottom edge.
+                                scope.launch { listState.animateScrollToItem(rowIndex) }
                             },
                             onWatch = onWatch,
                             onAddToMultiview = onAddToMultiview,

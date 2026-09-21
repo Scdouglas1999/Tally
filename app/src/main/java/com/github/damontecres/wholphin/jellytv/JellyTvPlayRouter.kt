@@ -2,11 +2,11 @@ package com.github.damontecres.wholphin.jellytv
 
 import com.github.damontecres.wholphin.jellytv.data.JellyTvRepository
 import com.github.damontecres.wholphin.ui.nav.Destination
-import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.cancellation.CancellationException
+import timber.log.Timber
 
 /**
  * Decides which player a server-pushed "play this item" opens. A JellyTV channel opens in the JellyTV player

@@ -163,34 +163,35 @@ fun JellyTvMultiviewPage(
                             subtitle = stringResource(R.string.jtv_mv_empty_subtitle),
                             modifier = Modifier.fillMaxSize(),
                         )
-                    1 -> TileSlot(0, Modifier.fillMaxSize())
+                    1 -> TileSlot(0, Modifier.fillMaxWidth().align(Alignment.Center))
                     2 ->
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxSize(),
                         ) {
-                            TileSlot(0, Modifier.weight(1f).fillMaxHeight())
-                            TileSlot(1, Modifier.weight(1f).fillMaxHeight())
+                            TileSlot(0, Modifier.weight(1f))
+                            TileSlot(1, Modifier.weight(1f))
                         }
                     else ->
                         Column(
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
                             modifier = Modifier.fillMaxSize(),
                         ) {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier = Modifier.weight(1f).fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                TileSlot(0, Modifier.weight(1f).fillMaxHeight())
-                                TileSlot(1, Modifier.weight(1f).fillMaxHeight())
+                                TileSlot(0, Modifier.weight(1f))
+                                TileSlot(1, Modifier.weight(1f))
                             }
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier = Modifier.weight(1f).fillMaxWidth(),
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
-                                TileSlot(2, Modifier.weight(1f).fillMaxHeight())
+                                TileSlot(2, Modifier.weight(1f))
                                 if (tiles.size > 3) {
-                                    TileSlot(3, Modifier.weight(1f).fillMaxHeight())
+                                    TileSlot(3, Modifier.weight(1f))
                                 } else {
                                     // A lone third tile stays half width on the second row.
                                     Spacer(Modifier.weight(1f))

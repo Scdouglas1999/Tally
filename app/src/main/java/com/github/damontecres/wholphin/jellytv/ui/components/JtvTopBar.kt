@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
@@ -101,12 +102,14 @@ fun JtvTopBar(
             )
         }
         Spacer(Modifier.weight(1f))
-        Text(
-            text = clock,
-            style = JtvType.clock.copy(fontSize = 22.sp),
-            color = JtvColors.accent,
-            maxLines = 1,
-        )
+        if (clock.isNotBlank()) {
+            Text(
+                text = clock,
+                style = JtvType.clock.copy(fontSize = 22.sp),
+                color = JtvColors.accent,
+                maxLines = 1,
+            )
+        }
     }
 }
 
@@ -147,7 +150,18 @@ private fun JtvTabItem(
         interactionSource = interactionSource,
         modifier = modifier.semantics { role = Role.Tab },
     ) {
-        Box(Modifier.fillMaxHeight()) {
+        // The underline is drawn, not laid out: a fillMaxWidth child would make the selected tab take the whole bar.
+        val underline = JtvDimens.focusBorder
+        Box(
+            Modifier
+                .fillMaxHeight()
+                .drawBehind {
+                    if (selected) {
+                        val h = underline.toPx()
+                        drawRect(JtvColors.accent, topLeft = Offset(0f, size.height - h), size = Size(size.width, h))
+                    }
+                },
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -162,16 +176,6 @@ private fun JtvTabItem(
                     style = JtvType.labelLarge,
                     color = contentColor,
                     maxLines = 1,
-                )
-            }
-            if (selected) {
-                Box(
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .height(JtvDimens.focusBorder)
-                            .background(JtvColors.accent),
                 )
             }
         }

@@ -1,5 +1,6 @@
 package com.github.damontecres.wholphin.jellytv.ui
 
+import android.os.SystemClock
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +38,7 @@ import com.github.damontecres.wholphin.jellytv.ui.player.GameSwitcher
 import com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerViewModel
 import com.github.damontecres.wholphin.jellytv.ui.player.ScoreBug
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvScale
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.playback.PlaybackPage
@@ -163,56 +164,59 @@ fun JellyTvPlaybackPage(
             modifier = Modifier.fillMaxSize(),
         )
 
-        ScoreBug(
-            game = game,
-            hideScores = hideScores,
-            modifier =
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(
-                        top = JtvDimens.marginVertical + 64.dp,
-                        end = JtvDimens.marginHorizontal,
-                    ),
-        )
-
-        // Keep the departing banner in composition so its fade-out can play.
-        var lastBanner by remember { mutableStateOf<JtvEvent?>(null) }
-        LaunchedEffect(banner) { if (banner != null) lastBanner = banner }
-        AnimatedVisibility(
-            visible = banner != null,
-            enter = fadeIn(tween(OVERLAY_ANIM_MS)),
-            exit = fadeOut(tween(OVERLAY_ANIM_MS)),
-            modifier = Modifier.align(Alignment.TopStart),
-        ) {
-            lastBanner?.let {
-                EventBanner(
-                    event = it,
-                    modifier =
-                        Modifier.padding(
-                            start = JtvDimens.marginHorizontal,
-                            top = JtvDimens.marginVertical,
+        // Overlays share the JellyTV canvas scale; the upstream player above must not.
+        JtvScale {
+            ScoreBug(
+                game = game,
+                hideScores = hideScores,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(
+                            top = JtvDimens.marginVertical + 64.dp,
+                            end = JtvDimens.marginHorizontal,
                         ),
+            )
+
+            // Keep the departing banner in composition so its fade-out can play.
+            var lastBanner by remember { mutableStateOf<JtvEvent?>(null) }
+            LaunchedEffect(banner) { if (banner != null) lastBanner = banner }
+            AnimatedVisibility(
+                visible = banner != null,
+                enter = fadeIn(tween(OVERLAY_ANIM_MS)),
+                exit = fadeOut(tween(OVERLAY_ANIM_MS)),
+                modifier = Modifier.align(Alignment.TopStart),
+            ) {
+                lastBanner?.let {
+                    EventBanner(
+                        event = it,
+                        modifier =
+                            Modifier.padding(
+                                start = JtvDimens.marginHorizontal,
+                                top = JtvDimens.marginVertical,
+                            ),
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = switcherOpen,
+                enter = fadeIn(tween(OVERLAY_ANIM_MS)) + slideInVertically(tween(OVERLAY_ANIM_MS)) { it / 3 },
+                exit = fadeOut(tween(OVERLAY_ANIM_MS)) + slideOutVertically(tween(OVERLAY_ANIM_MS)) { it / 3 },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            ) {
+                GameSwitcher(
+                    games = others,
+                    hideScores = hideScores,
+                    favorites = favorites,
+                    onSwitch = {
+                        switcherOpen = false
+                        viewModel.switchTo(it)
+                    },
+                    onAddToMultiview = viewModel::addToMultiview,
+                    onRowFocusChanged = { switcherRowFocused = it },
                 )
             }
-        }
-
-        AnimatedVisibility(
-            visible = switcherOpen,
-            enter = fadeIn(tween(OVERLAY_ANIM_MS)) + slideInVertically(tween(OVERLAY_ANIM_MS)) { it / 3 },
-            exit = fadeOut(tween(OVERLAY_ANIM_MS)) + slideOutVertically(tween(OVERLAY_ANIM_MS)) { it / 3 },
-            modifier = Modifier.align(Alignment.BottomCenter),
-        ) {
-            GameSwitcher(
-                games = others,
-                hideScores = hideScores,
-                favorites = favorites,
-                onSwitch = {
-                    switcherOpen = false
-                    viewModel.switchTo(it)
-                },
-                onAddToMultiview = viewModel::addToMultiview,
-                onRowFocusChanged = { switcherRowFocused = it },
-            )
         }
     }
 }

@@ -112,13 +112,14 @@ fun MultiviewTileView(
         interactionSource = interactionSource,
         modifier = modifier,
     ) {
-        Box(Modifier.fillMaxSize()) {
-            Column(Modifier.fillMaxSize()) {
+        // The tile takes its height from its width: a 16:9 picture plus the label bar, never letterboxed.
+        Box(Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth()) {
                 Box(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .weight(1f)
+                            .aspectRatio(16f / 9f)
                             .background(JtvColors.screen),
                 ) {
                     playback.player?.let { player ->
@@ -126,9 +127,7 @@ fun MultiviewTileView(
                             player = player,
                             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
                             modifier =
-                                Modifier
-                                    .align(Alignment.Center)
-                                    .aspectRatio(16f / 9f),
+                                Modifier.fillMaxSize(),
                         )
                     }
                     val status =

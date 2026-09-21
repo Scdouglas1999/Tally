@@ -117,27 +117,27 @@ class MultiviewPlayers internal constructor(
         val channelId: String,
         url: String,
     ) {
-        val player: ExoPlayer =
-            ExoPlayer
-                .Builder(appContext)
-                .build()
-                .apply {
-                    setMediaItem(
-                        MediaItem
-                            .Builder()
-                            .setUri(url)
-                            .setMimeType(MimeTypes.APPLICATION_M3U8)
-                            .build(),
-                    )
-                    volume = if (channelId == audioChannelId) 1f else 0f
-                    addListener(TileListener())
-                    prepare()
-                    playWhenReady = true
-                }
+        val player: ExoPlayer = ExoPlayer.Builder(appContext).build()
 
         var retries = 0
         var errorMessage: String? = null
         var pendingRetry: Runnable? = null
+
+        // prepare() reports state to the listener synchronously, and the listener reads every field above:
+        // start the player only once they all exist.
+        init {
+            player.setMediaItem(
+                MediaItem
+                    .Builder()
+                    .setUri(url)
+                    .setMimeType(MimeTypes.APPLICATION_M3U8)
+                    .build(),
+            )
+            player.volume = if (channelId == audioChannelId) 1f else 0f
+            player.addListener(TileListener())
+            player.prepare()
+            player.playWhenReady = true
+        }
 
         fun publish() {
             playback[channelId] =
@@ -145,7 +145,7 @@ class MultiviewPlayers internal constructor(
                     errorMessage != null ->
                         MultiviewTilePlayback(player = player, buffering = false, error = errorMessage)
                     player.playbackState == Player.STATE_READY ->
-                        MultiviewTilePlayback(player = player, playing = player.isPlaying)
+                        MultiviewTilePlayback(player = player, buffering = false, playing = player.isPlaying)
                     else ->
                         MultiviewTilePlayback(player = player, buffering = true)
                 }

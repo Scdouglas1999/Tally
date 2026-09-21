@@ -55,7 +55,8 @@ fun JellyTvPage(
                 tabs = JtvTab.entries,
                 selected = state.selectedTab,
                 onSelect = viewModel::selectTab,
-                clock = clock,
+                // Upstream draws its own clock in this corner when the user has it enabled; never show two.
+                clock = if (preferences.appPreferences.interfacePreferences.showClock) "" else clock,
             )
             when (state.selectedTab) {
                 JtvTab.GAMES ->
