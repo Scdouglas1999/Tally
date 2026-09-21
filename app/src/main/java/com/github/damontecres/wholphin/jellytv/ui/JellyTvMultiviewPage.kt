@@ -46,6 +46,7 @@ import com.github.damontecres.wholphin.jellytv.api.JtvTeam
 import com.github.damontecres.wholphin.jellytv.ui.components.EmptyState
 import com.github.damontecres.wholphin.jellytv.ui.components.RowHeader
 import com.github.damontecres.wholphin.jellytv.ui.components.gameStatusLabel
+import com.github.damontecres.wholphin.jellytv.ui.multiview.MultiviewBenchEntry
 import com.github.damontecres.wholphin.jellytv.ui.multiview.MultiviewTilePlayback
 import com.github.damontecres.wholphin.jellytv.ui.multiview.MultiviewTileView
 import com.github.damontecres.wholphin.jellytv.ui.multiview.MultiviewViewModel
@@ -237,11 +238,11 @@ fun JellyTvMultiviewPage(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    itemsIndexed(bench, key = { _, game -> game.id }) { index, game ->
+                    itemsIndexed(bench, key = { _, entry -> entry.channelId }) { index, entry ->
                         SwapInRow(
-                            game = game,
+                            entry = entry,
                             hideScores = hideScores,
-                            onClick = { viewModel.swapIn(game) },
+                            onClick = { viewModel.swapIn(entry) },
                             modifier =
                                 if (index == 0) {
                                     Modifier.focusRequester(firstRailFocus)
@@ -262,7 +263,7 @@ fun JellyTvMultiviewPage(
  */
 @Composable
 private fun SwapInRow(
-    game: JtvGame,
+    entry: MultiviewBenchEntry,
     hideScores: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -312,26 +313,44 @@ private fun SwapInRow(
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp, vertical = 8.dp),
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            val game = entry.game
+            if (game == null) {
+                // no live game on this channel right now: the channel name is all there is to say
                 Text(
-                    text = game.league.uppercase(),
+                    text = stringResource(R.string.jtv_mv_channel).uppercase(),
                     style = JtvType.label,
                     color = JtvColors.muted,
                     maxLines = 1,
                 )
-                Spacer(Modifier.weight(1f))
                 Text(
-                    text = gameStatusLabel(game),
-                    style = JtvType.label,
-                    color = if (game.isLive) JtvColors.accent else JtvColors.textSecondary,
-                    maxLines = 1,
+                    text = entry.name,
+                    style = JtvType.body,
+                    color = JtvColors.text,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                 )
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = game.league.uppercase(),
+                        style = JtvType.label,
+                        color = JtvColors.muted,
+                        maxLines = 1,
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = gameStatusLabel(game),
+                        style = JtvType.label,
+                        color = JtvColors.accent,
+                        maxLines = 1,
+                    )
+                }
+                SwapInTeamLine(team = game.away, hideScores = hideScores)
+                SwapInTeamLine(team = game.home, hideScores = hideScores)
             }
-            SwapInTeamLine(team = game.away, hideScores = hideScores)
-            SwapInTeamLine(team = game.home, hideScores = hideScores)
         }
     }
 }

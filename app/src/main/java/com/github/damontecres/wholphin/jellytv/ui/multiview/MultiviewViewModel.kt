@@ -65,23 +65,30 @@ class MultiviewViewModel
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
         /**
-         * Live, watchable games not already tiled, in board order (favorites first,
-         * then league, then start time), capped for the swap-in rail.
+         * What can be put on screen next: live games first (board order: favorites, league, start time), then
+         * every other channel that is not already tiled, so the rail is useful outside game time too.
          */
-        val bench: StateFlow<List<JtvGame>> =
+        val bench: StateFlow<List<MultiviewBenchEntry>> =
             combine(
                 repository.board,
                 repository.settings,
                 multiviewState.channelIds,
             ) { board, settings, ids ->
-                val games = board?.games ?: emptyList()
-                BoardOrganizer
-                    .rows(games, settings.favorites.toSet(), onlyWatchable = true)
-                    .flatMap { it.games }
-                    .filter { game ->
-                        val channelId = game.watch?.channelId
-                        game.isLive && !channelId.isNullOrBlank() && channelId !in ids
-                    }.take(MAX_BENCH)
+                val live =
+                    BoardOrganizer
+                        .rows(board?.games ?: emptyList(), settings.favorites.toSet(), onlyWatchable = true)
+                        .flatMap { it.games }
+                        .filter { it.isLive }
+                        .mapNotNull { game ->
+                            val watch = game.watch ?: return@mapNotNull null
+                            if (watch.channelId.isBlank()) null else MultiviewBenchEntry(watch.channelId, watch.channelName, game)
+                        }.distinctBy { it.channelId }
+                val liveIds = live.map { it.channelId }.toSet()
+                val others =
+                    (board?.channels ?: emptyList())
+                        .filter { it.id !in liveIds }
+                        .map { MultiviewBenchEntry(it.id, it.name, null) }
+                (live + others).filter { it.channelId !in ids }.take(MAX_BENCH)
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
         val hideScores: StateFlow<Boolean> =
@@ -123,15 +130,14 @@ class MultiviewViewModel
         }
 
         /**
-         * Put [game]'s channel on screen: replaces the audio tile when the queue is
+         * Put [entry]'s channel on screen: replaces the audio tile when the queue is
          * full, otherwise appends.
          */
-        fun swapIn(game: JtvGame) {
-            val channelId = game.watch?.channelId ?: return
+        fun swapIn(entry: MultiviewBenchEntry) {
             if (multiviewState.channelIds.value.size >= JellyTvMultiviewState.MAX) {
-                multiviewState.replace(_audioIndex.value, channelId)
+                multiviewState.replace(_audioIndex.value, entry.channelId)
             } else {
-                multiviewState.add(channelId)
+                multiviewState.add(entry.channelId)
             }
         }
 
@@ -144,3 +150,10 @@ class MultiviewViewModel
             const val MAX_BENCH = 12
         }
     }
+
+/** One row of the swap-in rail: a channel, with the live game it is showing when there is one. */
+data class MultiviewBenchEntry(
+    val channelId: String,
+    val name: String,
+    val game: JtvGame?,
+)

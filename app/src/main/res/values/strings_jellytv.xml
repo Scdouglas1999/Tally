@@ -78,4 +78,5 @@
     <string name="jtv_hero_starts">Starts</string>
     <string name="jtv_hero_final">Final</string>
     <string name="jtv_hero_on">On %1$s</string>
+    <string name="jtv_mv_channel">Channel</string>
 </resources>
