@@ -12,6 +12,7 @@ import com.github.damontecres.wholphin.data.model.JellyfinUser
 import com.github.damontecres.wholphin.ui.collectLatestIn
 import com.github.damontecres.wholphin.ui.launchIO
 // JELLYTV: begin
+import com.github.damontecres.wholphin.jellytv.JellyTvPlayRouter
 import com.github.damontecres.wholphin.ui.nav.Destination
 // JELLYTV: end
 import com.github.damontecres.wholphin.ui.showToast
@@ -46,6 +47,7 @@ class ServerEventListener
         private val serverRepository: ServerRepository,
         // JELLYTV: begin
         private val navigationManager: NavigationManager,
+        private val jellyTvPlayRouter: JellyTvPlayRouter,
         // JELLYTV: end
     ) : DefaultLifecycleObserver {
         private val activity = (context as AppCompatActivity)
@@ -135,10 +137,7 @@ class ServerEventListener
                                     navigationManager.backStack.removeLastOrNull()
                                 }
                                 navigationManager.navigateTo(
-                                    Destination.Playback(
-                                        itemId = itemId,
-                                        positionMs = (data.startPositionTicks ?: 0) / 10_000,
-                                    ),
+                                    jellyTvPlayRouter.destinationFor(itemId, (data.startPositionTicks ?: 0) / 10_000),
                                 )
                             }
                         }

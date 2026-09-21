@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -73,6 +75,13 @@ fun JellyTvPlaybackPage(
     var switcherRowFocused by remember { mutableStateOf(false) }
     var switcherWasOpen by remember { mutableStateOf(false) }
 
+    // Upstream's player acts on key-up and owns the D-pad while its controls are showing (DOWN walks from the
+    // seek bar to the button row). Its ControllerViewState is private to PlaybackPage, so mirror it from the
+    // keys we let through: DOWN belongs to us only while the controls are (as far as we can tell) hidden.
+    val controlsTimeoutMs = preferences.appPreferences.playbackPreferences.controllerTimeoutMs
+    val upstreamControls = remember { UpstreamControlsMirror() }
+    var swallowDownKeyUp by remember { mutableStateOf(false) }
+
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
 
@@ -106,14 +115,20 @@ fun JellyTvPlaybackPage(
         modifier
             .onPreviewKeyEvent { event ->
                 if (!switcherOpen) {
-                    if (event.type == KeyEventType.KeyDown &&
+                    if (event.key == Key.DirectionDown && swallowDownKeyUp && event.type == KeyEventType.KeyUp) {
+                        swallowDownKeyUp = false
+                        true
+                    } else if (event.type == KeyEventType.KeyDown &&
                         event.key == Key.DirectionDown &&
-                        others.isNotEmpty()
+                        others.isNotEmpty() &&
+                        !upstreamControls.likelyVisible(controlsTimeoutMs)
                     ) {
                         Timber.d("JellyTV: opening game switcher, %d other live games", others.size)
                         switcherOpen = true
+                        swallowDownKeyUp = true
                         true
                     } else {
+                        upstreamControls.onKeyPassedThrough(event)
                         false
                     }
                 } else {
@@ -198,5 +213,23 @@ fun JellyTvPlaybackPage(
                 onRowFocusChanged = { switcherRowFocused = it },
             )
         }
+    }
+}
+
+/** Best-effort mirror of upstream's controller visibility, fed by the key events that reach it. */
+private class UpstreamControlsMirror {
+    private var shown = false
+    private var lastInteractionAt = 0L
+
+    fun likelyVisible(timeoutMs: Long): Boolean = shown && SystemClock.elapsedRealtime() - lastInteractionAt < timeoutMs + 300
+
+    fun onKeyPassedThrough(event: KeyEvent) {
+        if (event.type != KeyEventType.KeyUp) return
+        lastInteractionAt = SystemClock.elapsedRealtime()
+        shown =
+            when (event.key) {
+                Key.Back, Key.Escape, Key.ButtonB -> false
+                else -> true
+            }
     }
 }
