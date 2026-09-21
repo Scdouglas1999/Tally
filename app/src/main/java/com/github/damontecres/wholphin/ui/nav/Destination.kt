@@ -174,4 +174,21 @@ sealed class Destination(
 
     @Serializable
     data object Debug : Destination(true)
+
+    // JELLYTV: begin
+    @Serializable
+    data object JellyTv : Destination()
+
+    @Serializable
+    data object JellyTvSettings : Destination()
+
+    @Serializable
+    data object JellyTvMultiview : Destination(true)
+
+    @Serializable
+    data class JellyTvPlayback(
+        val itemId: UUID,
+        val channelId: String,
+    ) : Destination(true)
+    // JELLYTV: end
 }

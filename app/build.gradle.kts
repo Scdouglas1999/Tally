@@ -72,7 +72,9 @@ configure<ApplicationExtension> {
     compileSdk = libs.versions.compileSdk.getInt()
 
     defaultConfig {
-        applicationId = "com.github.damontecres.wholphin"
+        // JELLYTV: begin
+        applicationId = "io.github.scoduglas1999.jellytv"
+        // JELLYTV: end
         minSdk = libs.versions.minSdk.getInt()
         targetSdk = libs.versions.targetSdk.getInt()
         versionCode = gitTags.trim().lines().size
@@ -147,7 +149,9 @@ configure<ApplicationExtension> {
             dimension = "version"
             isDefault = true
             manifestPlaceholders += mapOf(featureLeanback to false)
-            setFeatureFlag(featureUpdate, true)
+            // JELLYTV: begin
+            setFeatureFlag(featureUpdate, false)
+            // JELLYTV: end
             setFeatureFlag(featureDiscover, true)
         }
         create("appstore") {
