@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name" translatable="false">Wholphin</string>
-    <string name="app_name_long" translatable="false">Wholphin</string>
+    <!-- JELLYTV: begin -->
+    <string name="app_name" translatable="false">JellyTV</string>
+    <string name="app_name_long" translatable="false">JellyTV</string>
+    <!-- JELLYTV: end -->
 
     <string name="about">About</string>
     <string name="active_recordings">Active Recordings</string>

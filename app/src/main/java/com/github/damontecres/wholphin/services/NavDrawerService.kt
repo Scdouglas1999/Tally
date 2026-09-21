@@ -5,6 +5,9 @@ import com.github.damontecres.wholphin.data.ServerPreferencesDao
 import com.github.damontecres.wholphin.data.ServerRepository
 import com.github.damontecres.wholphin.data.model.JellyfinUser
 import com.github.damontecres.wholphin.data.model.NavPinType
+// JELLYTV: begin
+import com.github.damontecres.wholphin.jellytv.JellyTvAvailability
+// JELLYTV: end
 import com.github.damontecres.wholphin.services.hilt.DefaultCoroutineScope
 import com.github.damontecres.wholphin.ui.collectLatestIn
 import com.github.damontecres.wholphin.ui.launchDefault
@@ -51,6 +54,9 @@ class NavDrawerService
         private val serverPreferencesDao: ServerPreferencesDao,
         private val seerrServerRepository: SeerrServerRepository,
         private val musicService: MusicService,
+        // JELLYTV: begin
+        private val jellyTvAvailability: JellyTvAvailability,
+        // JELLYTV: end
     ) {
         private val _state = MutableStateFlow(NavDrawerItemState())
         val state: StateFlow<NavDrawerItemState> = _state
@@ -193,6 +199,9 @@ class NavDrawerService
         ) {
             val builtins =
                 buildList {
+                    // JELLYTV: begin
+                    if (jellyTvAvailability.available) add(NavDrawerItem.JellyTv)
+                    // JELLYTV: end
                     add(NavDrawerItem.Favorites)
                     if (discoverActive) add(NavDrawerItem.Discover)
                 }

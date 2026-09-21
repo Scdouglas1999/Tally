@@ -8,6 +8,12 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.data.filter.DefaultForGenresFilterOptions
 import com.github.damontecres.wholphin.data.filter.DefaultForStudiosFilterOptions
 import com.github.damontecres.wholphin.data.model.SeerrItemType
+// JELLYTV: begin
+import com.github.damontecres.wholphin.jellytv.ui.JellyTvMultiviewPage
+import com.github.damontecres.wholphin.jellytv.ui.JellyTvPage
+import com.github.damontecres.wholphin.jellytv.ui.JellyTvPlaybackPage
+import com.github.damontecres.wholphin.jellytv.ui.JellyTvSettingsPage
+// JELLYTV: end
 import com.github.damontecres.wholphin.preferences.PlayerBackend
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.components.ItemGrid
@@ -428,6 +434,39 @@ fun DestinationContent(
                 modifier = modifier,
             )
         }
+
+        // JELLYTV: begin
+        Destination.JellyTv -> {
+            LaunchedEffect(Unit) { onClearBackdrop.invoke() }
+            JellyTvPage(
+                preferences = preferences,
+                modifier = modifier,
+            )
+        }
+
+        Destination.JellyTvSettings -> {
+            LaunchedEffect(Unit) { onClearBackdrop.invoke() }
+            JellyTvSettingsPage(
+                preferences = preferences,
+                modifier = modifier,
+            )
+        }
+
+        Destination.JellyTvMultiview -> {
+            JellyTvMultiviewPage(
+                preferences = preferences,
+                modifier = modifier,
+            )
+        }
+
+        is Destination.JellyTvPlayback -> {
+            JellyTvPlaybackPage(
+                preferences = preferences,
+                destination = destination,
+                modifier = modifier,
+            )
+        }
+        // JELLYTV: end
     }
 }
 

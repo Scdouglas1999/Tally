@@ -11,6 +11,9 @@ import com.github.damontecres.wholphin.data.model.JellyfinServer
 import com.github.damontecres.wholphin.data.model.JellyfinUser
 import com.github.damontecres.wholphin.ui.collectLatestIn
 import com.github.damontecres.wholphin.ui.launchIO
+// JELLYTV: begin
+import com.github.damontecres.wholphin.ui.nav.Destination
+// JELLYTV: end
 import com.github.damontecres.wholphin.ui.showToast
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
@@ -24,6 +27,10 @@ import org.jellyfin.sdk.api.sockets.subscribe
 import org.jellyfin.sdk.model.api.GeneralCommandMessage
 import org.jellyfin.sdk.model.api.GeneralCommandType
 import org.jellyfin.sdk.model.api.MediaType
+// JELLYTV: begin
+import org.jellyfin.sdk.model.api.PlayCommand
+import org.jellyfin.sdk.model.api.PlayMessage
+// JELLYTV: end
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -37,16 +44,26 @@ class ServerEventListener
         @param:ActivityContext private val context: Context,
         private val api: ApiClient,
         private val serverRepository: ServerRepository,
+        // JELLYTV: begin
+        private val navigationManager: NavigationManager,
+        // JELLYTV: end
     ) : DefaultLifecycleObserver {
         private val activity = (context as AppCompatActivity)
 
         private var listenJob: Job? = null
+
+        // JELLYTV: begin
+        private var playJob: Job? = null
+        // JELLYTV: end
 
         init {
             activity.lifecycle.addObserver(this)
             serverRepository.current.collectLatestIn(activity.lifecycleScope) {
                 Timber.d("New user/server: %s", it)
                 listenJob?.cancel()
+                // JELLYTV: begin
+                playJob?.cancel()
+                // JELLYTV: end
                 if (it != null) {
                     init(it.server, it.user)
                 }
@@ -98,6 +115,37 @@ class ServerEventListener
                     }.catch { ex ->
                         Timber.e(ex, "Error in websocket subscription")
                     }.launchIn(activity.lifecycleScope)
+            // JELLYTV: begin
+            playJob?.cancel()
+            playJob =
+                api.webSocket
+                    .subscribe<PlayMessage>()
+                    .onEach { message ->
+                        val data = message.data
+                        if (data != null && data.playCommand == PlayCommand.PLAY_NOW) {
+                            val itemIds = data.itemIds
+                            if (!itemIds.isNullOrEmpty()) {
+                                val index = data.startIndex?.takeIf { it in itemIds.indices } ?: 0
+                                val itemId = itemIds[index]
+                                Timber.d("Server requested playback of item %s", itemId)
+                                // Switching games from the phone: swap the running player out instead of
+                                // stacking a second one on top of it (the old one would keep playing underneath).
+                                val top = navigationManager.backStack.lastOrNull()
+                                if (top is Destination.Playback || top is Destination.JellyTvPlayback) {
+                                    navigationManager.backStack.removeLastOrNull()
+                                }
+                                navigationManager.navigateTo(
+                                    Destination.Playback(
+                                        itemId = itemId,
+                                        positionMs = (data.startPositionTicks ?: 0) / 10_000,
+                                    ),
+                                )
+                            }
+                        }
+                    }.catch { ex ->
+                        Timber.e(ex, "Error in websocket play subscription")
+                    }.launchIn(activity.lifecycleScope)
+            // JELLYTV: end
         }
 
         override fun onResume(owner: LifecycleOwner) {
@@ -107,10 +155,16 @@ class ServerEventListener
         override fun onPause(owner: LifecycleOwner) {
             Timber.v("Cancelling WebSocket")
             listenJob?.cancel()
+            // JELLYTV: begin
+            playJob?.cancel()
+            // JELLYTV: end
         }
 
         override fun onStop(owner: LifecycleOwner) {
             Timber.v("Cancelling WebSocket")
             listenJob?.cancel()
+            // JELLYTV: begin
+            playJob?.cancel()
+            // JELLYTV: end
         }
     }

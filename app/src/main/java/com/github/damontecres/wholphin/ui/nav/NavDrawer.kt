@@ -138,6 +138,15 @@ class NavDrawerViewModel
                     )
                 }
 
+                // JELLYTV: begin
+                NavDrawerItem.JellyTv -> {
+                    setIndex(index)
+                    navigationManager.navigateToFromDrawer(
+                        Destination.JellyTv,
+                    )
+                }
+                // JELLYTV: end
+
                 is ServerNavDrawerItem -> {
                     setIndex(index)
                     navigationManager.navigateToFromDrawer(item.destination)
@@ -169,6 +178,9 @@ class NavDrawerViewModel
                             is ServerNavDrawerItem -> it.destination
                             is NavDrawerItem.Favorites -> Destination.Favorites
                             is NavDrawerItem.Discover -> Destination.Discover
+                            // JELLYTV: begin
+                            is NavDrawerItem.JellyTv -> Destination.JellyTv
+                            // JELLYTV: end
                             else -> null
                         }
                     }
@@ -243,6 +255,15 @@ sealed interface NavDrawerItem {
 
         override fun name(context: Context): String = context.getString(R.string.discover)
     }
+
+    // JELLYTV: begin
+    object JellyTv : NavDrawerItem {
+        override val id: String
+            get() = "a_jellytv"
+
+        override fun name(context: Context): String = context.getString(R.string.jtv_section_name)
+    }
+    // JELLYTV: end
 }
 
 /**
@@ -673,6 +694,12 @@ fun NavigationDrawerScope.NavItem(
                 NavDrawerItem.Discover -> {
                     R.string.fa_magnifying_glass_plus
                 }
+
+                // JELLYTV: begin
+                NavDrawerItem.JellyTv -> {
+                    R.string.fa_tv
+                }
+                // JELLYTV: end
 
                 is ServerNavDrawerItem -> {
                     when (library.type) {
