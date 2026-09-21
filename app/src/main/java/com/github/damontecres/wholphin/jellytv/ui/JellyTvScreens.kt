@@ -147,11 +147,17 @@ private fun MultiviewQueue(
                     .padding(horizontal = JtvDimens.marginHorizontal)
                     .padding(top = 24.dp),
         ) {
-            channelIds.forEachIndexed { index, channelId ->
+            // The thing people come here to do goes first and takes focus; the queue is housekeeping.
+            JtvRow(
+                label = stringResource(R.string.jtv_open_multiview),
+                onClick = onOpen,
+                primary = true,
+                modifier = Modifier.focusRequester(firstRowFocus),
+            )
+            channelIds.forEach { channelId ->
                 JtvRow(
                     label = channels.firstOrNull { it.id == channelId }?.name ?: channelId,
                     onClick = { onRemove(channelId) },
-                    modifier = if (index == 0) Modifier.focusRequester(firstRowFocus) else Modifier,
                     trailing = {
                         KeyHint(
                             key = stringResource(R.string.jtv_key_ok),
@@ -160,11 +166,6 @@ private fun MultiviewQueue(
                     },
                 )
             }
-            JtvRow(
-                label = stringResource(R.string.jtv_open_multiview),
-                onClick = onOpen,
-                primary = true,
-            )
         }
     }
 }

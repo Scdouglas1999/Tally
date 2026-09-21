@@ -113,6 +113,11 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var updateChecker: UpdateChecker
 
+    // JELLYTV: begin
+    @Inject
+    lateinit var jellyTvUpdatePrompt: com.github.damontecres.wholphin.jellytv.JellyTvUpdatePrompt
+    // JELLYTV: end
+
     @Inject
     lateinit var playbackLifecycleObserver: PlaybackLifecycleObserver
 
@@ -350,6 +355,13 @@ class MainActivity : AppCompatActivity() {
                         "Exception during update check",
                     )
                 }
+                // JELLYTV: begin
+                try {
+                    jellyTvUpdatePrompt.maybePrompt(appPreferences.updateUrl)
+                } catch (ex: Exception) {
+                    Timber.w(ex, "Exception offering the update")
+                }
+                // JELLYTV: end
             }
         }
     }

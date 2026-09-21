@@ -150,7 +150,8 @@ configure<ApplicationExtension> {
             isDefault = true
             manifestPlaceholders += mapOf(featureLeanback to false)
             // JELLYTV: begin
-            setFeatureFlag(featureUpdate, false)
+            // Self-updating stays on: the update URL default points at this fork's releases (AppPreference.UpdateUrl).
+            setFeatureFlag(featureUpdate, true)
             // JELLYTV: end
             setFeatureFlag(featureDiscover, true)
         }
