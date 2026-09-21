@@ -39,4 +39,40 @@
     <string name="jtv_mv_unknown_channel">Unknown channel</string>
     <string name="jtv_mv_empty_title">Nothing in multiview yet</string>
     <string name="jtv_mv_empty_subtitle">Swap in a live game from the list</string>
+
+    <!-- Board states -->
+    <string name="jtv_state_live">Live</string>
+    <string name="jtv_state_upcoming">Upcoming</string>
+    <string name="jtv_loading_games">Loading games\u2026</string>
+    <string name="jtv_loading_channels">Loading channels\u2026</string>
+    <string name="jtv_board_failed_title">Board unavailable</string>
+    <string name="jtv_feeds_failed">Some feeds failed: %1$s</string>
+    <string name="jtv_empty_games_title">No games today</string>
+    <string name="jtv_empty_games_sub">There are no games on the board right now</string>
+    <string name="jtv_empty_filtered_title">Nothing on your channels</string>
+    <string name="jtv_empty_filtered_sub">None of today\u2019s games are on your channels. Turn off \u201cMy channels only\u201d in Settings to see every game.</string>
+    <string name="jtv_no_channels_title">No channels yet</string>
+    <string name="jtv_no_channels_sub">JellyTV channels appear here once the server registers them</string>
+
+    <!-- One-shot messages -->
+    <string name="jtv_channel_registering">That channel is still registering with Jellyfin \u2014 try again in a minute</string>
+    <string name="jtv_multiview_added">Added to multiview</string>
+    <string name="jtv_multiview_already">Already in multiview</string>
+    <string name="jtv_multiview_full">Multiview is full</string>
+
+    <!-- Multiview queue -->
+    <string name="jtv_open_multiview">Open multiview</string>
+    <string name="jtv_multiview_empty_title">No channels queued</string>
+    <string name="jtv_multiview_empty_sub">Hold OK on a game or a channel to add it to multiview</string>
+    <string name="jtv_remove_from_multiview">Remove</string>
+
+    <!-- Settings -->
+    <string name="jtv_settings_my_channels">My channels only</string>
+    <string name="jtv_settings_my_channels_desc">Only show games you can watch on your channels</string>
+    <string name="jtv_settings_hide_scores">Hide scores</string>
+    <string name="jtv_settings_hide_scores_desc">Never show scores, results, or spoilers</string>
+    <string name="jtv_settings_plugin">JellyTV plugin</string>
+    <string name="jtv_server_version">Build %1$s \u00b7 API v%2$d</string>
+    <string name="jtv_server_features">Features: %1$s</string>
+    <string name="jtv_server_unavailable">No response from the JellyTV plugin</string>
 </resources>
