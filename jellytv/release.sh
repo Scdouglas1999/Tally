@@ -11,6 +11,7 @@ KEYDIR="${JELLYTV_KEYDIR:-$HOME/.config/jellytv}"
 [ -f "$KEYDIR/release.jks" ] && [ -f "$KEYDIR/release.env" ] || { echo "missing $KEYDIR/release.jks or release.env" >&2; exit 1; }
 if [ $PUBLISH = 1 ] && [ -n "$(git status --porcelain --untracked-files=no)" ]; then echo "commit your changes first: the version is derived from git" >&2; exit 1; fi
 set -a; . "$KEYDIR/release.env"; set +a
+export CI=true   # upstream only signs "CI" builds; this is the only thing the flag changes
 export SIGNING_KEY="$(base64 -w0 "$KEYDIR/release.jks")"
 export JAVA_HOME="${JAVA_HOME:-/usr/lib/jvm/java-17-openjdk}"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
@@ -22,8 +23,10 @@ rm -f app/ci.keystore
 OUT=jellytv/out; rm -rf "$OUT"; mkdir -p "$OUT"
 SRC=app/build/outputs/apk/default/release
 for abi in arm64-v8a armeabi-v7a x86_64; do cp "$SRC"/*-"$abi".apk "$OUT/Wholphin-release-$abi.apk"; done
-cp "$SRC"/*-universal.apk "$OUT/Wholphin-release.apk"
-cp "$SRC"/*-universal.apk "$OUT/JellyTV.apk"
+# the universal APK is the one without an ABI suffix
+UNIVERSAL="$(ls "$SRC"/*.apk | grep -v -E -- '-(arm64-v8a|armeabi-v7a|x86_64)\.apk$')"
+cp "$UNIVERSAL" "$OUT/Wholphin-release.apk"
+cp "$UNIVERSAL" "$OUT/JellyTV.apk"
 ls -lh "$OUT"
 
 if [ $PUBLISH = 1 ]; then
