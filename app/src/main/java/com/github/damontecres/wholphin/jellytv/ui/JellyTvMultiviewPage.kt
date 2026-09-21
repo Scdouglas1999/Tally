@@ -12,7 +12,7 @@ import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.playback.PlaybackPage
 
 @Composable
-fun JellyTvPage(
+fun JellyTvMultiviewPage(
     preferences: UserPreferences,
     modifier: Modifier,
 ) {
@@ -21,23 +21,7 @@ fun JellyTvPage(
         modifier = modifier.fillMaxSize(),
     ) {
         Text(
-            text = "JellyTV",
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-    }
-}
-
-@Composable
-fun JellyTvSettingsPage(
-    preferences: UserPreferences,
-    modifier: Modifier,
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize(),
-    ) {
-        Text(
-            text = "JellyTV Settings",
+            text = "JellyTV Multiview",
             color = MaterialTheme.colorScheme.onSurface,
         )
     }
