@@ -21,4 +21,14 @@
         <item quantity="one">%1$d OUT</item>
         <item quantity="other">%1$d OUTS</item>
     </plurals>
+    <!-- Multiview -->
+    <string name="jtv_mv_swap_in">Swap in</string>
+    <string name="jtv_mv_audio">Audio</string>
+    <string name="jtv_mv_muted">Muted</string>
+    <string name="jtv_mv_buffering">Buffering…</string>
+    <string name="jtv_mv_no_decoder">This device can’t decode another stream</string>
+    <string name="jtv_mv_unavailable">Stream unavailable</string>
+    <string name="jtv_mv_unknown_channel">Unknown channel</string>
+    <string name="jtv_mv_empty_title">Nothing in multiview yet</string>
+    <string name="jtv_mv_empty_subtitle">Swap in a live game from the list</string>
 </resources>
