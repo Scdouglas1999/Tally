@@ -315,7 +315,9 @@ fun InstallUpdatePageContent(
                 onClick = onInstallRelease,
                 // JELLYTV: begin
                 // The page is opened for people who did not ask for it: OK must mean "update".
-                modifier = com.github.damontecres.wholphin.jellytv.ui.initialFocusModifier("jellytv-update"),
+                modifier =
+                    com.github.damontecres.wholphin.jellytv.ui
+                        .initialFocusModifier("jellytv-update"),
                 // JELLYTV: end
             )
             TextButton(
