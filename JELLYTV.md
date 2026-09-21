@@ -37,6 +37,7 @@ file is a future merge conflict.** Therefore:
 | W6 | `app/build.gradle.kts`, `res/values/strings.xml` (`app_name`, `app_name_long` ONLY), launcher art | identity |
 | W7 | `MainActivity.kt` | inject `JellyTvUpdatePrompt`, call it after upstream's update check |
 | W8 | `preferences/AppPreference.kt` (`UpdateUrl.defaultValue` ONLY) | self-update from this fork's releases |
+| W9 | `ui/setup/InstallUpdatePage.kt` | initial focus on "Download & Update" |
 
 ## Releases and self-update
 

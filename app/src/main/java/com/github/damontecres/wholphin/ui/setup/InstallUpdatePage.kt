@@ -313,6 +313,10 @@ fun InstallUpdatePageContent(
             TextButton(
                 stringRes = R.string.download_and_update,
                 onClick = onInstallRelease,
+                // JELLYTV: begin
+                // The page is opened for people who did not ask for it: OK must mean "update".
+                modifier = com.github.damontecres.wholphin.jellytv.ui.initialFocusModifier("jellytv-update"),
+                // JELLYTV: end
             )
             TextButton(
                 stringRes = R.string.cancel,
