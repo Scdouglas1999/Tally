@@ -200,7 +200,7 @@ class NavDrawerService
             val builtins =
                 buildList {
                     // JELLYTV: begin
-                    if (jellyTvAvailability.available) add(NavDrawerItem.JellyTv)
+                    if (jellyTvAvailability.check()) add(NavDrawerItem.JellyTv)
                     // JELLYTV: end
                     add(NavDrawerItem.Favorites)
                     if (discoverActive) add(NavDrawerItem.Discover)
