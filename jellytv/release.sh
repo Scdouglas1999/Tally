@@ -29,10 +29,20 @@ cp "$UNIVERSAL" "$OUT/Wholphin-release.apk"
 cp "$UNIVERSAL" "$OUT/JellyTV.apk"
 ls -lh "$OUT"
 
+# Store builds (no self-update, TV-only): an app bundle for Google Play, an APK for the Amazon Appstore.
+# Same signing key as the sideloaded build, so the three can update over one another.
+if [ "${1:-}" = "--stores" ] || [ "${2:-}" = "--stores" ]; then
+  ./gradlew :app:bundleAppstoreRelease :app:assembleFiretvRelease
+  rm -f app/ci.keystore
+  cp app/build/outputs/bundle/appstoreRelease/*.aab "$OUT/JellyTV-play.aab"
+  cp "$(ls app/build/outputs/apk/firetv/release/*.apk | grep -v -E -- '-(arm64-v8a|armeabi-v7a|x86_64)\.apk$')" "$OUT/JellyTV-amazon.apk"
+  ls -lh "$OUT"/JellyTV-play.aab "$OUT"/JellyTV-amazon.apk
+fi
+
 if [ $PUBLISH = 1 ]; then
   TAG="jtv-${VERSION#v}"
   git tag -f "$TAG" && git push -f origin "$TAG" jellytv
   NOTES="${JELLYTV_NOTES:-JellyTV for Android TV $VERSION}"
-  gh release create "$TAG" "$OUT"/*.apk --repo Scdouglas1999/jellytv-android --title "$VERSION" --notes "$NOTES" --latest
+  gh release create "$TAG" "$OUT"/JellyTV.apk "$OUT"/Wholphin-release*.apk --repo Scdouglas1999/jellytv-android --title "$VERSION" --notes "$NOTES" --latest
   echo "published $VERSION"
 fi

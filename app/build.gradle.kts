@@ -77,7 +77,14 @@ configure<ApplicationExtension> {
         // JELLYTV: end
         minSdk = libs.versions.minSdk.getInt()
         targetSdk = libs.versions.targetSdk.getInt()
-        versionCode = gitTags.trim().lines().size
+        // JELLYTV: begin
+        // Upstream counts release tags, which never changes between this fork's releases; Play (and a sane
+        // update order) needs every release to be higher. tags * 1000 + commits since the upstream tag:
+        // 59 tags, v1.0.8-26-g… -> 59026; rebasing onto upstream's next tag jumps to 60xxx.
+        versionCode =
+            gitTags.trim().lines().size * 1000 +
+            (Regex("-(\\d+)-g[0-9a-f]+$").find(gitDescribe.trim())?.groupValues?.get(1)?.toIntOrNull() ?: 0).coerceAtMost(999)
+        // JELLYTV: end
         versionName = gitDescribe.trim().removePrefix("v").ifBlank { "0.0.0" }
         testInstrumentationRunner = "com.github.damontecres.wholphin.test.WholphinTestRunner"
 
