@@ -1,0 +1,53 @@
+{
+  "serverTime": "2026-09-21T00:35:12.481Z",
+  "games": [
+    {
+      "id": "401872945", "sport": "football", "league": "NFL", "name": "IND @ KC", "start": "2026-09-21T00:20:00+00:00",
+      "state": "in", "detail": "8:25 - 1st", "period": 1, "clock": "8:25", "clockSeconds": 505,
+      "home": { "id": "12", "abbr": "KC", "name": "Kansas City Chiefs", "shortName": "Chiefs", "nickname": "Chiefs", "location": "Kansas City", "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/kc.png", "score": 0, "record": "1-1", "possession": false, "winner": false },
+      "away": { "id": "11", "abbr": "IND", "name": "Indianapolis Colts", "shortName": "Colts", "nickname": "Colts", "location": "Indianapolis", "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/ind.png", "score": 7, "record": "2-0", "possession": true, "winner": false },
+      "lastPlay": "(Shotgun) D.Jones pass short right to M.Pittman to KC 41 for 9 yards.", "lastPlayType": "Pass Reception", "lastPlayScore": 0,
+      "downDistance": "2nd & 1 at KC 41", "redZone": false, "balls": null, "strikes": null, "outs": null, "onFirst": false, "onSecond": false, "onThird": false,
+      "homeWinPct": 0.41, "broadcasts": ["NBC", "Peacock"],
+      "channels": [{ "id": "dea2bdfac2d6739c", "kind": "teams" }], "heat": 30, "tags": [],
+      "watch": { "channelId": "dea2bdfac2d6739c", "channelName": "Indianapolis Colts Kansas City Chiefs", "liveTvItemId": "1fcfacdbc1fa4309f9ac372a218380ed",
+                 "hlsPath": "/JellyTV/Live/dea2bdfac2d6739c.m3u8?s=95c3847533b71d15f8dbec4b04cdaee1410f589c2b0f90f9a382d00aaebf9cf3",
+                 "cardPath": "/JellyTV/Card/4cdecdcf9b58eec4.png?v=g401872945-in-7-0-1-14916257&n=Indianapolis%20Colts%20Kansas%20City%20Chiefs", "confidence": "teams" },
+      "extras": {}
+    },
+    {
+      "id": "401817017", "sport": "baseball", "league": "MLB", "name": "PHI @ NYM", "start": "2026-09-20T23:10:00+00:00",
+      "state": "in", "detail": "Top 8th", "period": 8, "clock": "0:00", "clockSeconds": 0,
+      "home": { "id": "21", "abbr": "NYM", "name": "New York Mets", "shortName": "Mets", "nickname": "Mets", "location": "New York", "logo": "https://a.espncdn.com/i/teamlogos/mlb/500/scoreboard/nym.png", "score": 2, "record": "71-84", "possession": false, "winner": false },
+      "away": { "id": "22", "abbr": "PHI", "name": "Philadelphia Phillies", "shortName": "Phillies", "nickname": "Phillies", "location": "Philadelphia", "logo": "https://a.espncdn.com/i/teamlogos/mlb/500/scoreboard/phi.png", "score": 4, "record": "85-70", "possession": false, "winner": false },
+      "lastPlay": "Pitch 4 : Ball 3", "lastPlayType": "Ball", "lastPlayScore": 0, "downDistance": null, "redZone": false,
+      "balls": 3, "strikes": 1, "outs": 1, "onFirst": true, "onSecond": true, "onThird": false, "homeWinPct": null,
+      "broadcasts": ["MLB.TV", "WPIX"], "channels": [], "heat": 50, "tags": ["LATE & CLOSE"], "watch": null,
+      "extras": { "fantasy": { "myPlayers": 2 } }
+    },
+    {
+      "id": "401872950", "sport": "football", "league": "NFL", "name": "DET @ GB", "start": "2026-09-22T00:15:00+00:00",
+      "state": "pre", "detail": "9/21 - 8:15 PM EDT", "period": 0, "clock": "0:00", "clockSeconds": 0,
+      "home": { "id": "9", "abbr": "GB", "name": "Green Bay Packers", "shortName": "Packers", "nickname": "Packers", "location": "Green Bay", "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/gb.png", "score": null, "record": "1-1", "possession": false, "winner": false },
+      "away": { "id": "8", "abbr": "DET", "name": "Detroit Lions", "shortName": "Lions", "nickname": "Lions", "location": "Detroit", "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/det.png", "score": null, "record": "2-0", "possession": false, "winner": false },
+      "lastPlay": null, "lastPlayType": null, "lastPlayScore": 0, "downDistance": null, "redZone": false, "broadcasts": ["ESPN", "ABC"],
+      "channels": [{ "id": "aa11bb22cc33dd44", "kind": "network" }], "heat": 0, "tags": [],
+      "watch": { "channelId": "aa11bb22cc33dd44", "channelName": "ESPN", "liveTvItemId": null, "hlsPath": "/JellyTV/Live/aa11bb22cc33dd44.m3u8?s=00ff", "cardPath": "/JellyTV/Card/9f8e7d6c5b4a3921.png?v=g401872950-pre&n=ESPN", "confidence": "network" },
+      "extras": {}
+    }
+  ],
+  "channels": [
+    { "id": "dea2bdfac2d6739c", "name": "Indianapolis Colts Kansas City Chiefs", "group": "NFL", "logo": null, "liveTvItemId": "1fcfacdbc1fa4309f9ac372a218380ed",
+      "hlsPath": "/JellyTV/Live/dea2bdfac2d6739c.m3u8?s=95c3847533b71d15f8dbec4b04cdaee1410f589c2b0f90f9a382d00aaebf9cf3",
+      "cardPath": "/JellyTV/Card/4cdecdcf9b58eec4.png?v=g401872945-in-7-0-1-14916257&n=Indianapolis%20Colts%20Kansas%20City%20Chiefs", "gameId": "401872945", "now": null, "next": null },
+    { "id": "aa11bb22cc33dd44", "name": "ESPN", "group": "US Sports", "logo": "https://example.invalid/espn.png", "liveTvItemId": null,
+      "hlsPath": "/JellyTV/Live/aa11bb22cc33dd44.m3u8?s=00ff", "cardPath": "/JellyTV/Card/9f8e7d6c5b4a3921.png?v=c&n=ESPN", "gameId": null,
+      "now": { "channelId": "aa11bb22cc33dd44", "title": "SportsCenter", "start": "2026-09-21T00:00:00+00:00", "end": "2026-09-21T01:00:00+00:00", "isLive": true }, "next": null }
+  ],
+  "events": [
+    { "id": 1789950912001, "source": "scores", "kind": "score", "gameId": "401872945", "title": "Colts score — Touchdown", "text": "IND 7 · KC 0 · 8:25 - 1st", "createdAt": "2026-09-21T00:31:40Z",
+      "watch": { "channelId": "dea2bdfac2d6739c", "channelName": "Indianapolis Colts Kansas City Chiefs", "liveTvItemId": "1fcfacdbc1fa4309f9ac372a218380ed", "hlsPath": "/JellyTV/Live/dea2bdfac2d6739c.m3u8?s=95c3", "cardPath": "/JellyTV/Card/4cdecdcf9b58eec4.png?v=x", "confidence": "teams" } }
+  ],
+  "modules": {},
+  "errors": {}
+}
