@@ -181,6 +181,12 @@ class JellyTvRepository
 
         private suspend fun tick() {
             try {
+                // Seed the event cursor first: without it `since` is never sent
+                // and no events ever arrive. Safe to call every time; probe()
+                // swallows non-cancellation failures.
+                if (cursor == null) {
+                    probe()
+                }
                 val newBoard = jellyTvApi.board(cursor)
                 _board.value = newBoard
                 _boardError.value = null
