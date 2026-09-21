@@ -114,11 +114,12 @@ fun JellyTvPlaybackPage(
     Box(
         modifier
             .onPreviewKeyEvent { event ->
-                if (!switcherOpen) {
-                    if (event.key == Key.DirectionDown && swallowDownKeyUp && event.type == KeyEventType.KeyUp) {
-                        swallowDownKeyUp = false
-                        true
-                    } else if (event.type == KeyEventType.KeyDown &&
+                // The key-up of the DOWN that opened the switcher must not reach upstream (it would show its controls).
+                if (swallowDownKeyUp && event.key == Key.DirectionDown && event.type == KeyEventType.KeyUp) {
+                    swallowDownKeyUp = false
+                    true
+                } else if (!switcherOpen) {
+                    if (event.type == KeyEventType.KeyDown &&
                         event.key == Key.DirectionDown &&
                         others.isNotEmpty() &&
                         !upstreamControls.likelyVisible(controlsTimeoutMs)

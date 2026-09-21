@@ -68,11 +68,15 @@ fun GameSwitcher(
             modifier
                 .fillMaxWidth()
                 .background(
+                    // Functional scrim (as in the mockup): fully dark by the time the header starts, so the
+                    // header and key hints stay legible over a bright pitch or a daytime sky.
                     Brush.verticalGradient(
-                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.92f)),
+                        0f to Color.Transparent,
+                        0.32f to Color.Black.copy(alpha = 0.78f),
+                        1f to Color.Black.copy(alpha = 0.94f),
                     ),
                 ).onFocusChanged { onRowFocusChanged(it.hasFocus) }
-                .padding(top = 64.dp, bottom = JtvDimens.marginVertical),
+                .padding(top = 112.dp, bottom = JtvDimens.marginVertical),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
