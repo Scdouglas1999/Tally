@@ -21,4 +21,12 @@
         <item quantity="one">%1$d OUT</item>
         <item quantity="other">%1$d OUTS</item>
     </plurals>
+    <!-- In-player overlays -->
+    <string name="jtv_player_also_on_now">Also on now</string>
+    <string name="jtv_player_switch">Switch</string>
+    <string name="jtv_player_press_down_for_games">Press DOWN for games</string>
+    <string name="jtv_player_channel_pending">Channel is not ready yet</string>
+    <string name="jtv_player_added_to_multiview">Added to multiview</string>
+    <string name="jtv_player_already_in_multiview">Already in multiview</string>
+    <string name="jtv_player_multiview_full">Multiview is full</string>
 </resources>
