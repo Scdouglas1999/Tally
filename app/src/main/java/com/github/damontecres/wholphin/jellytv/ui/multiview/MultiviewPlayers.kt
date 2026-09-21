@@ -142,12 +142,17 @@ class MultiviewPlayers internal constructor(
         fun publish() {
             playback[channelId] =
                 when {
-                    errorMessage != null ->
+                    errorMessage != null -> {
                         MultiviewTilePlayback(player = player, buffering = false, error = errorMessage)
-                    player.playbackState == Player.STATE_READY ->
+                    }
+
+                    player.playbackState == Player.STATE_READY -> {
                         MultiviewTilePlayback(player = player, buffering = false, playing = player.isPlaying)
-                    else ->
+                    }
+
+                    else -> {
                         MultiviewTilePlayback(player = player, buffering = true)
+                    }
                 }
         }
 
@@ -181,7 +186,9 @@ class MultiviewPlayers internal constructor(
                 when {
                     // The device has run out of decoders; retrying cannot help.
                     isDecoderInitFailure(error) -> errorMessage = decoderLimitMessage
+
                     retries >= MAX_RETRIES -> errorMessage = unavailableMessage
+
                     else -> scheduleRetry()
                 }
                 publish()

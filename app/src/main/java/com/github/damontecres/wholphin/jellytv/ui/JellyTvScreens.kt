@@ -59,7 +59,7 @@ fun JellyTvPage(
                 clock = if (preferences.appPreferences.interfacePreferences.showClock) "" else clock,
             )
             when (state.selectedTab) {
-                JtvTab.GAMES ->
+                JtvTab.GAMES -> {
                     GamesBoard(
                         rows = state.rows,
                         favorites = state.favorites,
@@ -73,8 +73,9 @@ fun JellyTvPage(
                         onAddToMultiview = viewModel::addToMultiview,
                         modifier = Modifier.fillMaxSize(),
                     )
+                }
 
-                JtvTab.CHANNELS ->
+                JtvTab.CHANNELS -> {
                     ChannelsGrid(
                         channels = state.channels,
                         games = state.games,
@@ -88,8 +89,9 @@ fun JellyTvPage(
                         onAddToMultiview = viewModel::addToMultiview,
                         modifier = Modifier.fillMaxSize(),
                     )
+                }
 
-                JtvTab.MULTIVIEW ->
+                JtvTab.MULTIVIEW -> {
                     MultiviewQueue(
                         channelIds = state.multiview,
                         channels = state.channels,
@@ -97,8 +99,9 @@ fun JellyTvPage(
                         onOpen = viewModel::openMultiview,
                         modifier = Modifier.fillMaxSize(),
                     )
+                }
 
-                JtvTab.SETTINGS ->
+                JtvTab.SETTINGS -> {
                     JtvSettingsContent(
                         onlyWatchable = state.onlyWatchable,
                         hideScores = state.hideScores,
@@ -107,6 +110,7 @@ fun JellyTvPage(
                         onHideScoresChange = viewModel::setHideScores,
                         modifier = Modifier.fillMaxSize(),
                     )
+                }
             }
         }
     }

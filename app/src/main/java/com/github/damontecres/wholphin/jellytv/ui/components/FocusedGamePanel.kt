@@ -228,7 +228,7 @@ private fun HeroTeamLine(
 @Composable
 private fun Situation(game: JtvGame) {
     when (game.sport) {
-        "football" ->
+        "football" -> {
             game.downDistance?.let {
                 Text(
                     text = it.uppercase(),
@@ -238,6 +238,8 @@ private fun Situation(game: JtvGame) {
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+
         "baseball" -> {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -267,7 +269,8 @@ private fun Situation(game: JtvGame) {
                 }
             }
         }
-        else ->
+
+        else -> {
             if (game.detail.isNotBlank()) {
                 Text(
                     text = game.detail.uppercase(),
@@ -277,6 +280,7 @@ private fun Situation(game: JtvGame) {
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
     }
 }
 

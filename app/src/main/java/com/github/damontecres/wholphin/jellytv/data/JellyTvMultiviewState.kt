@@ -1,11 +1,11 @@
 package com.github.damontecres.wholphin.jellytv.data
 
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * The channels queued for multiview (max [MAX]). A process-wide singleton because three screens feed it:

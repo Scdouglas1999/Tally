@@ -5,9 +5,6 @@ import com.github.damontecres.wholphin.data.ServerPreferencesDao
 import com.github.damontecres.wholphin.data.ServerRepository
 import com.github.damontecres.wholphin.data.model.JellyfinUser
 import com.github.damontecres.wholphin.data.model.NavPinType
-// JELLYTV: begin
-import com.github.damontecres.wholphin.jellytv.JellyTvAvailability
-// JELLYTV: end
 import com.github.damontecres.wholphin.services.hilt.DefaultCoroutineScope
 import com.github.damontecres.wholphin.ui.collectLatestIn
 import com.github.damontecres.wholphin.ui.launchDefault
@@ -55,7 +52,7 @@ class NavDrawerService
         private val seerrServerRepository: SeerrServerRepository,
         private val musicService: MusicService,
         // JELLYTV: begin
-        private val jellyTvAvailability: JellyTvAvailability,
+        private val jellyTvAvailability: com.github.damontecres.wholphin.jellytv.JellyTvAvailability,
         // JELLYTV: end
     ) {
         private val _state = MutableStateFlow(NavDrawerItemState())

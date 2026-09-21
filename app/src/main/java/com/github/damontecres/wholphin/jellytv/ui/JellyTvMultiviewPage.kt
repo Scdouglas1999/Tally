@@ -98,6 +98,7 @@ fun JellyTvMultiviewPage(
                     firstTileFocus.tryRequestFocus()
                     initialFocusDone = true
                 }
+
                 bench.isNotEmpty() -> {
                     firstRailFocus.tryRequestFocus()
                     initialFocusDone = true
@@ -122,7 +123,11 @@ fun JellyTvMultiviewPage(
             hideScores = hideScores,
             onFocused = { viewModel.focusTile(index) },
             onClick = {
-                val itemId = tile.game?.watch?.liveTvItemId?.toUUIDOrNull()
+                val itemId =
+                    tile.game
+                        ?.watch
+                        ?.liveTvItemId
+                        ?.toUUIDOrNull()
                 if (itemId != null) {
                     viewModel.navigationManager.navigateTo(
                         Destination.JellyTvPlayback(itemId = itemId, channelId = tile.channelId),
@@ -157,14 +162,19 @@ fun JellyTvMultiviewPage(
                         .fillMaxHeight(),
             ) {
                 when (tiles.size) {
-                    0 ->
+                    0 -> {
                         EmptyState(
                             title = stringResource(R.string.jtv_mv_empty_title),
                             subtitle = stringResource(R.string.jtv_mv_empty_subtitle),
                             modifier = Modifier.fillMaxSize(),
                         )
-                    1 -> TileSlot(0, Modifier.fillMaxWidth().align(Alignment.Center))
-                    2 ->
+                    }
+
+                    1 -> {
+                        TileSlot(0, Modifier.fillMaxWidth().align(Alignment.Center))
+                    }
+
+                    2 -> {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -173,7 +183,9 @@ fun JellyTvMultiviewPage(
                             TileSlot(0, Modifier.weight(1f))
                             TileSlot(1, Modifier.weight(1f))
                         }
-                    else ->
+                    }
+
+                    else -> {
                         Column(
                             verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
                             modifier = Modifier.fillMaxSize(),
@@ -198,6 +210,7 @@ fun JellyTvMultiviewPage(
                                 }
                             }
                         }
+                    }
                 }
             }
             Column(

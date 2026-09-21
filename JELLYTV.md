@@ -16,6 +16,9 @@ file is a future merge conflict.** Therefore:
    fonts `app/src/main/res/font/ibm_plex_*`).
 2. Upstream files may be edited ONLY at the seams listed below, only by the task that owns that seam, and
    every edited region is wrapped in `// JELLYTV: begin` … `// JELLYTV: end`.
+   Exception: never put marker comments inside an import list (ktlint cannot sort around them). Prefer a
+   fully-qualified type in the seam over a new import; where an import is unavoidable, add it unmarked in its
+   sorted position. Seams only ever ADD lines; if a seam needs logic, the logic lives in the jellytv package.
 3. Never reformat, reorder imports in, or "tidy" an upstream file. Never touch `strings.xml`
    (Weblate rewrites it) — new strings go in `strings_jellytv.xml`.
 4. Never add a Room entity/migration (the DB is versioned upstream). Persist with `KeyValueService`.

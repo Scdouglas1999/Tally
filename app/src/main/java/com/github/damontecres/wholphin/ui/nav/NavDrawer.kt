@@ -145,6 +145,7 @@ class NavDrawerViewModel
                         Destination.JellyTv,
                     )
                 }
+
                 // JELLYTV: end
 
                 is ServerNavDrawerItem -> {
@@ -176,10 +177,14 @@ class NavDrawerViewModel
                     }.map {
                         when (it) {
                             is ServerNavDrawerItem -> it.destination
+
                             is NavDrawerItem.Favorites -> Destination.Favorites
+
                             is NavDrawerItem.Discover -> Destination.Discover
+
                             // JELLYTV: begin
                             is NavDrawerItem.JellyTv -> Destination.JellyTv
+
                             // JELLYTV: end
                             else -> null
                         }
@@ -699,6 +704,7 @@ fun NavigationDrawerScope.NavItem(
                 NavDrawerItem.JellyTv -> {
                     R.string.fa_tv
                 }
+
                 // JELLYTV: end
 
                 is ServerNavDrawerItem -> {

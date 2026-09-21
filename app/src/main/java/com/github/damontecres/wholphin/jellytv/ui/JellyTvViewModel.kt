@@ -18,10 +18,6 @@ import com.github.damontecres.wholphin.ui.launchDefault
 import com.github.damontecres.wholphin.ui.launchIO
 import com.github.damontecres.wholphin.ui.nav.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +30,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import org.jellyfin.sdk.model.serializer.toUUIDOrNull
 import timber.log.Timber
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import javax.inject.Inject
 
 /**
  * Everything the JellyTV screens need, in one state object.
@@ -84,16 +84,16 @@ class JellyTvViewModel
                 ::RepositoryState,
             )
 
-        private val _selectedTab = MutableStateFlow(JtvTab.GAMES)
+        private val selectedTabState = MutableStateFlow(JtvTab.GAMES)
 
         /** The user's explicit "My channels" choice; null = not chosen, derive from the board. */
-        private val _onlyWatchableChoice = MutableStateFlow<Boolean?>(null)
+        private val onlyWatchableChoice = MutableStateFlow<Boolean?>(null)
 
         val uiState: StateFlow<JellyTvUiState> =
             combine(
                 repositoryState,
-                _selectedTab,
-                _onlyWatchableChoice,
+                selectedTabState,
+                onlyWatchableChoice,
             ) { repo, selectedTab, onlyWatchableChoice ->
                 val games = repo.board?.games.orEmpty()
                 val favorites = repo.settings.favorites.toSet()
@@ -154,11 +154,11 @@ class JellyTvViewModel
         }
 
         fun selectTab(tab: JtvTab) {
-            _selectedTab.value = tab
+            selectedTabState.value = tab
         }
 
         fun toggleOnlyWatchable() {
-            _onlyWatchableChoice.value = !uiState.value.onlyWatchable
+            onlyWatchableChoice.value = !uiState.value.onlyWatchable
         }
 
         fun setHideScores(hide: Boolean) {

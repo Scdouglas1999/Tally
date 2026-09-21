@@ -1,9 +1,9 @@
 package com.github.damontecres.wholphin.jellytv
 
 import com.github.damontecres.wholphin.jellytv.data.JellyTvRepository
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
-import timber.log.Timber
 
 /**
  * Whether the connected server has the JellyTV plugin. The nav drawer asks every time it is rebuilt

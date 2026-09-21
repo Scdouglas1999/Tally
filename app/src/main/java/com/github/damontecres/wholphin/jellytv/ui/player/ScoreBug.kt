@@ -101,7 +101,10 @@ private fun scoreLine(game: JtvGame) =
 private fun situationLine(game: JtvGame): String {
     val situation =
         when (game.sport) {
-            "football" -> game.downDistance
+            "football" -> {
+                game.downDistance
+            }
+
             "baseball" -> {
                 val count =
                     if (game.balls != null && game.strikes != null) {
@@ -112,7 +115,10 @@ private fun situationLine(game: JtvGame): String {
                 val outs = game.outs?.let { pluralStringResource(R.plurals.jtv_outs, it, it) }
                 listOfNotNull(count, outs).joinToString(" · ").ifBlank { null }
             }
-            else -> null
+
+            else -> {
+                null
+            }
         }
     return listOfNotNull(game.detail.ifBlank { null }, situation).joinToString(" · ")
 }

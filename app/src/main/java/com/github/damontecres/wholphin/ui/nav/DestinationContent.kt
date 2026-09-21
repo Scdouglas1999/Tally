@@ -8,12 +8,10 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.data.filter.DefaultForGenresFilterOptions
 import com.github.damontecres.wholphin.data.filter.DefaultForStudiosFilterOptions
 import com.github.damontecres.wholphin.data.model.SeerrItemType
-// JELLYTV: begin
 import com.github.damontecres.wholphin.jellytv.ui.JellyTvMultiviewPage
 import com.github.damontecres.wholphin.jellytv.ui.JellyTvPage
 import com.github.damontecres.wholphin.jellytv.ui.JellyTvPlaybackPage
 import com.github.damontecres.wholphin.jellytv.ui.JellyTvSettingsPage
-// JELLYTV: end
 import com.github.damontecres.wholphin.preferences.PlayerBackend
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.components.ItemGrid

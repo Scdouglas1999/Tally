@@ -149,7 +149,9 @@ fun JellyTvPlaybackPage(
                             }
                         }
 
-                        else -> false
+                        else -> {
+                            false
+                        }
                     }
                 }
             },

@@ -2,9 +2,6 @@ package com.github.damontecres.wholphin.jellytv.api
 
 import com.github.damontecres.wholphin.services.hilt.AuthOkHttpClient
 import com.github.damontecres.wholphin.util.WholphinDispatchers
-import java.io.IOException
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import okhttp3.MediaType.Companion.toMediaType
@@ -12,6 +9,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.jellyfin.sdk.api.client.ApiClient
+import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Failures talking to the JellyTV plugin endpoints.
@@ -105,8 +105,7 @@ class JellyTvApi
 
         suspend fun info(): JtvInfo = getDecoded("/JellyTV/Client/v1/info")
 
-        suspend fun board(since: Long?): JtvBoard =
-            getDecoded("/JellyTV/Client/v1/board" + (since?.let { "?since=$it" } ?: ""))
+        suspend fun board(since: Long?): JtvBoard = getDecoded("/JellyTV/Client/v1/board" + (since?.let { "?since=$it" } ?: ""))
 
         suspend fun channel(id: String): JtvChannel = getDecoded("/JellyTV/Client/v1/channels/$id")
 

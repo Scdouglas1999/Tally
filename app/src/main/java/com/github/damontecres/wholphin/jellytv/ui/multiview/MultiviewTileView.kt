@@ -132,10 +132,17 @@ fun MultiviewTileView(
                     }
                     val status =
                         when {
-                            playback.error != null -> playback.error
-                            playback.player == null || playback.buffering ->
+                            playback.error != null -> {
+                                playback.error
+                            }
+
+                            playback.player == null || playback.buffering -> {
                                 stringResource(R.string.jtv_mv_buffering)
-                            else -> null
+                            }
+
+                            else -> {
+                                null
+                            }
                         }
                     if (status != null) {
                         Text(
