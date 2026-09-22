@@ -60,6 +60,7 @@ internal class TogetherPlayerSync(
     private var holding = false
     private var expectedPlaying = false
     private var announcedHold = false
+    private var announcedPause = false
     private var localPause = false
 
     private var playlistItemId: UUID? = null
@@ -122,6 +123,7 @@ internal class TogetherPlayerSync(
         holding = false
         expectedPlaying = false
         announcedHold = false
+        announcedPause = false
         localPause = false
         sawQueue = false
         heldPlayer = null
@@ -307,11 +309,15 @@ internal class TogetherPlayerSync(
     }
 
     private fun announcePaused() {
+        // A joining TV gets Pause, a buffering round, then Pause again: say PAUSED once until playback resumes.
+        if (announcedPause) return
+        announcedPause = true
         announcedHold = true
         onNotice(TogetherNotice.Paused)
     }
 
     private fun announceResumed() {
+        announcedPause = false
         if (!announcedHold) return
         announcedHold = false
         onNotice(TogetherNotice.Resumed)
