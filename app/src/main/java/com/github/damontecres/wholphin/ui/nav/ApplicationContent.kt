@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.nav
 
 import androidx.compose.foundation.layout.Box

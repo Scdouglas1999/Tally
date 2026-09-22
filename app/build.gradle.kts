@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.ProductFlavor
 import com.android.build.api.variant.FilterConfiguration

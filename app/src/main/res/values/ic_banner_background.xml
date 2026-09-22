@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin, from September 2026. See NOTICE.md. -->
 <resources>
     <color name="ic_banner_background">#0E0F0E</color>
 </resources>
