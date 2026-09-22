@@ -3,6 +3,7 @@ package com.github.damontecres.wholphin.jellytv.ui.components
 import android.graphics.drawable.ColorDrawable
 import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -50,17 +51,20 @@ import kotlinx.coroutines.delay
 /**
  * What can be done with a game from wherever it is shown. A null action is not offered.
  * [followedAway]/[followedHome] say whether each team is currently followed (the action toggles it).
+ * [watchLabel] replaces "Watch" where the game is already on screen (multiview: "Watch full screen").
  */
 data class GameActions(
     val watch: (() -> Unit)? = null,
     val addToMultiview: (() -> Unit)? = null,
     val watchInCorner: (() -> Unit)? = null,
-    val followAway: () -> Unit,
-    val followHome: () -> Unit,
-    val followedAway: Boolean,
-    val followedHome: Boolean,
+    val followAway: (() -> Unit)? = null,
+    val followHome: (() -> Unit)? = null,
+    val followedAway: Boolean = false,
+    val followedHome: Boolean = false,
     val hideScores: Boolean,
     val toggleHideScores: () -> Unit,
+    val removeFromMultiview: (() -> Unit)? = null,
+    @param:StringRes val watchLabel: Int = R.string.jtv_actions_watch,
 )
 
 /**
@@ -100,21 +104,25 @@ private data class ActionLine(
 
 /**
  * The long-press menu for a game: a centred JellyTV panel over a 60% black scrim.
- * Watch, multiview, and corner close the dialog after they run. Follow and hide-scores toggle in place.
+ * Watch, multiview, corner and remove close the dialog after they run. Follow and hide-scores toggle in place.
  * Focus starts on the first row, stays inside the list, and BACK dismisses.
+ *
+ * [game] is null for a channel with no game resolved to it (a multiview tile between games); the
+ * header then shows [channelName] and the follow rows are left out.
  */
 @Composable
 fun GameActionsDialog(
-    game: JtvGame,
+    game: JtvGame?,
     actions: GameActions,
     onDismiss: () -> Unit,
+    channelName: String = "",
 ) {
-    val away = game.away.menuName()
-    val home = game.home.menuName()
+    val away = game?.away?.menuName().orEmpty()
+    val home = game?.home?.menuName().orEmpty()
     val lines =
         buildList {
             actions.watch?.let { watch ->
-                add(ActionLine(stringResource(R.string.jtv_actions_watch), dismissOnClick = true, onClick = watch))
+                add(ActionLine(stringResource(actions.watchLabel), dismissOnClick = true, onClick = watch))
             }
             actions.addToMultiview?.let { addToMultiview ->
                 add(
@@ -134,28 +142,34 @@ fun GameActionsDialog(
                     ),
                 )
             }
-            add(
-                ActionLine(
-                    label =
-                        stringResource(
-                            if (actions.followedAway) R.string.jtv_actions_following else R.string.jtv_actions_follow,
-                            away,
+            if (game != null) {
+                actions.followAway?.let { followAway ->
+                    add(
+                        ActionLine(
+                            label =
+                                stringResource(
+                                    if (actions.followedAway) R.string.jtv_actions_following else R.string.jtv_actions_follow,
+                                    away,
+                                ),
+                            dismissOnClick = false,
+                            onClick = followAway,
                         ),
-                    dismissOnClick = false,
-                    onClick = actions.followAway,
-                ),
-            )
-            add(
-                ActionLine(
-                    label =
-                        stringResource(
-                            if (actions.followedHome) R.string.jtv_actions_following else R.string.jtv_actions_follow,
-                            home,
+                    )
+                }
+                actions.followHome?.let { followHome ->
+                    add(
+                        ActionLine(
+                            label =
+                                stringResource(
+                                    if (actions.followedHome) R.string.jtv_actions_following else R.string.jtv_actions_follow,
+                                    home,
+                                ),
+                            dismissOnClick = false,
+                            onClick = followHome,
                         ),
-                    dismissOnClick = false,
-                    onClick = actions.followHome,
-                ),
-            )
+                    )
+                }
+            }
             add(
                 ActionLine(
                     label =
@@ -166,6 +180,15 @@ fun GameActionsDialog(
                     onClick = actions.toggleHideScores,
                 ),
             )
+            actions.removeFromMultiview?.let { remove ->
+                add(
+                    ActionLine(
+                        stringResource(R.string.jtv_actions_remove_multiview),
+                        dismissOnClick = true,
+                        onClick = remove,
+                    ),
+                )
+            }
         }
     val firstRow = remember { FocusRequester() }
     // The long-press that opened the menu ends with a key-up. If the first row is already
@@ -215,15 +238,17 @@ fun GameActionsDialog(
                         .padding(20.dp),
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (game != null) {
+                        Text(
+                            text = "${game.league.uppercase()}   ${gameStatusLabel(game)}",
+                            style = JtvType.label,
+                            color = if (game.isLive) JtvColors.accent else JtvColors.muted,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
                     Text(
-                        text = "${game.league.uppercase()}   ${gameStatusLabel(game)}",
-                        style = JtvType.label,
-                        color = if (game.isLive) JtvColors.accent else JtvColors.muted,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        text = stringResource(R.string.jtv_actions_at, away, home),
+                        text = if (game != null) stringResource(R.string.jtv_actions_at, away, home) else channelName,
                         style = dialogTitle,
                         color = JtvColors.text,
                         maxLines = 2,

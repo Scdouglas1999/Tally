@@ -53,6 +53,8 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.api.JtvTeam
 import com.github.damontecres.wholphin.jellytv.data.JellyTvMultiviewState
 import com.github.damontecres.wholphin.jellytv.ui.components.EmptyState
+import com.github.damontecres.wholphin.jellytv.ui.components.GameActions
+import com.github.damontecres.wholphin.jellytv.ui.components.GameActionsDialog
 import com.github.damontecres.wholphin.jellytv.ui.components.RowHeader
 import com.github.damontecres.wholphin.jellytv.ui.components.gameStatusLabel
 import com.github.damontecres.wholphin.jellytv.ui.multiview.MultiviewBenchEntry
@@ -73,7 +75,7 @@ import com.github.damontecres.wholphin.ui.tryRequestFocus
 /**
  * Multiview: up to four live streams, a swap-in rail, and audio that follows the focused tile.
  * OK promotes a tile into the large slot, or returns the large tile to an equal grid.
- * Long-OK removes the tile.
+ * Long-OK opens the actions menu for the tile: full screen, follow its teams, hide scores, remove.
  */
 @Composable
 fun JellyTvMultiviewPage(
@@ -87,6 +89,7 @@ fun JellyTvMultiviewPage(
     val audioIndex by viewModel.audioIndex.collectAsState()
     val layoutChoice by viewModel.layoutChoice.collectAsState()
     val bigIndex by viewModel.bigIndex.collectAsState()
+    val favoriteTeams by viewModel.favoriteTeams.collectAsState()
     val players = rememberMultiviewPlayers()
     val layout = layoutChoice ?: defaultMultiviewLayout(tiles.size)
     val big = if (tiles.isEmpty()) 0 else bigIndex.coerceIn(0, tiles.lastIndex)
@@ -110,6 +113,8 @@ fun JellyTvMultiviewPage(
     // Null while the rail is focused, so the hint only says "Equal tiles" on the large tile.
     var focusedIndex by remember { mutableStateOf<Int?>(null) }
     var lastTileIndex by remember { mutableIntStateOf(0) }
+    // The tile whose actions menu is open, by channel so a board refresh cannot retarget it.
+    var actionsChannelId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(tiles.size, bench.isEmpty()) {
         val size = tiles.size
@@ -195,7 +200,7 @@ fun JellyTvMultiviewPage(
                                 lastTileIndex = index
                             },
                             onClick = viewModel::onTileOk,
-                            onLongClick = viewModel::removeTile,
+                            onLongClick = { index -> actionsChannelId = tiles.getOrNull(index)?.channelId },
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
@@ -234,6 +239,34 @@ fun JellyTvMultiviewPage(
                 )
             }
         }
+    }
+
+    val actionsIndex = tiles.indexOfFirst { it.channelId == actionsChannelId }
+    val actionsTile = tiles.getOrNull(actionsIndex)
+    if (actionsTile != null) {
+        val game = actionsTile.game
+        GameActionsDialog(
+            game = game,
+            channelName = actionsTile.name.ifBlank { stringResource(R.string.jtv_mv_unknown_channel) },
+            actions =
+                GameActions(
+                    watch =
+                        if (actionsTile.liveTvItemId.isNullOrBlank()) {
+                            null
+                        } else {
+                            { viewModel.watchFullScreen(actionsIndex) }
+                        },
+                    watchLabel = R.string.jtv_actions_full_screen,
+                    followAway = game?.let { { viewModel.toggleFollow(it.teamKey(it.away)) } },
+                    followHome = game?.let { { viewModel.toggleFollow(it.teamKey(it.home)) } },
+                    followedAway = game != null && game.teamKey(game.away) in favoriteTeams,
+                    followedHome = game != null && game.teamKey(game.home) in favoriteTeams,
+                    hideScores = hideScores,
+                    toggleHideScores = viewModel::toggleHideScores,
+                    removeFromMultiview = { viewModel.removeTile(actionsIndex) },
+                ),
+            onDismiss = { actionsChannelId = null },
+        )
     }
 }
 

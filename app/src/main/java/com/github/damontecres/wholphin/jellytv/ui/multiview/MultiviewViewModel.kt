@@ -10,6 +10,7 @@ import com.github.damontecres.wholphin.services.KeyValueService
 import com.github.damontecres.wholphin.services.NavigationManager
 import com.github.damontecres.wholphin.services.ScreensaverService
 import com.github.damontecres.wholphin.ui.launchIO
+import com.github.damontecres.wholphin.ui.nav.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import org.jellyfin.sdk.model.serializer.toUUIDOrNull
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -28,13 +30,15 @@ import javax.inject.Inject
  * One video slot in multiview: a queued channel joined with the board.
  *
  * [hlsUrl] is null until the channel is on the board with a signed `hlsPath`;
- * [game] is the live game currently resolved to the channel, when known.
+ * [game] is the live game currently resolved to the channel, when known;
+ * [liveTvItemId] is the Live TV item full-screen playback needs, when the server has registered one.
  */
 data class MultiviewTile(
     val channelId: String,
     val name: String,
     val hlsUrl: String?,
     val game: JtvGame?,
+    val liveTvItemId: String? = null,
 )
 
 /**
@@ -65,6 +69,7 @@ class MultiviewViewModel
                                 ?.takeIf { it.isNotBlank() }
                                 ?.let(repository::absoluteUrl),
                         game = game,
+                        liveTvItemId = channel?.liveTvItemId ?: game?.watch?.liveTvItemId,
                     )
                 }
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -100,6 +105,12 @@ class MultiviewViewModel
             repository.settings
                 .map { it.hideScores }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+
+        /** Followed team keys, upper-cased like [JtvGame.teamKey], for the tile actions menu. */
+        val favoriteTeams: StateFlow<Set<String>> =
+            repository.settings
+                .map { settings -> settings.favoriteTeams.map { it.uppercase() }.toSet() }
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
         /** Index of the tile whose audio is unmuted; follows focus. */
         private val _audioIndex = MutableStateFlow(0)
@@ -190,6 +201,24 @@ class MultiviewViewModel
             } else {
                 multiviewState.add(entry.channelId)
             }
+        }
+
+        /**
+         * Play [index]'s channel full screen. Multiview stays on the back stack, so BACK returns to it
+         * (its players are released while it is hidden and rebuilt on return).
+         */
+        fun watchFullScreen(index: Int) {
+            val tile = tiles.value.getOrNull(index) ?: return
+            val itemId = tile.liveTvItemId?.toUUIDOrNull() ?: return
+            navigationManager.navigateTo(Destination.JellyTvPlayback(itemId, tile.channelId))
+        }
+
+        fun toggleFollow(teamKey: String) {
+            viewModelScope.launchIO { repository.toggleFavoriteTeam(teamKey) }
+        }
+
+        fun toggleHideScores() {
+            viewModelScope.launchIO { repository.setHideScores(!hideScores.value) }
         }
 
         fun close() = navigationManager.goBack()
