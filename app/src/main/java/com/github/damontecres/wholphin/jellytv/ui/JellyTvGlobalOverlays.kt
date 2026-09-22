@@ -12,6 +12,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.damontecres.wholphin.jellytv.SleepTimerService
+import com.github.damontecres.wholphin.jellytv.together.ui.TogetherDialog
+import com.github.damontecres.wholphin.jellytv.together.ui.TogetherOverlay
 import com.github.damontecres.wholphin.jellytv.ui.household.SendToDialog
 import com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu
 import com.github.damontecres.wholphin.jellytv.ui.player.SleepTimerChip
@@ -29,7 +31,7 @@ class JellyTvGlobalOverlaysViewModel
         val playerFactory: PlayerFactory,
     ) : ViewModel()
 
-/** Overlays that must work above any screen: the sleep timer chip and the players' JellyTV menu dialogs. */
+/** Overlays that must work above any screen: the sleep timer chip, Watch Together, and the players' JellyTV menu dialogs. */
 @Composable
 fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
     val viewModel: JellyTvGlobalOverlaysViewModel = hiltViewModel()
@@ -64,8 +66,17 @@ fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
                     }
                 }
 
+                JellyTvPlayerMenu.Request.TOGETHER -> {
+                    TogetherDialog(
+                        itemId = JellyTvPlayerMenu.nowPlayingItemId,
+                        positionMs = viewModel.playerFactory.currentPlayer?.currentPosition ?: 0L,
+                        onDismiss = { JellyTvPlayerMenu.request.value = null },
+                    )
+                }
+
                 null -> {}
             }
+            TogetherOverlay(Modifier.fillMaxSize())
         }
     }
 }

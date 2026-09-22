@@ -58,6 +58,7 @@ file is a future merge conflict.** Therefore:
 | W27 | `ui/playback/PlaybackViewModel.kt` (`STATE_ENDED`, nothing next) | a finished movie opens the post-play page (`JellyTvPostPlay`) instead of going back |
 | W28 | `services/ServerEventListener.kt` | advertise `JellyTvRemoteCommands.SUPPORTED`; start/stop `JellyTvRemoteCommands.listen` with the socket |
 | W29 | `ui/playback/PlaybackViewModel.kt` (`init`) | bind the player to `JellyTvRemoteBus` for remote audio/subtitle track switching |
+| W30 | `ui/playback/PlaybackDialog.kt` (W20 region), `ui/main/HomePage.kt` (W23 region) | "Watch together" menu entry (`JELLYTV_TOGETHER`); `TogetherRow` after the household row |
 
 ## Releases and self-update
 

@@ -4,5 +4,7 @@
     <string name="jtv_surprise_name">Surprise me</string>
     <!-- %1$d is the current year, e.g. "Your 2026". -->
     <string name="jtv_year_name">Your %1$d</string>
+    <!-- Player settings menu entry for Watch Together (SyncPlay). -->
+    <string name="jtv_together">Watch together</string>
     <string name="jtv_fa_calendar" translatable="false">&#xf073;</string>
 </resources>

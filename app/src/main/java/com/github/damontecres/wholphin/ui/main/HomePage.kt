@@ -406,6 +406,10 @@ fun HomePageContent(
                         com.github.damontecres.wholphin.jellytv.ui.household
                             .HouseholdRow(Modifier.animateItem(placementSpec = null))
                     }
+                    item(key = "together") {
+                        com.github.damontecres.wholphin.jellytv.together.ui
+                            .TogetherRow(Modifier.animateItem(placementSpec = null))
+                    }
                     // JELLYTV: end
                     itemsIndexed(homeRows) { rowIndex, row ->
                         val rowModifier =
