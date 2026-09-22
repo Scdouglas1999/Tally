@@ -109,9 +109,9 @@ object TogetherFrames {
     fun deniedMessage(type: GroupUpdateType): String =
         when (type) {
             GroupUpdateType.LIBRARY_ACCESS_DENIED -> "Library access denied"
-            GroupUpdateType.GROUP_DOES_NOT_EXIST -> "That party no longer exists"
-            GroupUpdateType.CREATE_GROUP_DENIED -> "Could not start a party"
-            GroupUpdateType.JOIN_GROUP_DENIED -> "Could not join that party"
+            GroupUpdateType.GROUP_DOES_NOT_EXIST -> "That watch party no longer exists"
+            GroupUpdateType.CREATE_GROUP_DENIED -> "Could not start a watch party"
+            GroupUpdateType.JOIN_GROUP_DENIED -> "Could not join that watch party"
             else -> type.serialName
         }
 }

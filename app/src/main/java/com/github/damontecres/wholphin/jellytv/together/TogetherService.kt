@@ -136,7 +136,7 @@ class TogetherService
                 Timber.tag(TOGETHER_SYNC_LOG).e(e, "create group failed")
                 queueOnJoin = null
                 if (_state.value is TogetherState.Joining) {
-                    apply(TogetherUpdate.Denied(e.message?.takeIf { it.isNotBlank() } ?: "Could not start a party"))
+                    apply(TogetherUpdate.Denied(e.message?.takeIf { it.isNotBlank() } ?: "Could not start a watch party"))
                 }
             }
         }
@@ -156,7 +156,7 @@ class TogetherService
             } catch (e: Exception) {
                 Timber.tag(TOGETHER_SYNC_LOG).e(e, "join group failed")
                 if (_state.value is TogetherState.Joining) {
-                    apply(TogetherUpdate.Denied(e.message?.takeIf { it.isNotBlank() } ?: "Could not join that party"))
+                    apply(TogetherUpdate.Denied(e.message?.takeIf { it.isNotBlank() } ?: "Could not join that watch party"))
                 }
             }
         }
@@ -323,7 +323,7 @@ class TogetherService
                 } catch (e: Exception) {
                     Timber.tag(TOGETHER_SYNC_LOG).e(e, "set queue failed")
                     if (_state.value is TogetherState.InGroup) {
-                        apply(TogetherUpdate.Denied("Could not start a party"))
+                        apply(TogetherUpdate.Denied("Could not start a watch party"))
                     }
                 }
             }

@@ -238,7 +238,10 @@ fun TogetherDialog(
                             Modifier
                                 .fillMaxWidth()
                                 .heightIn(max = 320.dp)
-                                .verticalScroll(rememberScrollState()),
+                                .verticalScroll(rememberScrollState())
+                                // A scroll container clips to its bounds: keep room for the focus border of the
+                                // first and last rows, or their outer edge is cut (found at full resolution).
+                                .padding(vertical = JtvDimens.focusBorder + 1.dp),
                     ) {
                         if (inGroup != null) {
                             GroupRows(

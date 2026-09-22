@@ -67,18 +67,18 @@ class TogetherReducerTest {
                 TogetherUpdate.Denied(TogetherFrames.deniedMessage(GroupUpdateType.JOIN_GROUP_DENIED)),
             )
         val failure = failed as TogetherState.Failed
-        assertEquals("Could not join that party", failure.message)
-        assertEquals(listOf(TogetherNotice.Error("Could not join that party")), errorNotices)
+        assertEquals("Could not join that watch party", failure.message)
+        assertEquals(listOf(TogetherNotice.Error("Could not join that watch party")), errorNotices)
         assertEquals(
             "Library access denied",
             TogetherFrames.deniedMessage(GroupUpdateType.LIBRARY_ACCESS_DENIED),
         )
         assertEquals(
-            "That party no longer exists",
+            "That watch party no longer exists",
             TogetherFrames.deniedMessage(GroupUpdateType.GROUP_DOES_NOT_EXIST),
         )
         assertEquals(
-            "Could not start a party",
+            "Could not start a watch party",
             TogetherFrames.deniedMessage(GroupUpdateType.CREATE_GROUP_DENIED),
         )
     }

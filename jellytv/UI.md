@@ -19,6 +19,9 @@ Source of truth: the header comment and tokens in the plugin's `Web/app.css`, mi
 - No gradients as decoration, no blur, no glow, no scale-on-focus, no shadows except under logos on imagery,
   no emoji. Image scrims (ground → transparent) are allowed where text sits on pictures.
 - Focus: 3dp accent border (`JtvDimens.focusBorder`), drawn inside the element's bounds; nothing moves.
+- A focus border is never clipped: every scrolling container (LazyRow, LazyColumn, verticalScroll) pads its content
+  by at least `focusBorder + 1dp` on the sides where a focused item can touch its edge. Verify by measuring the
+  border on all four sides of a focused first and last item at full resolution: they must be equal.
 - Plain-language labels ("Resume", "From the start", "Mark watched"), not jargon.
 - Text in a control is vertically centred: equal space above and below the cap height. tv-material3 `Surface`
   puts content top-left, so labels must fill the control's height and centre explicitly. Check at full resolution.
