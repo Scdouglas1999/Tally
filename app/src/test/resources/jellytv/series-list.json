@@ -1,0 +1,267 @@
+{
+    "Items": [
+        {
+            "Name": "Bluey",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "f2b780cd033f94017b022e5a0085dd0f",
+            "PremiereDate": "2018-10-01T00:00:00.0000000Z",
+            "OfficialRating": "TV-Y",
+            "ChannelId": null,
+            "CommunityRating": 8.6,
+            "RunTimeTicks": 4200000000,
+            "ProductionYear": 2018,
+            "IsFolder": true,
+            "Type": "Series",
+            "UserData": {
+                "PlayedPercentage": 83.33333333333334,
+                "UnplayedItemCount": 1,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "353546",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "RecursiveItemCount": 6,
+            "ChildCount": 1,
+            "Status": "Continuing",
+            "AirDays": [],
+            "ImageTags": {
+                "Primary": "14c9a82487a937110311a05b21fa5c64",
+                "Logo": "7e77f19116f92704862ba7efa9be27fd",
+                "Thumb": "dfdf5961b13e71cf87879b543de80724"
+            },
+            "BackdropImageTags": [
+                "351c18dc4654cc30e17612926c5226de"
+            ],
+            "ImageBlurHashes": {
+                "Backdrop": {
+                    "351c18dc4654cc30e17612926c5226de": "W~J+.5o#S%tSoMozI$a#R:W@oJa#Emf5niaejqaekqbIt1oIazWX"
+                },
+                "Primary": {
+                    "14c9a82487a937110311a05b21fa5c64": "d;KLt7o~Ny%MJ[ofWFWsXloznzaw$+j[jrsoR%jXogW="
+                },
+                "Logo": {
+                    "7e77f19116f92704862ba7efa9be27fd": "N5TSUA-;fQ-;fQ-;~qj[fQj[fQj[fQfQfQfQfQfQ"
+                },
+                "Thumb": {
+                    "dfdf5961b13e71cf87879b543de80724": "W.K.P2nhR,tlX9%LS.V?WBohW?kEI]S6kCR:n~bbXUf-W?SNt5a}"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown",
+            "EndDate": "2024-04-21T00:00:00.0000000Z"
+        },
+        {
+            "Name": "Severance",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "33e60e865132660eaf355c6fd0570697",
+            "PremiereDate": "2022-02-17T00:00:00.0000000Z",
+            "OfficialRating": "TV-MA",
+            "ChannelId": null,
+            "CommunityRating": 8.394,
+            "RunTimeTicks": 0,
+            "ProductionYear": 2022,
+            "IsFolder": true,
+            "Type": "Series",
+            "UserData": {
+                "PlayedPercentage": 0,
+                "UnplayedItemCount": 8,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": true,
+                "Played": false,
+                "Key": "371980",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "RecursiveItemCount": 8,
+            "ChildCount": 2,
+            "Status": "Continuing",
+            "AirDays": [],
+            "ImageTags": {
+                "Primary": "92fe8feffe6bb43d4283025432c6d16b",
+                "Logo": "de5c63f61a9b56c5ba14978250674ab0",
+                "Thumb": "04f5a71913aacbaf96cc31d7380d4c13"
+            },
+            "BackdropImageTags": [
+                "2179e7d73653530acf30716d492fb0e9"
+            ],
+            "ImageBlurHashes": {
+                "Backdrop": {
+                    "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+                },
+                "Primary": {
+                    "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+                },
+                "Logo": {
+                    "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+                },
+                "Thumb": {
+                    "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown",
+            "EndDate": "2025-03-20T00:00:00.0000000Z"
+        },
+        {
+            "Name": "The Last of Us",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "274c7c4948f95f8e92bafc347f1be972",
+            "PremiereDate": "2023-01-15T00:00:00.0000000Z",
+            "OfficialRating": "TV-MA",
+            "ChannelId": null,
+            "CommunityRating": 8.408,
+            "RunTimeTicks": 0,
+            "ProductionYear": 2023,
+            "IsFolder": true,
+            "Type": "Series",
+            "UserData": {
+                "PlayedPercentage": 0,
+                "UnplayedItemCount": 4,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "392256",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "RecursiveItemCount": 4,
+            "ChildCount": 1,
+            "Status": "Continuing",
+            "AirDays": [],
+            "ImageTags": {
+                "Primary": "636e81eb9f48a91e2f3d0fa0df46a81a",
+                "Logo": "1b8bb873a150ef1b268842eafcf15d01",
+                "Thumb": "ce949827ec12ac4204de6c173722ccfb"
+            },
+            "BackdropImageTags": [
+                "e7c40b6d08f1b9b6ee6c59d966d3aeec"
+            ],
+            "ImageBlurHashes": {
+                "Backdrop": {
+                    "e7c40b6d08f1b9b6ee6c59d966d3aeec": "W96*p#4V%Mt6M|xt.7IBt7oyV[azNGt6Rjofj@RkM|xtWBa#oeWB"
+                },
+                "Primary": {
+                    "636e81eb9f48a91e2f3d0fa0df46a81a": "dPEo[C%N4n4n_3%MD%9F01xuofRjIUWBxu%LxuIUj[xv"
+                },
+                "Logo": {
+                    "1b8bb873a150ef1b268842eafcf15d01": "HBTSUAxufQxufQxufQxufQ~qj[fQj[fQj[fQj[fQ"
+                },
+                "Thumb": {
+                    "ce949827ec12ac4204de6c173722ccfb": "WKA^gvMKsk-:aKt6_MR5xYxts,t79ZoM%MM{t7oy4nogxvIVa$WV"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown",
+            "EndDate": "2025-05-25T00:00:00.0000000Z"
+        },
+        {
+            "Name": "The Office",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "PremiereDate": "2005-03-24T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "CommunityRating": 8.582,
+            "RunTimeTicks": 0,
+            "ProductionYear": 2005,
+            "IsFolder": true,
+            "Type": "Series",
+            "UserData": {
+                "PlayedPercentage": 90,
+                "UnplayedItemCount": 1,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "73244",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "RecursiveItemCount": 10,
+            "ChildCount": 2,
+            "Status": "Ended",
+            "AirDays": [],
+            "ImageTags": {
+                "Primary": "26f7f28ee651f878cb3f6ebf64dc207c",
+                "Logo": "e0b5ed4d317375a7b3168c85811e0a81",
+                "Thumb": "ac9f8ef447c85eed60c5137a1e687fba"
+            },
+            "BackdropImageTags": [
+                "592397a34b90122614f13f4ed2b23baa"
+            ],
+            "ImageBlurHashes": {
+                "Backdrop": {
+                    "592397a34b90122614f13f4ed2b23baa": "WNA]{QxZM{WCRkxZ~Ws:RjafRjs:-ooet7oJM{ogxZoLxuocM{t7"
+                },
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                },
+                "Logo": {
+                    "e0b5ed4d317375a7b3168c85811e0a81": "HAHC1RRj?b_3of00IU%M-;4nWBM{_3ofRj-;M{D%"
+                },
+                "Thumb": {
+                    "ac9f8ef447c85eed60c5137a1e687fba": "WRDT3d?bIw9ZROWGkvM{Ivxv%LxvD*IUIptSxAsk%LoIR+Wsn}Ri"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown",
+            "EndDate": "2013-05-16T00:00:00.0000000Z"
+        },
+        {
+            "Name": "Breaking Bad",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "PremiereDate": "2008-01-20T00:00:00.0000000Z",
+            "CriticRating": 96,
+            "OfficialRating": "TV-MA",
+            "ChannelId": null,
+            "CommunityRating": 8.952,
+            "RunTimeTicks": 0,
+            "ProductionYear": 2008,
+            "IsFolder": true,
+            "Type": "Series",
+            "UserData": {
+                "PlayedPercentage": 20,
+                "UnplayedItemCount": 8,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "81189",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "RecursiveItemCount": 10,
+            "ChildCount": 2,
+            "Status": "Ended",
+            "AirDays": [],
+            "ImageTags": {
+                "Primary": "eb8df0da869e299a843bd9e1e0ffd90f",
+                "Logo": "382148adadc9149451a3f862355c9959",
+                "Thumb": "20e6d4c7fd94a50899ebbb2bb3ac0ce0"
+            },
+            "BackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "ImageBlurHashes": {
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                },
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown",
+            "EndDate": "2013-09-29T00:00:00.0000000Z"
+        }
+    ],
+    "TotalRecordCount": 5,
+    "StartIndex": 0
+}

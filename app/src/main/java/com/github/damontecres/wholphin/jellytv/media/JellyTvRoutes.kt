@@ -2,7 +2,10 @@ package com.github.damontecres.wholphin.jellytv.media
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.github.damontecres.wholphin.jellytv.media.episode.JtvEpisodePage
 import com.github.damontecres.wholphin.jellytv.media.movie.JtvMoviePage
+import com.github.damontecres.wholphin.jellytv.media.series.JtvSeasonRundown
+import com.github.damontecres.wholphin.jellytv.media.series.JtvSeriesPage
 import com.github.damontecres.wholphin.preferences.AppThemeColors
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.nav.Destination
@@ -33,10 +36,30 @@ object JellyTvRoutes {
                         true
                     }
 
+                    BaseItemKind.SERIES -> {
+                        JtvSeriesPage(destination, preferences, modifier)
+                        true
+                    }
+
+                    BaseItemKind.EPISODE -> {
+                        JtvEpisodePage(destination, preferences, modifier)
+                        true
+                    }
+
                     else -> {
                         false
                     }
                 }
+            }
+
+            is Destination.SeriesOverview -> {
+                JtvSeasonRundown(
+                    destination = destination,
+                    preferences = preferences,
+                    initialSeasonEpisode = destination.seasonEpisode,
+                    modifier = modifier,
+                )
+                true
             }
 
             else -> {

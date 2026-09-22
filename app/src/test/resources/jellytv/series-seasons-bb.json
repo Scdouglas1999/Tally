@@ -1,0 +1,112 @@
+{
+    "Items": [
+        {
+            "Name": "Season 1",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "635a47c4025b8934b06bfc54b908d8c1",
+            "PremiereDate": "2008-01-20T00:00:00.0000000Z",
+            "ChannelId": null,
+            "ProductionYear": 2008,
+            "IndexNumber": 1,
+            "IsFolder": true,
+            "Type": "Season",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "UnplayedItemCount": 5,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "81189001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "ChildCount": 7,
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "ImageTags": {
+                "Primary": "c596e92a4a33a866d912782e08fa9aed"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "c596e92a4a33a866d912782e08fa9aed": "dxIY@0t7S5tS0%RjWCS4%2s.n#aet7oJadWBNGbIbIWW",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown"
+        },
+        {
+            "Name": "Season 2",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "58f865f4dd79557028d28e6af6075a1e",
+            "PremiereDate": "2009-03-08T00:00:00.0000000Z",
+            "ChannelId": null,
+            "ProductionYear": 2009,
+            "IndexNumber": 2,
+            "IsFolder": true,
+            "Type": "Season",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "UnplayedItemCount": 3,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "81189002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "ChildCount": 3,
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "ImageTags": {
+                "Primary": "fbbe7b61090e3dd3bc43a03281257494"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "fbbe7b61090e3dd3bc43a03281257494": "dRFPWuo~D*%LT}tQNGS54;WBIoM{#lRkIUM|xut6nhS4",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown"
+        }
+    ],
+    "TotalRecordCount": 2,
+    "StartIndex": 0
+}

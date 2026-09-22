@@ -1,0 +1,266 @@
+{
+    "Items": [
+        {
+            "Name": "The Dundies",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "654898726742860383086ef4f0ceff6f",
+            "CanDelete": true,
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-09-20T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "It's time for the \"Dundies\", Dunder Mifflin's annual awards banquet (held at the neighborhood Chili's), and the staff must endure the excruciating performance of their inept emcee, boss Michael Scott.",
+            "CommunityRating": 8.303,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 1,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "ParentId": "92a0e676990e3ebce85467a610b36f45",
+            "Type": "Episode",
+            "ParentLogoItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropImageTags": [
+                "592397a34b90122614f13f4ed2b23baa"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-04-24T17:05:00.0000000Z",
+                "Played": true,
+                "Key": "73244002001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "92a0e676990e3ebce85467a610b36f45",
+            "PrimaryImageAspectRatio": 1.7777777777777777,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "c60ae821685ada0635e938d864adeed5"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "e0b5ed4d317375a7b3168c85811e0a81",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "c60ae821685ada0635e938d864adeed5": "W59?E_~BM}RjEfrr}E9[aM$Q%1-Bt7IoV[V[V[sTtl$joMn+$NxZ",
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                },
+                "Logo": {
+                    "e0b5ed4d317375a7b3168c85811e0a81": "HAHC1RRj?b_3of00IU%M-;4nWBM{_3ofRj-;M{D%"
+                },
+                "Thumb": {
+                    "ac9f8ef447c85eed60c5137a1e687fba": "WRDT3d?bIw9ZROWGkvM{Ivxv%LxvD*IUIptSxAsk%LoIR+Wsn}Ri"
+                },
+                "Backdrop": {
+                    "592397a34b90122614f13f4ed2b23baa": "WNA]{QxZM{WCRkxZ~Ws:RjafRjs:-ooet7oJM{ogxZoLxuocM{t7"
+                }
+            },
+            "ParentThumbItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentThumbImageTag": "ac9f8ef447c85eed60c5137a1e687fba",
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Sexual Harassment",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "00a4536061686c39d622be50fda7398e",
+            "CanDelete": true,
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-09-27T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Just as corporate tells Toby, one of the workers at the Scranton branch, to give a seminar on sexual harassment issues, Michael receives a visit from his obnoxious sales-rep friend Todd Packer.  The two chauvinistic friends try to prove that the office is not in need of harassment counseling, but only wind up making the situation worse, causing yet another zany day at the office.",
+            "CommunityRating": 8.111,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 2,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "ParentId": "92a0e676990e3ebce85467a610b36f45",
+            "Type": "Episode",
+            "ParentLogoItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropImageTags": [
+                "592397a34b90122614f13f4ed2b23baa"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-02-20T21:02:00.0000000Z",
+                "Played": true,
+                "Key": "73244002002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "92a0e676990e3ebce85467a610b36f45",
+            "PrimaryImageAspectRatio": 1.7777777777777777,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "3f92579e01fe0adac58991b48da51feb"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "e0b5ed4d317375a7b3168c85811e0a81",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "3f92579e01fe0adac58991b48da51feb": "WLGHl2tmo}xC?G%L_M={xZkXtlx]%LtRNHbvI;j[-Ux[ozxaV?RO",
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                },
+                "Logo": {
+                    "e0b5ed4d317375a7b3168c85811e0a81": "HAHC1RRj?b_3of00IU%M-;4nWBM{_3ofRj-;M{D%"
+                },
+                "Thumb": {
+                    "ac9f8ef447c85eed60c5137a1e687fba": "WRDT3d?bIw9ZROWGkvM{Ivxv%LxvD*IUIptSxAsk%LoIR+Wsn}Ri"
+                },
+                "Backdrop": {
+                    "592397a34b90122614f13f4ed2b23baa": "WNA]{QxZM{WCRkxZ~Ws:RjafRjs:-ooet7oJM{ogxZoLxuocM{t7"
+                }
+            },
+            "ParentThumbItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentThumbImageTag": "ac9f8ef447c85eed60c5137a1e687fba",
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Office Olympics",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "378302b855c10089e8f374b6d89f02fb",
+            "CanDelete": true,
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-10-04T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "While Michael and Dwight are out of the office for the day trying to close a deal on a new condo for Michael, Jim and Pam arrange for the staff to participate in an \"Office Olympics,\" where the workers play strange, invented games (among them, Dunderball, Hate Ball...and Pam Pong) that they usually play while the boss is out.  At the end of the day, the festivities cheer up everyone - even the oblivious Michael.",
+            "CommunityRating": 8.09,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "ParentId": "92a0e676990e3ebce85467a610b36f45",
+            "Type": "Episode",
+            "ParentLogoItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropImageTags": [
+                "592397a34b90122614f13f4ed2b23baa"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-08-23T18:30:00.0000000Z",
+                "Played": true,
+                "Key": "73244002003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "92a0e676990e3ebce85467a610b36f45",
+            "PrimaryImageAspectRatio": 1.7810760667903525,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "0acae052c93cc9f5ab88d1616c44952f"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "e0b5ed4d317375a7b3168c85811e0a81",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "0acae052c93cc9f5ab88d1616c44952f": "NCCi:S~p_2~Vt2nN-5DiIA%2ogVtD*IVRRIVM|jI",
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                },
+                "Logo": {
+                    "e0b5ed4d317375a7b3168c85811e0a81": "HAHC1RRj?b_3of00IU%M-;4nWBM{_3ofRj-;M{D%"
+                },
+                "Thumb": {
+                    "ac9f8ef447c85eed60c5137a1e687fba": "WRDT3d?bIw9ZROWGkvM{Ivxv%LxvD*IUIptSxAsk%LoIR+Wsn}Ri"
+                },
+                "Backdrop": {
+                    "592397a34b90122614f13f4ed2b23baa": "WNA]{QxZM{WCRkxZ~Ws:RjafRjs:-ooet7oJM{ogxZoLxuocM{t7"
+                }
+            },
+            "ParentThumbItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentThumbImageTag": "ac9f8ef447c85eed60c5137a1e687fba",
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "The Fire",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "e1aa8d8b8bd71a46a2944d1628593149",
+            "CanDelete": true,
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-10-11T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "The Office is forced into the parking lot for the day when a fire starts in the kitchen. To ease everyone's boredom, Jim suggests a game of \"Desert Island\" and \"Who Would You Do?\", where certain staff members reveal a little too much information about themselves. Throughout the day, Michael talks business with Ryan, leaving Dwight feeling left out.",
+            "CommunityRating": 8.238,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 4,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "ParentId": "92a0e676990e3ebce85467a610b36f45",
+            "Type": "Episode",
+            "ParentLogoItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropImageTags": [
+                "592397a34b90122614f13f4ed2b23baa"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-12-17T18:59:00.0000000Z",
+                "Played": true,
+                "Key": "73244002004",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "92a0e676990e3ebce85467a610b36f45",
+            "PrimaryImageAspectRatio": 1.7777777777777777,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "627e65b0615a2f5f54aed61270f96a0f"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "e0b5ed4d317375a7b3168c85811e0a81",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "627e65b0615a2f5f54aed61270f96a0f": "WLEoMg={Xnt,NF-p~C-=tlcDbv%1^j?Io}XStRxZ?HxatRbvNHt6",
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                },
+                "Logo": {
+                    "e0b5ed4d317375a7b3168c85811e0a81": "HAHC1RRj?b_3of00IU%M-;4nWBM{_3ofRj-;M{D%"
+                },
+                "Thumb": {
+                    "ac9f8ef447c85eed60c5137a1e687fba": "WRDT3d?bIw9ZROWGkvM{Ivxv%LxvD*IUIptSxAsk%LoIR+Wsn}Ri"
+                },
+                "Backdrop": {
+                    "592397a34b90122614f13f4ed2b23baa": "WNA]{QxZM{WCRkxZ~Ws:RjafRjs:-ooet7oJM{ogxZoLxuocM{t7"
+                }
+            },
+            "ParentThumbItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentThumbImageTag": "ac9f8ef447c85eed60c5137a1e687fba",
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        }
+    ],
+    "TotalRecordCount": 4,
+    "StartIndex": 0
+}

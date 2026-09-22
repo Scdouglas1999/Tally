@@ -16,6 +16,8 @@ import com.github.damontecres.wholphin.data.model.ItemPlayback
 import com.github.damontecres.wholphin.ui.components.ConfirmDialog
 import com.github.damontecres.wholphin.ui.components.ContextMenu
 import com.github.damontecres.wholphin.ui.components.ContextMenuDialog
+import com.github.damontecres.wholphin.ui.components.DialogParams
+import com.github.damontecres.wholphin.ui.components.DialogPopup
 import com.github.damontecres.wholphin.ui.data.AddPlaylistViewModel
 import com.github.damontecres.wholphin.ui.data.ItemDetailsDialog
 import com.github.damontecres.wholphin.ui.data.ItemDetailsDialogInfo
@@ -33,10 +35,13 @@ class ItemDialogsState {
     var overview by mutableStateOf<ItemDetailsDialogInfo?>(null)
     var playlistItemId by mutableStateOf<UUID?>(null)
     var deleteItem by mutableStateOf<BaseItem?>(null)
+
+    /** A list dialog built by upstream (for example `buildDialogForSeason`). */
+    var dialog by mutableStateOf<DialogParams?>(null)
 }
 
 /**
- * Context menu, add-to-playlist, full overview, and delete confirmation.
+ * Context menu, add-to-playlist, full overview, an upstream list dialog, and delete confirmation.
  * Reuses the upstream dialogs until a later task restyles them.
  */
 @Composable
@@ -83,6 +88,16 @@ fun ItemDialogsHost(
             },
             onSearch = playlistViewModel::loadPlaylists,
             elevation = 3.dp,
+        )
+    }
+    state.dialog?.let { params ->
+        DialogPopup(
+            showDialog = true,
+            title = params.title,
+            dialogItems = params.items,
+            onDismissRequest = { state.dialog = null },
+            dismissOnClick = true,
+            waitToLoad = params.fromLongClick,
         )
     }
     state.deleteItem?.let { item ->

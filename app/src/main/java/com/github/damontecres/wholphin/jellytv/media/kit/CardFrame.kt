@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +41,7 @@ import com.github.damontecres.wholphin.jellytv.ui.components.IndicatorSquare
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
+import com.github.damontecres.wholphin.ui.FontAwesome
 import com.github.damontecres.wholphin.ui.logCoilError
 import com.github.damontecres.wholphin.ui.playback.isPlayKeyUp
 
@@ -82,6 +84,7 @@ fun CardFrame(
     tagAccent: Boolean = false,
     favorite: Boolean = false,
     label: (@Composable () -> Unit)? = null,
+    tagGlyph: String? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
@@ -170,7 +173,31 @@ fun CardFrame(
                         )
                     }
                 }
-                if (tag != null) {
+                if (tag != null && tagGlyph != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier =
+                            Modifier
+                                .align(Alignment.TopStart)
+                                .background(JtvColors.labelBar)
+                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                    ) {
+                        Text(
+                            text = tagGlyph,
+                            fontFamily = FontAwesome,
+                            fontSize = 9.sp,
+                            color = JtvColors.text,
+                            maxLines = 1,
+                        )
+                        Text(
+                            text = tag.uppercase(),
+                            style = CardDetailStyle,
+                            color = if (tagAccent) JtvColors.accent else JtvColors.muted,
+                            maxLines = 1,
+                        )
+                    }
+                } else if (tag != null) {
                     Text(
                         text = tag.uppercase(),
                         style = CardDetailStyle,

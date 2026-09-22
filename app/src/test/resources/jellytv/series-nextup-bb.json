@@ -1,0 +1,68 @@
+{
+    "Items": [
+        {
+            "Name": "...And the Bag's in the River",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "eed62655e6a2b09220cf240a9bb8b2ba",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-02-10T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "CommunityRating": 8.424,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlayedPercentage": 42,
+                "PlaybackPositionTicks": 252096600,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-22T12:00:00.0000000Z",
+                "Played": false,
+                "Key": "81189001003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "488e04c5d45ee1d04e4b1df972c09de2"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "488e04c5d45ee1d04e4b1df972c09de2": "WGB3G*~TOGt7-mxYfls.$~t5j[jt9cIqs+ayRnWY$~t5RnRmoKs,",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        }
+    ],
+    "TotalRecordCount": 1,
+    "StartIndex": 0
+}
