@@ -23,6 +23,7 @@ Source of truth: the header comment and tokens in the plugin's `Web/app.css`, mi
   by at least `focusBorder + 1dp` on the sides where a focused item can touch its edge. Verify by measuring the
   border on all four sides of a focused first and last item at full resolution: they must be equal.
 - Plain-language labels ("Resume", "From the start", "Mark watched"), not jargon.
+- All text is American English (Favorite, Color, Canceled, Center…), in strings, code and docs.
 - Text in a control is vertically centered: equal space above and below the cap height. tv-material3 `Surface`
   puts content top-left, so labels must fill the control's height and center explicitly. Check at full resolution.
 
