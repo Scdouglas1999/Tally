@@ -9,7 +9,7 @@
 | App or game / Category | App / Video Players & Editors |
 | Free or paid | Free |
 | Contact email | your email (it is shown publicly on the listing) |
-| Privacy policy URL | `https://github.com/Scdouglas1999/jellytv-android/blob/jellytv/jellytv/PRIVACY.md` |
+| Privacy policy URL | `https://github.com/Scdouglas1999/Tally/blob/jellytv/jellytv/PRIVACY.md` |
 | Package | `io.github.scoduglas1999.jellytv` |
 
 Full description:
@@ -31,7 +31,7 @@ If your server runs the JellyTV plugin, a JellyTV section appears in the menu:
 You need a Jellyfin server. This app has no content of its own and does not provide any channels or streams.
 Without the JellyTV plugin it is a regular Jellyfin client.
 
-Open source (GPL-2.0): github.com/Scdouglas1999/jellytv-android
+Open source (GPL-2.0): github.com/Scdouglas1999/Tally
 Not affiliated with the Jellyfin project.
 ```
 

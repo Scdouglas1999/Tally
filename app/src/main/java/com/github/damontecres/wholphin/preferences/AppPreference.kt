@@ -568,7 +568,7 @@ sealed interface AppPreference<Pref, T> {
             AppStringPreference<AppPreferences>(
                 title = R.string.update_url,
                 // JELLYTV: begin
-                defaultValue = "https://api.github.com/repos/Scdouglas1999/jellytv-android/releases/latest",
+                defaultValue = "https://api.github.com/repos/Scdouglas1999/Tally/releases/latest",
                 // JELLYTV: end
                 getter = { it.updateUrl },
                 setter = { prefs, value ->

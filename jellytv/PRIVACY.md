@@ -25,4 +25,4 @@ location, contacts, camera or microphone access (voice search uses your TV's own
 
 **Children.** The app has no content of its own; it shows what the connected server offers.
 
-**Contact.** Open an issue at https://github.com/Scdouglas1999/jellytv-android/issues
+**Contact.** Open an issue at https://github.com/Scdouglas1999/Tally/issues

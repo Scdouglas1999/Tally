@@ -69,7 +69,7 @@ file is a future merge conflict.** Therefore:
 Upstream's updater is kept and pointed at this fork (W8). It reads the GitHub release **name** as the version
 (`v<git describe>`, e.g. `v1.0.8-25-gabc1234`) and downloads the asset `Wholphin-release-<abi>.apk`, so release
 assets keep upstream's names; `JellyTV.apk` (universal) is an extra copy for the permanent install link
-`https://github.com/Scdouglas1999/jellytv-android/releases/latest/download/JellyTV.apk`.
+`https://github.com/Scdouglas1999/Tally/releases/latest/download/JellyTV.apk`.
 Release git tags are `jtv-*`: they must NOT match `v*`/`p*`, which `app/build.gradle.kts` uses for the version.
 `jellytv/release.sh` builds and signs; `jellytv/release.sh --publish` also creates the GitHub release.
 
