@@ -1,8 +1,8 @@
 package com.github.damontecres.wholphin.jellytv.ui
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,8 +15,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -30,7 +30,6 @@ import com.github.damontecres.wholphin.jellytv.ui.components.JtvRow
 import com.github.damontecres.wholphin.jellytv.ui.components.JtvTab
 import com.github.damontecres.wholphin.jellytv.ui.components.JtvTopBar
 import com.github.damontecres.wholphin.jellytv.ui.components.KeyHint
-import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvSurface
 import com.github.damontecres.wholphin.preferences.UserPreferences
@@ -55,67 +54,73 @@ fun JellyTvPage(
             showToast(context, context.getString(resId))
         }
     }
+    // Leaving the content upward always lands on the current tab, not on whichever tab happens to be
+    // nearest (a wide empty panel is nearest to MULTIVIEW; Compose's geometric search would pick that).
+    val selectedTabFocus = remember { FocusRequester() }
     JtvSurface(modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
             JtvTopBar(
                 tabs = JtvTab.entries,
                 selected = state.selectedTab,
                 onSelect = viewModel::selectTab,
+                selectedTabFocus = selectedTabFocus,
                 // Upstream draws its own clock in this corner when the user has it enabled; never show two.
                 clock = if (preferences.appPreferences.interfacePreferences.showClock) "" else clock,
             )
-            when (state.selectedTab) {
-                JtvTab.GAMES -> {
-                    GamesBoard(
-                        rows = state.rows,
-                        favorites = state.favorites,
-                        hideScores = state.hideScores,
-                        loading = state.loading,
-                        hasBoard = state.hasBoard,
-                        boardError = state.boardError,
-                        feedErrors = state.feedErrors,
-                        hasGames = state.games.isNotEmpty(),
-                        onWatch = viewModel::watch,
-                        onAddToMultiview = viewModel::addToMultiview,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+            Box(Modifier.focusProperties { up = selectedTabFocus }) {
+                when (state.selectedTab) {
+                    JtvTab.GAMES -> {
+                        GamesBoard(
+                            rows = state.rows,
+                            favorites = state.favorites,
+                            hideScores = state.hideScores,
+                            loading = state.loading,
+                            hasBoard = state.hasBoard,
+                            boardError = state.boardError,
+                            feedErrors = state.feedErrors,
+                            hasGames = state.games.isNotEmpty(),
+                            onWatch = viewModel::watch,
+                            onAddToMultiview = viewModel::addToMultiview,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
 
-                JtvTab.CHANNELS -> {
-                    ChannelsGrid(
-                        channels = state.channels,
-                        games = state.games,
-                        favorites = state.favorites,
-                        hideScores = state.hideScores,
-                        loading = state.loading,
-                        hasBoard = state.hasBoard,
-                        boardError = state.boardError,
-                        cardUrl = { viewModel.absoluteUrl(it.cardPath) },
-                        onWatch = viewModel::watchChannel,
-                        onAddToMultiview = viewModel::addToMultiview,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+                    JtvTab.CHANNELS -> {
+                        ChannelsGrid(
+                            channels = state.channels,
+                            games = state.games,
+                            favorites = state.favorites,
+                            hideScores = state.hideScores,
+                            loading = state.loading,
+                            hasBoard = state.hasBoard,
+                            boardError = state.boardError,
+                            cardUrl = { viewModel.absoluteUrl(it.cardPath) },
+                            onWatch = viewModel::watchChannel,
+                            onAddToMultiview = viewModel::addToMultiview,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
 
-                JtvTab.MULTIVIEW -> {
-                    MultiviewQueue(
-                        channelIds = state.multiview,
-                        channels = state.channels,
-                        onRemove = viewModel::removeFromMultiview,
-                        onOpen = viewModel::openMultiview,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
+                    JtvTab.MULTIVIEW -> {
+                        MultiviewQueue(
+                            channelIds = state.multiview,
+                            channels = state.channels,
+                            onRemove = viewModel::removeFromMultiview,
+                            onOpen = viewModel::openMultiview,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
 
-                JtvTab.SETTINGS -> {
-                    JtvSettingsContent(
-                        onlyWatchable = state.onlyWatchable,
-                        hideScores = state.hideScores,
-                        info = (state.availability as? JellyTvRepository.Availability.Available)?.info,
-                        onToggleOnlyWatchable = viewModel::toggleOnlyWatchable,
-                        onHideScoresChange = viewModel::setHideScores,
-                        modifier = Modifier.fillMaxSize(),
-                    )
+                    JtvTab.SETTINGS -> {
+                        JtvSettingsContent(
+                            onlyWatchable = state.onlyWatchable,
+                            hideScores = state.hideScores,
+                            info = (state.availability as? JellyTvRepository.Availability.Available)?.info,
+                            onToggleOnlyWatchable = viewModel::toggleOnlyWatchable,
+                            onHideScoresChange = viewModel::setHideScores,
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
                 }
             }
         }
@@ -136,11 +141,6 @@ private fun MultiviewQueue(
     modifier: Modifier = Modifier,
 ) {
     if (channelIds.isEmpty()) {
-        // Removing the last row would otherwise leave focus with nowhere to go (it falls out to the drawer):
-        // the empty state is a focus target itself, with the usual frame while focused.
-        val emptyFocus = remember { FocusRequester() }
-        var emptyFocused by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { emptyFocus.tryRequestFocus("jellytv-multiview-empty") }
         EmptyState(
             title = stringResource(R.string.jtv_multiview_empty_title),
             subtitle = stringResource(R.string.jtv_multiview_empty_sub),
@@ -148,14 +148,7 @@ private fun MultiviewQueue(
                 modifier
                     .fillMaxWidth()
                     .padding(horizontal = JtvDimens.marginHorizontal)
-                    .padding(top = 24.dp)
-                    .focusRequester(emptyFocus)
-                    .onFocusChanged { emptyFocused = it.isFocused }
-                    .focusable()
-                    .border(
-                        if (emptyFocused) JtvDimens.focusBorder else JtvDimens.hairline,
-                        if (emptyFocused) JtvColors.accent else JtvColors.ruleStrong,
-                    ),
+                    .padding(top = 24.dp),
         )
     } else {
         val firstRowFocus = remember { FocusRequester() }

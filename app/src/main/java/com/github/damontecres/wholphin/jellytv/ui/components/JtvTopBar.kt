@@ -19,6 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -62,6 +64,7 @@ fun JtvTopBar(
     onSelect: (JtvTab) -> Unit,
     clock: String,
     modifier: Modifier = Modifier,
+    selectedTabFocus: FocusRequester? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -98,7 +101,12 @@ fun JtvTopBar(
                 tab = tab,
                 selected = tab == selected,
                 onSelect = { onSelect(tab) },
-                modifier = Modifier.fillMaxHeight(),
+                modifier =
+                    if (tab == selected && selectedTabFocus != null) {
+                        Modifier.fillMaxHeight().focusRequester(selectedTabFocus)
+                    } else {
+                        Modifier.fillMaxHeight()
+                    },
             )
         }
         Spacer(Modifier.weight(1f))

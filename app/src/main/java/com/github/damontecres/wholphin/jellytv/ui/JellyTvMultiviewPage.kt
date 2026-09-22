@@ -168,6 +168,7 @@ fun JellyTvMultiviewPage(
                             title = stringResource(R.string.jtv_mv_empty_title),
                             subtitle = stringResource(R.string.jtv_mv_empty_subtitle),
                             modifier = Modifier.fillMaxSize(),
+                            takeFocus = false, // the swap-in rail takes focus on this page
                         )
                     }
 
