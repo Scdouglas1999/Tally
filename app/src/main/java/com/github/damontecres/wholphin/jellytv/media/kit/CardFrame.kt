@@ -86,6 +86,7 @@ fun CardFrame(
     favorite: Boolean = false,
     label: (@Composable () -> Unit)? = null,
     tagGlyph: String? = null,
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
@@ -150,7 +151,7 @@ fun CardFrame(
                     AsyncImage(
                         model = imageUrl,
                         contentDescription = contentDescription,
-                        contentScale = ContentScale.Crop,
+                        contentScale = contentScale,
                         onError = { logCoilError(imageUrl, it.result) },
                         modifier = Modifier.fillMaxSize(),
                     )

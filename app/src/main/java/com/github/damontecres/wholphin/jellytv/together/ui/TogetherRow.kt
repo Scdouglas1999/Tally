@@ -46,6 +46,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
+import com.github.damontecres.wholphin.jellytv.media.home.HomeRowTitle
 import com.github.damontecres.wholphin.jellytv.ui.components.KeyHint
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
@@ -101,14 +102,17 @@ fun TogetherRow(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ItemRowTitle(title = stringResource(R.string.jtv_together_ui_row_title))
-            Text(
-                text = stringResource(R.string.jtv_together_ui_row_count, shown.size),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-            )
+        val title = stringResource(R.string.jtv_together_ui_row_title)
+        HomeRowTitle(title = title, count = shown.size, start = RowStart) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                ItemRowTitle(title = title)
+                Text(
+                    text = stringResource(R.string.jtv_together_ui_row_count, shown.size),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
+            }
         }
         JtvScale {
             LazyRow(

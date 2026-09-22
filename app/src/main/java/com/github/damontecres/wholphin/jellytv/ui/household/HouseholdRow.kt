@@ -36,6 +36,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.household.HouseholdSession
+import com.github.damontecres.wholphin.jellytv.media.home.HomeRowTitle
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvScale
@@ -70,7 +71,10 @@ fun HouseholdRow(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp),
     ) {
-        ItemRowTitle(title = stringResource(R.string.jtv_household_row_title))
+        val title = stringResource(R.string.jtv_household_row_title)
+        HomeRowTitle(title = title, count = sessions.size, start = 20.dp) {
+            ItemRowTitle(title = title)
+        }
         JtvScale {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(JtvDimens.cardGap),
