@@ -56,6 +56,10 @@ data class JtvTeam(
     val winner: Boolean = false,
     /** Points per period (quarter, inning, …) in order; empty before the game starts. */
     val periods: List<Int> = emptyList(),
+    /** Team colour, six hex digits without '#' ("132448"); empty when unknown. */
+    val color: String = "",
+    /** Alternate team colour, same format. */
+    val altColor: String = "",
 )
 
 /** Where to watch a game. Resolved on the server. */
@@ -104,6 +108,8 @@ data class JtvGame(
     val onThird: Boolean = false,
     val broadcasts: List<String> = emptyList(),
     val watch: JtvWatch? = null,
+    /** Root-relative, anonymous 16:9 matchup art for backdrops (text-free, score-independent). */
+    val backdropPath: String? = null,
     /** Per-module additions keyed by module name. Feature modules read their own key; everything else ignores it. */
     val extras: Map<String, JsonElement> = emptyMap(),
 ) {

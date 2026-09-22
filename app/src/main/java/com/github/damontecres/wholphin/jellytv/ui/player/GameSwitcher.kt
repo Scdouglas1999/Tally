@@ -102,7 +102,7 @@ fun GameSwitcher(
                 )
                 KeyHint(
                     key = stringResource(R.string.jtv_key_hold),
-                    label = stringResource(R.string.jtv_actions_menu),
+                    label = stringResource(R.string.jtv_actions_more),
                 )
             }
         }

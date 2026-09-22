@@ -45,6 +45,7 @@ import com.github.damontecres.wholphin.jellytv.api.JtvGame
 import com.github.damontecres.wholphin.jellytv.data.JellyTvRepository
 import com.github.damontecres.wholphin.jellytv.ui.components.GameActionsDialog
 import com.github.damontecres.wholphin.jellytv.ui.components.gameActions
+import com.github.damontecres.wholphin.jellytv.ui.player.BoxScoreOverlay
 import com.github.damontecres.wholphin.jellytv.ui.player.CornerRequests
 import com.github.damontecres.wholphin.jellytv.ui.player.CornerView
 import com.github.damontecres.wholphin.jellytv.ui.player.CornerViewController
@@ -81,7 +82,8 @@ private const val OVERLAY_ANIM_MS = 140
  * a score bug, a DPAD_DOWN "also on now" switcher, and transient event banners.
  *
  * The wrapper's [Modifier.onPreviewKeyEvent] sees keys before upstream's handler:
- * while the switcher is closed only DPAD_DOWN is intercepted (to open it); while it is
+ * while the switcher is closed DPAD_DOWN opens it and DPAD_UP opens the box score (both only while upstream's
+ * controls are hidden); the box score closes on the next key or after [BOX_SCORE_LINGER_MS]; while it is
  * open, Back/Escape/B and DPAD_UP on the card row close it, everything else falls
  * through to the focused card or the player untouched.
  */
@@ -112,6 +114,14 @@ fun JellyTvPlaybackPage(
     val controlsTimeoutMs = preferences.appPreferences.playbackPreferences.controllerTimeoutMs
     val upstreamControls = remember { UpstreamControlsMirror() }
     var swallowDownKeyUp by remember { mutableStateOf(false) }
+    var boxScoreOpen by remember { mutableStateOf(false) }
+    var swallowUpKeyUp by remember { mutableStateOf(false) }
+    LaunchedEffect(boxScoreOpen) {
+        if (boxScoreOpen) {
+            delay(BOX_SCORE_LINGER_MS)
+            boxScoreOpen = false
+        }
+    }
 
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -199,8 +209,9 @@ fun JellyTvPlaybackPage(
         cornerFocusEnabled = true
     }
 
-    BackHandler(enabled = switcherOpen || actionsGameId != null || cornerFocused) {
+    BackHandler(enabled = switcherOpen || actionsGameId != null || cornerFocused || boxScoreOpen) {
         when {
+            boxScoreOpen -> boxScoreOpen = false
             actionsGameId != null -> actionsGameId = null
             switcherOpen -> switcherOpen = false
             else -> restorePlayerFocusAt = SystemClock.elapsedRealtime()
@@ -214,6 +225,22 @@ fun JellyTvPlaybackPage(
                 if (swallowDownKeyUp && event.key == Key.DirectionDown && event.type == KeyEventType.KeyUp) {
                     swallowDownKeyUp = false
                     true
+                } else if (swallowUpKeyUp && event.key == Key.DirectionUp && event.type == KeyEventType.KeyUp) {
+                    swallowUpKeyUp = false
+                    true
+                } else if (boxScoreOpen) {
+                    // Any key closes the box score. UP and BACK stop there; everything else also reaches the player.
+                    if (event.type == KeyEventType.KeyDown) boxScoreOpen = false
+                    when (event.key) {
+                        Key.DirectionUp, Key.Back, Key.Escape, Key.ButtonB -> {
+                            if (event.type == KeyEventType.KeyDown && event.key == Key.DirectionUp) swallowUpKeyUp = true
+                            true
+                        }
+
+                        else -> {
+                            false
+                        }
+                    }
                 } else if (!switcherOpen) {
                     val toCorner =
                         cornerChannel != null &&
@@ -233,6 +260,15 @@ fun JellyTvPlaybackPage(
                         if (event.type == KeyEventType.KeyUp) {
                             restorePlayerFocusAt = SystemClock.elapsedRealtime()
                         }
+                        true
+                    } else if (event.type == KeyEventType.KeyDown &&
+                        event.key == Key.DirectionUp &&
+                        game != null &&
+                        !cornerFocused &&
+                        !upstreamControls.likelyVisible(controlsTimeoutMs)
+                    ) {
+                        boxScoreOpen = true
+                        swallowUpKeyUp = true
                         true
                     } else if (event.type == KeyEventType.KeyDown &&
                         event.key == Key.DirectionDown &&
@@ -288,9 +324,9 @@ fun JellyTvPlaybackPage(
             val bugKey = game?.let { "${it.away.score}-${it.home.score}|${it.detail}|${it.downDistance}" }
             LaunchedEffect(bugKey, upstreamControls.lastKeyAt) { bugShownAt = SystemClock.elapsedRealtime() }
             var bugVisible by remember { mutableStateOf(true) }
-            LaunchedEffect(bugShownAt, switcherOpen) {
-                bugVisible = true
-                if (!switcherOpen) {
+            LaunchedEffect(bugShownAt, switcherOpen, boxScoreOpen) {
+                bugVisible = !boxScoreOpen
+                if (!switcherOpen && !boxScoreOpen) {
                     delay(BUG_LINGER_MS)
                     bugVisible = false
                 }
@@ -308,6 +344,15 @@ fun JellyTvPlaybackPage(
                         ),
             ) {
                 ScoreBug(game = game, hideScores = hideScores)
+            }
+
+            AnimatedVisibility(
+                visible = boxScoreOpen,
+                enter = fadeIn(tween(OVERLAY_ANIM_MS)) + slideInVertically(tween(OVERLAY_ANIM_MS)) { -it / 6 },
+                exit = fadeOut(tween(OVERLAY_ANIM_MS * 2)),
+                modifier = Modifier.align(Alignment.TopCenter).fillMaxSize(),
+            ) {
+                BoxScoreOverlay(game = game, hideScores = hideScores, modifier = Modifier.fillMaxSize())
             }
 
             // Keep the departing banner in composition so its fade-out can play.
@@ -463,6 +508,9 @@ private fun adoptCornerRequest(
 internal interface CornerBoardEntryPoint {
     fun jellyTvRepository(): JellyTvRepository
 }
+
+/** The box score closes itself after this long without a key. */
+private const val BOX_SCORE_LINGER_MS = 12_000L
 
 /** Best-effort mirror of upstream's controller visibility, fed by the key events that reach it. */
 private const val BUG_LINGER_MS = 8_000L

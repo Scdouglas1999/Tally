@@ -169,12 +169,16 @@ class JellyTvHomeRowViewModel
         }
 
         /**
-         * A game card took focus. Upstream sets the page backdrop to the focused library item's art and only ever
-         * replaces it, so the last movie's poster would stay behind our cards; the JellyTV ground is plain.
+         * A game card took focus. The game's matchup art (server-rendered, text-free) becomes the page backdrop,
+         * so upstream fades it in and tints the page from the teams' colours exactly as it does for a film.
+         * Servers without the art get a cleared backdrop: the last film's poster must not linger behind a game.
          */
         fun onCardFocused(game: JtvGame) {
             JellyTvHomeHeaderState.focusedGame.value = game
-            viewModelScope.launchIO { backdropService.clearBackdrop() }
+            val art = game.backdropPath?.takeIf { it.isNotBlank() }?.let(repository::absoluteUrl)
+            viewModelScope.launchIO {
+                if (art != null) backdropService.submit("jellytv_game_${game.id}", art) else backdropService.clearBackdrop()
+            }
         }
 
         fun watch(game: JtvGame) {

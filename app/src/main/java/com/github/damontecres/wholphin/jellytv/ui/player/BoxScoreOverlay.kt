@@ -60,23 +60,18 @@ fun BoxScoreOverlay(
     modifier: Modifier = Modifier,
 ) {
     if (game == null) return
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        val scrimHeight = if (maxHeight != Dp.Infinity) maxHeight * 0.40f else 280.dp
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(scrimHeight)
-                    .background(boxScrim),
-        )
+    Box(modifier = modifier.fillMaxWidth()) {
+        // The scrim is sized by the content, not the screen: dark behind every line, then a fade below the last.
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .background(boxScrim)
                     .padding(
                         start = JtvDimens.marginHorizontal,
                         end = JtvDimens.marginHorizontal,
                         top = JtvDimens.marginVertical,
+                        bottom = SCRIM_FADE,
                     ),
         ) {
             Text(
@@ -127,12 +122,14 @@ fun BoxScoreOverlay(
     }
 }
 
+/** How far below the last line of text the scrim takes to fade out. */
+private val SCRIM_FADE = 96.dp
+
 private val boxScrim =
     Brush.verticalGradient(
-        // Hold the dark across the title and the line score, then fall away so the picture
-        // is clear by 40% of the height.
-        0f to Color.Black.copy(alpha = 0.85f),
-        0.78f to Color.Black.copy(alpha = 0.82f),
+        // Hold the dark across all of the text, then fall away over the bottom padding.
+        0f to Color.Black.copy(alpha = 0.86f),
+        0.7f to Color.Black.copy(alpha = 0.8f),
         1f to Color.Transparent,
     )
 
