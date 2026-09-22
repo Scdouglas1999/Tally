@@ -738,7 +738,11 @@ class PlaybackViewModel
                         } else if (source.supportsDirectStream) {
                             source.transcodingUrl?.let(api::createUrl)
                         } else {
-                            source.transcodingUrl?.let(api::createUrl)
+                            source.transcodingUrl
+                                // JELLYTV: begin
+                                ?.let(com.github.damontecres.wholphin.jellytv.quality.JellyTvQuality::transcodingUrl)
+                                // JELLYTV: end
+                                ?.let(api::createUrl)
                         }
                     if (mediaUrl.isNullOrBlank()) {
                         _state.update {

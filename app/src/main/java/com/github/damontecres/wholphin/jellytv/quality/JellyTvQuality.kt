@@ -11,7 +11,8 @@ import kotlinx.coroutines.launch
 /**
  * In-player quality choice ("Original" or a lower bitrate), which Wholphin lacks: it only has one global maximum
  * bitrate in Settings. Process-wide, bound to the open upstream player by seams in `PlaybackViewModel`:
- *  - `changeStreams` asks [maxBitrateOverride] before the global preference (every stream request goes through it);
+ *  - `changeStreams` asks [maxBitrateOverride] before the global preference (every stream request goes through it),
+ *    and passes a transcoding URL through [transcodingUrl];
  *  - `init` publishes the player's `currentPlayback` here ([nowPlaying]) and binds [requests] to a restart of the
  *    stream at the current position.
  * The choice lasts for the life of that player (every item it plays), then resets to Original.
@@ -28,6 +29,19 @@ object JellyTvQuality {
 
     /** Read by `changeStreams`: the bitrate cap for this request, or null to use the preference. */
     fun maxBitrateOverride(): Int? = _choice.value
+
+    /**
+     * Read by `changeStreams` for a transcoded stream. With a quality chosen, the server must re-encode the video:
+     * otherwise it copies a source whose reported bitrate is below the cap, and live channels report only their
+     * audio's bitrate (a 720p channel shows as 0.19 Mbps), so a lower choice changed nothing. Jellyfin 10.10 leaves
+     * `AllowVideoStreamCopy` out of the transcoding URL even when the request disallowed it, so it is added here.
+     */
+    fun transcodingUrl(url: String): String =
+        if (_choice.value == null || url.contains("AllowVideoStreamCopy=", ignoreCase = true)) {
+            url
+        } else {
+            "$url&AllowVideoStreamCopy=false"
+        }
 
     /** The dialog chose a quality: remember it and restart the stream at the current position. */
     fun choose(bitsPerSecond: Int?) {

@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services.hilt
 
 import android.content.Context
@@ -82,7 +85,11 @@ object AppModule {
         @ApplicationContext context: Context,
     ): ClientInfo =
         ClientInfo(
-            name = context.getString(R.string.app_name),
+            // JELLYTV: begin
+            name =
+                com.github.damontecres.wholphin.jellytv.JellyTvClientName
+                    .get(context, context.getString(R.string.app_name)),
+            // JELLYTV: end
             version = BuildConfig.VERSION_NAME,
         )
 

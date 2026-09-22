@@ -61,8 +61,9 @@ file is a future merge conflict.** Therefore:
 | W30 | `ui/playback/PlaybackDialog.kt` (W20 region), `ui/main/HomePage.kt` (W23 region) | "Watch together" menu entry (`JELLYTV_TOGETHER`); `TogetherRow` after the household row |
 | W31 | `ui/nav/DestinationContent.kt` (top of `DestinationContent`) | `JellyTvRoutes.Content`: JellyTV-owned screens (JELLYTV theme only), see `jellytv/UI.md` |
 | W32 | `ui/theme/Theme.kt` (W15 region) | square theme shapes for JELLYTV (`JellyTvShapes`, `JellyTvMaterialShapes`) |
-| W33 | `ui/playback/PlaybackViewModel.kt` (`init` W29 region; `changeStreams` bitrate), `PlaybackDialog.kt` (W20 region) | in-player Quality: `JellyTvQuality` override before the global max bitrate, restart at the current position; "Quality" menu entry |
+| W33 | `ui/playback/PlaybackViewModel.kt` (`init` W29 region; `changeStreams` bitrate), `PlaybackDialog.kt` (W20 region) | in-player Quality: `JellyTvQuality` override before the global max bitrate, restart at the current position, no video stream copy while a quality is chosen (`transcodingUrl`); "Quality" menu entry |
 | W34 | `ui/nav/ApplicationContent.kt` (NavDrawer call) | `TallyNavDrawer` replaces upstream's drawer while the JELLYTV theme is selected |
+| W35 | `services/hilt/AppModule.kt` (`clientInfo`) | `JellyTvClientName`: JellyTV-era installs keep reporting "JellyTV" to the server, because their tokens are bound to that name |
 
 ## Releases and self-update
 
