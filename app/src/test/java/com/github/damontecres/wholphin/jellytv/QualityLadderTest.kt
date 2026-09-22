@@ -34,13 +34,13 @@ class QualityLadderTest {
         val options = QualityLadder.options(1080, 14_772_533)
         assertEquals(
             listOf(
-                "ORIGINAL · 14.8 MBPS",
-                "1080P · 10 MBPS",
-                "1080P · 8 MBPS",
-                "720P · 5 MBPS",
-                "720P · 3 MBPS",
-                "480P · 2 MBPS",
-                "360P · 1 MBPS",
+                "Original · 14.8 Mbps",
+                "1080p · 10 Mbps",
+                "1080p · 8 Mbps",
+                "720p · 5 Mbps",
+                "720p · 3 Mbps",
+                "480p · 2 Mbps",
+                "360p · 1 Mbps",
             ),
             options.map { it.label },
         )
@@ -55,63 +55,63 @@ class QualityLadderTest {
     fun `an unknown height or bitrate never drops a rung on that axis`() {
         val all = QualityLadder.options(null, null)
         assertEquals(14, all.size)
-        assertEquals("ORIGINAL", all.first().label)
-        assertEquals("4K · 120 MBPS", all[1].label)
+        assertEquals("Original", all.first().label)
+        assertEquals("4K · 120 Mbps", all[1].label)
         assertEquals(
             listOf(
-                "ORIGINAL · 15 MBPS",
-                "1080P · 10 MBPS",
-                "1080P · 8 MBPS",
-                "720P · 5 MBPS",
-                "720P · 3 MBPS",
-                "480P · 2 MBPS",
-                "360P · 1 MBPS",
+                "Original · 15 Mbps",
+                "1080p · 10 Mbps",
+                "1080p · 8 Mbps",
+                "720p · 5 Mbps",
+                "720p · 3 Mbps",
+                "480p · 2 Mbps",
+                "360p · 1 Mbps",
             ),
             QualityLadder.options(null, 15_000_000).map { it.label },
         )
         assertEquals(
-            listOf("ORIGINAL", "720P · 5 MBPS", "720P · 3 MBPS", "480P · 2 MBPS", "360P · 1 MBPS"),
+            listOf("Original", "720p · 5 Mbps", "720p · 3 Mbps", "480p · 2 Mbps", "360p · 1 Mbps"),
             QualityLadder.options(720, null).map { it.label },
         )
     }
 
     @Test
     fun `a tiny 360p file only offers original`() {
-        assertEquals(listOf("ORIGINAL · 0.8 MBPS"), QualityLadder.options(360, 800_000).map { it.label })
+        assertEquals(listOf("Original · 0.8 Mbps"), QualityLadder.options(360, 800_000).map { it.label })
     }
 
     @Test
     fun `original shows one decimal under 20 mbps and whole numbers from 20 up`() {
-        assertEquals("ORIGINAL", QualityLadder.originalLabel(null))
-        assertEquals("ORIGINAL · 14.8 MBPS", QualityLadder.originalLabel(14_772_533))
-        assertEquals("ORIGINAL · 19.9 MBPS", QualityLadder.originalLabel(19_900_000))
-        assertEquals("ORIGINAL · 20 MBPS", QualityLadder.originalLabel(20_000_000))
-        assertEquals("ORIGINAL · 81 MBPS", QualityLadder.originalLabel(80_600_000))
+        assertEquals("Original", QualityLadder.originalLabel(null))
+        assertEquals("Original · 14.8 Mbps", QualityLadder.originalLabel(14_772_533))
+        assertEquals("Original · 19.9 Mbps", QualityLadder.originalLabel(19_900_000))
+        assertEquals("Original · 20 Mbps", QualityLadder.originalLabel(20_000_000))
+        assertEquals("Original · 81 Mbps", QualityLadder.originalLabel(80_600_000))
     }
 
     @Test
     fun `equal bitrate is not under the source and the same height at a lower bitrate is`() {
         assertFalse(QualityLadder.options(1080, mbit(10)).any { it.bitsPerSecond == mbit(10) })
         assertTrue(QualityLadder.options(1080, mbit(10) + 1).any { it.bitsPerSecond == mbit(10) })
-        assertFalse(QualityLadder.options(1079, 50_000_000).any { it.label.startsWith("1080P") })
+        assertFalse(QualityLadder.options(1079, 50_000_000).any { it.label.startsWith("1080p") })
     }
 
     @Test
     fun `a 2160p 80 mbps source offers 4k 60 down to 360p 1`() {
         assertEquals(
             listOf(
-                "ORIGINAL · 80 MBPS",
-                "4K · 60 MBPS",
-                "4K · 40 MBPS",
-                "1080P · 30 MBPS",
-                "1080P · 20 MBPS",
-                "1080P · 15 MBPS",
-                "1080P · 10 MBPS",
-                "1080P · 8 MBPS",
-                "720P · 5 MBPS",
-                "720P · 3 MBPS",
-                "480P · 2 MBPS",
-                "360P · 1 MBPS",
+                "Original · 80 Mbps",
+                "4K · 60 Mbps",
+                "4K · 40 Mbps",
+                "1080p · 30 Mbps",
+                "1080p · 20 Mbps",
+                "1080p · 15 Mbps",
+                "1080p · 10 Mbps",
+                "1080p · 8 Mbps",
+                "720p · 5 Mbps",
+                "720p · 3 Mbps",
+                "480p · 2 Mbps",
+                "360p · 1 Mbps",
             ),
             QualityLadder.options(2160, 80_000_000).map { it.label },
         )
@@ -121,22 +121,22 @@ class QualityLadderTest {
 
     @Test
     fun `now line names the resolution and rounds bitrate to one decimal`() {
-        assertEquals("1080P", QualityStatus.resolutionLabel(1080, 1920))
+        assertEquals("1080p", QualityStatus.resolutionLabel(1080, 1920))
         assertEquals("4K", QualityStatus.resolutionLabel(2160, 3840))
         assertEquals("4K", QualityStatus.resolutionLabel(1600, 3840))
-        assertEquals("720P", QualityStatus.resolutionLabel(720, 1280))
-        assertEquals("480P", QualityStatus.resolutionLabel(480, 854))
-        assertEquals("360P", QualityStatus.resolutionLabel(360, 640))
-        assertEquals("14.8 MBPS", QualityStatus.bitrateLabel(14_772_533))
-        assertEquals("4 MBPS", QualityStatus.bitrateLabel(4_000_000))
+        assertEquals("720p", QualityStatus.resolutionLabel(720, 1280))
+        assertEquals("480p", QualityStatus.resolutionLabel(480, 854))
+        assertEquals("360p", QualityStatus.resolutionLabel(360, 640))
+        assertEquals("14.8 Mbps", QualityStatus.bitrateLabel(14_772_533))
+        assertEquals("4 Mbps", QualityStatus.bitrateLabel(4_000_000))
         assertNull(QualityStatus.bitrateLabel(0))
         assertEquals(
-            "DIRECT PLAY · 1080P · 14.8 MBPS",
-            QualityStatus.formatNowLine("DIRECT PLAY", "1080P", "14.8 MBPS"),
+            "DIRECT PLAY · 1080p · 14.8 Mbps",
+            QualityStatus.formatNowLine("DIRECT PLAY", "1080p", "14.8 Mbps"),
         )
         assertEquals(
-            "TRANSCODING · 720P · 4 MBPS",
-            QualityStatus.formatNowLine("TRANSCODING", "720P", "4 MBPS"),
+            "TRANSCODING · 720p · 4 Mbps",
+            QualityStatus.formatNowLine("TRANSCODING", "720p", "4 Mbps"),
         )
     }
 
@@ -197,8 +197,8 @@ class QualityLadderTest {
         assertEquals(14_772_533, QualityStatus.sourceBitrate(playback))
         val now = QualityStatus.now(playback)
         assertEquals(QualityStatus.Method.TRANSCODING, now?.method)
-        assertEquals("720P", now?.resolution)
-        assertEquals("4 MBPS", now?.bitrateLabel)
+        assertEquals("720p", now?.resolution)
+        assertEquals("4 Mbps", now?.bitrateLabel)
         assertEquals(
             listOf(
                 TranscodeReason.AUDIO_CODEC_NOT_SUPPORTED,
@@ -208,13 +208,13 @@ class QualityLadderTest {
         )
         assertEquals(
             listOf(
-                "ORIGINAL · 14.8 MBPS",
-                "1080P · 10 MBPS",
-                "1080P · 8 MBPS",
-                "720P · 5 MBPS",
-                "720P · 3 MBPS",
-                "480P · 2 MBPS",
-                "360P · 1 MBPS",
+                "Original · 14.8 Mbps",
+                "1080p · 10 Mbps",
+                "1080p · 8 Mbps",
+                "720p · 5 Mbps",
+                "720p · 3 Mbps",
+                "480p · 2 Mbps",
+                "360p · 1 Mbps",
             ),
             QualityLadder.options(QualityStatus.sourceHeight(playback), QualityStatus.sourceBitrate(playback)).map { it.label },
         )
@@ -236,8 +236,8 @@ class QualityLadderTest {
             )
         val now = QualityStatus.now(playback)
         assertEquals(QualityStatus.Method.DIRECT_PLAY, now?.method)
-        assertEquals("1080P", now?.resolution)
-        assertEquals("14.8 MBPS", now?.bitrateLabel)
+        assertEquals("1080p", now?.resolution)
+        assertEquals("14.8 Mbps", now?.bitrateLabel)
         assertTrue(now?.reasons.orEmpty().isEmpty())
     }
 
@@ -259,7 +259,7 @@ class QualityLadderTest {
         assertNull(QualityStatus.sourceBitrate(playback))
         assertEquals(720, QualityStatus.sourceHeight(playback))
         assertEquals(
-            listOf("ORIGINAL", "720P · 5 MBPS", "720P · 3 MBPS", "480P · 2 MBPS", "360P · 1 MBPS"),
+            listOf("Original", "720p · 5 Mbps", "720p · 3 Mbps", "480p · 2 Mbps", "360p · 1 Mbps"),
             QualityLadder.options(QualityStatus.sourceHeight(playback), QualityStatus.sourceBitrate(playback)).map { it.label },
         )
     }
@@ -369,7 +369,7 @@ class QualityLadderTest {
         assertEquals(13, options.size)
         for (option in options) {
             val height = QualityLadder.heightFor(option.bitsPerSecond!!)
-            val expected = if (option.label.startsWith("4K")) 2160 else option.label.substringBefore('P').toInt()
+            val expected = if (option.label.startsWith("4K")) 2160 else option.label.substringBefore('p').toInt()
             assertEquals(option.label, expected, height)
         }
         assertNull(QualityLadder.heightFor(4_000_000))

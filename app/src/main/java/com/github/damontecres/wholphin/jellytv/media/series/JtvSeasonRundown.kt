@@ -75,6 +75,7 @@ import com.github.damontecres.wholphin.jellytv.media.kit.formatEndsAt
 import com.github.damontecres.wholphin.jellytv.media.kit.formatRuntime
 import com.github.damontecres.wholphin.jellytv.media.kit.resumePercent
 import com.github.damontecres.wholphin.jellytv.ui.components.EmptyState
+import com.github.damontecres.wholphin.jellytv.ui.components.tallyUppercase
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvScale
@@ -716,7 +717,7 @@ private fun SummaryText(episodes: List<BaseItem?>?) {
             add(pluralStringResource(R.plurals.jtv_series_episodes, summary.episodes, summary.episodes))
             add(stringResource(R.string.jtv_series_left, summary.left))
             if (summary.left > 0 && summary.remainingTicks > 0L) add(formatRuntime(summary.remainingTicks))
-        }.joinToString(" · ").uppercase()
+        }.joinToString(" · ").tallyUppercase()
     Text(
         text = text,
         style = JtvType.label,
@@ -808,7 +809,7 @@ private fun SeasonTab(
                     .padding(horizontal = 16.dp),
         ) {
             Text(
-                text = label.uppercase(),
+                text = label.tallyUppercase(),
                 style = JtvType.label,
                 color = color,
                 maxLines = 1,

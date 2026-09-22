@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.data.model.BaseItem
+import com.github.damontecres.wholphin.jellytv.ui.components.tallyUppercase
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
 import org.jellyfin.sdk.model.api.ImageType
@@ -40,7 +41,7 @@ fun LandscapeCard(
         label = {
             if (!kicker.isNullOrBlank()) {
                 Text(
-                    text = kicker.uppercase(),
+                    text = kicker.tallyUppercase(),
                     style = CardKickerStyle,
                     color = JtvColors.accent,
                     maxLines = 1,

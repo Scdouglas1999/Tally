@@ -32,6 +32,7 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Glow
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import com.github.damontecres.wholphin.jellytv.ui.components.tallyUppercase
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
@@ -128,7 +129,7 @@ fun JtvButton(
                 )
             }
             Text(
-                text = label.uppercase(),
+                text = label.tallyUppercase(),
                 style = JtvType.label,
                 color = contentColor,
                 maxLines = 1,
@@ -218,7 +219,7 @@ fun JtvIconButton(
             }
         }
         Text(
-            text = if (focused) label.uppercase() else "",
+            text = if (focused) label.tallyUppercase() else "",
             style = iconCaption,
             color = JtvColors.muted,
             maxLines = 1,

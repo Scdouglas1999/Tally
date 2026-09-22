@@ -11,6 +11,25 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+private val UNIT_FIXES =
+    listOf(
+        Regex("""(\d(?:[\d.]*\d)?) ?MBPS\b""") to "$1 Mbps",
+        Regex("""(\d(?:[\d.]*\d)?) ?KBPS\b""") to "$1 kbps",
+        Regex("""\b(\d{3,4})P\b""") to "$1p",
+        Regex("""\b(\d{3,4})I\b""") to "$1i",
+        Regex("""\b(\d+)H\b""") to "$1h",
+        Regex("""\b(\d+)M\b""") to "$1m",
+        Regex("""\b(\d+)S\b""") to "$1s",
+    )
+
+/**
+ * Tally's uppercase label style, except for units and technical notation, which keep their standard case:
+ * `14.8 Mbps` (MBPS would read as megabytes), `1080p`, `1080i`, and durations `2h 35m`, `1m 30s`.
+ * Use it instead of `uppercase()` for any label that can contain one of them.
+ */
+fun String.tallyUppercase(): String =
+    UNIT_FIXES.fold(uppercase(Locale.US)) { text, (regex, replacement) -> regex.replace(text, replacement) }
+
 private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.getDefault())
 private val dayTimeFormatter = DateTimeFormatter.ofPattern("EEE h:mm a", Locale.getDefault())
 

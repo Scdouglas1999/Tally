@@ -38,6 +38,7 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.jellytv.ui.components.IndicatorSquare
+import com.github.damontecres.wholphin.jellytv.ui.components.tallyUppercase
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
@@ -191,7 +192,7 @@ fun CardFrame(
                             maxLines = 1,
                         )
                         Text(
-                            text = tag.uppercase(),
+                            text = tag.tallyUppercase(),
                             style = CardDetailStyle,
                             color = if (tagAccent) JtvColors.accent else JtvColors.muted,
                             maxLines = 1,
@@ -199,7 +200,7 @@ fun CardFrame(
                     }
                 } else if (tag != null) {
                     Text(
-                        text = tag.uppercase(),
+                        text = tag.tallyUppercase(),
                         style = CardDetailStyle,
                         color = if (tagAccent) JtvColors.accent else JtvColors.muted,
                         maxLines = 1,
@@ -263,7 +264,7 @@ internal fun CardTitleText(
 @Composable
 internal fun CardDetailText(text: String) {
     Text(
-        text = text.uppercase(),
+        text = text.tallyUppercase(),
         style = CardDetailStyle,
         color = JtvColors.muted,
         maxLines = 1,

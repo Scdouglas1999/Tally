@@ -12,7 +12,7 @@ import kotlin.math.roundToInt
 /**
  * Plain-language "what is playing right now" for the quality dialog. Resolution names match the ladder
  * (`1080P`, `4K`). Bitrates are decimal megabits, one decimal only when it is not a whole number
- * (`14.8 MBPS`, `4 MBPS`).
+ * (`14.8 Mbps`, `4 Mbps`).
  */
 object QualityStatus {
     enum class Method { DIRECT_PLAY, DIRECT_STREAM, TRANSCODING }
@@ -100,24 +100,24 @@ object QualityStatus {
         if ((h ?: 0) > 1440 || (w ?: 0) > 2560) return "4K"
         val pixels = h ?: return null
         return when {
-            pixels >= 900 -> "1080P"
-            pixels >= 600 -> "720P"
-            pixels >= 400 -> "480P"
-            pixels >= 240 -> "360P"
-            else -> "${pixels}P"
+            pixels >= 900 -> "1080p"
+            pixels >= 600 -> "720p"
+            pixels >= 400 -> "480p"
+            pixels >= 240 -> "360p"
+            else -> "${pixels}p"
         }
     }
 
-    /** Decimal megabits: one decimal under 20 Mbps when not whole (`14.8 MBPS`, `4 MBPS`), whole from 20 up. */
+    /** Decimal megabits: one decimal under 20 Mbps when not whole (`14.8 Mbps`, `4 Mbps`), whole from 20 up. */
     fun bitrateLabel(bitsPerSecond: Int?): String? {
         if (bitsPerSecond == null || bitsPerSecond <= 0) return null
         val megabits = bitsPerSecond / 1_000_000.0
-        if (megabits >= 20) return "${megabits.roundToInt()} MBPS"
+        if (megabits >= 20) return "${megabits.roundToInt()} Mbps"
         val tenths = (megabits * 10).roundToInt()
         val whole = tenths / 10
         val fraction = tenths % 10
         val number = if (fraction == 0) whole.toString() else "$whole.$fraction"
-        return "$number MBPS"
+        return "$number Mbps"
     }
 
     fun formatNowLine(

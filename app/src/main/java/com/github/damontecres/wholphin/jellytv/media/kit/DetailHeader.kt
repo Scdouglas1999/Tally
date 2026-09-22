@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
+import com.github.damontecres.wholphin.jellytv.ui.components.tallyUppercase
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
@@ -61,19 +62,19 @@ import kotlin.math.roundToInt
 
 private const val TICKS_PER_SECOND = 10_000_000L
 
-/** `2H 28M`, `52M`, `1M 30S`, `45S`. Seconds are kept only when there are no hours. */
+/** `2h 28m`, `52m`, `1m 30s`, `45s`. Seconds are kept only when there are no hours. */
 fun formatRuntime(ticks: Long): String {
-    if (ticks <= 0L) return "0S"
+    if (ticks <= 0L) return "0s"
     val totalSeconds = ticks / TICKS_PER_SECOND
     val hours = totalSeconds / 3600
     val minutes = (totalSeconds % 3600) / 60
     val seconds = totalSeconds % 60
     return when {
-        hours > 0 && minutes > 0 -> "${hours}H ${minutes}M"
-        hours > 0 -> "${hours}H"
-        minutes > 0 && seconds > 0 -> "${minutes}M ${seconds}S"
-        minutes > 0 -> "${minutes}M"
-        else -> "${seconds}S"
+        hours > 0 && minutes > 0 -> "${hours}h ${minutes}m"
+        hours > 0 -> "${hours}h"
+        minutes > 0 && seconds > 0 -> "${minutes}m ${seconds}s"
+        minutes > 0 -> "${minutes}m"
+        else -> "${seconds}s"
     }
 }
 
@@ -144,7 +145,7 @@ fun techBoxes(
             val width = videoStream.width
             val height = videoStream.height
             if (width != null && height != null && width > 0 && height > 0) {
-                add(resolutionString(width, height, videoStream.isInterlaced).uppercase(Locale.US))
+                add(resolutionString(width, height, videoStream.isInterlaced).tallyUppercase())
             }
             videoStream.codec?.takeIf { it.isNotBlank() }?.let { add(it.uppercase(Locale.US)) }
             hdrLabel(videoStream)?.let { add(it) }
@@ -339,7 +340,7 @@ fun DetailHeader(
                 modifier = Modifier.widthIn(max = textMaxWidth),
             ) {
                 Text(
-                    text = kicker.uppercase(),
+                    text = kicker.tallyUppercase(),
                     style = JtvType.label,
                     color = kickerColor,
                     maxLines = 1,
@@ -463,7 +464,7 @@ private fun MetaLine(parts: List<DetailMetaPart>) {
                 when (part) {
                     is DetailMetaPart.Plain -> {
                         Text(
-                            text = part.text.uppercase(),
+                            text = part.text.tallyUppercase(),
                             style = JtvType.label,
                             color = JtvColors.textSecondary,
                             maxLines = 1,
@@ -473,7 +474,7 @@ private fun MetaLine(parts: List<DetailMetaPart>) {
 
                     is DetailMetaPart.Boxed -> {
                         Text(
-                            text = part.text.uppercase(),
+                            text = part.text.tallyUppercase(),
                             style = JtvType.label,
                             color = JtvColors.textSecondary,
                             maxLines = 1,
@@ -509,7 +510,7 @@ private fun metaFits(
             when (part) {
                 is DetailMetaPart.Plain -> part.text
                 is DetailMetaPart.Boxed -> part.text
-            }.uppercase(Locale.US)
+            }.tallyUppercase()
         width += measurer.measure(text = label, style = JtvType.label).size.width
         if (part is DetailMetaPart.Boxed) width += boxPadPx
     }

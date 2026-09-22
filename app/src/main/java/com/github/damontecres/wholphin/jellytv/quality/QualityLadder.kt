@@ -4,7 +4,7 @@ import com.github.damontecres.wholphin.preferences.AppPreference
 
 /**
  * One choice in the quality dialog. [bitsPerSecond] null = Original. [megabits] is the step on upstream's Max
- * bitrate slider (null = Original). [label] like "1080P · 10 MBPS" or "ORIGINAL · 14.8 MBPS".
+ * bitrate slider (null = Original). [label] like "1080p · 10 Mbps" or "Original · 14.8 Mbps".
  */
 data class QualityOption(
     val bitsPerSecond: Int?,
@@ -27,7 +27,7 @@ object QualityLadder {
         val megabits: Int,
     ) {
         val bitsPerSecond: Int = (megabits * AppPreference.MEGA_BIT).toInt()
-        val label: String = if (height >= 2000) "4K · $megabits MBPS" else "${height}P · $megabits MBPS"
+        val label: String = if (height >= 2000) "4K · $megabits Mbps" else "${height}p · $megabits Mbps"
     }
 
     private val rungs =
@@ -65,10 +65,10 @@ object QualityLadder {
         return listOf(QualityOption(null, null, originalLabel(bitrate))) + offered
     }
 
-    /** `ORIGINAL · 14.8 MBPS`, or `ORIGINAL` alone when the source bitrate is unknown (live streams). */
+    /** `Original · 14.8 Mbps`, or `Original` alone when the source bitrate is unknown (live streams). */
     fun originalLabel(sourceBitrate: Int?): String {
-        val rate = QualityStatus.bitrateLabel(sourceBitrate) ?: return "ORIGINAL"
-        return "ORIGINAL · $rate"
+        val rate = QualityStatus.bitrateLabel(sourceBitrate) ?: return "Original"
+        return "Original · $rate"
     }
 }
 
