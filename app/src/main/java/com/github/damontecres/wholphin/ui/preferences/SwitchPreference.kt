@@ -81,6 +81,9 @@ fun SwitchColors(): SwitchColors {
         AppThemeColors.OLED_BLACK,
         AppThemeColors.RED,
         AppThemeColors.BROWN,
+        // JELLYTV: begin
+        AppThemeColors.JELLYTV,
+        // JELLYTV: end
         -> {
             SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onPrimary,

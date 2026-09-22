@@ -493,12 +493,16 @@ sealed interface AppPreference<Pref, T> {
         val ThemeColors =
             AppChoicePreference<AppPreferences, AppThemeColors>(
                 title = R.string.app_theme,
-                defaultValue = AppThemeColors.PURPLE,
+                // JELLYTV: begin
+                defaultValue = AppThemeColors.JELLYTV,
+                // JELLYTV: end
                 getter = { it.interfacePreferences.appThemeColors },
                 setter = { prefs, value ->
                     prefs.updateInterfacePreferences { appThemeColors = value }
                 },
-                displayValues = R.array.app_theme_colors,
+                // JELLYTV: begin
+                displayValues = R.array.jtv_app_theme_colors,
+                // JELLYTV: end
                 indexToValue = { AppThemeColors.forNumber(it) },
                 valueToIndex = { if (it != AppThemeColors.UNRECOGNIZED) it.number else 0 },
             )

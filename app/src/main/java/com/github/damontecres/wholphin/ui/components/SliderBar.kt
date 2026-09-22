@@ -160,6 +160,9 @@ fun sliderActiveColor(focused: Boolean): Color {
             }
         }
 
+        // JELLYTV: begin
+        AppThemeColors.JELLYTV,
+        // JELLYTV: end
         AppThemeColors.OLED_BLACK -> {
             if (focused) {
                 MaterialTheme.colorScheme.primaryContainer
@@ -196,6 +199,9 @@ fun sliderInactiveColor(focused: Boolean): Color {
             MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .66f)
         }
 
+        // JELLYTV: begin
+        AppThemeColors.JELLYTV,
+        // JELLYTV: end
         AppThemeColors.OLED_BLACK -> {
             if (focused) {
                 MaterialTheme.colorScheme.tertiaryContainer

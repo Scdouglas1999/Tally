@@ -142,7 +142,11 @@ fun MainContent(
                     exit = ScreensaverService.exitAnimation,
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    AppScreensaver(userPreferences.appPreferences, Modifier.fillMaxSize())
+                    // JELLYTV: begin
+                    if (!com.github.damontecres.wholphin.jellytv.ui.screensaver.JellyTvScreensaver(Modifier.fillMaxSize())) {
+                        AppScreensaver(userPreferences.appPreferences, Modifier.fillMaxSize())
+                    }
+                    // JELLYTV: end
                 }
             }
             AnimatedVisibility(

@@ -27,6 +27,9 @@ fun getThemeColors(appThemeColors: AppThemeColors): ThemeColors =
         AppThemeColors.BOLD_BLUE -> BoldBlueThemeColors
         AppThemeColors.RED -> RedThemeColors
         AppThemeColors.BROWN -> BrownThemeColors
+        // JELLYTV: begin
+        AppThemeColors.JELLYTV -> com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvThemeColors
+        // JELLYTV: end
         AppThemeColors.UNRECOGNIZED -> PurpleThemeColors
     }
 
@@ -44,13 +47,20 @@ fun WholphinTheme(
             else -> themeColors.lightScheme
         }
     CompositionLocalProvider(LocalTheme provides appThemeColors) {
+        // JELLYTV: begin
+        val jellyTv = appThemeColors == AppThemeColors.JELLYTV
+        // JELLYTV: end
         androidx.compose.material3.MaterialTheme(
             colorScheme = if (darkTheme) themeColors.darkSchemeMaterial else themeColors.lightSchemeMaterial,
-            typography = androidx.compose.material3.Typography(),
+            // JELLYTV: begin
+            typography = if (jellyTv) com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvMaterialTypography else androidx.compose.material3.Typography(),
+            // JELLYTV: end
         ) {
             MaterialTheme(
                 colorScheme = colorScheme,
-                typography = AppTypography,
+                // JELLYTV: begin
+                typography = if (jellyTv) com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvTypography else AppTypography,
+                // JELLYTV: end
                 content = content,
             )
         }

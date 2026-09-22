@@ -42,6 +42,11 @@ file is a future merge conflict.** Therefore:
 | W11 | `ui/setup/SwitchUserContent.kt` | no users yet: open the Quick Connect dialog straight away |
 | W12 | `services/PlayerFactory.kt` | live buffering cushion + load control (`JellyTvLivePlayback`) |
 | W13 | `ui/playback/PlaybackViewModel.kt` (`onPlayerError`) | re-sync instead of failing when behind the live window |
+| W14 | `proto/WholphinDataStore.proto` (`AppThemeColors.JELLYTV = 8`, additive) | the JellyTV theme as a first-class Wholphin theme |
+| W15 | `ui/theme/Theme.kt` | map JELLYTV → `JellyTvThemeColors`; IBM Plex typography when it is active |
+| W16 | `preferences/AppPreference.kt` (`ThemeColors` default + display array), `ui/preferences/SwitchPreference.kt` | JELLYTV is the default theme |
+| W17 | `ui/main/HomePage.kt` | `JellyTvHomeRow` item above the library rows |
+| W18 | `MainContent.kt` | `JellyTvScreensaver` before upstream's screensaver |
 
 ## Releases and self-update
 

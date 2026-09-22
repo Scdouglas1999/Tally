@@ -49,6 +49,9 @@ fun WatchedIconBackground(): Color =
         AppThemeColors.BROWN,
         -> MaterialTheme.colorScheme.border.copy(alpha = 1f)
 
+        // JELLYTV: begin
+        AppThemeColors.JELLYTV,
+        // JELLYTV: end
         AppThemeColors.OLED_BLACK -> MaterialTheme.colorScheme.secondaryContainer
     }
 
@@ -62,6 +65,9 @@ fun WatchedIconColor(): Color =
         AppThemeColors.ORANGE,
         AppThemeColors.BOLD_BLUE,
         AppThemeColors.OLED_BLACK,
+        // JELLYTV: begin
+        AppThemeColors.JELLYTV,
+        // JELLYTV: end
         AppThemeColors.RED,
         AppThemeColors.BROWN,
         -> Color.White // MaterialTheme.colorScheme.onSurface

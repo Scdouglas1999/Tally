@@ -373,6 +373,12 @@ fun HomePageContent(
                         Modifier
                             .focusRestorer(),
                 ) {
+                    // JELLYTV: begin
+                    item(key = "jellytv") {
+                        com.github.damontecres.wholphin.jellytv.ui.home
+                            .JellyTvHomeRow(Modifier.animateItem(placementSpec = null))
+                    }
+                    // JELLYTV: end
                     itemsIndexed(homeRows) { rowIndex, row ->
                         val rowModifier =
                             Modifier

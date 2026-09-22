@@ -811,6 +811,9 @@ fun navItemColor(
 
                     AppThemeColors.BOLD_BLUE,
                     AppThemeColors.OLED_BLACK,
+                    // JELLYTV: begin
+                    AppThemeColors.JELLYTV,
+                    // JELLYTV: end
                     -> MaterialTheme.colorScheme.primary
                 }
             }

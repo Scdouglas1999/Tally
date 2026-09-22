@@ -122,6 +122,9 @@ enum AppThemeColors {
   OLED_BLACK = 5;
   RED = 6;
   BROWN = 7;
+  // JELLYTV: begin
+  JELLYTV = 8;
+  // JELLYTV: end
 }
 
 enum EdgeStyle{

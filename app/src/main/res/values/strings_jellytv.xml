@@ -79,4 +79,17 @@
     <string name="jtv_hero_final">Final</string>
     <string name="jtv_hero_on">On %1$s</string>
     <string name="jtv_mv_channel">Channel</string>
+    <string name="jtv_theme_name">JellyTV</string>
+    <!-- upstream's app_theme_colors plus ours; order = AppThemeColors enum numbers -->
+    <string-array name="jtv_app_theme_colors">
+        <item>@string/purple</item>
+        <item>@string/blue</item>
+        <item>@string/green</item>
+        <item>@string/orange</item>
+        <item>@string/bold_blue</item>
+        <item>@string/black</item>
+        <item>@string/red</item>
+        <item>@string/brown</item>
+        <item>@string/jtv_theme_name</item>
+    </string-array>
 </resources>
