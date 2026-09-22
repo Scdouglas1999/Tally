@@ -64,6 +64,7 @@ file is a future merge conflict.** Therefore:
 | W33 | `ui/playback/PlaybackViewModel.kt` (`init` W29 region; `changeStreams` bitrate), `PlaybackDialog.kt` (W20 region) | in-player Quality: `JellyTvQuality` override before the global max bitrate, restart at the current position, no video stream copy while a quality is chosen (`transcodingUrl`); "Quality" menu entry |
 | W34 | `ui/nav/ApplicationContent.kt` (NavDrawer call) | `TallyNavDrawer` replaces upstream's drawer while the JELLYTV theme is selected |
 | W35 | `services/hilt/AppModule.kt` (`clientInfo`) | `JellyTvClientName`: JellyTV-era installs keep reporting "JellyTV" to the server, because their tokens are bound to that name |
+| (resource) | `res/values-v31/themes_jellytv.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 
 ## Releases and self-update
 

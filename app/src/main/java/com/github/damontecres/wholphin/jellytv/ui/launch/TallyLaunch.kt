@@ -110,8 +110,8 @@ class TallyLaunchViewModel
 
 /**
  * The launch card: the tally lamp and the TALLY wordmark on an opaque ground, above everything. The lamp sputters
- * while the app gets ready and catches once it is; at full brightness an accent line sweeps along the top edge,
- * and when the catch is complete the card crossfades away. Keys are swallowed while it is up.
+ * while the app gets ready and catches once it is; when the catch is complete the card crossfades away (no top
+ * accent line: the user preferred the card without it). Keys are swallowed while it is up.
  */
 @Composable
 fun TallyLaunch(modifier: Modifier = Modifier) {
@@ -121,7 +121,6 @@ fun TallyLaunch(modifier: Modifier = Modifier) {
     var lamp by remember { mutableStateOf(LampState.Off) }
     var connecting by remember { mutableStateOf(false) }
     var serverName by remember { mutableStateOf<String?>(null) }
-    val sweep = remember { Animatable(0f) }
     val alpha = remember { Animatable(1f) }
 
     LaunchedEffect(Unit) {
@@ -137,11 +136,7 @@ fun TallyLaunch(modifier: Modifier = Modifier) {
             connecting = !viewModel.ready
         }
     }
-    var fullBrightness by remember { mutableStateOf(false) }
     var settled by remember { mutableStateOf(false) }
-    LaunchedEffect(fullBrightness) {
-        if (fullBrightness) sweep.animateTo(1f, tween(SWEEP_MS, easing = EaseOutCubic))
-    }
     LaunchedEffect(settled) {
         if (settled) {
             alpha.animateTo(0f, tween(FADE_MS, easing = LinearEasing))
@@ -156,16 +151,7 @@ fun TallyLaunch(modifier: Modifier = Modifier) {
         modifier
             .fillMaxSize()
             .graphicsLayer { this.alpha = alpha.value }
-            .background(JtvColors.ground)
-            .drawBehind {
-                val w = size.width * sweep.value
-                if (w > 0f) {
-                    drawRect(
-                        color = JtvColors.accent,
-                        size = Size(w, JtvDimens.focusBorder.toPx()),
-                    )
-                }
-            },
+            .background(JtvColors.ground),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -175,7 +161,6 @@ fun TallyLaunch(modifier: Modifier = Modifier) {
                 state = lamp,
                 size = SQUARE,
                 modifier = Modifier.offset(y = CAP_CENTER_NUDGE),
-                onFullBrightness = { fullBrightness = true },
                 onSettled = { settled = true },
             )
             Spacer(Modifier.width(GAP))
@@ -268,5 +253,4 @@ private val CONNECTING_TOP = 120.dp
 
 private const val DARK_MS = 120L
 private const val CONNECTING_AFTER_MS = 4_000L
-private const val SWEEP_MS = 260
 private const val FADE_MS = 250
