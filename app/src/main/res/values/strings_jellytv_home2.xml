@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tally home page (jellytv/media/home) -->
+    <string name="jtv_home2_view_all">View all</string>
+    <!-- Card kicker in Continue Watching / Next Up: episode code and share watched, e.g. "S1 E3 · 42%" -->
+    <string name="jtv_home2_kicker_progress">%1$s · %2$d%%</string>
+    <!-- Card kicker for a film in Continue Watching: share watched, e.g. "42%" -->
+    <string name="jtv_home2_percent">%1$d%%</string>
+</resources>

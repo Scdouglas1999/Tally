@@ -32,6 +32,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.data.isFollowed
+import com.github.damontecres.wholphin.jellytv.media.home.HomeRowTitle
 import com.github.damontecres.wholphin.jellytv.ui.components.GameActionsDialog
 import com.github.damontecres.wholphin.jellytv.ui.components.GameCard
 import com.github.damontecres.wholphin.jellytv.ui.components.gameActions
@@ -158,7 +159,8 @@ fun JellyTvHomeRow(modifier: Modifier = Modifier) {
 }
 
 /**
- * Wholphin's home-row title ([ItemRowTitle]: `titleLarge`, `onBackground`, 8.dp start) plus a muted count.
+ * The row title: Tally's mono row header in the JellyTV look, else Wholphin's home-row title ([ItemRowTitle]:
+ * `titleLarge`, `onBackground`, 8.dp start) plus a muted count.
  */
 @Composable
 private fun JellyTvHomeRowTitle(
@@ -166,21 +168,19 @@ private fun JellyTvHomeRowTitle(
     count: Int,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier,
-    ) {
-        ItemRowTitle(
-            title =
-                stringResource(
-                    if (anyLive) R.string.jtv_home_row_live else R.string.jtv_home_row_today,
-                ),
-        )
-        Text(
-            text = stringResource(R.string.jtv_home_row_count, count),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-        )
+    val title = stringResource(if (anyLive) R.string.jtv_home_row_live else R.string.jtv_home_row_today)
+    HomeRowTitle(title = title, count = count, start = 20.dp) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier,
+        ) {
+            ItemRowTitle(title = title)
+            Text(
+                text = stringResource(R.string.jtv_home_row_count, count),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+            )
+        }
     }
 }

@@ -99,7 +99,8 @@ fun Modifier.bleedHorizontal(amount: Dp = FocusEdge): Modifier =
 /**
  * [RowHeader] over a horizontal row of cards. The last focused card is restored when focus
  * re-enters the row. Put a [FocusRequester] on [modifier] to enter the row from outside;
- * [up] is where DPAD up leaves it.
+ * [up] is where DPAD up leaves it. [count] is shown next to the title (null hides it);
+ * [revealOnFocus] false leaves vertical scrolling to the parent list's own bring-into-view spec.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -110,6 +111,8 @@ fun <T> MediaRow(
     up: FocusRequester? = null,
     onRowFocused: () -> Unit = {},
     key: (index: Int, item: T) -> Any = { index, _ -> index },
+    count: Int? = items.size,
+    revealOnFocus: Boolean = true,
     card: @Composable (item: T, index: Int, modifier: Modifier, onFocused: () -> Unit) -> Unit,
 ) {
     val lazyFocus = remember { FocusRequester() }
@@ -129,7 +132,7 @@ fun <T> MediaRow(
                     }
                 },
     ) {
-        RowHeader(title = title, count = items.size)
+        RowHeader(title = title, count = count)
         CompositionLocalProvider(LocalBringIntoViewSpec provides rememberFocusEdgeSpec()) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(JtvDimens.cardGap / 2),
@@ -159,7 +162,7 @@ fun <T> MediaRow(
                         onRowFocused()
                         // Reveal the whole row (header and the padding round the focus border),
                         // not only the card.
-                        scope.launch(ExceptionHandler()) { bringRow.bringIntoView() }
+                        if (revealOnFocus) scope.launch(ExceptionHandler()) { bringRow.bringIntoView() }
                     }
                 }
             }
