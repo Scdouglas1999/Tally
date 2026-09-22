@@ -62,6 +62,11 @@ internal object SettingsJson {
         hide: Boolean,
     ): JsonObject = JsonObject(raw + ("hideScores" to JsonPrimitive(hide)))
 
+    fun setOnlyWatchable(
+        raw: JsonObject,
+        only: Boolean,
+    ): JsonObject = JsonObject(raw + ("onlyWatchable" to JsonPrimitive(only)))
+
     fun setLastChannel(
         raw: JsonObject,
         channelId: String,
@@ -224,6 +229,8 @@ class JellyTvRepository
         suspend fun toggleFavorite(channelId: String) = mutateSettings { SettingsJson.toggleFavorite(it, channelId) }
 
         suspend fun setHideScores(hide: Boolean) = mutateSettings { SettingsJson.setHideScores(it, hide) }
+
+        suspend fun setOnlyWatchable(only: Boolean) = mutateSettings { SettingsJson.setOnlyWatchable(it, only) }
 
         suspend fun setLastChannel(channelId: String) = mutateSettings { SettingsJson.setLastChannel(it, channelId) }
 

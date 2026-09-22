@@ -78,4 +78,15 @@ class JellyTvSettingsMergeTest {
         assertFalse(parsed.hideScores)
         assertEquals(null, parsed.lastChannel)
     }
+
+    @Test
+    fun `my channels only is stored and read back, and absent means undecided`() {
+        val stored = SettingsJson.setOnlyWatchable(raw("hideScores" to JsonPrimitive(true), "custom" to JsonPrimitive("kept")), true)
+
+        assertTrue(stored["onlyWatchable"]!!.jsonPrimitive.boolean)
+        assertEquals("kept", stored["custom"]!!.jsonPrimitive.content)
+        assertEquals(true, SettingsJson.parse(stored).onlyWatchable)
+        assertEquals(null, SettingsJson.parse(raw("hideScores" to JsonPrimitive(false))).onlyWatchable)
+        assertEquals(false, SettingsJson.parse(SettingsJson.setOnlyWatchable(stored, false)).onlyWatchable)
+    }
 }

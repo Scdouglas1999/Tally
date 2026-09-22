@@ -1,5 +1,7 @@
 package com.github.damontecres.wholphin.jellytv.ui
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,10 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -25,6 +30,7 @@ import com.github.damontecres.wholphin.jellytv.ui.components.JtvRow
 import com.github.damontecres.wholphin.jellytv.ui.components.JtvTab
 import com.github.damontecres.wholphin.jellytv.ui.components.JtvTopBar
 import com.github.damontecres.wholphin.jellytv.ui.components.KeyHint
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvSurface
 import com.github.damontecres.wholphin.preferences.UserPreferences
@@ -130,6 +136,11 @@ private fun MultiviewQueue(
     modifier: Modifier = Modifier,
 ) {
     if (channelIds.isEmpty()) {
+        // Removing the last row would otherwise leave focus with nowhere to go (it falls out to the drawer):
+        // the empty state is a focus target itself, with the usual frame while focused.
+        val emptyFocus = remember { FocusRequester() }
+        var emptyFocused by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) { emptyFocus.tryRequestFocus("jellytv-multiview-empty") }
         EmptyState(
             title = stringResource(R.string.jtv_multiview_empty_title),
             subtitle = stringResource(R.string.jtv_multiview_empty_sub),
@@ -137,7 +148,14 @@ private fun MultiviewQueue(
                 modifier
                     .fillMaxWidth()
                     .padding(horizontal = JtvDimens.marginHorizontal)
-                    .padding(top = 24.dp),
+                    .padding(top = 24.dp)
+                    .focusRequester(emptyFocus)
+                    .onFocusChanged { emptyFocused = it.isFocused }
+                    .focusable()
+                    .border(
+                        if (emptyFocused) JtvDimens.focusBorder else JtvDimens.hairline,
+                        if (emptyFocused) JtvColors.accent else JtvColors.ruleStrong,
+                    ),
         )
     } else {
         val firstRowFocus = remember { FocusRequester() }

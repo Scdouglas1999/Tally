@@ -99,7 +99,7 @@ class JellyTvViewModel
                 val favorites = repo.settings.favorites.toSet()
                 // Default on when at least one game is watchable so the board is
                 // never mysteriously empty.
-                val onlyWatchable = onlyWatchableChoice ?: games.any { it.watch != null }
+                val onlyWatchable = onlyWatchableChoice ?: repo.settings.onlyWatchable ?: games.any { it.watch != null }
                 JellyTvUiState(
                     availability = repo.availability,
                     rows = BoardOrganizer.rows(games, favorites, onlyWatchable),
@@ -158,7 +158,9 @@ class JellyTvViewModel
         }
 
         fun toggleOnlyWatchable() {
-            onlyWatchableChoice.value = !uiState.value.onlyWatchable
+            val only = !uiState.value.onlyWatchable
+            onlyWatchableChoice.value = only
+            viewModelScope.launchIO { repository.setOnlyWatchable(only) }
         }
 
         fun setHideScores(hide: Boolean) {

@@ -150,4 +150,6 @@ data class JtvSettings(
     val favorites: List<String> = emptyList(),
     val hideScores: Boolean = false,
     val lastChannel: String? = null,
+    /** "My channels only" on the Games board; null = never chosen, so the app decides from the board. */
+    val onlyWatchable: Boolean? = null,
 )
