@@ -49,12 +49,15 @@ import com.github.damontecres.wholphin.jellytv.together.TogetherGroup
 import com.github.damontecres.wholphin.jellytv.together.TogetherNotice
 import com.github.damontecres.wholphin.jellytv.together.TogetherState
 import com.github.damontecres.wholphin.jellytv.ui.components.IndicatorSquare
+import com.github.damontecres.wholphin.jellytv.ui.components.LampState
+import com.github.damontecres.wholphin.jellytv.ui.components.TallyLamp
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
 import com.github.damontecres.wholphin.ui.findActivity
 import kotlinx.coroutines.delay
 import org.jellyfin.sdk.model.api.GroupStateType
+import java.util.UUID
 
 /**
  * Watch Together above every screen: the party chip (top right, while this TV is in a watch party) and, under
@@ -84,6 +87,30 @@ fun TogetherOverlay(modifier: Modifier = Modifier) {
 
     LaunchedEffect(group?.id, group?.state, group?.participants) {
         lastChangeAt = SystemClock.elapsedRealtime()
+    }
+
+    // The chip's square is the tally lamp until the party's first play has been shown: it sputters while the group
+    // waits and catches when it first plays. Once that first play ends, the square switches color instantly.
+    var playedPartyId by remember { mutableStateOf<UUID?>(null) }
+    var firstPlayOverId by remember { mutableStateOf<UUID?>(null) }
+    LaunchedEffect(group?.id, group?.state) {
+        when {
+            group == null -> {
+                playedPartyId = null
+                firstPlayOverId = null
+            }
+
+            group.state == GroupStateType.PLAYING -> {
+                // Joining a party that is already playing reports PLAYING for a moment, then WAITING while this
+                // TV loads: only a PLAYING that lasts counts as the first play.
+                delay(FIRST_PLAY_SETTLE_MS)
+                playedPartyId = group.id
+            }
+
+            playedPartyId == group.id -> {
+                firstPlayOverId = group.id
+            }
+        }
     }
 
     val notices = remember { mutableStateListOf<ShownNotice>() }
@@ -132,7 +159,12 @@ fun TogetherOverlay(modifier: Modifier = Modifier) {
                         top = JtvDimens.marginVertical + if (showClock) CLOCK_OFFSET else 0.dp,
                     ),
         ) {
-            ChipSlot(visible = chipVisible, group = shownGroup, alpha = chipAlpha)
+            ChipSlot(
+                visible = chipVisible,
+                group = shownGroup,
+                alpha = chipAlpha,
+                firstPlayOver = shownGroup?.id != null && shownGroup?.id == firstPlayOverId,
+            )
             notices.forEach { shown ->
                 androidx.compose.runtime.key(shown.id) {
                     NoticeLine(shown = shown, onGone = { notices.remove(shown) })
@@ -155,6 +187,7 @@ private fun ChipSlot(
     visible: MutableTransitionState<Boolean>,
     group: TogetherGroup?,
     alpha: Float,
+    firstPlayOver: Boolean,
 ) {
     Box(Modifier.height(BAR_HEIGHT), contentAlignment = Alignment.CenterEnd) {
         AnimatedVisibility(
@@ -162,7 +195,7 @@ private fun ChipSlot(
             enter = fadeIn(tween(FADE_MS)),
             exit = fadeOut(tween(FADE_MS)),
         ) {
-            group?.let { PartyChip(group = it, modifier = Modifier.alpha(alpha)) }
+            group?.let { PartyChip(group = it, firstPlayOver = firstPlayOver, modifier = Modifier.alpha(alpha)) }
         }
     }
 }
@@ -170,9 +203,11 @@ private fun ChipSlot(
 @Composable
 private fun PartyChip(
     group: TogetherGroup,
+    firstPlayOver: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val waiting = group.state == GroupStateType.WAITING
+    val playing = group.state == GroupStateType.PLAYING
     val square =
         when (group.state) {
             GroupStateType.PLAYING -> JtvColors.accent
@@ -180,7 +215,14 @@ private fun PartyChip(
             else -> JtvColors.muted
         }
     BlackBar(modifier = modifier) {
-        IndicatorSquare(color = square)
+        if (!firstPlayOver && (waiting || playing)) {
+            // Starts sputtering even when the party is already playing, so the first play always catches.
+            var lamp by remember { mutableStateOf(LampState.Sputtering) }
+            LaunchedEffect(playing) { lamp = if (playing) LampState.Lit else LampState.Sputtering }
+            TallyLamp(state = lamp, size = CHIP_SQUARE, glow = false)
+        } else {
+            IndicatorSquare(color = square, size = CHIP_SQUARE)
+        }
         Text(
             text = stringResource(R.string.jtv_together_ui_chip),
             style = JtvType.label,
@@ -324,6 +366,12 @@ private class KeyTap(
 }
 
 private val BAR_HEIGHT = 32.dp
+
+/** IndicatorSquare's default size; the lamp that stands in for it matches. */
+private val CHIP_SQUARE = 8.dp
+
+/** Long enough for the lamp's catch (including its wait for a blip and the flicker budget) to finish. */
+private const val FIRST_PLAY_SETTLE_MS = 2_000L
 
 /**
  * IBM Plex Mono capitals sit ~0.75dp (at JtvScale) below the center of their line box (ascent 1025, descent 275,

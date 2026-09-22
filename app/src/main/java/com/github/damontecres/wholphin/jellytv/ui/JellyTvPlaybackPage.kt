@@ -4,13 +4,19 @@ import android.os.SystemClock
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -27,6 +33,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -35,15 +42,26 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.tv.material3.Text
+import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.api.JtvBoard
 import com.github.damontecres.wholphin.jellytv.api.JtvEvent
 import com.github.damontecres.wholphin.jellytv.api.JtvGame
+import com.github.damontecres.wholphin.jellytv.api.JtvTeam
 import com.github.damontecres.wholphin.jellytv.data.JellyTvRepository
 import com.github.damontecres.wholphin.jellytv.ui.components.GameActionsDialog
+import com.github.damontecres.wholphin.jellytv.ui.components.LampState
+import com.github.damontecres.wholphin.jellytv.ui.components.TallyLamp
 import com.github.damontecres.wholphin.jellytv.ui.components.gameActions
 import com.github.damontecres.wholphin.jellytv.ui.player.BoxScoreOverlay
 import com.github.damontecres.wholphin.jellytv.ui.player.CornerRequests
@@ -59,13 +77,17 @@ import com.github.damontecres.wholphin.jellytv.ui.player.cornerStreamUrl
 import com.github.damontecres.wholphin.jellytv.ui.player.gameToCornerAfterSwap
 import com.github.damontecres.wholphin.jellytv.ui.player.gamelessChannelGames
 import com.github.damontecres.wholphin.jellytv.ui.player.shouldShowCornerRequest
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvScale
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.playback.PlaybackPage
+import com.github.damontecres.wholphin.ui.playback.PlaybackViewModel
 import com.github.damontecres.wholphin.ui.showToast
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import com.github.damontecres.wholphin.util.LoadingState
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -306,18 +328,36 @@ fun JellyTvPlaybackPage(
                 }
             },
     ) {
-        PlaybackPage(
-            preferences = preferences,
-            destination =
+        // The same view model PlaybackPage would create for itself (same call, same destination), so the tune-in
+        // card can follow its player and its loading state.
+        val playbackDestination =
+            remember(destination.itemId) {
                 Destination.Playback(
                     itemId = destination.itemId,
                     positionMs = 0L,
-                ),
+                )
+            }
+        val playbackViewModel =
+            hiltViewModel<PlaybackViewModel, PlaybackViewModel.Factory>(
+                creationCallback = { it.create(playbackDestination) },
+            )
+        PlaybackPage(
+            preferences = preferences,
+            destination = playbackDestination,
             modifier = Modifier.fillMaxSize(),
+            viewModel = playbackViewModel,
         )
 
         // Overlays share the JellyTV canvas scale; the upstream player above must not.
         JtvScale {
+            TuneIn(
+                viewModel = playbackViewModel,
+                title =
+                    game?.let {
+                        stringResource(R.string.jtv_lamp_matchup, it.away.tuneInName(), it.home.tuneInName())
+                    },
+            )
+
             // The bug is not a permanent fixture over the picture: it shows when the game opens, whenever the
             // score, period or situation changes, while the switcher is up, and for a moment after any key.
             var bugShownAt by remember { mutableStateOf(SystemClock.elapsedRealtime()) }
@@ -502,6 +542,89 @@ private fun adoptCornerRequest(
         controller.show(showing, url)
     }
 }
+
+/**
+ * Tuning in to a live channel: from the player opening until its first video frame is rendered, the picture is
+ * covered by the tally lamp (sputtering), TUNING IN and the game. The first frame makes the lamp catch; 300 ms after
+ * full brightness the card fades out. A player error (or upstream's own error page) removes it at once, so the
+ * error shows as it always has.
+ */
+@Composable
+private fun TuneIn(
+    viewModel: PlaybackViewModel,
+    title: String?,
+) {
+    val playerInstance by viewModel.currentPlayer.collectAsState()
+    val playbackState by viewModel.state.collectAsState()
+    var firstFrame by remember { mutableStateOf(false) }
+    var playerFailed by remember { mutableStateOf(false) }
+    var gone by remember { mutableStateOf(false) }
+    val player = playerInstance?.player
+    DisposableEffect(player) {
+        val listener =
+            object : Player.Listener {
+                override fun onRenderedFirstFrame() {
+                    firstFrame = true
+                }
+
+                override fun onPlayerError(error: PlaybackException) {
+                    playerFailed = true
+                }
+            }
+        player?.addListener(listener)
+        onDispose { player?.removeListener(listener) }
+    }
+    val failed = playerFailed || playbackState.loading is LoadingState.Error
+    if (gone || failed) return
+
+    val alpha = remember { Animatable(1f) }
+    var fullBrightness by remember { mutableStateOf(false) }
+    LaunchedEffect(fullBrightness) {
+        if (fullBrightness) {
+            delay(TUNE_IN_HOLD_MS)
+            alpha.animateTo(0f, tween(TUNE_IN_FADE_MS, easing = LinearEasing))
+            gone = true
+        }
+    }
+    Box(
+        Modifier
+            .fillMaxSize()
+            .graphicsLayer { this.alpha = alpha.value }
+            .background(JtvColors.ground),
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.align(Alignment.Center),
+        ) {
+            TallyLamp(
+                state = if (firstFrame) LampState.Lit else LampState.Sputtering,
+                size = 20.dp,
+                onFullBrightness = { fullBrightness = true },
+            )
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.jtv_lamp_tuning_in),
+                style = JtvType.label,
+                color = JtvColors.muted,
+                maxLines = 1,
+            )
+            if (title != null) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = title,
+                    style = TextStyle(fontFamily = JtvType.Sans, fontWeight = FontWeight.Medium, fontSize = 18.sp),
+                    color = JtvColors.text,
+                    maxLines = 1,
+                )
+            }
+        }
+    }
+}
+
+private fun JtvTeam.tuneInName(): String = shortName.ifBlank { abbr.ifBlank { name } }
+
+private const val TUNE_IN_HOLD_MS = 300L
+private const val TUNE_IN_FADE_MS = 250
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)

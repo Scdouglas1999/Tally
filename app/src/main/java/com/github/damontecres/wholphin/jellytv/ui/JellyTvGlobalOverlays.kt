@@ -15,6 +15,7 @@ import com.github.damontecres.wholphin.jellytv.SleepTimerService
 import com.github.damontecres.wholphin.jellytv.together.ui.TogetherDialog
 import com.github.damontecres.wholphin.jellytv.together.ui.TogetherOverlay
 import com.github.damontecres.wholphin.jellytv.ui.household.SendToDialog
+import com.github.damontecres.wholphin.jellytv.ui.launch.TallyLaunch
 import com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu
 import com.github.damontecres.wholphin.jellytv.ui.player.SleepTimerChip
 import com.github.damontecres.wholphin.jellytv.ui.player.SleepTimerDialog
@@ -31,7 +32,10 @@ class JellyTvGlobalOverlaysViewModel
         val playerFactory: PlayerFactory,
     ) : ViewModel()
 
-/** Overlays that must work above any screen: the sleep timer chip, Watch Together, and the players' JellyTV menu dialogs. */
+/**
+ * Overlays that must work above any screen: the sleep timer chip, Watch Together, the players' JellyTV menu dialogs,
+ * and on a cold start the launch card above all of them.
+ */
 @Composable
 fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
     val viewModel: JellyTvGlobalOverlaysViewModel = hiltViewModel()
@@ -83,6 +87,8 @@ fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
                 null -> {}
             }
             TogetherOverlay(Modifier.fillMaxSize())
+            // Topmost: the launch card covers everything until the app is ready.
+            TallyLaunch(Modifier.fillMaxSize())
         }
     }
 }
