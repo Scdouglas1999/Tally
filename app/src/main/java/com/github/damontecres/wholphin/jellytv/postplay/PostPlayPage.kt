@@ -1,13 +1,465 @@
 package com.github.damontecres.wholphin.jellytv.postplay
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.tv.material3.Border
+import androidx.tv.material3.ClickableSurfaceDefaults
+import androidx.tv.material3.Glow
+import androidx.tv.material3.Surface
+import androidx.tv.material3.Text
+import coil3.compose.AsyncImage
+import com.github.damontecres.wholphin.R
+import com.github.damontecres.wholphin.jellytv.ui.components.JtvRow
+import com.github.damontecres.wholphin.jellytv.ui.components.LabelBar
+import com.github.damontecres.wholphin.jellytv.ui.components.RowHeader
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvSurface
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
+import com.github.damontecres.wholphin.ui.LocalImageUrlService
+import com.github.damontecres.wholphin.ui.formatDuration
+import com.github.damontecres.wholphin.ui.logCoilError
 import com.github.damontecres.wholphin.ui.nav.Destination
+import com.github.damontecres.wholphin.ui.tryRequestFocus
+import kotlinx.coroutines.delay
+import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.ImageType
+import org.jellyfin.sdk.model.extensions.ticks
+import timber.log.Timber
+import kotlin.time.Duration
 
-/** STUB: task `movienext` implements the post-play page. */
+private val ColumnMaxWidth = 520.dp
+private val ActionWidth = 280.dp
+private val LogoMaxWidth = 360.dp
+private val LogoMaxHeight = 96.dp
+private val PosterWidth = 132.dp
+private val PosterHeight = 198.dp
+private const val FADE_MS = 120
+
+/**
+ * Shown when a film ends with nothing queued after it. Backdrop of the film just watched,
+ * watch-again / done, and a row of similar posters.
+ */
 @Composable
 fun PostPlayPage(
     destination: Destination.JellyTvPostPlay,
     modifier: Modifier = Modifier,
+    viewModel: PostPlayViewModel = hiltViewModel(),
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    // BACK does what Done does, so a post-play page that is the only page never leaves the app.
+    BackHandler(onBack = viewModel::done)
+    LaunchedEffect(destination.itemId) {
+        Timber.i("Post-play page %s", destination.itemId)
+        viewModel.load(destination.itemId)
+    }
+
+    val watchAgainFocus = remember { FocusRequester() }
+    val doneFocus = remember { FocusRequester() }
+    val firstPosterFocus = remember { FocusRequester() }
+    var initialFocusPlaced by remember(destination.itemId) { mutableStateOf(false) }
+    val similar = state.similar
+    val hasPosters = !similar.isNullOrEmpty()
+
+    LaunchedEffect(state.film?.id, similar, initialFocusPlaced) {
+        if (initialFocusPlaced || state.film == null) return@LaunchedEffect
+        if (similar == null) {
+            watchAgainFocus.tryRequestFocus("postplay-watch")
+            return@LaunchedEffect
+        }
+        if (similar.isEmpty()) {
+            watchAgainFocus.tryRequestFocus("postplay-watch")
+            initialFocusPlaced = true
+            return@LaunchedEffect
+        }
+        repeat(5) {
+            if (firstPosterFocus.tryRequestFocus("postplay-poster")) {
+                initialFocusPlaced = true
+                return@LaunchedEffect
+            }
+            delay(40)
+        }
+    }
+
+    // JtvSurface already applies JtvScale. The page is the full 960×540dp TV canvas.
+    JtvSurface(modifier = modifier) {
+        val film = state.film
+        if (film != null) {
+            FilmBackdrop(film)
+            Column(
+                modifier =
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(
+                            start = JtvDimens.marginHorizontal,
+                            top = JtvDimens.marginVertical + 24.dp,
+                            end = JtvDimens.marginHorizontal,
+                        ).widthIn(max = ColumnMaxWidth),
+            ) {
+                Text(
+                    text = stringResource(R.string.jtv_postplay_kicker).uppercase(),
+                    style = JtvType.label,
+                    color = JtvColors.muted,
+                    maxLines = 1,
+                )
+                Spacer(Modifier.height(12.dp))
+                LogoOrTitle(film)
+                val meta = metaLine(film)
+                if (meta.isNotEmpty()) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = meta,
+                        style = JtvType.label,
+                        color = JtvColors.textSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(Modifier.height(20.dp))
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.width(ActionWidth),
+                ) {
+                    JtvRow(
+                        label = stringResource(R.string.jtv_postplay_watch_again),
+                        onClick = viewModel::watchAgain,
+                        primary = true,
+                        modifier =
+                            Modifier
+                                .focusRequester(watchAgainFocus)
+                                .focusProperties {
+                                    up = FocusRequester.Cancel
+                                    down = doneFocus
+                                    left = FocusRequester.Cancel
+                                    right = FocusRequester.Cancel
+                                    start = FocusRequester.Cancel
+                                    end = FocusRequester.Cancel
+                                },
+                    )
+                    JtvRow(
+                        label = stringResource(R.string.jtv_postplay_done),
+                        onClick = viewModel::done,
+                        modifier =
+                            Modifier
+                                .focusRequester(doneFocus)
+                                .focusProperties {
+                                    up = watchAgainFocus
+                                    down = if (hasPosters) firstPosterFocus else FocusRequester.Cancel
+                                    left = FocusRequester.Cancel
+                                    right = FocusRequester.Cancel
+                                    start = FocusRequester.Cancel
+                                    end = FocusRequester.Cancel
+                                },
+                    )
+                }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = hasPosters,
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(),
+            enter = fadeIn(tween(FADE_MS)),
+            exit = fadeOut(tween(FADE_MS)),
+        ) {
+            SimilarRow(
+                items = similar.orEmpty(),
+                firstPosterFocus = firstPosterFocus,
+                upTarget = watchAgainFocus,
+                onOpen = viewModel::open,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = JtvDimens.marginVertical),
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilmBackdrop(film: BaseItemDto) {
+    val images = LocalImageUrlService.current
+    val backdropUrl =
+        remember(film.id) {
+            if (film.backdropImageTags.isNullOrEmpty()) {
+                null
+            } else {
+                images.getItemImageUrl(
+                    itemId = film.id,
+                    imageType = ImageType.BACKDROP,
+                    fillWidth = 1920,
+                    fillHeight = 1080,
+                )
+            }
+        }
+    var failed by remember(film.id) { mutableStateOf(false) }
+    if (backdropUrl == null || failed) return
+    AsyncImage(
+        model = backdropUrl,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        alignment = Alignment.Center,
+        onError = {
+            logCoilError(backdropUrl, it.result)
+            failed = true
+        },
+        modifier = Modifier.fillMaxSize(),
+    )
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(JtvColors.ground.copy(alpha = 0.78f)),
+    )
+    Box(
+        Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    0f to Color.Transparent,
+                    0.42f to Color.Transparent,
+                    1f to JtvColors.ground,
+                ),
+            ),
+    )
+}
+
+@Composable
+private fun LogoOrTitle(film: BaseItemDto) {
+    val images = LocalImageUrlService.current
+    val logoUrl =
+        remember(film.id) {
+            if (ImageType.LOGO in film.imageTags.orEmpty()) {
+                images.getItemImageUrl(
+                    itemId = film.id,
+                    imageType = ImageType.LOGO,
+                    maxWidth = 720,
+                    maxHeight = 192,
+                )
+            } else {
+                null
+            }
+        }
+    var failed by remember(film.id) { mutableStateOf(false) }
+    if (logoUrl != null && !failed) {
+        AsyncImage(
+            model = logoUrl,
+            contentDescription = film.name,
+            contentScale = ContentScale.Fit,
+            alignment = Alignment.CenterStart,
+            onError = {
+                logCoilError(logoUrl, it.result)
+                failed = true
+            },
+            modifier =
+                Modifier
+                    .widthIn(max = LogoMaxWidth)
+                    .heightIn(max = LogoMaxHeight),
+        )
+    } else {
+        Text(
+            text = film.name.orEmpty(),
+            style =
+                TextStyle(
+                    fontFamily = JtvType.Sans,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 40.sp,
+                    lineHeight = 48.sp,
+                ),
+            color = JtvColors.text,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun metaLine(film: BaseItemDto): String {
+    val resources = LocalResources.current
+    return remember(film.id, resources) {
+        buildList {
+            film.productionYear?.let { add(it.toString()) }
+            film.officialRating?.takeIf { it.isNotBlank() }?.let(::add)
+            film.runTimeTicks
+                ?.ticks
+                ?.takeIf { it > Duration.ZERO }
+                ?.let { add(resources.formatDuration(it)) }
+        }.joinToString(" · ")
+    }
+}
+
+@Composable
+private fun SimilarRow(
+    items: List<BaseItemDto>,
+    firstPosterFocus: FocusRequester,
+    upTarget: FocusRequester,
+    onOpen: (BaseItemDto) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val images = LocalImageUrlService.current
+    val listState = rememberLazyListState()
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier,
+    ) {
+        RowHeader(
+            title = stringResource(R.string.jtv_postplay_more_like_this),
+            modifier = Modifier.padding(horizontal = JtvDimens.marginHorizontal),
+        )
+        LazyRow(
+            state = listState,
+            horizontalArrangement = Arrangement.spacedBy(JtvDimens.cardGap),
+            contentPadding =
+                PaddingValues(
+                    horizontal = JtvDimens.marginHorizontal,
+                    vertical = 6.dp,
+                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .focusGroup()
+                    .focusProperties {
+                        up = upTarget
+                        down = FocusRequester.Cancel
+                    },
+        ) {
+            itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
+                val imageUrl =
+                    images.getItemImageUrl(
+                        itemId = item.id,
+                        imageType = ImageType.PRIMARY,
+                        fillWidth = 400,
+                        fillHeight = 600,
+                    )
+                SimilarPoster(
+                    title = item.name.orEmpty(),
+                    imageUrl = imageUrl,
+                    onClick = { onOpen(item) },
+                    modifier =
+                        Modifier
+                            .then(if (index == 0) Modifier.focusRequester(firstPosterFocus) else Modifier)
+                            .focusProperties {
+                                up = upTarget
+                                if (index == 0) {
+                                    left = FocusRequester.Cancel
+                                    start = FocusRequester.Cancel
+                                }
+                                if (index == items.lastIndex) {
+                                    right = FocusRequester.Cancel
+                                    end = FocusRequester.Cancel
+                                }
+                            },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SimilarPoster(
+    title: String,
+    imageUrl: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        onClick = onClick,
+        shape = ClickableSurfaceDefaults.shape(RectangleShape),
+        scale = ClickableSurfaceDefaults.scale(1f, 1f, 1f),
+        colors =
+            ClickableSurfaceDefaults.colors(
+                containerColor = JtvColors.ground,
+                contentColor = JtvColors.text,
+                focusedContainerColor = JtvColors.groundRaised,
+                focusedContentColor = JtvColors.text,
+                pressedContainerColor = JtvColors.groundRaised,
+                pressedContentColor = JtvColors.text,
+            ),
+        border =
+            ClickableSurfaceDefaults.border(
+                border =
+                    Border(
+                        border = BorderStroke(JtvDimens.hairline, JtvColors.ruleStrong),
+                        shape = RectangleShape,
+                    ),
+                focusedBorder =
+                    Border(
+                        border = BorderStroke(JtvDimens.focusBorder, JtvColors.accent),
+                        shape = RectangleShape,
+                    ),
+                pressedBorder =
+                    Border(
+                        border = BorderStroke(JtvDimens.focusBorder, JtvColors.accent),
+                        shape = RectangleShape,
+                    ),
+            ),
+        glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
+        modifier = modifier.width(PosterWidth),
+    ) {
+        Column(Modifier.fillMaxWidth()) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(PosterHeight)
+                        .background(JtvColors.screen),
+            ) {
+                if (imageUrl != null) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+            LabelBar(text = title, live = false)
+        }
+    }
 }
