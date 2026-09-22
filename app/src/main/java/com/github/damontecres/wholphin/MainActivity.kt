@@ -116,6 +116,9 @@ class MainActivity : AppCompatActivity() {
     // JELLYTV: begin
     @Inject
     lateinit var jellyTvUpdatePrompt: com.github.damontecres.wholphin.jellytv.JellyTvUpdatePrompt
+
+    @Inject
+    lateinit var jellyTvFirstRun: com.github.damontecres.wholphin.jellytv.JellyTvFirstRun
     // JELLYTV: end
 
     @Inject
@@ -343,6 +346,9 @@ class MainActivity : AppCompatActivity() {
         Timber.d("onStart")
 
         lifecycleScope.launchDefault {
+            // JELLYTV: begin
+            jellyTvFirstRun.apply()
+            // JELLYTV: end
             val appPreferences = userPreferencesDataStore.data.first()
             if (UpdateChecker.ACTIVE && appPreferences.autoCheckForUpdates) {
                 try {

@@ -45,8 +45,9 @@ file is a future merge conflict.** Therefore:
 | W14 | `proto/WholphinDataStore.proto` (`AppThemeColors.JELLYTV = 8`, additive) | the JellyTV theme as a first-class Wholphin theme |
 | W15 | `ui/theme/Theme.kt` | map JELLYTV → `JellyTvThemeColors`; IBM Plex typography when it is active |
 | W16 | `preferences/AppPreference.kt` (`ThemeColors` default + display array), `ui/preferences/SwitchPreference.kt` | JELLYTV is the default theme |
-| W17 | `ui/main/HomePage.kt` | `JellyTvHomeRow` item above the library rows |
+| W17 | `ui/main/HomePage.kt` | `JellyTvHomeRow` as a fixed band above the library rows; `JellyTvHomeHeader` while a game card has focus; `JellyTvHomeFocus` hand-off in the initial-focus step |
 | W18 | `MainContent.kt` | `JellyTvScreensaver` before upstream's screensaver |
+| W19 | `MainActivity.kt` (same region as W7) | `JellyTvFirstRun`: one-time theme switch for stores written by earlier builds |
 
 ## Releases and self-update
 
