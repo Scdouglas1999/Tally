@@ -77,6 +77,12 @@ private const val OPEN_GRACE_MS = 400L
 private val FOCUS_ROOM = JtvDimens.focusBorder + 1.dp
 
 /**
+ * Height of the scrolling list: six and a half row slots (a 58dp row plus 2 x FOCUS_ROOM), so a seventh row
+ * peeks out when there are more. With the header and key bar the panel stays well inside a 1080p screen.
+ */
+private val LIST_MAX_HEIGHT = 416.dp
+
+/**
  * In-player quality picker. Same panel family as the sleep timer: centered over a 60% scrim, focus
  * trapped, BACK closes, focus starts on the current choice.
  */
@@ -244,49 +250,52 @@ private fun QualityPanel(
                     .height(JtvDimens.hairline)
                     .background(JtvColors.rule),
             )
-            // The scroll container clips: leave room inside it for the focused row's border on every side.
+            // Six and a half rows, then the list scrolls inside the panel; the half row shows there is more.
+            // Each row sits in a slot with FOCUS_ROOM around it: the slot is what is scrolled into view, so the
+            // focused row's whole border stays visible, and the scroll clip never cuts it.
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier =
                     Modifier
                         .padding(horizontal = 20.dp - FOCUS_ROOM)
-                        .heightIn(max = 460.dp + FOCUS_ROOM * 2)
+                        .heightIn(max = LIST_MAX_HEIGHT)
                         .verticalScroll(rememberScrollState())
-                        .padding(FOCUS_ROOM),
+                        .padding(horizontal = FOCUS_ROOM),
             ) {
                 val last = rowCount - 1
                 options.forEachIndexed { index, option ->
                     val selected = option.bitsPerSecond == choice
+                    RowSlot(bringers[index]) {
+                        QualityChoiceRow(
+                            label = option.label,
+                            selected = selected,
+                            nowTag = if (selected) stringResource(R.string.jtv_quality_now) else null,
+                            onClick = {
+                                onChoose(option.bitsPerSecond, option.megabits)
+                            },
+                            onFocused = { scope.launch { bringers[index].bringIntoView() } },
+                            modifier =
+                                Modifier
+                                    .focusRequester(requesters[index])
+                                    .rowFocus(index, last),
+                        )
+                    }
+                }
+                RowSlot(bringers[last]) {
                     QualityChoiceRow(
-                        label = option.label,
-                        selected = selected,
-                        nowTag = if (selected) stringResource(R.string.jtv_quality_now) else null,
-                        onClick = {
-                            onChoose(option.bitsPerSecond, option.bitsPerSecond?.div(1_000_000))
-                        },
-                        onFocused = { scope.launch { bringers[index].bringIntoView() } },
+                        label = stringResource(R.string.jtv_quality_default),
+                        selected = saveAsDefault,
+                        nowTag =
+                            stringResource(
+                                if (saveAsDefault) R.string.jtv_quality_on else R.string.jtv_quality_off,
+                            ),
+                        onClick = onToggleDefault,
+                        onFocused = { scope.launch { bringers[last].bringIntoView() } },
                         modifier =
                             Modifier
-                                .bringIntoViewRequester(bringers[index])
-                                .focusRequester(requesters[index])
-                                .rowFocus(index, last),
+                                .focusRequester(requesters[last])
+                                .rowFocus(last, last),
                     )
                 }
-                QualityChoiceRow(
-                    label = stringResource(R.string.jtv_quality_default),
-                    selected = saveAsDefault,
-                    nowTag =
-                        stringResource(
-                            if (saveAsDefault) R.string.jtv_quality_on else R.string.jtv_quality_off,
-                        ),
-                    onClick = onToggleDefault,
-                    onFocused = { scope.launch { bringers[last].bringIntoView() } },
-                    modifier =
-                        Modifier
-                            .bringIntoViewRequester(bringers[last])
-                            .focusRequester(requesters[last])
-                            .rowFocus(last, last),
-                )
             }
         }
         Row(
@@ -311,6 +320,22 @@ private fun QualityPanel(
                 label = stringResource(R.string.jtv_quality_close),
             )
         }
+    }
+}
+
+/** A row plus FOCUS_ROOM above and below (rows end up 2 x FOCUS_ROOM apart); scrolled into view whole. */
+@Composable
+private fun RowSlot(
+    bringer: BringIntoViewRequester,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier =
+            Modifier
+                .bringIntoViewRequester(bringer)
+                .padding(vertical = FOCUS_ROOM),
+    ) {
+        content()
     }
 }
 
