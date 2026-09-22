@@ -4,7 +4,7 @@
     <!-- Row title, sentence case like Wholphin's home row titles. The count is appended on the same line. -->
     <string name="jtv_home_row_live">Live on JellyTV</string>
     <string name="jtv_home_row_today">Today on JellyTV</string>
-    <string name="jtv_home_row_count"> · %1$d</string>
+    <string name="jtv_home_row_count">\u0020· %1$d</string>
     <!-- Pressing OK on a game whose channel Jellyfin has not registered yet. -->
     <string name="jtv_home_channel_not_ready">Channel not ready yet</string>
 </resources>

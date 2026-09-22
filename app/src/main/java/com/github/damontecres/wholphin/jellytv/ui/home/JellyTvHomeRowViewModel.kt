@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.serializer.toUUIDOrNull
 import timber.log.Timber
 import java.time.Instant
@@ -97,6 +98,9 @@ class JellyTvHomeRowViewModel
         // The poll lives as long as this view model (the Home destination), not as long as the row is composed:
         // the LazyColumn disposes the row whenever it scrolls out of view, which must not cancel the fetch.
         init {
+            viewModelScope.launch {
+                repository.availability.collect { JellyTvHomeFocus.rowExpected = it is JellyTvRepository.Availability.Available }
+            }
             repository.startPolling()
             viewModelScope.launchIO {
                 if (repository.availability.value is JellyTvRepository.Availability.Unknown) {

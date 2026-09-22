@@ -19,6 +19,10 @@ object JellyTvHomeFocus {
     @Volatile
     private var pageOpenedAt = 0L
 
+    /** Set by the row's view model once the server is known to have the plugin: a row is coming, worth a wait. */
+    @Volatile
+    var rowExpected = false
+
     /** True once the row has taken the initial focus for this page opening; upstream then leaves focus alone. */
     @Volatile
     var claimed = false
@@ -56,7 +60,7 @@ object JellyTvHomeFocus {
     suspend fun awaitPendingClaim(): Boolean {
         repeat(AWAIT_STEPS) {
             if (claimed) return true
-            if (!windowOpen()) return false
+            if (!rowExpected || !windowOpen()) return false
             delay(FRAME_MS)
         }
         return claimed
@@ -65,5 +69,5 @@ object JellyTvHomeFocus {
     private const val CLAIM_WINDOW_MS = 4_000L
     private const val CLAIM_TRIES = 12
     private const val FRAME_MS = 32L
-    private const val AWAIT_STEPS = 40
+    private const val AWAIT_STEPS = 80
 }
