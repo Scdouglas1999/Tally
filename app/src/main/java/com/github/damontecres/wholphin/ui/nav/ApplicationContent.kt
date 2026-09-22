@@ -87,7 +87,9 @@ fun ApplicationContent(
                         )
                     } else if (user != null && server != null) {
                         // JELLYTV: begin
-                        if (com.github.damontecres.wholphin.jellytv.media.drawer.tallyDrawerActive()) {
+                        if (com.github.damontecres.wholphin.jellytv.media.drawer
+                                .tallyDrawerActive()
+                        ) {
                             com.github.damontecres.wholphin.jellytv.media.drawer.TallyNavDrawer(
                                 destination = key,
                                 preferences = preferences,
