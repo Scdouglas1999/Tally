@@ -134,7 +134,7 @@ instrument-like. Mono labels are UPPERCASE with 1.5–2.5sp letter spacing. Mini
 
 Focus: exactly one element is focused. Focused = 3dp `accent` border + `groundRaised` ground; NO scale
 animation, no glow. Unfocused = 1dp `ruleStrong` border. Safe margins: 48dp left/right, 27dp top/bottom.
-Motion: focus/colour changes ≤120ms, nothing bounces.
+Motion: focus/color changes ≤120ms, nothing bounces.
 
 Reference mockups (1920×1080): Games = top bar, a large "focused game" panel (teams, big mono scores, clock,
 situation, last play, channel label bar, key hints), then horizontally scrolling rows of game cards, one row
