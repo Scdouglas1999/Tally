@@ -350,8 +350,12 @@ private fun HomeContent(
             }
         }
     }
-    LaunchedEffect(onUpdateBackdrop, focusedItem) {
-        focusedItem?.let { onUpdateBackdrop.invoke(it) }
+    // While a game card has focus its matchup art is the backdrop (JellyTvHomeRowViewModel submits it); the library
+    // item under `position` must not replace it when rows load or refresh. Leaving the game row restores the item's.
+    val focusedGame by JellyTvHomeHeaderState.focusedGame
+    val gameFocused = focusedGame != null
+    LaunchedEffect(onUpdateBackdrop, focusedItem, gameFocused) {
+        if (!gameFocused) focusedItem?.let { onUpdateBackdrop.invoke(it) }
     }
 
     // A focused row comes to rest at the top of the list, as upstream's page does. Requests come from the
