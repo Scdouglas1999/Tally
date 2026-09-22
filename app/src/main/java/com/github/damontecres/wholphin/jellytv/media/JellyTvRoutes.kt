@@ -2,10 +2,12 @@ package com.github.damontecres.wholphin.jellytv.media
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.github.damontecres.wholphin.jellytv.media.movie.JtvMoviePage
 import com.github.damontecres.wholphin.preferences.AppThemeColors
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.theme.LocalTheme
+import org.jellyfin.sdk.model.api.BaseItemKind
 
 /**
  * Which destinations JellyTV draws itself (see `jellytv/UI.md`). Called first by `DestinationContent` (seam W31):
@@ -24,7 +26,22 @@ object JellyTvRoutes {
     ): Boolean {
         if (LocalTheme.current != AppThemeColors.JELLYTV) return false
         return when (destination) {
-            else -> false
+            is Destination.MediaItem -> {
+                when (destination.type) {
+                    BaseItemKind.MOVIE, BaseItemKind.VIDEO -> {
+                        JtvMoviePage(destination, preferences, modifier)
+                        true
+                    }
+
+                    else -> {
+                        false
+                    }
+                }
+            }
+
+            else -> {
+                false
+            }
         }
     }
 }
