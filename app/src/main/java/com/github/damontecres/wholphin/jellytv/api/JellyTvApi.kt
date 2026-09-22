@@ -21,7 +21,7 @@ sealed class JellyTvException(
     cause: Throwable? = null,
 ) : Exception(message, cause) {
     /** The server has no JellyTV plugin (404); the JellyTV section must not appear. */
-    data object NotInstalled : JellyTvException("JellyTV plugin is not installed")
+    data object NotInstalled : JellyTvException("The Tally server plugin is not installed")
 
     /** No server/user, or the token was rejected (401/403). */
     data object SignedOut : JellyTvException("Not signed in")

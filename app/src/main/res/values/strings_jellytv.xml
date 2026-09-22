@@ -1,7 +1,7 @@
 <resources>
     <!-- JellyTV strings. All names are prefixed jtv_; never add these to strings.xml. -->
 
-    <string name="jtv_wordmark" translatable="false">JELLYTV</string>
+    <string name="jtv_wordmark" translatable="false">SPORTS</string>
     <string name="jtv_tab_games">Games</string>
     <string name="jtv_tab_channels">Channels</string>
     <string name="jtv_tab_multiview">Multiview</string>
@@ -52,7 +52,7 @@
     <string name="jtv_empty_filtered_title">Nothing on your channels</string>
     <string name="jtv_empty_filtered_sub">None of today\u2019s games are on your channels. Turn off \u201cMy channels only\u201d in Settings to see every game.</string>
     <string name="jtv_no_channels_title">No channels yet</string>
-    <string name="jtv_no_channels_sub">JellyTV channels appear here once the server registers them</string>
+    <string name="jtv_no_channels_sub">Channels appear here once the server registers them</string>
 
     <!-- One-shot messages -->
     <string name="jtv_channel_registering">That channel is still registering with Jellyfin \u2014 try again in a minute</string>
@@ -71,15 +71,15 @@
     <string name="jtv_settings_my_channels_desc">Only show games you can watch on your channels</string>
     <string name="jtv_settings_hide_scores">Hide scores</string>
     <string name="jtv_settings_hide_scores_desc">Never show scores, results, or spoilers</string>
-    <string name="jtv_settings_plugin">JellyTV plugin</string>
+    <string name="jtv_settings_plugin">Server plugin</string>
     <string name="jtv_server_version">Build %1$s \u00b7 API v%2$d</string>
     <string name="jtv_server_features">Features: %1$s</string>
-    <string name="jtv_server_unavailable">No response from the JellyTV plugin</string>
+    <string name="jtv_server_unavailable">No response from the Tally plugin on the server</string>
     <string name="jtv_hero_starts">Starts</string>
     <string name="jtv_hero_final">Final</string>
     <string name="jtv_hero_on">On %1$s</string>
     <string name="jtv_mv_channel">Channel</string>
-    <string name="jtv_theme_name">JellyTV</string>
+    <string name="jtv_theme_name">Tally</string>
     <!-- upstream's app_theme_colors plus ours; order = AppThemeColors enum numbers -->
     <string-array name="jtv_app_theme_colors">
         <item>@string/purple</item>

@@ -1,7 +1,7 @@
 <resources>
     <!-- JELLYTV: begin -->
-    <string name="app_name" translatable="false">JellyTV</string>
-    <string name="app_name_long" translatable="false">JellyTV</string>
+    <string name="app_name" translatable="false">Tally</string>
+    <string name="app_name_long" translatable="false">Tally</string>
     <!-- JELLYTV: end -->
 
     <string name="about">About</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- JELLYTV: begin -->
-    <string name="app_name" translatable="false">JellyTV Debug</string>
+    <string name="app_name" translatable="false">Tally Debug</string>
     <!-- JELLYTV: end -->
 </resources>
