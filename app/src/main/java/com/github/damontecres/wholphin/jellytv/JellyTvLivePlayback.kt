@@ -2,7 +2,6 @@ package com.github.damontecres.wholphin.jellytv
 
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
-import androidx.media3.common.Timeline
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -25,33 +24,12 @@ object JellyTvLivePlayback {
             // do not race to the edge after a stall: catching up at 1.03x steals from the cushion just rebuilt
             .setLiveMaxSpeed(1.0f)
 
-    /** Live media that must be buffered before the first frame, and again after a stall. */
-    const val LIVE_START_BUFFER_MS = 15_000L
-    const val LIVE_RESTART_BUFFER_MS = 6_000L
-
     /**
-     * Upstream's defaults, except that a live stream does not start until [LIVE_START_BUFFER_MS] of it is
-     * buffered. Jellyfin's playlists carry no wall-clock tags, so ExoPlayer cannot drift back to a target offset
-     * after it has started: whatever cushion exists at the first frame is the cushion for the whole game. Holding
-     * the first frame about six seconds longer buys 12-15 s of protection for the next three hours. VOD is untouched.
+     * Upstream's buffering, plus a little history so a switch back does not refetch. An earlier build held the
+     * first frame until 15 s of live media was buffered; on a real server that turned tune-in into a long
+     * black screen with a stuck first frame and playback that sometimes never started, so it is gone.
      */
-    fun loadControl(): LoadControl = LiveCushionLoadControl()
-
-    /**
-     * Subclassed rather than delegated: LoadControl's Java default methods forward to one another, and Kotlin
-     * interface delegation does not cover defaults, so a delegate recursed until the stack ran out.
-     */
-    private class LiveCushionLoadControl : DefaultLoadControl() {
-        override fun shouldStartPlayback(parameters: LoadControl.Parameters): Boolean {
-            // Not parameters.targetLiveOffsetUs: ExoPlayer leaves that unset for playlists without
-            // PROGRAM-DATE-TIME, which is every Jellyfin live playlist. The window itself still says live.
-            val window = parameters.timeline.takeIf { !it.isEmpty }?.getWindow(0, Timeline.Window())
-            val live = window != null && window.isLive() && window.isDynamic
-            if (!live) return super.shouldStartPlayback(parameters)
-            val neededUs = (if (parameters.rebuffering) LIVE_RESTART_BUFFER_MS else LIVE_START_BUFFER_MS) * 1000
-            return parameters.bufferedDurationUs >= neededUs && super.shouldStartPlayback(parameters)
-        }
-    }
+    fun loadControl(): LoadControl = DefaultLoadControl.Builder().setBackBuffer(20_000, true).build()
 
     /**
      * A live playlist is a sliding window; wait out one long stall and the position the player wants is gone.

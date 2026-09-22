@@ -23,6 +23,10 @@ class JellyTvAvailability
         suspend fun check(): Boolean {
             val result = repository.probe()
             Timber.i("JellyTV availability: %s", result)
-            return result is JellyTvRepository.Availability.Available
+            val available = result is JellyTvRepository.Availability.Available
+            // Warm the board now, so the home screen's JellyTV row has its cards on its very first frame
+            // instead of racing the library rows for the initial focus.
+            if (available) repository.refreshNow()
+            return available
         }
     }

@@ -88,7 +88,7 @@ fun JellyTvHomeRow(modifier: Modifier = Modifier) {
                         onClick = { viewModel.watch(game) },
                         onLongClick = { game.watch?.channelId?.let(viewModel::addToMultiview) },
                         modifier = if (index == 0) Modifier.focusRequester(firstCardFocus) else Modifier,
-                        onFocused = { JellyTvHomeHeaderState.focusedGame.value = game },
+                        onFocused = { viewModel.onCardFocused(game) },
                     )
                 }
             }

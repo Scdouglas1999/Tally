@@ -7,6 +7,7 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.api.JtvGame
 import com.github.damontecres.wholphin.jellytv.data.JellyTvMultiviewState
 import com.github.damontecres.wholphin.jellytv.data.JellyTvRepository
+import com.github.damontecres.wholphin.services.BackdropService
 import com.github.damontecres.wholphin.services.NavigationManager
 import com.github.damontecres.wholphin.ui.launchDefault
 import com.github.damontecres.wholphin.ui.launchIO
@@ -52,6 +53,7 @@ class JellyTvHomeRowViewModel
         private val repository: JellyTvRepository,
         private val navigationManager: NavigationManager,
         private val multiviewState: JellyTvMultiviewState,
+        private val backdropService: BackdropService,
     ) : ViewModel() {
         /**
          * Moves the "starts within 12 hours" window on even when the board itself is unchanged
@@ -109,6 +111,15 @@ class JellyTvHomeRowViewModel
         override fun onCleared() {
             repository.stopPolling()
             super.onCleared()
+        }
+
+        /**
+         * A game card took focus. Upstream sets the page backdrop to the focused library item's art and only ever
+         * replaces it, so the last movie's poster would stay behind our cards; the JellyTV ground is plain.
+         */
+        fun onCardFocused(game: JtvGame) {
+            JellyTvHomeHeaderState.focusedGame.value = game
+            viewModelScope.launchIO { backdropService.clearBackdrop() }
         }
 
         fun watch(game: JtvGame) {
