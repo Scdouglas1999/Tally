@@ -150,11 +150,11 @@ fun MainContent(
                     }
                     // JELLYTV: end
                 }
-                // JELLYTV: begin
-                com.github.damontecres.wholphin.jellytv.ui
-                    .JellyTvGlobalOverlays()
-                // JELLYTV: end
             }
+            // JELLYTV: begin
+            com.github.damontecres.wholphin.jellytv.ui
+                .JellyTvGlobalOverlays()
+            // JELLYTV: end
             AnimatedVisibility(
                 visible = screenSaverState.showDim || (screenSaverState.dimEnabled && screenSaverState.show),
                 enter = ScreensaverService.enterAnimation,
