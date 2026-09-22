@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Other screens in the house. Names are prefixed jtv_household_; never add these to strings.xml. -->
+
+    <!-- Home row title, sentence case like Wholphin's home row titles. -->
+    <string name="jtv_household_row_title">Playing in the house</string>
+    <!-- Status tag on a card whose session is paused. Drawn uppercase. -->
+    <string name="jtv_household_paused">Paused</string>
+
+    <string name="jtv_household_send_title">Send to another screen</string>
+    <string name="jtv_household_send_empty">No other screens are on</string>
+    <!-- device name, client, user -->
+    <string name="jtv_household_session">%1$s · %2$s · %3$s</string>
+    <string name="jtv_household_sent">Sent to %1$s</string>
+    <string name="jtv_household_send_failed">Could not send to %1$s</string>
+    <string name="jtv_household_send_action">Send</string>
+    <string name="jtv_household_close">Close</string>
+    <string name="jtv_household_key_back">Back</string>
+</resources>
