@@ -1,0 +1,9 @@
+<resources>
+    <!-- The JellyTV row on Wholphin's home screen. Names are prefixed jtv_home_; never add these to strings.xml. -->
+
+    <!-- Row header, rendered uppercase, followed by the number of games. -->
+    <string name="jtv_home_row_live">Live on JellyTV</string>
+    <string name="jtv_home_row_today">Today on JellyTV</string>
+    <!-- Pressing OK on a game whose channel Jellyfin has not registered yet. -->
+    <string name="jtv_home_channel_not_ready">Channel not ready yet</string>
+</resources>

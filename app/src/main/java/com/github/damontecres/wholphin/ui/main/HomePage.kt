@@ -322,10 +322,22 @@ fun HomePageContent(
                     rowFocusRequesters.getOrNull(index)?.tryRequestFocus()
                     firstFocused = true
                 } else {
+                    // JELLYTV: begin
+                    com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeFocus
+                        .pageOpened()
+                    // JELLYTV: end
                     // Waiting for the first home row to load, then focus on it
                     homeRows
                         .indexOfFirstOrNull { it is HomeRowLoadingState.Success && it.items.isNotEmpty() }
                         ?.let {
+                            // JELLYTV: begin
+                            if (com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeFocus
+                                    .awaitPendingClaim()
+                            ) {
+                                firstFocused = true
+                                return@let
+                            }
+                            // JELLYTV: end
                             rowFocusRequesters[it].tryRequestFocus()
                             firstFocused = true
                             delay(50)
@@ -348,7 +360,21 @@ fun HomePageContent(
                         }
                     }.fillMaxSize(),
         ) {
-            headerComposable.invoke(focusedItem)
+            // JELLYTV: begin
+            // While a game card has focus the header describes the game; the row itself is a fixed band above
+            // the library rows: always composed, never scrolled out of sight.
+            val jellyTvGame by com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeHeaderState.focusedGame
+            if (jellyTvGame != null) {
+                com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeHeader(
+                    game = jellyTvGame!!,
+                    hideScores = com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeHeaderState.hideScores.value,
+                )
+            } else {
+                headerComposable.invoke(focusedItem)
+            }
+            com.github.damontecres.wholphin.jellytv.ui.home
+                .JellyTvHomeRow()
+            // JELLYTV: end
 
             val density = LocalDensity.current
             val spaceAbovePx =
@@ -373,12 +399,6 @@ fun HomePageContent(
                         Modifier
                             .focusRestorer(),
                 ) {
-                    // JELLYTV: begin
-                    item(key = "jellytv") {
-                        com.github.damontecres.wholphin.jellytv.ui.home
-                            .JellyTvHomeRow(Modifier.animateItem(placementSpec = null))
-                    }
-                    // JELLYTV: end
                     itemsIndexed(homeRows) { rowIndex, row ->
                         val rowModifier =
                             Modifier
