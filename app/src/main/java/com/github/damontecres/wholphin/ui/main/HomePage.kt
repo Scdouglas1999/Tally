@@ -361,8 +361,7 @@ fun HomePageContent(
                     }.fillMaxSize(),
         ) {
             // JELLYTV: begin
-            // While a game card has focus the header describes the game; the row itself is a fixed band above
-            // the library rows: always composed, never scrolled out of sight.
+            // While a game card has focus the header describes the game instead of a library item.
             val jellyTvGame by com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeHeaderState.focusedGame
             if (jellyTvGame != null) {
                 com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeHeader(
@@ -372,8 +371,6 @@ fun HomePageContent(
             } else {
                 headerComposable.invoke(focusedItem)
             }
-            com.github.damontecres.wholphin.jellytv.ui.home
-                .JellyTvHomeRow()
             // JELLYTV: end
 
             val density = LocalDensity.current
@@ -399,6 +396,13 @@ fun HomePageContent(
                         Modifier
                             .focusRestorer(),
                 ) {
+                    // JELLYTV: begin
+                    // The JellyTV row scrolls with the others, at the top; it renders nothing without games.
+                    item(key = "jellytv") {
+                        com.github.damontecres.wholphin.jellytv.ui.home
+                            .JellyTvHomeRow(Modifier.animateItem(placementSpec = null))
+                    }
+                    // JELLYTV: end
                     itemsIndexed(homeRows) { rowIndex, row ->
                         val rowModifier =
                             Modifier
