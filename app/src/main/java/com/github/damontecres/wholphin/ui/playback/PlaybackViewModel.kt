@@ -1371,6 +1371,13 @@ class PlaybackViewModel
 
         override fun onPlayerError(error: PlaybackException) {
             Timber.e(error, "Playback error")
+            // JELLYTV: begin
+            if (com.github.damontecres.wholphin.jellytv.JellyTvLivePlayback
+                    .recover(player, error)
+            ) {
+                return
+            }
+            // JELLYTV: end
             viewModelScope.launch(WholphinDispatchers.Main + ExceptionHandler()) {
                 state.value.currentPlayback?.let {
                     when (it.playMethod) {

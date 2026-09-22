@@ -144,7 +144,15 @@ class PlayerFactory
 
                         ExoPlayer
                             .Builder(context)
-                            .setMediaSourceFactory(mediaSourceFactory)
+                            // JELLYTV: begin
+                            .setMediaSourceFactory(
+                                com.github.damontecres.wholphin.jellytv.JellyTvLivePlayback
+                                    .tune(mediaSourceFactory),
+                            ).setLoadControl(
+                                com.github.damontecres.wholphin.jellytv.JellyTvLivePlayback
+                                    .loadControl(),
+                            )
+                            // JELLYTV: end
                             .setRenderersFactory(renderersFactory)
                             .setTrackSelector(trackSelector)
                             .build()

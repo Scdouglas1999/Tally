@@ -168,9 +168,23 @@ fun JellyTvPlaybackPage(
 
         // Overlays share the JellyTV canvas scale; the upstream player above must not.
         JtvScale {
-            ScoreBug(
-                game = game,
-                hideScores = hideScores,
+            // The bug is not a permanent fixture over the picture: it shows when the game opens, whenever the
+            // score, period or situation changes, while the switcher is up, and for a moment after any key.
+            var bugShownAt by remember { mutableStateOf(SystemClock.elapsedRealtime()) }
+            val bugKey = game?.let { "${it.away.score}-${it.home.score}|${it.detail}|${it.downDistance}" }
+            LaunchedEffect(bugKey, upstreamControls.lastKeyAt) { bugShownAt = SystemClock.elapsedRealtime() }
+            var bugVisible by remember { mutableStateOf(true) }
+            LaunchedEffect(bugShownAt, switcherOpen) {
+                bugVisible = true
+                if (!switcherOpen) {
+                    delay(BUG_LINGER_MS)
+                    bugVisible = false
+                }
+            }
+            AnimatedVisibility(
+                visible = bugVisible,
+                enter = fadeIn(tween(OVERLAY_ANIM_MS)),
+                exit = fadeOut(tween(OVERLAY_ANIM_MS * 3)),
                 modifier =
                     Modifier
                         .align(Alignment.TopEnd)
@@ -178,7 +192,9 @@ fun JellyTvPlaybackPage(
                             top = JtvDimens.marginVertical + 64.dp,
                             end = JtvDimens.marginHorizontal,
                         ),
-            )
+            ) {
+                ScoreBug(game = game, hideScores = hideScores)
+            }
 
             // Keep the departing banner in composition so its fade-out can play.
             var lastBanner by remember { mutableStateOf<JtvEvent?>(null) }
@@ -224,15 +240,22 @@ fun JellyTvPlaybackPage(
 }
 
 /** Best-effort mirror of upstream's controller visibility, fed by the key events that reach it. */
+private const val BUG_LINGER_MS = 8_000L
+
 private class UpstreamControlsMirror {
     private var shown = false
     private var lastInteractionAt = 0L
+
+    /** Time of the last key-up seen, as state so overlays can react to "the viewer touched the remote". */
+    var lastKeyAt by mutableStateOf(0L)
+        private set
 
     fun likelyVisible(timeoutMs: Long): Boolean = shown && SystemClock.elapsedRealtime() - lastInteractionAt < timeoutMs + 300
 
     fun onKeyPassedThrough(event: KeyEvent) {
         if (event.type != KeyEventType.KeyUp) return
         lastInteractionAt = SystemClock.elapsedRealtime()
+        lastKeyAt = lastInteractionAt
         shown =
             when (event.key) {
                 Key.Back, Key.Escape, Key.ButtonB -> false

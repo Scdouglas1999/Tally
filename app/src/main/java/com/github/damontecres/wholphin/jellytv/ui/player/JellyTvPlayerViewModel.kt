@@ -9,8 +9,10 @@ import com.github.damontecres.wholphin.jellytv.data.BoardOrganizer
 import com.github.damontecres.wholphin.jellytv.data.JellyTvMultiviewState
 import com.github.damontecres.wholphin.jellytv.data.JellyTvRepository
 import com.github.damontecres.wholphin.services.NavigationManager
+import com.github.damontecres.wholphin.services.PlayerFactory
 import com.github.damontecres.wholphin.ui.nav.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,7 +26,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.model.serializer.toUUIDOrNull
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -42,8 +46,32 @@ class JellyTvPlayerViewModel
         private val repository: JellyTvRepository,
         private val multiviewState: JellyTvMultiviewState,
         private val navigationManager: NavigationManager,
+        private val playerFactory: PlayerFactory,
     ) : ViewModel() {
         private val channelId = MutableStateFlow<String?>(null)
+
+        init {
+            // Buffer health of the live stream, for the log: how far behind the edge we sit and how much is
+            // ready to play. When someone reports a stall, this is the first thing to look at.
+            viewModelScope.launch {
+                while (true) {
+                    delay(HEALTH_LOG_MS)
+                    withContext(Dispatchers.Main) {
+                        val player = playerFactory.currentPlayer ?: return@withContext
+                        if (player.isCurrentMediaItemLive) {
+                            // Jellyfin's live playlists carry no PROGRAM-DATE-TIME, so currentLiveOffset is unset;
+                            // the distance to the end of the live window is the same thing.
+                            Timber.d(
+                                "Live health: %.1fs behind edge, %.1fs buffered, state %d",
+                                (player.duration - player.currentPosition) / 1000.0,
+                                (player.bufferedPosition - player.currentPosition) / 1000.0,
+                                player.playbackState,
+                            )
+                        }
+                    }
+                }
+            }
+        }
 
         /** The live game carried on the bound channel, if the board shows one. */
         val game: StateFlow<JtvGame?> =
@@ -157,6 +185,7 @@ class JellyTvPlayerViewModel
         }
 
         private companion object {
+            const val HEALTH_LOG_MS = 10_000L
             const val MAX_OTHERS = 12
             const val BANNER_MS = 8_000L
         }

@@ -40,6 +40,8 @@ file is a future merge conflict.** Therefore:
 | W9 | `ui/setup/InstallUpdatePage.kt` | initial focus on "Download & Update" |
 | W10 | `ui/setup/SwitchServerViewModel.kt` (`init`) | no servers yet: add the one stamped into the APK (`JellyTvStampedServer`) |
 | W11 | `ui/setup/SwitchUserContent.kt` | no users yet: open the Quick Connect dialog straight away |
+| W12 | `services/PlayerFactory.kt` | live buffering cushion + load control (`JellyTvLivePlayback`) |
+| W13 | `ui/playback/PlaybackViewModel.kt` (`onPlayerError`) | re-sync instead of failing when behind the live window |
 
 ## Releases and self-update
 
