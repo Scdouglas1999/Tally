@@ -75,6 +75,14 @@ internal class TogetherPlayerSync(
 
     private var awaitingReady = false
     private var readySent = false
+
+    /**
+     * The position the server asked for (hold or seek), reported back with Ready instead of wherever the player
+     * landed. Jellyfin re-sends Seek to a member whose Ready position is off by more than ~0.5 s, so a target the
+     * player cannot hit exactly (past the end, a transcode that seeks to keyframes) made an endless Seek/Ready loop,
+     * ~30 per second. Drift correction evens out the difference once playing.
+     */
+    private var readyAtTicks: Long? = null
     private var suppressBuffering = false
     private var ownUntilElapsed = 0L
     private var ownSeekTargetMs: Long? = null
@@ -130,6 +138,7 @@ internal class TogetherPlayerSync(
         playerBeingReplaced = null
         awaitingReady = false
         readySent = false
+        readyAtTicks = null
         suppressBuffering = false
     }
 
@@ -223,6 +232,7 @@ internal class TogetherPlayerSync(
         heldPlayer = player
         playerBeingReplaced = null
         val startMs = startPositionTicks / SyncPolicy.TICKS_PER_MS
+        readyAtTicks = startPositionTicks
         Timber.tag(TOGETHER_SYNC_LOG).i("hold item=%s startMs=%d", wantedItemId, startMs)
         markOwn()
         player.pause()
@@ -287,6 +297,7 @@ internal class TogetherPlayerSync(
         val player = attached?.takeUnless { it.isReleased } ?: return
         val playlistId = playlistItemId ?: return
         val positionMs = positionTicks / SyncPolicy.TICKS_PER_MS
+        readyAtTicks = positionTicks
         markOwn()
         player.setPlaybackSpeed(1f)
         player.pause()
@@ -503,7 +514,8 @@ internal class TogetherPlayerSync(
         val playlistId = playlistItemId ?: return
         readySent = true
         awaitingReady = false
-        val positionTicks = player.currentPosition * SyncPolicy.TICKS_PER_MS
+        val positionTicks = readyAtTicks ?: (player.currentPosition * SyncPolicy.TICKS_PER_MS)
+        readyAtTicks = null
         scope.launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -521,6 +533,7 @@ internal class TogetherPlayerSync(
                 throw e
             } catch (e: Exception) {
                 readySent = false
+                if (readyAtTicks == null) readyAtTicks = positionTicks
                 Timber.tag(TOGETHER_SYNC_LOG).w(e, "ready report failed")
             }
         }
