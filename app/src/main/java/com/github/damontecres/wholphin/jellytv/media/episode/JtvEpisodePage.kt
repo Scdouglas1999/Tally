@@ -709,7 +709,7 @@ private fun EpisodeActionRow(
                 JtvButton(
                     label =
                         stringResource(
-                            if (episode.favorite) R.string.jtv_media_favourited else R.string.jtv_media_favourite,
+                            if (episode.favorite) R.string.jtv_media_favorited else R.string.jtv_media_favorite,
                         ),
                     glyph = stringResource(R.string.fa_heart),
                     onClick = onFavorite,
