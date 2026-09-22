@@ -27,59 +27,96 @@ import org.junit.Test
 import java.util.UUID
 
 class QualityLadderTest {
+    private fun mbit(megabits: Int): Int = (megabits * AppPreference.MEGA_BIT).toInt()
+
     @Test
-    fun `big buck bunny offers original then the rungs under 1080p and 14_8 mbps`() {
+    fun `big buck bunny offers original with its bitrate then the rungs under 1080p and 14_8 mbps`() {
         val options = QualityLadder.options(1080, 14_772_533)
         assertEquals(
             listOf(
-                "ORIGINAL",
+                "ORIGINAL · 14.8 MBPS",
                 "1080P · 10 MBPS",
-                "720P · 6 MBPS",
-                "720P · 4 MBPS",
+                "1080P · 8 MBPS",
+                "720P · 5 MBPS",
+                "720P · 3 MBPS",
                 "480P · 2 MBPS",
                 "360P · 1 MBPS",
             ),
             options.map { it.label },
         )
         assertEquals(
-            listOf(null, 10_000_000, 6_000_000, 4_000_000, 2_000_000, 1_000_000),
+            listOf(null, mbit(10), mbit(8), mbit(5), mbit(3), mbit(2), mbit(1)),
             options.map { it.bitsPerSecond },
         )
+        assertEquals(listOf(null, 10, 8, 5, 3, 2, 1), options.map { it.megabits })
     }
 
     @Test
     fun `an unknown height or bitrate never drops a rung on that axis`() {
-        assertEquals(9, QualityLadder.options(null, null).size)
+        val all = QualityLadder.options(null, null)
+        assertEquals(14, all.size)
+        assertEquals("ORIGINAL", all.first().label)
+        assertEquals("4K · 120 MBPS", all[1].label)
         assertEquals(
-            listOf("ORIGINAL", "1080P · 10 MBPS", "720P · 6 MBPS", "720P · 4 MBPS", "480P · 2 MBPS", "360P · 1 MBPS"),
+            listOf(
+                "ORIGINAL · 15 MBPS",
+                "1080P · 10 MBPS",
+                "1080P · 8 MBPS",
+                "720P · 5 MBPS",
+                "720P · 3 MBPS",
+                "480P · 2 MBPS",
+                "360P · 1 MBPS",
+            ),
             QualityLadder.options(null, 15_000_000).map { it.label },
         )
         assertEquals(
-            listOf("ORIGINAL", "720P · 6 MBPS", "720P · 4 MBPS", "480P · 2 MBPS", "360P · 1 MBPS"),
+            listOf("ORIGINAL", "720P · 5 MBPS", "720P · 3 MBPS", "480P · 2 MBPS", "360P · 1 MBPS"),
             QualityLadder.options(720, null).map { it.label },
         )
     }
 
     @Test
     fun `a tiny 360p file only offers original`() {
-        assertEquals(listOf("ORIGINAL"), QualityLadder.options(360, 800_000).map { it.label })
+        assertEquals(listOf("ORIGINAL · 0.8 MBPS"), QualityLadder.options(360, 800_000).map { it.label })
+    }
+
+    @Test
+    fun `original shows one decimal under 20 mbps and whole numbers from 20 up`() {
+        assertEquals("ORIGINAL", QualityLadder.originalLabel(null))
+        assertEquals("ORIGINAL · 14.8 MBPS", QualityLadder.originalLabel(14_772_533))
+        assertEquals("ORIGINAL · 19.9 MBPS", QualityLadder.originalLabel(19_900_000))
+        assertEquals("ORIGINAL · 20 MBPS", QualityLadder.originalLabel(20_000_000))
+        assertEquals("ORIGINAL · 81 MBPS", QualityLadder.originalLabel(80_600_000))
     }
 
     @Test
     fun `equal bitrate is not under the source and the same height at a lower bitrate is`() {
-        assertFalse(QualityLadder.options(1080, 10_000_000).any { it.bitsPerSecond == 10_000_000 })
-        assertTrue(QualityLadder.options(1080, 10_000_001).any { it.bitsPerSecond == 10_000_000 })
+        assertFalse(QualityLadder.options(1080, mbit(10)).any { it.bitsPerSecond == mbit(10) })
+        assertTrue(QualityLadder.options(1080, mbit(10) + 1).any { it.bitsPerSecond == mbit(10) })
         assertFalse(QualityLadder.options(1079, 50_000_000).any { it.label.startsWith("1080P") })
     }
 
     @Test
-    fun `a 4k source above 60 mbps offers the whole ladder`() {
-        val labels = QualityLadder.options(2160, 80_000_000).map { it.label }
-        assertEquals("ORIGINAL", labels.first())
-        assertEquals("4K · 60 MBPS", labels[1])
-        assertEquals("4K · 40 MBPS", labels[2])
-        assertEquals("360P · 1 MBPS", labels.last())
-        assertEquals(9, labels.size)
+    fun `a 2160p 80 mbps source offers 4k 60 down to 360p 1`() {
+        assertEquals(
+            listOf(
+                "ORIGINAL · 80 MBPS",
+                "4K · 60 MBPS",
+                "4K · 40 MBPS",
+                "1080P · 30 MBPS",
+                "1080P · 20 MBPS",
+                "1080P · 15 MBPS",
+                "1080P · 10 MBPS",
+                "1080P · 8 MBPS",
+                "720P · 5 MBPS",
+                "720P · 3 MBPS",
+                "480P · 2 MBPS",
+                "360P · 1 MBPS",
+            ),
+            QualityLadder.options(2160, 80_000_000).map { it.label },
+        )
+        // 80 decimal Mbps is under upstream's 80 Mbps step (80 x 1024 x 1024), above 4K 60.
+        assertEquals(14, QualityLadder.options(2160, 130_000_000).size)
     }
 
     @Test
@@ -170,7 +207,15 @@ class QualityLadderTest {
             now?.reasons,
         )
         assertEquals(
-            listOf("ORIGINAL", "1080P · 10 MBPS", "720P · 6 MBPS", "720P · 4 MBPS", "480P · 2 MBPS", "360P · 1 MBPS"),
+            listOf(
+                "ORIGINAL · 14.8 MBPS",
+                "1080P · 10 MBPS",
+                "1080P · 8 MBPS",
+                "720P · 5 MBPS",
+                "720P · 3 MBPS",
+                "480P · 2 MBPS",
+                "360P · 1 MBPS",
+            ),
             QualityLadder.options(QualityStatus.sourceHeight(playback), QualityStatus.sourceBitrate(playback)).map { it.label },
         )
     }
@@ -214,7 +259,7 @@ class QualityLadderTest {
         assertNull(QualityStatus.sourceBitrate(playback))
         assertEquals(720, QualityStatus.sourceHeight(playback))
         assertEquals(
-            listOf("ORIGINAL", "720P · 6 MBPS", "720P · 4 MBPS", "480P · 2 MBPS", "360P · 1 MBPS"),
+            listOf("ORIGINAL", "720P · 5 MBPS", "720P · 3 MBPS", "480P · 2 MBPS", "360P · 1 MBPS"),
             QualityLadder.options(QualityStatus.sourceHeight(playback), QualityStatus.sourceBitrate(playback)).map { it.label },
         )
     }
@@ -244,18 +289,34 @@ class QualityLadderTest {
     }
 
     @Test
-    fun `the default toggle lands on a settings slider step`() {
+    fun `every rung saved as the default lands exactly on its settings step`() {
         val preference = AppPreference.MaxBitrate
         assertEquals(preference.defaultValue, maxBitratePreferenceIndex(null))
         assertEquals("100 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(null)))
-        assertEquals("10 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(10)))
-        assertEquals("1 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(1)))
-        assertEquals("2 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(2)))
-        assertEquals("20 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(20)))
-        assertEquals("40 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(40)))
-        assertEquals("60 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(60)))
+        val expected =
+            mapOf(
+                120 to 18L,
+                80 to 15L,
+                60 to 13L,
+                40 to 11L,
+                30 to 10L,
+                20 to 9L,
+                15 to 8L,
+                10 to 7L,
+                8 to 6L,
+                5 to 5L,
+                3 to 4L,
+                2 to 3L,
+                1 to 2L,
+            )
+        val rungs = QualityLadder.options(null, null).mapNotNull { it.megabits }
+        assertEquals(expected.keys.toList(), rungs)
+        expected.forEach { (megabits, index) ->
+            assertEquals("$megabits Mbps", index, maxBitratePreferenceIndex(megabits))
+            assertEquals("$megabits Mbps", preference.summarizer?.invoke(index))
+        }
+        // Safety net only: a value that is not a step lands on the nearest one, the lower on a tie.
         assertEquals("3 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(4)))
-        assertEquals("5 Mbps", preference.summarizer?.invoke(maxBitratePreferenceIndex(6)))
     }
 
     private fun mediaSource(

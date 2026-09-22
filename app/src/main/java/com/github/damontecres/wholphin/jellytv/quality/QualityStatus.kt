@@ -108,11 +108,14 @@ object QualityStatus {
         }
     }
 
+    /** Decimal megabits: one decimal under 20 Mbps when not whole (`14.8 MBPS`, `4 MBPS`), whole from 20 up. */
     fun bitrateLabel(bitsPerSecond: Int?): String? {
         if (bitsPerSecond == null || bitsPerSecond <= 0) return null
-        val tenths = (bitsPerSecond / 1_000_000.0 * 10).roundToInt()
+        val megabits = bitsPerSecond / 1_000_000.0
+        if (megabits >= 20) return "${megabits.roundToInt()} MBPS"
+        val tenths = (megabits * 10).roundToInt()
         val whole = tenths / 10
-        val fraction = kotlin.math.abs(tenths % 10)
+        val fraction = tenths % 10
         val number = if (fraction == 0) whole.toString() else "$whole.$fraction"
         return "$number MBPS"
     }
