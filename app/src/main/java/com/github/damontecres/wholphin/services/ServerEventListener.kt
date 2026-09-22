@@ -39,6 +39,7 @@ class ServerEventListener
         private val serverRepository: ServerRepository,
         // JELLYTV: begin
         private val jellyTvPlayRouter: com.github.damontecres.wholphin.jellytv.JellyTvPlayRouter,
+        private val jellyTvRemoteCommands: com.github.damontecres.wholphin.jellytv.remote.JellyTvRemoteCommands,
         // JELLYTV: end
     ) : DefaultLifecycleObserver {
         private val activity = (context as AppCompatActivity)
@@ -47,6 +48,7 @@ class ServerEventListener
 
         // JELLYTV: begin
         private var playJob: Job? = null
+        private var remoteJob: Job? = null
         // JELLYTV: end
 
         init {
@@ -72,6 +74,10 @@ class ServerEventListener
                             listOf(
                                 GeneralCommandType.DISPLAY_MESSAGE,
                                 GeneralCommandType.SEND_STRING,
+                                // JELLYTV: begin
+                                *com.github.damontecres.wholphin.jellytv.remote.JellyTvRemoteCommands.SUPPORTED
+                                    .toTypedArray(),
+                                // JELLYTV: end
                             ),
                         supportsMediaControl = true,
                     )
@@ -86,6 +92,7 @@ class ServerEventListener
             listenJob?.cancel()
             // JELLYTV: begin
             playJob?.cancel()
+            remoteJob?.cancel()
             // JELLYTV: end
             listenJob =
                 api.webSocket
@@ -111,6 +118,8 @@ class ServerEventListener
             // JELLYTV: begin
             playJob?.cancel()
             playJob = jellyTvPlayRouter.listen(api, activity.lifecycleScope)
+            remoteJob?.cancel()
+            remoteJob = jellyTvRemoteCommands.listen(api, activity)
             // JELLYTV: end
         }
 
@@ -123,6 +132,7 @@ class ServerEventListener
             listenJob?.cancel()
             // JELLYTV: begin
             playJob?.cancel()
+            remoteJob?.cancel()
             // JELLYTV: end
         }
 
@@ -131,6 +141,7 @@ class ServerEventListener
             listenJob?.cancel()
             // JELLYTV: begin
             playJob?.cancel()
+            remoteJob?.cancel()
             // JELLYTV: end
         }
     }

@@ -305,6 +305,11 @@ class PlaylistCreator
                                         PlaylistItem.Media(BaseItem(it, false))
                                     }.let(::addAll)
                             }
+                            // JELLYTV: begin
+                            com.github.damontecres.wholphin.jellytv.playback.CollectionNext
+                                .nextFor(api, item)
+                                ?.let { add(PlaylistItem.Media(BaseItem(it, false))) }
+                            // JELLYTV: end
                         }
                     PlaylistCreationResult.Success(Playlist(list))
                 }

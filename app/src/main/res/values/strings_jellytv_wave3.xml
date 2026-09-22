@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Wave-3 drawer entries (contract). Feature strings live in each task's own strings_jellytv_<task>.xml. -->
+    <string name="jtv_surprise_name">Surprise me</string>
+    <!-- %1$d is the current year, e.g. "Your 2026". -->
+    <string name="jtv_year_name">Your %1$d</string>
+    <string name="jtv_fa_calendar" translatable="false">&#xf073;</string>
+</resources>

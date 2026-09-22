@@ -67,3 +67,32 @@ for e in 1 2 3; do id=$(episode_id "Bluey" 1 $e); [ -n "$id" ] && api -X POST "$
 for f in "Interstellar" "Paddington 2" "Arrival"; do favorite "$f" Movie; done
 favorite "Severance" Series
 api "$B/Items/Counts" && echo
+
+# A year of history for "Your Year": more titles watched, spread over 2025 and this year, a few rewatched.
+python3 - "$B" "$TOK" "$USER" <<'PY'
+import json, random, sys, urllib.request
+base, tok, user = sys.argv[1:4]
+hdr = {"Authorization": f'MediaBrowser Token="{tok}"', "Content-Type": "application/json"}
+def call(path, body=None):
+    req = urllib.request.Request(base + path, data=None if body is None else json.dumps(body).encode(), headers=hdr, method="GET" if body is None else "POST")
+    with urllib.request.urlopen(req) as r:
+        raw = r.read()
+        return json.loads(raw) if raw else None
+rnd = random.Random(2026)
+items = call(f"/Items?userId={user}&recursive=true&includeItemTypes=Movie,Episode&sortBy=SortName&enableUserData=true")["Items"]
+year = __import__("datetime").date.today().year
+for it in items:
+    if it["UserData"].get("PlaybackPositionTicks"):
+        continue  # keep the in-progress ones for Continue Watching
+    if it["Type"] == "Episode" and it.get("SeriesName") in ("Severance", "The Last of Us"):
+        continue  # leave something unwatched to find
+    if rnd.random() < 0.35 and not it["UserData"].get("Played"):
+        continue
+    when_year = year if rnd.random() < 0.8 else year - 1
+    month = rnd.randint(1, 12 if when_year < year else __import__("datetime").date.today().month)
+    day = rnd.randint(1, 28)
+    plays = 1 + (rnd.random() < 0.2) + (rnd.random() < 0.05)
+    call(f"/UserItems/{it['Id']}/UserData?userId={user}", {"Played": True, "PlayCount": plays,
+         "LastPlayedDate": f"{when_year}-{month:02d}-{day:02d}T{rnd.randint(17,23):02d}:{rnd.randint(0,59):02d}:00Z"})
+print("history spread over", year - 1, "and", year)
+PY

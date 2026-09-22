@@ -146,6 +146,16 @@ class NavDrawerViewModel
                     )
                 }
 
+                NavDrawerItem.JellyTvSurprise -> {
+                    setIndex(index)
+                    navigationManager.navigateToFromDrawer(Destination.JellyTvSurprise)
+                }
+
+                NavDrawerItem.JellyTvYear -> {
+                    setIndex(index)
+                    navigationManager.navigateToFromDrawer(Destination.JellyTvYear())
+                }
+
                 // JELLYTV: end
 
                 is ServerNavDrawerItem -> {
@@ -184,6 +194,8 @@ class NavDrawerViewModel
 
                             // JELLYTV: begin
                             is NavDrawerItem.JellyTv -> Destination.JellyTv
+
+                            is NavDrawerItem.JellyTvSurprise -> Destination.JellyTvSurprise
 
                             // JELLYTV: end
                             else -> null
@@ -267,6 +279,26 @@ sealed interface NavDrawerItem {
             get() = "a_jellytv"
 
         override fun name(context: Context): String = context.getString(R.string.jtv_section_name)
+    }
+
+    object JellyTvSurprise : NavDrawerItem {
+        override val id: String
+            get() = "a_jellytv_surprise"
+
+        override fun name(context: Context): String = context.getString(R.string.jtv_surprise_name)
+    }
+
+    object JellyTvYear : NavDrawerItem {
+        override val id: String
+            get() = "a_jellytv_year"
+
+        override fun name(context: Context): String =
+            context.getString(
+                R.string.jtv_year_name,
+                java.time.Year
+                    .now()
+                    .value,
+            )
     }
     // JELLYTV: end
 }
@@ -703,6 +735,14 @@ fun NavigationDrawerScope.NavItem(
                 // JELLYTV: begin
                 NavDrawerItem.JellyTv -> {
                     R.string.fa_tv
+                }
+
+                NavDrawerItem.JellyTvSurprise -> {
+                    R.string.fa_dice
+                }
+
+                NavDrawerItem.JellyTvYear -> {
+                    R.string.jtv_fa_calendar
                 }
 
                 // JELLYTV: end

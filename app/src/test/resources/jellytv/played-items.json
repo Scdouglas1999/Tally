@@ -1,0 +1,1856 @@
+{
+    "Items": [
+        {
+            "Name": "Sexual Harassment",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "00a4536061686c39d622be50fda7398e",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-09-27T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 8.111,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 2,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-02-20T21:02:00.0000000Z",
+                "Played": true,
+                "Key": "73244002002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "92a0e676990e3ebce85467a610b36f45",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Health Care",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "00bd988b3604bdb7063f6470e99d4a0b",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-04-05T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 7.667,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-08-13T20:36:00.0000000Z",
+                "Played": true,
+                "Key": "73244001003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "0450f4253c584c3c4fa9ed8db53b086b",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Pilot",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "08fab11822c54bb1196ad409f954eb5b",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-01-20T00:00:00.0000000Z",
+            "OfficialRating": "TV-MA",
+            "ChannelId": null,
+            "Genres": [
+                "Crime",
+                "Drama",
+                "Thriller"
+            ],
+            "CommunityRating": 8.493,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 1,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-21T18:57:00.0000000Z",
+                "Played": true,
+                "Key": "81189001001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Back to the Future Part III",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "0bebe89f04e533b858799f5b489a2c8c",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "1990-05-25T00:00:00.0000000Z",
+            "CriticRating": 79,
+            "OfficialRating": "PG",
+            "ChannelId": null,
+            "Genres": [
+                "Adventure",
+                "Comedy",
+                "Science Fiction"
+            ],
+            "CommunityRating": 7.5,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 1990,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Adventure",
+                    "Id": "51cec9645b896084d12b259acd05ccb1"
+                },
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                },
+                {
+                    "Name": "Science Fiction",
+                    "Id": "0430d514c35e1f158fa93f1eeb8361ea"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-16T19:58:00.0000000Z",
+                "Played": true,
+                "Key": "196",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Basketball",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "1014e1aabcf87474c887c2b2745f4e02",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-04-19T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 8.013,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 5,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-08-22T21:16:00.0000000Z",
+                "Played": true,
+                "Key": "73244001005",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "0450f4253c584c3c4fa9ed8db53b086b",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Parasite",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "23ae9fcdde140338a79e2f5b780490c8",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2019-05-30T00:00:00.0000000Z",
+            "CriticRating": 99,
+            "OfficialRating": "R",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy",
+                "Thriller",
+                "Drama"
+            ],
+            "CommunityRating": 8.49,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 2019,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-02-28T17:56:00.0000000Z",
+                "Played": true,
+                "Key": "496243",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Finding Nemo",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "255f576e87001fe21b81feb1261d0866",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2003-05-30T00:00:00.0000000Z",
+            "CriticRating": 99,
+            "OfficialRating": "G",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Family",
+                "Adventure"
+            ],
+            "CommunityRating": 7.821,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 2003,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                },
+                {
+                    "Name": "Adventure",
+                    "Id": "51cec9645b896084d12b259acd05ccb1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-02-18T18:02:00.0000000Z",
+                "Played": true,
+                "Key": "12",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Toy Story",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "266f2e127bd3d4e2ba40deb8dd1ebe91",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "1995-11-22T00:00:00.0000000Z",
+            "CriticRating": 100,
+            "OfficialRating": "G",
+            "ChannelId": null,
+            "Genres": [
+                "Family",
+                "Comedy",
+                "Animation",
+                "Adventure"
+            ],
+            "CommunityRating": 7.989,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 1995,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                },
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                },
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Adventure",
+                    "Id": "51cec9645b896084d12b259acd05ccb1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-22T17:39:00.0000000Z",
+                "Played": true,
+                "Key": "862",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "The Matrix",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "27657e067b46664f6b18c7606bf935e7",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "1999-03-31T00:00:00.0000000Z",
+            "CriticRating": 83,
+            "OfficialRating": "R",
+            "ChannelId": null,
+            "Genres": [
+                "Action",
+                "Science Fiction"
+            ],
+            "CommunityRating": 8.259,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 1999,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Action",
+                    "Id": "ce06903d834d2c3417e0889dd4049f3b"
+                },
+                {
+                    "Name": "Science Fiction",
+                    "Id": "0430d514c35e1f158fa93f1eeb8361ea"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-07-10T20:28:00.0000000Z",
+                "Played": true,
+                "Key": "603",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Back to the Future",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "2d454829cd8fee962dd177e1d6d7e21a",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "1985-07-03T00:00:00.0000000Z",
+            "CriticRating": 93,
+            "OfficialRating": "PG",
+            "ChannelId": null,
+            "Genres": [
+                "Adventure",
+                "Comedy",
+                "Science Fiction"
+            ],
+            "CommunityRating": 8.33,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 1985,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Adventure",
+                    "Id": "51cec9645b896084d12b259acd05ccb1"
+                },
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                },
+                {
+                    "Name": "Science Fiction",
+                    "Id": "0430d514c35e1f158fa93f1eeb8361ea"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-14T23:12:00.0000000Z",
+                "Played": true,
+                "Key": "105",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Office Olympics",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "378302b855c10089e8f374b6d89f02fb",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-10-04T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 8.09,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-08-23T18:30:00.0000000Z",
+                "Played": true,
+                "Key": "73244002003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "92a0e676990e3ebce85467a610b36f45",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "The Dundies",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "654898726742860383086ef4f0ceff6f",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-09-20T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 8.303,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 1,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-04-24T17:05:00.0000000Z",
+                "Played": true,
+                "Key": "73244002001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "92a0e676990e3ebce85467a610b36f45",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "A No Rough Stuff Type Deal",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "6d96613ffb1a90cf2a8fb881978e91b1",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-03-09T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Crime",
+                "Drama",
+                "Thriller"
+            ],
+            "CommunityRating": 8.384,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 7,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-08-23T19:28:00.0000000Z",
+                "Played": true,
+                "Key": "81189001007",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Spirited Away",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "719af8b449563195e98d693cc9637472",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2001-07-20T00:00:00.0000000Z",
+            "CriticRating": 96,
+            "OfficialRating": "PG",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Family",
+                "Fantasy"
+            ],
+            "CommunityRating": 8.535,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 2001,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                },
+                {
+                    "Name": "Fantasy",
+                    "Id": "a30dcc65be22eb3c21c03f7c1c7a57d1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-26T18:01:00.0000000Z",
+                "Played": true,
+                "Key": "129",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Gray Matter",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "73cfee42b2a79e3f0d2a1f75a3c0137e",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-02-24T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Crime",
+                "Drama",
+                "Thriller"
+            ],
+            "CommunityRating": 8.158,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 5,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-05-18T20:51:00.0000000Z",
+                "Played": true,
+                "Key": "81189001005",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "The Dark Knight",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "7aa5add2c2d8575eda5280b9b9072071",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-07-16T00:00:00.0000000Z",
+            "CriticRating": 94,
+            "OfficialRating": "PG-13",
+            "ChannelId": null,
+            "Genres": [
+                "Action",
+                "Thriller",
+                "Crime"
+            ],
+            "CommunityRating": 8.535,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 2008,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Action",
+                    "Id": "ce06903d834d2c3417e0889dd4049f3b"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                },
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-03-05T21:21:00.0000000Z",
+                "Played": true,
+                "Key": "155",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Seven Thirty-Seven",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "7dd2afd1a947217c9231b9d180aad55d",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2009-03-08T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Crime",
+                "Drama",
+                "Thriller"
+            ],
+            "CommunityRating": 8.326,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2009,
+            "IndexNumber": 1,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-07-27T22:17:00.0000000Z",
+                "Played": true,
+                "Key": "81189002001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "58f865f4dd79557028d28e6af6075a1e",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Hot Girl",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "7e6bfb2f3f8c4746fb1a07843b1ddea3",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-04-26T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 7.625,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 6,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-08-26T17:53:00.0000000Z",
+                "Played": true,
+                "Key": "73244001006",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "0450f4253c584c3c4fa9ed8db53b086b",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Hospital",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "90ca3730d7f0dad93deb60f1d6cd9734",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2018-10-02T00:00:00.0000000Z",
+            "OfficialRating": "TV-G",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Family"
+            ],
+            "CommunityRating": 7.3,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2018,
+            "IndexNumber": 2,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-12-23T22:23:00.0000000Z",
+                "Played": true,
+                "Key": "353546001002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Bluey",
+            "SeriesId": "f2b780cd033f94017b022e5a0085dd0f",
+            "SeasonId": "4c2d40f641b6a59942b3c8b69c12afcf",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "14c9a82487a937110311a05b21fa5c64",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "14c9a82487a937110311a05b21fa5c64": "d;KLt7o~Ny%MJ[ofWFWsXloznzaw$+j[jrsoR%jXogW="
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "The Magic Xylophone",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "91a8da140847dc7205616db7c6eb5a71",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2018-10-01T00:00:00.0000000Z",
+            "OfficialRating": "TV-G",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Family"
+            ],
+            "CommunityRating": 7.05,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2018,
+            "IndexNumber": 1,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-02-04T17:52:00.0000000Z",
+                "Played": true,
+                "Key": "353546001001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Bluey",
+            "SeriesId": "f2b780cd033f94017b022e5a0085dd0f",
+            "SeasonId": "4c2d40f641b6a59942b3c8b69c12afcf",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "14c9a82487a937110311a05b21fa5c64",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "14c9a82487a937110311a05b21fa5c64": "d;KLt7o~Ny%MJ[ofWFWsXloznzaw$+j[jrsoR%jXogW="
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Jurassic Park",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "9aff9e45652201b2f4ad806fef42a70d",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "1993-06-11T00:00:00.0000000Z",
+            "CriticRating": 91,
+            "OfficialRating": "PG-13",
+            "ChannelId": null,
+            "Genres": [
+                "Adventure",
+                "Science Fiction"
+            ],
+            "CommunityRating": 7.976,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 1993,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Adventure",
+                    "Id": "51cec9645b896084d12b259acd05ccb1"
+                },
+                {
+                    "Name": "Science Fiction",
+                    "Id": "0430d514c35e1f158fa93f1eeb8361ea"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-05-14T20:19:00.0000000Z",
+                "Played": true,
+                "Key": "329",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Diversity Day",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "a2d7667a27693d47e6021c85611820ba",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-03-29T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 7.811,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 2,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-02-24T19:18:00.0000000Z",
+                "Played": true,
+                "Key": "73244001002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "0450f4253c584c3c4fa9ed8db53b086b",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Shadowlands",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "a5dee8905c0e2694db55ce7ffd2d06ae",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2018-10-05T00:00:00.0000000Z",
+            "OfficialRating": "TV-G",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Family"
+            ],
+            "CommunityRating": 7.6,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2018,
+            "IndexNumber": 5,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-05-27T22:56:00.0000000Z",
+                "Played": true,
+                "Key": "353546001005",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Bluey",
+            "SeriesId": "f2b780cd033f94017b022e5a0085dd0f",
+            "SeasonId": "4c2d40f641b6a59942b3c8b69c12afcf",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "14c9a82487a937110311a05b21fa5c64",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "14c9a82487a937110311a05b21fa5c64": "d;KLt7o~Ny%MJ[ofWFWsXloznzaw$+j[jrsoR%jXogW="
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Toy Story 2",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "ac6dcea4c8ebd0b80986b4da5f2f4586",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "1999-10-30T00:00:00.0000000Z",
+            "CriticRating": 100,
+            "OfficialRating": "G",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Comedy",
+                "Family"
+            ],
+            "CommunityRating": 7.623,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 1999,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-04-19T21:08:00.0000000Z",
+                "Played": true,
+                "Key": "863",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Crazy Handful of Nothin'",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "c30cc6ac527e13339e54d5af5a52cbcc",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-03-02T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Crime",
+                "Drama",
+                "Thriller"
+            ],
+            "CommunityRating": 8.909,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 6,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-16T22:31:00.0000000Z",
+                "Played": true,
+                "Key": "81189001006",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Pilot",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "c93d8e6211ace0efd196e4de15522a4e",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-03-24T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 7.588,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 1,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-27T23:49:00.0000000Z",
+                "Played": true,
+                "Key": "73244001001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "0450f4253c584c3c4fa9ed8db53b086b",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "The Grand Budapest Hotel",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "ccc571b5c7f2c21e71932478687a7917",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2014-02-26T00:00:00.0000000Z",
+            "CriticRating": 92,
+            "OfficialRating": "R",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy",
+                "Drama"
+            ],
+            "CommunityRating": 8.026,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 2014,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-01-15T20:45:00.0000000Z",
+                "Played": true,
+                "Key": "120467",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Cat's in the Bag...",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "d76a86fe9498ae50055252a16715742c",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-01-27T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Crime",
+                "Drama",
+                "Thriller"
+            ],
+            "CommunityRating": 8.245,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 2,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-06-07T19:51:00.0000000Z",
+                "Played": true,
+                "Key": "81189001002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Up",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "da0fc1174d13ffeaa79c09237a233aca",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2009-05-28T00:00:00.0000000Z",
+            "CriticRating": 98,
+            "OfficialRating": "PG",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Comedy",
+                "Family",
+                "Adventure"
+            ],
+            "CommunityRating": 7.96,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 2009,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                },
+                {
+                    "Name": "Adventure",
+                    "Id": "51cec9645b896084d12b259acd05ccb1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-03-04T22:51:00.0000000Z",
+                "Played": true,
+                "Key": "14160",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Back to the Future Part II",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "df7cdaadbcd57f71656dfb0529648865",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "1989-11-22T00:00:00.0000000Z",
+            "CriticRating": 63,
+            "OfficialRating": "PG",
+            "ChannelId": null,
+            "Genres": [
+                "Adventure",
+                "Comedy",
+                "Science Fiction"
+            ],
+            "CommunityRating": 7.783,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 1989,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Adventure",
+                    "Id": "51cec9645b896084d12b259acd05ccb1"
+                },
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                },
+                {
+                    "Name": "Science Fiction",
+                    "Id": "0430d514c35e1f158fa93f1eeb8361ea"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-07-03T19:59:00.0000000Z",
+                "Played": true,
+                "Key": "165",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Daddy Robot",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "dfe3788b561dc27c96bb065283308b91",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2018-10-04T00:00:00.0000000Z",
+            "OfficialRating": "TV-G",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Family"
+            ],
+            "CommunityRating": 7.9,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2018,
+            "IndexNumber": 4,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-02-23T20:56:00.0000000Z",
+                "Played": true,
+                "Key": "353546001004",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Bluey",
+            "SeriesId": "f2b780cd033f94017b022e5a0085dd0f",
+            "SeasonId": "4c2d40f641b6a59942b3c8b69c12afcf",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "14c9a82487a937110311a05b21fa5c64",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "14c9a82487a937110311a05b21fa5c64": "d;KLt7o~Ny%MJ[ofWFWsXloznzaw$+j[jrsoR%jXogW="
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "The Fire",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "e1aa8d8b8bd71a46a2944d1628593149",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2005-10-11T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Comedy"
+            ],
+            "CommunityRating": 8.238,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2005,
+            "IndexNumber": 4,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Comedy",
+                    "Id": "08d31605d366d63a7a924f944b4417f1"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-12-17T18:59:00.0000000Z",
+                "Played": true,
+                "Key": "73244002004",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeasonId": "92a0e676990e3ebce85467a610b36f45",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Keepy Uppy",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "e6883a52ed7947c77ad100b5696f0a27",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2018-10-03T00:00:00.0000000Z",
+            "OfficialRating": "TV-G",
+            "ChannelId": null,
+            "Genres": [
+                "Animation",
+                "Family"
+            ],
+            "CommunityRating": 7.1,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2018,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Animation",
+                    "Id": "074229225b7254292f131f9f49f8dcd6"
+                },
+                {
+                    "Name": "Family",
+                    "Id": "ccbd8d9008aab2b5e749e1cc4bc458a4"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-26T18:52:00.0000000Z",
+                "Played": true,
+                "Key": "353546001003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Bluey",
+            "SeriesId": "f2b780cd033f94017b022e5a0085dd0f",
+            "SeasonId": "4c2d40f641b6a59942b3c8b69c12afcf",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "14c9a82487a937110311a05b21fa5c64",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "14c9a82487a937110311a05b21fa5c64": "d;KLt7o~Ny%MJ[ofWFWsXloznzaw$+j[jrsoR%jXogW="
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "...And the Bag's in the River",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "eed62655e6a2b09220cf240a9bb8b2ba",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-02-10T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Crime",
+                "Drama",
+                "Thriller"
+            ],
+            "CommunityRating": 8.424,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-07-19T20:32:00.0000000Z",
+                "Played": true,
+                "Key": "81189001003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Bit by a Dead Bee",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "effd39fb50f5b9d695734a0d4a6143dc",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2009-03-22T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Genres": [
+                "Crime",
+                "Drama",
+                "Thriller"
+            ],
+            "CommunityRating": 8,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2009,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "GenreItems": [
+                {
+                    "Name": "Crime",
+                    "Id": "83a9dab21914792744c8fb23b9925dc6"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Thriller",
+                    "Id": "4936f5b1a6f84f0b0aa2657368a5b364"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2025-11-25T19:42:00.0000000Z",
+                "Played": true,
+                "Key": "81189002003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "58f865f4dd79557028d28e6af6075a1e",
+            "PrimaryImageAspectRatio": 0.6666666666666666,
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Interstellar",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "f539d45ddf7dd7e4d85804218bd0da68",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2014-11-05T00:00:00.0000000Z",
+            "CriticRating": 73,
+            "OfficialRating": "PG-13",
+            "ChannelId": null,
+            "Genres": [
+                "Adventure",
+                "Drama",
+                "Science Fiction"
+            ],
+            "CommunityRating": 8.488,
+            "RunTimeTicks": 900230000,
+            "ProductionYear": 2014,
+            "IsFolder": false,
+            "Type": "Movie",
+            "GenreItems": [
+                {
+                    "Name": "Adventure",
+                    "Id": "51cec9645b896084d12b259acd05ccb1"
+                },
+                {
+                    "Name": "Drama",
+                    "Id": "090eac6e9de4fe1fbc194e5b96691277"
+                },
+                {
+                    "Name": "Science Fiction",
+                    "Id": "0430d514c35e1f158fa93f1eeb8361ea"
+                }
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": true,
+                "LastPlayedDate": "2026-09-07T18:10:00.0000000Z",
+                "Played": true,
+                "Key": "157336",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "VideoType": "VideoFile",
+            "ImageBlurHashes": {},
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        }
+    ],
+    "TotalRecordCount": 36,
+    "StartIndex": 0
+}

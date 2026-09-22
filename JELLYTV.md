@@ -52,6 +52,12 @@ file is a future merge conflict.** Therefore:
 | W21 | `ui/playback/PlaybackViewModel.kt` (item set) | publishes the now-playing item id for Send |
 | W22 | `MainContent.kt` | `JellyTvGlobalOverlays` (sleep chip, menu dialogs) above every screen |
 | W23 | `ui/main/HomePage.kt` | `HouseholdRow` item after the JellyTV row |
+| W24 | `ui/nav/Destination.kt`, `ui/nav/DestinationContent.kt` | `JellyTvSurprise`, `JellyTvYear`, `JellyTvPostPlay` and their pages |
+| W25 | `ui/nav/NavDrawer.kt`, `services/NavDrawerService.kt` | drawer entries "Surprise me" and "Your <year>" |
+| W26 | `services/PlaylistCreator.kt` (movie branch) | append the next film of the movie's collection (`CollectionNext`) so upstream's Up Next works for movies |
+| W27 | `ui/playback/PlaybackViewModel.kt` (`STATE_ENDED`, nothing next) | a finished movie opens the post-play page (`JellyTvPostPlay`) instead of going back |
+| W28 | `services/ServerEventListener.kt` | advertise `JellyTvRemoteCommands.SUPPORTED`; start/stop `JellyTvRemoteCommands.listen` with the socket |
+| W29 | `ui/playback/PlaybackViewModel.kt` (`init`) | bind the player to `JellyTvRemoteBus` for remote audio/subtitle track switching |
 
 ## Releases and self-update
 

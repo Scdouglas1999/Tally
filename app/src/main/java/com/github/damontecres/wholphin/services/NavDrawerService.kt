@@ -198,6 +198,8 @@ class NavDrawerService
                 buildList {
                     // JELLYTV: begin
                     if (jellyTvAvailability.check()) add(NavDrawerItem.JellyTv)
+                    add(NavDrawerItem.JellyTvSurprise)
+                    add(NavDrawerItem.JellyTvYear)
                     // JELLYTV: end
                     add(NavDrawerItem.Favorites)
                     if (discoverActive) add(NavDrawerItem.Discover)

@@ -198,6 +198,13 @@ class PlaybackViewModel
         val initJob: Job
 
         init {
+            // JELLYTV: begin
+            com.github.damontecres.wholphin.jellytv.remote.JellyTvRemoteBus.bindPlayer(
+                scope = viewModelScope,
+                onAudio = ::changeAudioStream,
+                onSubtitle = { changeSubtitleStream(it) },
+            )
+            // JELLYTV: end
             initJob =
                 viewModelScope.launchIO {
                     addCloseable {
@@ -1101,6 +1108,14 @@ class PlaybackViewModel
 
                         null -> {
                             Timber.v("No next up")
+                            // JELLYTV: begin
+                            com.github.damontecres.wholphin.jellytv.postplay.JellyTvPostPlay
+                                .destinationFor(currentItem)
+                                ?.let {
+                                    navigationManager.replace(it)
+                                    return@launchDefault
+                                }
+                            // JELLYTV: end
                             navigationManager.goBack()
                         }
                     }

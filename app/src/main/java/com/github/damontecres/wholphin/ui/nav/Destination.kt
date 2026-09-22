@@ -190,5 +190,18 @@ sealed class Destination(
         val itemId: UUID,
         val channelId: String,
     ) : Destination(true)
+
+    @Serializable
+    data object JellyTvSurprise : Destination()
+
+    @Serializable
+    data class JellyTvYear(
+        val year: Int? = null,
+    ) : Destination(true)
+
+    @Serializable
+    data class JellyTvPostPlay(
+        val itemId: UUID,
+    ) : Destination(true)
     // JELLYTV: end
 }

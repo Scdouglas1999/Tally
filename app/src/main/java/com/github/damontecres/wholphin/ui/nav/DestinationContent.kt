@@ -464,6 +464,30 @@ fun DestinationContent(
                 modifier = modifier,
             )
         }
+
+        Destination.JellyTvSurprise -> {
+            LaunchedEffect(Unit) { onClearBackdrop.invoke() }
+            com.github.damontecres.wholphin.jellytv.surprise.SurprisePage(
+                preferences = preferences,
+                modifier = modifier,
+            )
+        }
+
+        is Destination.JellyTvYear -> {
+            LaunchedEffect(Unit) { onClearBackdrop.invoke() }
+            com.github.damontecres.wholphin.jellytv.year.YearPage(
+                destination = destination,
+                modifier = modifier,
+            )
+        }
+
+        is Destination.JellyTvPostPlay -> {
+            LaunchedEffect(Unit) { onClearBackdrop.invoke() }
+            com.github.damontecres.wholphin.jellytv.postplay.PostPlayPage(
+                destination = destination,
+                modifier = modifier,
+            )
+        }
         // JELLYTV: end
     }
 }
