@@ -1008,8 +1008,8 @@ private suspend fun preloadPosters(
                                         .size(Size.ORIGINAL)
                                         .build(),
                                 )
-                            } catch (cancelled: CancellationException) {
-                                throw cancelled
+                            } catch (canceled: CancellationException) {
+                                throw canceled
                             } catch (error: Exception) {
                                 Timber.w(error, "Surprise poster preload failed")
                             }
@@ -1017,8 +1017,8 @@ private suspend fun preloadPosters(
                     }.awaitAll()
             }
         }
-    } catch (cancelled: CancellationException) {
-        throw cancelled
+    } catch (canceled: CancellationException) {
+        throw canceled
     } catch (error: Exception) {
         Timber.w(error, "Surprise poster preload failed")
     }

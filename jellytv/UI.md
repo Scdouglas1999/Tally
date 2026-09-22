@@ -2,7 +2,7 @@
 
 The JellyTV section (Games, Channels, Multiview), the player overlays and the plugin's web UI share one visual
 language. As of 2026-09-22 the whole app uses it: the Wholphin look (pill buttons, round avatars, rounded posters,
-full-page colour washes) is retired for the JELLYTV theme. This document is the design authority for that work.
+full-page color washes) is retired for the JELLYTV theme. This document is the design authority for that work.
 Workers implement it; they do not redesign it.
 
 ## 1. The language ("control room, off duty")
@@ -23,13 +23,13 @@ Source of truth: the header comment and tokens in the plugin's `Web/app.css`, mi
   by at least `focusBorder + 1dp` on the sides where a focused item can touch its edge. Verify by measuring the
   border on all four sides of a focused first and last item at full resolution: they must be equal.
 - Plain-language labels ("Resume", "From the start", "Mark watched"), not jargon.
-- Text in a control is vertically centred: equal space above and below the cap height. tv-material3 `Surface`
-  puts content top-left, so labels must fill the control's height and centre explicitly. Check at full resolution.
+- Text in a control is vertically centered: equal space above and below the cap height. tv-material3 `Surface`
+  puts content top-left, so labels must fill the control's height and center explicitly. Check at full resolution.
 
 ## 2. Architecture
 - Upstream keeps the data: ViewModels, services, repositories, `BaseItem`, image URL helpers, navigation.
   JellyTV owns the composables. A JellyTV screen obtains the SAME ViewModel the upstream screen uses (same
-  `hiltViewModel` call and factory arguments), reads the same state and calls the same actions. If a behaviour
+  `hiltViewModel` call and factory arguments), reads the same state and calls the same actions. If a behavior
   lives in an upstream composable (a dialog, a context menu, a picker), the JellyTV screen reuses that composable
   rather than re-implementing it, until a later task restyles it.
 - Routing: one seam at the top of `ui/nav/DestinationContent.kt` asks `JellyTvRoutes.Content(destination, …)` to
@@ -39,7 +39,7 @@ Source of truth: the header comment and tokens in the plugin's `Web/app.css`, mi
 - Package layout: `jellytv/media/kit/` (components), `jellytv/media/<screen>/` (pages), strings in
   `res/values/strings_jellytv_media*.xml`.
 - Every JellyTV page wraps its content in `JtvScale { … }` (1080p = 960x540dp) on `JtvColors.ground`.
-- Theme-level coverage for everything not yet owned: square theme shapes (`JellyTvShapes`), no backdrop colour wash
+- Theme-level coverage for everything not yet owned: square theme shapes (`JellyTvShapes`), no backdrop color wash
   (`JellyTvFirstRun`), IBM Plex type (`JellyTvTypography`).
 
 ## 3. The kit (`jellytv/media/kit/`)
@@ -52,7 +52,7 @@ series). `showLabel = false` hides the bar (dense grids). Overlays on the image:
 - progress (resumable): 4dp bar along the image bottom, accent on `ruleStrong`, full image width.
 - played: a black tag top-left with mono 11sp `SEEN` in `muted` (JellyTV tag like multiview's MUTED).
 - unplayed episodes (series/season): the same tag with `4 NEW` in accent instead.
-- favourite: an 8dp accent `IndicatorSquare` top-right, 8dp in from the corner.
+- favorite: an 8dp accent `IndicatorSquare` top-right, 8dp in from the corner.
 **LandscapeCard** — 16:9 artwork (thumb → backdrop → primary). Default width 232. Same frame, focus and progress.
 Label bar: mono 11sp accent kicker (`S2 · E4`, `CHAPTER 3 · 30:00`, `TRAILER`) then Sans Medium 14sp title.
 **PersonCard** — square 1:1 portrait, width 104, `Crop`, same frame; label bar: name (Sans Medium 13sp, one line)
@@ -64,7 +64,7 @@ focused index when focus re-enters the row.
 optional FontAwesome glyph (16sp) before it. `primary`: accent fill, `onAccent` text; focused primary: a 3dp `text`
 border inside. Secondary: transparent, 1dp `ruleStrong` border, `text` label; focused: 3dp accent border.
 **IconButton** — 40x40 square, glyph 18sp, 1dp `ruleStrong` border; focused 3dp accent border and its label
-appears under the row as a mono 12sp `muted` caption ("FAVOURITE"), so icon-only rows stay legible.
+appears under the row as a mono 12sp `muted` caption ("FAVORITE"), so icon-only rows stay legible.
 **Tabs** — the JellyTV top-bar tab style (indicator square + mono uppercase, selected = accent + underline),
 generic over labels: `JtvTabs(labels, selected, onSelect)`.
 **Chip** — filter/sort chip: height 32, 1dp `ruleStrong`, mono 13sp; toggles carry a leading `IndicatorSquare`
@@ -95,7 +95,7 @@ mono right; playing = accent indicator square before the number. Focus like Epis
 
 ## 4. Screens, in order
 1. Film details (pilot: sets the bar for the rest). 2. Series details with seasons as tabs and an episode list.
-3. Episode details. 4. Home. 5. Library (grid, tabs, filter/sort). 6. Search. 7. Collection, Person, Favourites,
+3. Episode details. 4. Home. 5. Library (grid, tabs, filter/sort). 6. Search. 7. Collection, Person, Favorites,
 Playlist. 8. Music (album, artist, now playing). 9. Player controls. 10. Settings and upstream dialogs (theme level
 first; bespoke later).
 Each screen's spec lists: the upstream VM and actions it reuses, layout, focus, and the screens to look at.

@@ -55,7 +55,7 @@ class JellyTvModelsTest {
 
     @Test
     fun `unknown keys are ignored`() {
-        // heat, tags, channels, nickname, homeWinPct, clockSeconds are not modelled
+        // heat, tags, channels, nickname, homeWinPct, clockSeconds are not modeled
         val game = board.games[1]
         assertEquals("PHI @ NYM", game.name)
         assertEquals("Top 8th", game.detail)

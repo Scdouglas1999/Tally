@@ -6,7 +6,7 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 
 /**
  * Where to go when a player reaches the natural end of something with nothing queued after it
- * (seam in `PlaybackViewModel.onPlaybackStateChanged`). Null keeps upstream's behaviour (go back).
+ * (seam in `PlaybackViewModel.onPlaybackStateChanged`). Null keeps upstream's behavior (go back).
  * Only a finished movie gets the post-play page; episodes, live TV and intros never do.
  */
 object JellyTvPostPlay {

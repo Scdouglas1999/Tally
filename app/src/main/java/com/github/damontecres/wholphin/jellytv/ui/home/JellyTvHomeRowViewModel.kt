@@ -170,7 +170,7 @@ class JellyTvHomeRowViewModel
 
         /**
          * A game card took focus. The game's matchup art (server-rendered, text-free) becomes the page backdrop,
-         * so upstream fades it in and tints the page from the teams' colours exactly as it does for a film.
+         * so upstream fades it in and tints the page from the teams' colors exactly as it does for a film.
          * Servers without the art get a cleared backdrop: the last film's poster must not linger behind a game.
          */
         fun onCardFocused(game: JtvGame) {

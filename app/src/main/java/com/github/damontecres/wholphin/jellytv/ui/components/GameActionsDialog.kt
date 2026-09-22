@@ -103,7 +103,7 @@ private data class ActionLine(
 )
 
 /**
- * The long-press menu for a game: a centred JellyTV panel over a 60% black scrim.
+ * The long-press menu for a game: a centered JellyTV panel over a 60% black scrim.
  * Watch, multiview, corner and remove close the dialog after they run. Follow and hide-scores toggle in place.
  * Focus starts on the first row, stays inside the list, and BACK dismisses.
  *

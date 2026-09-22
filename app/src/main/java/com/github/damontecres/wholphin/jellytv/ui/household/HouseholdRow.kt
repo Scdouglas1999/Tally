@@ -53,7 +53,7 @@ private val HouseholdCardHeight = 120.dp
  *
  * The title matches [com.github.damontecres.wholphin.ui.cards.ItemRow]'s title; the cards sit
  * inside [JtvScale] so they stay the size they are in the JellyTV section. The row never asks
- * for focus — UP/DOWN from the neighbouring rows reaches it.
+ * for focus — UP/DOWN from the neighboring rows reaches it.
  */
 @Composable
 fun HouseholdRow(

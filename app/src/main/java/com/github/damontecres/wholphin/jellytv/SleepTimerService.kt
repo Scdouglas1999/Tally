@@ -103,7 +103,7 @@ class SleepTimerService
         }
 
         fun cancel() {
-            Timber.i("Sleep timer cancelled")
+            Timber.i("Sleep timer canceled")
             generation++
             teardown()
         }

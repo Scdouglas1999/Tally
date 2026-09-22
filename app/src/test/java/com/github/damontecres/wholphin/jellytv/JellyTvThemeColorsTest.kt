@@ -10,7 +10,7 @@ import org.junit.Test
 
 /**
  * The JellyTV palette is the whole app's default theme, so the tokens it promises are pinned here: near-black
- * grounds, one amber accent, red only for errors, hairline greys — and, above all, nothing that reads purple,
+ * grounds, one amber accent, red only for errors, hairline grays — and, above all, nothing that reads purple,
  * blue or green (the upstream themes it replaces are all built on those hues).
  */
 class JellyTvThemeColorsTest {

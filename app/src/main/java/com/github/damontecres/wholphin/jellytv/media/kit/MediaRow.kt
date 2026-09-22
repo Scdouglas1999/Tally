@@ -35,7 +35,7 @@ import com.github.damontecres.wholphin.util.ExceptionHandler
 import kotlinx.coroutines.launch
 
 /**
- * Room a focused card's border needs outside the card: tv-material3 centres the 3dp stroke on the
+ * Room a focused card's border needs outside the card: tv-material3 centers the 3dp stroke on the
  * card's edge, so half of it lies outside, and a lazy list clips at its bounds.
  */
 val FocusEdge: Dp = JtvDimens.focusBorder + 1.dp

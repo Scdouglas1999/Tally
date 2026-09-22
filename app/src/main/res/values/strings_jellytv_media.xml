@@ -8,8 +8,8 @@
     <string name="jtv_media_trailer">Trailer</string>
     <string name="jtv_media_watched">Watched</string>
     <string name="jtv_media_unwatched">Unwatched</string>
-    <string name="jtv_media_favourite">Favourite</string>
-    <string name="jtv_media_favourited">Favourited</string>
+    <string name="jtv_media_favorite">Favorite</string>
+    <string name="jtv_media_favorited">Favorited</string>
     <string name="jtv_media_version">Version</string>
     <string name="jtv_media_more">More</string>
     <string name="jtv_media_cast">Cast &amp; crew</string>

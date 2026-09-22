@@ -77,7 +77,7 @@ private const val OPEN_GRACE_MS = 400L
 private val FOCUS_ROOM = JtvDimens.focusBorder + 1.dp
 
 /**
- * In-player quality picker. Same panel family as the sleep timer: centred over a 60% scrim, focus
+ * In-player quality picker. Same panel family as the sleep timer: centered over a 60% scrim, focus
  * trapped, BACK closes, focus starts on the current choice.
  */
 @Composable

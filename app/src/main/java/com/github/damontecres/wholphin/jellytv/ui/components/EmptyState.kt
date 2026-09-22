@@ -31,7 +31,7 @@ import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 
 /**
- * Centred title + muted subtitle inside a 1dp dashed ruleStrong border.
+ * Centered title + muted subtitle inside a 1dp dashed ruleStrong border.
  */
 @Composable
 fun EmptyState(

@@ -10,7 +10,7 @@ import kotlinx.serialization.json.JsonElement
  * Rules every client follows:
  *  - decode leniently: unknown keys are ignored, missing keys take the defaults below;
  *  - never decide what the server already decided (which channel to watch is `watch`, full stop);
- *  - `heat` and `tags` exist in the payload for other clients and are deliberately NOT modelled here.
+ *  - `heat` and `tags` exist in the payload for other clients and are deliberately NOT modeled here.
  */
 
 val JellyTvJson: Json =
@@ -56,9 +56,9 @@ data class JtvTeam(
     val winner: Boolean = false,
     /** Points per period (quarter, inning, …) in order; empty before the game starts. */
     val periods: List<Int> = emptyList(),
-    /** Team colour, six hex digits without '#' ("132448"); empty when unknown. */
+    /** Team color, six hex digits without '#' ("132448"); empty when unknown. */
     val color: String = "",
-    /** Alternate team colour, same format. */
+    /** Alternate team color, same format. */
     val altColor: String = "",
 )
 

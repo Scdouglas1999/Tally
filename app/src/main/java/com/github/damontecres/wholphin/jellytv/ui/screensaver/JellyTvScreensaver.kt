@@ -140,7 +140,7 @@ fun JellyTvScreensaver(modifier: Modifier = Modifier): Boolean {
 }
 
 /**
- * The idle screen itself: [shown] centred, a "N live" count and the wall clock in the top corners.
+ * The idle screen itself: [shown] centered, a "N live" count and the wall clock in the top corners.
  * [games] is the whole live set, so a score that changes mid-crossfade still lands in the right half.
  */
 @Composable

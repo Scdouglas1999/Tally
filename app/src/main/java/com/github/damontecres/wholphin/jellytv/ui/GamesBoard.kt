@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
  * The games board: the large [FocusedGamePanel] mirroring the focused card on top,
  * then vertically scrolling rows of [GameCard]s (one per league + state).
  *
- * Focus behaviour (mirrors upstream rows of cards):
+ * Focus behavior (mirrors upstream rows of cards):
  *  - on open (and on return from the player), focus lands on the card at the
  *    remembered position, defaulting to the first card of the first row;
  *  - each row restores its own last-focused card when re-entered from above/below;

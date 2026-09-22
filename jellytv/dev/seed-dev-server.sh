@@ -4,7 +4,7 @@
 # Points a dev Jellyfin at the library built by make-test-library.sh (Movies, Shows, Music with
 # automatic TMDb collections and trickplay), waits for the scan, then gives the admin user a
 # believable history so home rows are populated: a few films watched, two in progress, Breaking Bad
-# S01E01-E03 watched (Next Up = E04), Bluey half-way through season 1, and some favourites.
+# S01E01-E03 watched (Next Up = E04), Bluey half-way through season 1, and some favorites.
 set -euo pipefail
 B=${1:?server url}; TOK=${2:?admin token}; ROOT=${3:-/media}
 H="Authorization: MediaBrowser Token=\"$TOK\""; J='Content-Type: application/json'

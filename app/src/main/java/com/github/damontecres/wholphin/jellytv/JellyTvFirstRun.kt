@@ -19,7 +19,7 @@ import javax.inject.Singleton
  * (Purple, the proto default), so the default never applies to it: switch that once. Anyone who picks another
  * theme afterwards keeps it.
  *
- * Second step (JellyTV UI takeover): the backdrop shows the image only, without Wholphin's full-page colour wash
+ * Second step (JellyTV UI takeover): the backdrop shows the image only, without Wholphin's full-page color wash
  * (gradients as decoration are not part of the JellyTV look). Once, so a user who turns the wash back on keeps it.
  */
 @Singleton
@@ -56,7 +56,7 @@ class JellyTvFirstRun
                     .first()
                     .interfacePreferences.backdropStyle
             if (current == BackdropStyle.BACKDROP_DYNAMIC_COLOR || current == BackdropStyle.UNRECOGNIZED) {
-                Timber.i("JellyTV look: backdrop colour wash off (image only)")
+                Timber.i("JellyTV look: backdrop color wash off (image only)")
                 dataStore.updateData { data ->
                     data
                         .toBuilder()

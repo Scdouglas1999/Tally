@@ -57,7 +57,7 @@ class JellyTvRemoteCommands
                     .launchIn(activity.lifecycleScope)
         }
 
-        /** Subscribes to the session's general commands until the returned job is cancelled (the caller owns it). */
+        /** Subscribes to the session's general commands until the returned job is canceled (the caller owns it). */
         fun listen(
             api: ApiClient,
             activity: AppCompatActivity,

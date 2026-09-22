@@ -8,7 +8,7 @@ settings are the foundation, and Tally adds a new look, live sports and a set of
 and deciding what to watch.
 
 The name comes from the *tally light*, the red lamp on a broadcast camera that says "you're on air". The design
-follows the same idea: a calm, dark control room with one accent colour for what is focused or live.
+follows the same idea: a calm, dark control room with one accent color for what is focused or live.
 
 > Tally is an independent fork. It is not made, reviewed or endorsed by the Wholphin project or by Jellyfin.
 > Please report problems with Tally [here](https://github.com/Scdouglas1999/Tally/issues), not to Wholphin.

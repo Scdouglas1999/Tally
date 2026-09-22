@@ -112,7 +112,7 @@ fun JtvButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            // tv-material3 Surface lays its content out top-start: fill the 40dp so the label is centred.
+            // tv-material3 Surface lays its content out top-start: fill the 40dp so the label is centered.
             modifier =
                 Modifier
                     .fillMaxHeight()
@@ -133,7 +133,7 @@ fun JtvButton(
                 color = contentColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                // Plex Mono capitals sit below the centre of their line box (the descent is empty
+                // Plex Mono capitals sit below the center of their line box (the descent is empty
                 // for caps): lift them so the ink has equal room above and below.
                 modifier = Modifier.offset(y = CapsLift),
             )
@@ -142,7 +142,7 @@ fun JtvButton(
     }
 }
 
-/** Upward nudge for an uppercase mono label centred in a fixed-height box. */
+/** Upward nudge for an uppercase mono label centered in a fixed-height box. */
 internal val CapsLift = (-1).dp
 
 private val iconCaption =

@@ -857,7 +857,7 @@ fun navItemColor(
                     -> MaterialTheme.colorScheme.primary
 
                     // JELLYTV: begin
-                    // the selected pill is the accent itself, so the icon takes the pill's text colour
+                    // the selected pill is the accent itself, so the icon takes the pill's text color
                     AppThemeColors.JELLYTV -> MaterialTheme.colorScheme.inverseOnSurface
                     // JELLYTV: end
                 }

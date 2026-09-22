@@ -252,7 +252,7 @@ private fun noticeText(notice: TogetherNotice): Pair<String, Color> =
         is TogetherNotice.Error -> notice.message.uppercase() to JtvColors.liveText
     }
 
-/** A black label bar, 32dp high, no border; its content is centred vertically. */
+/** A black label bar, 32dp high, no border; its content is centered vertically. */
 @Composable
 private fun BlackBar(
     modifier: Modifier = Modifier,
@@ -326,8 +326,8 @@ private class KeyTap(
 private val BAR_HEIGHT = 32.dp
 
 /**
- * IBM Plex Mono capitals sit ~0.75dp (at JtvScale) below the centre of their line box (ascent 1025, descent 275,
- * cap height 698 per 1000), so a centred UPPERCASE label reads low by ~2px at 1080p. Lifting it makes the space
+ * IBM Plex Mono capitals sit ~0.75dp (at JtvScale) below the center of their line box (ascent 1025, descent 275,
+ * cap height 698 per 1000), so a centered UPPERCASE label reads low by ~2px at 1080p. Lifting it makes the space
  * above and below the capitals equal, as UI.md asks.
  */
 internal val CAP_NUDGE = (-0.75).dp

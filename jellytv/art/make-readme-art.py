@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Renders the README header (1600x440) and the GitHub social preview (1280x640) in the Tally brand system:
 near-black ground, an amber rule along the top, the amber tally square, the name in IBM Plex Sans Bold (tracked),
-and a mono tagline. Run from the repository root: python3 jellytv/art/make-readme-art.py
+and (social preview only) a mono tagline. Run from the repository root: python3 jellytv/art/make-readme-art.py
 
 The header is an animated PNG: the tally light is off, flickers on like a lamp warming up and settles with a soft
 glow, then the top rule sweeps across ("on air"); it stays lit for about nine seconds and repeats. It loops because
@@ -46,9 +46,10 @@ def art(w, h, cap, tagline, sub, out=None, tag_scale=0.26, tag_track=0.07, lamp=
     gap = int(cap * 0.62)
     total = sq + gap + name_w
     x0 = (w - total) / 2
-    cap_top = h * 0.36
     top_off = sans.getbbox("H")[1]
     cap_h = sans.getbbox("H")[3] - top_off
+    # with a tagline the name sits a little high; without one the lamp and name are centered on the canvas
+    cap_top = h * 0.36 if tagline else (h - cap_h) / 2
     box = [x0, cap_top + (cap_h - sq) / 2, x0 + sq - 1, cap_top + (cap_h + sq) / 2 - 1]
     if glow > 0:
         halo = Image.new("L", (w, h), 0)
@@ -59,11 +60,12 @@ def art(w, h, cap, tagline, sub, out=None, tag_scale=0.26, tag_track=0.07, lamp=
         d = ImageDraw.Draw(im)
     d.rectangle(box, fill=mix(LAMP_OFF, AMBER, lamp))
     tracked(d, (x0 + sq + gap, cap_top - top_off), "TALLY", sans, TEXT, track)
-    mono = ImageFont.truetype(MONO, int(cap * tag_scale))
-    mtrack = cap * tag_track
-    y = cap_top + cap_h + cap * 0.62
-    tw = width(tagline, mono, mtrack)
-    tracked(d, ((w - tw) / 2, y), tagline, mono, MUTED, mtrack)
+    if tagline:
+        mono = ImageFont.truetype(MONO, int(cap * tag_scale))
+        mtrack = cap * tag_track
+        y = cap_top + cap_h + cap * 0.62
+        tw = width(tagline, mono, mtrack)
+        tracked(d, ((w - tw) / 2, y), tagline, mono, MUTED, mtrack)
     if sub:
         small = ImageFont.truetype(MONO, int(cap * 0.12))
         sw = width(sub, small, cap * 0.035)
@@ -85,7 +87,7 @@ def header_animation(out):
     steps += [(ease_out(i / 6), ease_out(i / 6) * 0.7, 0, 30) for i in range(1, 7)]
     steps += [(1, 0.7 + 0.3 * ease_out(i / 8), ease_out(i / 8), 33) for i in range(1, 9)]
     steps[-1] = (1, 1, 1, 9000)
-    args = (1600, 440, 132, "LIVE SPORTS  ·  YOUR LIBRARY  ·  WATCH TOGETHER", None)
+    args = (1600, 440, 132, None, None)
     final = art(*args)
     frames = [art(*args, lamp=l, glow=g, rule=r) for l, g, r, _ in steps]
     final.save(out, save_all=True, append_images=frames, default_image=True, loop=0,

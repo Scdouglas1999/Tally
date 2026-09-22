@@ -61,7 +61,7 @@ import java.util.UUID
  * Draws nothing (zero height, no header) when there are no parties and this TV is not in one.
  *
  * Polls while composed (see [TogetherRowViewModel.poll]); the poll restarts at once when this TV joins or
- * leaves a party. The row never asks for focus: UP/DOWN from the neighbouring rows reaches it, like
+ * leaves a party. The row never asks for focus: UP/DOWN from the neighboring rows reaches it, like
  * [com.github.damontecres.wholphin.jellytv.ui.household.HouseholdRow].
  */
 @Composable
@@ -72,7 +72,7 @@ fun TogetherRow(modifier: Modifier = Modifier) {
     LaunchedEffect(viewModel, mine) { viewModel.poll() }
 
     // A party can end while its card has focus. Move focus off that card BEFORE it leaves the row (to its
-    // neighbour, or out of the row when it was the last one); otherwise Compose drops focus on the drawer.
+    // neighbor, or out of the row when it was the last one); otherwise Compose drops focus on the drawer.
     var shown by remember { mutableStateOf(parties) }
     var focusedId by remember { mutableStateOf<UUID?>(null) }
     var rowFocused by remember { mutableStateOf(false) }
@@ -82,9 +82,9 @@ fun TogetherRow(modifier: Modifier = Modifier) {
         val focused = focusedId
         if (rowFocused && focused != null && parties.none { it.id == focused }) {
             val index = shown.indexOfFirst { it.id == focused }
-            val neighbour =
+            val neighbor =
                 (shown.drop(index + 1) + shown.take(index).reversed()).firstOrNull { card -> parties.any { it.id == card.id } }
-            val moved = neighbour?.let { requesters[it.id]?.tryRequestFocus("jtv-together-row") } ?: false
+            val moved = neighbor?.let { requesters[it.id]?.tryRequestFocus("jtv-together-row") } ?: false
             if (!moved) focusManager.moveFocus(FocusDirection.Down) || focusManager.moveFocus(FocusDirection.Up)
         }
         shown = parties

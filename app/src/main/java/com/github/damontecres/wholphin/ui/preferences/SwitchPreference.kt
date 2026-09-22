@@ -92,7 +92,7 @@ fun SwitchColors(): SwitchColors {
         }
 
         // JELLYTV: begin
-        // A focused row is an amber pill, so the track must not be amber: grey track, amber thumb when on.
+        // A focused row is an amber pill, so the track must not be amber: gray track, amber thumb when on.
         AppThemeColors.JELLYTV -> {
             SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.primary,

@@ -806,9 +806,9 @@ private fun ActionRow(
                     label =
                         stringResource(
                             if (movie.favorite) {
-                                R.string.jtv_media_favourited
+                                R.string.jtv_media_favorited
                             } else {
-                                R.string.jtv_media_favourite
+                                R.string.jtv_media_favorite
                             },
                         ),
                     glyph = heartGlyph,

@@ -10,7 +10,7 @@ import com.github.damontecres.wholphin.ui.theme.ThemeColors
  * The JellyTV look as a Wholphin theme, selected as `AppThemeColors.JELLYTV` (the fork's default).
  *
  * Same palette as the JellyTV section and the JellyTV web UI (see JELLYTV.md): flat near-black grounds,
- * hairline greys, one amber accent, red only for errors and LIVE. There is deliberately no purple, blue or
+ * hairline grays, one amber accent, red only for errors and LIVE. There is deliberately no purple, blue or
  * green anywhere — Wholphin paints focus with `colorScheme.border` and the focused drawer item, switches and
  * sliders with `colorScheme.primary`, so both of those are the amber accent.
  *

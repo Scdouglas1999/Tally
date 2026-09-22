@@ -98,8 +98,8 @@ class SurpriseViewModel
                                     Destination.MediaItem(pick)
                                 }
                             navigationManager.navigateTo(destination)
-                        } catch (cancelled: CancellationException) {
-                            throw cancelled
+                        } catch (canceled: CancellationException) {
+                            throw canceled
                         } catch (error: Exception) {
                             Timber.e(error, "Surprise play failed")
                             _state.update { it.copy(loading = false, error = shortError(error)) }
@@ -134,8 +134,8 @@ class SurpriseViewModel
                             val names =
                                 try {
                                     repository.genres(filters.kind)
-                                } catch (cancelled: CancellationException) {
-                                    throw cancelled
+                                } catch (canceled: CancellationException) {
+                                    throw canceled
                                 } catch (error: Exception) {
                                     Timber.w(error, "Surprise genres failed")
                                     emptyList()
@@ -168,8 +168,8 @@ class SurpriseViewModel
                                 )
                             }
                         }
-                    } catch (cancelled: CancellationException) {
-                        throw cancelled
+                    } catch (canceled: CancellationException) {
+                        throw canceled
                     } catch (error: Exception) {
                         Timber.e(error, "Surprise shuffle failed")
                         if (generation != requestGeneration) return@launch

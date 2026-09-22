@@ -71,7 +71,7 @@ object SyncPolicy {
 
     /**
      * When to act on a timed command: the local instant for [commandWhen], or now if that has passed. A late
-     * `Unpause` is honoured by starting at once from [expectedPositionMs] rather than from the command's position.
+     * `Unpause` is honored by starting at once from [expectedPositionMs] rather than from the command's position.
      */
     fun localFireTime(
         commandWhen: Instant,
