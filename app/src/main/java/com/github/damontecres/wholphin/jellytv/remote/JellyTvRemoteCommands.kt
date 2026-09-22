@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.api.sockets.subscribe
+import org.jellyfin.sdk.model.api.ForceKeepAliveMessage
 import org.jellyfin.sdk.model.api.GeneralCommandMessage
 import org.jellyfin.sdk.model.api.GeneralCommandType
 import timber.log.Timber
@@ -32,6 +33,30 @@ class JellyTvRemoteCommands
     constructor(
         private val navigationManager: NavigationManager,
     ) {
+        private var keeper: Job? = null
+        private var keeperActivity: AppCompatActivity? = null
+
+        /**
+         * Holds one websocket subscription for the activity's whole life. Upstream cancels every collector on pause
+         * and resubscribes on resume; the SDK closes the socket when its subscriber count reaches zero, and a
+         * subscription made in the same moment does not reopen it, so after any pause (a deep link, a system dialog)
+         * pushed Play, remote commands and messages stopped arriving. With this subscriber the count never reaches
+         * zero. It ends with the activity (its lifecycle scope), not on pause or stop.
+         */
+        fun keepSocketOpen(
+            api: ApiClient,
+            activity: AppCompatActivity,
+        ) {
+            if (keeperActivity === activity && keeper?.isActive == true) return
+            keeper?.cancel()
+            keeperActivity = activity
+            keeper =
+                api.webSocket
+                    .subscribe<ForceKeepAliveMessage>()
+                    .catch { ex -> Timber.w(ex, "JellyTV socket keeper") }
+                    .launchIn(activity.lifecycleScope)
+        }
+
         /** Subscribes to the session's general commands until the returned job is cancelled (the caller owns it). */
         fun listen(
             api: ApiClient,

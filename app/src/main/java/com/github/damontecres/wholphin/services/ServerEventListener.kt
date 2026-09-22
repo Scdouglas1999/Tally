@@ -120,6 +120,7 @@ class ServerEventListener
             playJob = jellyTvPlayRouter.listen(api, activity.lifecycleScope)
             remoteJob?.cancel()
             remoteJob = jellyTvRemoteCommands.listen(api, activity)
+            jellyTvRemoteCommands.keepSocketOpen(api, activity)
             // JELLYTV: end
         }
 
