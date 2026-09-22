@@ -37,6 +37,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
@@ -302,6 +303,8 @@ fun DetailHeader(
     actions: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     ends: String? = null,
+    kickerColor: Color = JtvColors.muted,
+    textMaxWidth: Dp = 480.dp,
 ) {
     Box(modifier = modifier) {
         Box(
@@ -333,12 +336,12 @@ fun DetailHeader(
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.widthIn(max = 480.dp),
+                modifier = Modifier.widthIn(max = textMaxWidth),
             ) {
                 Text(
                     text = kicker.uppercase(),
                     style = JtvType.label,
-                    color = JtvColors.muted,
+                    color = kickerColor,
                     maxLines = 1,
                 )
                 LogoOrTitle(title = title, logoUrl = logoUrl)

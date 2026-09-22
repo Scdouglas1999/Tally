@@ -1,0 +1,112 @@
+{
+    "Items": [
+        {
+            "Name": "Season 1",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "0450f4253c584c3c4fa9ed8db53b086b",
+            "PremiereDate": "2005-03-24T00:00:00.0000000Z",
+            "ChannelId": null,
+            "ProductionYear": 2005,
+            "IndexNumber": 1,
+            "IsFolder": true,
+            "Type": "Season",
+            "ParentLogoItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropImageTags": [
+                "592397a34b90122614f13f4ed2b23baa"
+            ],
+            "UserData": {
+                "UnplayedItemCount": 1,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "73244001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "ChildCount": 6,
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "ImageTags": {
+                "Primary": "c3016b4d865b7420a74bbfe43f964095"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "e0b5ed4d317375a7b3168c85811e0a81",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "c3016b4d865b7420a74bbfe43f964095": "dpO3,.%M-;?b$xt7Rjae~pxuWDoe%LRkWYoeMxRjWARj",
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                },
+                "Logo": {
+                    "e0b5ed4d317375a7b3168c85811e0a81": "HAHC1RRj?b_3of00IU%M-;4nWBM{_3ofRj-;M{D%"
+                },
+                "Thumb": {
+                    "ac9f8ef447c85eed60c5137a1e687fba": "WRDT3d?bIw9ZROWGkvM{Ivxv%LxvD*IUIptSxAsk%LoIR+Wsn}Ri"
+                },
+                "Backdrop": {
+                    "592397a34b90122614f13f4ed2b23baa": "WNA]{QxZM{WCRkxZ~Ws:RjafRjs:-ooet7oJM{ogxZoLxuocM{t7"
+                }
+            },
+            "ParentThumbItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentThumbImageTag": "ac9f8ef447c85eed60c5137a1e687fba",
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown"
+        },
+        {
+            "Name": "Season 2",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "92a0e676990e3ebce85467a610b36f45",
+            "PremiereDate": "2005-09-20T00:00:00.0000000Z",
+            "ChannelId": null,
+            "ProductionYear": 2005,
+            "IndexNumber": 2,
+            "IsFolder": true,
+            "Type": "Season",
+            "ParentLogoItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentBackdropImageTags": [
+                "592397a34b90122614f13f4ed2b23baa"
+            ],
+            "UserData": {
+                "UnplayedItemCount": 0,
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": true,
+                "Key": "73244002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "ChildCount": 4,
+            "SeriesName": "The Office",
+            "SeriesId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "SeriesPrimaryImageTag": "26f7f28ee651f878cb3f6ebf64dc207c",
+            "ImageTags": {
+                "Primary": "105f9c1290820c1e01bc884dc3a27db6"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "e0b5ed4d317375a7b3168c85811e0a81",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "105f9c1290820c1e01bc884dc3a27db6": "dJMZwc.A6m=|;BS1o}xI,]xUwZxu@rs:I.rpzmIoOZRP",
+                    "26f7f28ee651f878cb3f6ebf64dc207c": "dbMj,Y~Xt7-;00j[M{MxxuIUj[Rj?bR%tRt7oLofbHa#"
+                },
+                "Logo": {
+                    "e0b5ed4d317375a7b3168c85811e0a81": "HAHC1RRj?b_3of00IU%M-;4nWBM{_3ofRj-;M{D%"
+                },
+                "Thumb": {
+                    "ac9f8ef447c85eed60c5137a1e687fba": "WRDT3d?bIw9ZROWGkvM{Ivxv%LxvD*IUIptSxAsk%LoIR+Wsn}Ri"
+                },
+                "Backdrop": {
+                    "592397a34b90122614f13f4ed2b23baa": "WNA]{QxZM{WCRkxZ~Ws:RjafRjs:-ooet7oJM{ogxZoLxuocM{t7"
+                }
+            },
+            "ParentThumbItemId": "ffeb6196e3c9ffb1e32edb9fe38c6d2a",
+            "ParentThumbImageTag": "ac9f8ef447c85eed60c5137a1e687fba",
+            "LocationType": "FileSystem",
+            "MediaType": "Unknown"
+        }
+    ],
+    "TotalRecordCount": 2,
+    "StartIndex": 0
+}
