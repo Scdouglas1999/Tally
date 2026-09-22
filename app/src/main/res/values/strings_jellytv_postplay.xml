@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Post-play page. Names are prefixed jtv_postplay_; never add these to strings.xml. -->
+    <string name="jtv_postplay_kicker">You just watched</string>
+    <string name="jtv_postplay_watch_again">Watch again</string>
+    <string name="jtv_postplay_done">Done</string>
+    <string name="jtv_postplay_more_like_this">More like this</string>
+</resources>
