@@ -3,9 +3,10 @@
 near-black ground, an amber rule along the top, the amber tally square, the name in IBM Plex Sans Bold (tracked),
 and a mono tagline. Run from the repository root: python3 jellytv/art/make-readme-art.py
 
-The header is an animated PNG that plays once: the tally light is off, flickers on like a lamp warming up and
-settles with a soft glow, then the top rule sweeps across ("on air"). Its default image is the final frame, so a
-viewer that cannot animate APNG shows the light on."""
+The header is an animated PNG: the tally light is off, flickers on like a lamp warming up and settles with a soft
+glow, then the top rule sweeps across ("on air"); it stays lit for about nine seconds and repeats. It loops because
+on the repository page the README starts below the file list, so a play-once animation had finished before anyone
+scrolled to it. Its default image is the lit frame, for viewers that cannot animate APNG."""
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 GROUND, AMBER, TEXT, MUTED, RULE = (14, 15, 14), (255, 176, 0), (227, 229, 222), (139, 144, 132), (42, 44, 42)
@@ -80,15 +81,15 @@ def ease_out(t):
 
 def header_animation(out):
     """(lamp, glow, rule, milliseconds) per frame: dark, two flickers, a warm-up, then the rule sweeps."""
-    steps = [(0, 0, 0, 900), (0.55, 0.15, 0, 60), (0, 0, 0, 90), (0.85, 0.3, 0, 50), (0.1, 0, 0, 140)]
+    steps = [(0, 0, 0, 700), (0.55, 0.15, 0, 60), (0, 0, 0, 90), (0.85, 0.3, 0, 50), (0.1, 0, 0, 140)]
     steps += [(ease_out(i / 6), ease_out(i / 6) * 0.7, 0, 30) for i in range(1, 7)]
     steps += [(1, 0.7 + 0.3 * ease_out(i / 8), ease_out(i / 8), 33) for i in range(1, 9)]
-    steps[-1] = (1, 1, 1, 1000)
+    steps[-1] = (1, 1, 1, 9000)
     args = (1600, 440, 132, "LIVE SPORTS  ·  YOUR LIBRARY  ·  WATCH TOGETHER", None)
     final = art(*args)
     frames = [art(*args, lamp=l, glow=g, rule=r) for l, g, r, _ in steps]
-    final.save(out, save_all=True, append_images=frames, default_image=True, loop=1,
-               duration=[0] + [ms for *_, ms in steps], optimize=True)
+    final.save(out, save_all=True, append_images=frames, default_image=True, loop=0,
+               duration=[ms for *_, ms in steps], optimize=True)
 
 
 header_animation(OUT + "header.png")
