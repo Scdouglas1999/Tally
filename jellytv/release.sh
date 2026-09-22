@@ -43,7 +43,7 @@ fi
 
 if [ $PUBLISH = 1 ]; then
   TAG="jtv-${VERSION#v}"
-  git tag -f "$TAG" && git push -f origin "$TAG" jellytv
+  git tag -f "$TAG" && git push -f origin "refs/tags/$TAG" && git push origin main
   NOTES="${JELLYTV_NOTES:-JellyTV for Android TV $VERSION}"
   gh release create "$TAG" "$OUT"/JellyTV.apk "$OUT"/Wholphin-release*.apk --repo Scdouglas1999/Tally --title "$VERSION" --notes "$NOTES" --latest
   echo "published $VERSION"
