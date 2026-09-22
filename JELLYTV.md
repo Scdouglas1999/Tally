@@ -64,7 +64,6 @@ file is a future merge conflict.** Therefore:
 | W33 | `ui/playback/PlaybackViewModel.kt` (`init` W29 region; `changeStreams` bitrate), `PlaybackDialog.kt` (W20 region) | in-player Quality: `JellyTvQuality` override before the global max bitrate, restart at the current position, no video stream copy while a quality is chosen (`transcodingUrl`); "Quality" menu entry |
 | W34 | `ui/nav/ApplicationContent.kt` (NavDrawer call) | `TallyNavDrawer` replaces upstream's drawer while the JELLYTV theme is selected |
 | W35 | `services/hilt/AppModule.kt` (`clientInfo`) | `JellyTvClientName`: JellyTV-era installs keep reporting "JellyTV" to the server, because their tokens are bound to that name |
-| W36 | `ui/nav/ApplicationContent.kt` (`NavDisplay` call) | `TallyTransitions`: a 180 ms cut between pages in the Tally theme instead of the 700 ms default crossfade |
 
 ## Releases and self-update
 
@@ -135,7 +134,7 @@ instrument-like. Mono labels are UPPERCASE with 1.5–2.5sp letter spacing. Mini
 
 Focus: exactly one element is focused. Focused = 3dp `accent` border + `groundRaised` ground; NO scale
 animation, no glow. Unfocused = 1dp `ruleStrong` border. Safe margins: 48dp left/right, 27dp top/bottom.
-Motion: focus/color changes ≤120ms, nothing bounces.
+Motion: focus/colour changes ≤120ms, nothing bounces.
 
 Reference mockups (1920×1080): Games = top bar, a large "focused game" panel (teams, big mono scores, clock,
 situation, last play, channel label bar, key hints), then horizontally scrolling rows of game cards, one row
