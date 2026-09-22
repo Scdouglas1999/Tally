@@ -137,4 +137,12 @@ for entry in "${ALBUMS[@]}"; do
     } > "$first"
   fi
 done
+# One real-bitrate film for quality testing: 1080p at ~14 Mbps with Dolby Digital 5.1 and a commentary track.
+BIG="$OUT/movies/Big Buck Bunny (2008)"; mkdir -p "$BIG"
+[ -f "$BIG/Big Buck Bunny (2008).mkv" ] || ffmpeg -nostdin -loglevel error -y \
+  -f lavfi -i "testsrc2=size=1920x1080:rate=30:duration=60" -f lavfi -i "sine=frequency=440:duration=60" \
+  -f lavfi -i "sine=frequency=880:duration=60" -map 0:v -map 1:a -map 2:a \
+  -c:v libx264 -preset veryfast -b:v 14M -maxrate 16M -bufsize 16M -pix_fmt yuv420p -c:a ac3 -b:a 384k -ac 6 \
+  -metadata:s:a:0 language=eng -metadata:s:a:0 title="English 5.1" \
+  -metadata:s:a:1 language=eng -metadata:s:a:1 title="Commentary" "$BIG/Big Buck Bunny (2008).mkv"
 du -sh "$OUT"
