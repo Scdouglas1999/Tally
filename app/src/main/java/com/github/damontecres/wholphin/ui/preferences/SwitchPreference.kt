@@ -81,14 +81,25 @@ fun SwitchColors(): SwitchColors {
         AppThemeColors.OLED_BLACK,
         AppThemeColors.RED,
         AppThemeColors.BROWN,
-        // JELLYTV: begin
-        AppThemeColors.JELLYTV,
-        // JELLYTV: end
         -> {
             SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                 uncheckedThumbColor = MaterialTheme.colorScheme.onPrimary,
             )
         }
+
+        // JELLYTV: begin
+        // A focused row is an amber pill, so the track must not be amber: grey track, amber thumb when on.
+        AppThemeColors.JELLYTV -> {
+            SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                checkedTrackColor = MaterialTheme.colorScheme.tertiaryContainer,
+                checkedBorderColor = MaterialTheme.colorScheme.border,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                uncheckedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                uncheckedBorderColor = MaterialTheme.colorScheme.border,
+            )
+        }
+        // JELLYTV: end
     }
 }

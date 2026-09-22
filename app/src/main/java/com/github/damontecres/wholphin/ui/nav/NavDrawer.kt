@@ -811,10 +811,12 @@ fun navItemColor(
 
                     AppThemeColors.BOLD_BLUE,
                     AppThemeColors.OLED_BLACK,
-                    // JELLYTV: begin
-                    AppThemeColors.JELLYTV,
-                    // JELLYTV: end
                     -> MaterialTheme.colorScheme.primary
+
+                    // JELLYTV: begin
+                    // the selected pill is the accent itself, so the icon takes the pill's text colour
+                    AppThemeColors.JELLYTV -> MaterialTheme.colorScheme.inverseOnSurface
+                    // JELLYTV: end
                 }
             }
 
