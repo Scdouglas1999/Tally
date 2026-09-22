@@ -198,21 +198,18 @@ fun PlaybackDialog(
                 onSelectChoice = { _, choice ->
                     // JELLYTV: begin
                     val jellyTvRequest =
-                        when (choice.data) {
-                            PlaybackDialogType.JELLYTV_SLEEP_TIMER -> com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.Request.SLEEP_TIMER
-                            PlaybackDialogType.JELLYTV_SEND_TO -> com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.Request.SEND_TO
-                            else -> null
-                        }
+                        com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu
+                            .requestFor(choice.data)
+                    // JELLYTV: end
                     if (jellyTvRequest != null) {
+                        // JELLYTV: begin
                         com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.request.value = jellyTvRequest
                         onDismissRequest.invoke()
-                    } else {
                         // JELLYTV: end
-                        if (choice.data == PlaybackDialogType.DEBUG) {
-                            onPlaybackActionClick.invoke(PlaybackAction.ShowDebug)
-                        } else {
-                            onClickPlaybackDialogType(choice.data)
-                        }
+                    } else if (choice.data == PlaybackDialogType.DEBUG) {
+                        onPlaybackActionClick.invoke(PlaybackAction.ShowDebug)
+                    } else {
+                        onClickPlaybackDialogType(choice.data)
                     }
                 },
                 gravity = leftGravity,

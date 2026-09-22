@@ -1,6 +1,7 @@
 package com.github.damontecres.wholphin.jellytv.ui.player
 
 import androidx.compose.runtime.mutableStateOf
+import com.github.damontecres.wholphin.ui.playback.PlaybackDialogType
 import java.util.UUID
 
 /**
@@ -11,6 +12,14 @@ object JellyTvPlayerMenu {
     enum class Request { SLEEP_TIMER, SEND_TO }
 
     val request = mutableStateOf<Request?>(null)
+
+    /** The request behind a settings-menu entry, or null for upstream's own entries. */
+    fun requestFor(type: PlaybackDialogType): Request? =
+        when (type) {
+            PlaybackDialogType.JELLYTV_SLEEP_TIMER -> Request.SLEEP_TIMER
+            PlaybackDialogType.JELLYTV_SEND_TO -> Request.SEND_TO
+            else -> null
+        }
 
     /** The item the upstream player is on, published by a seam in PlaybackViewModel. */
     @Volatile
