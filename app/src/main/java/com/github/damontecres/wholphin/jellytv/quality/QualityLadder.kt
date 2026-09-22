@@ -47,6 +47,9 @@ object QualityLadder {
             Rung(360, 1),
         )
 
+    /** The picture height of the rung with this bitrate (a value from [options]), or null for anything else. */
+    fun heightFor(bitsPerSecond: Int): Int? = rungs.firstOrNull { it.bitsPerSecond == bitsPerSecond }?.height
+
     fun options(
         sourceHeight: Int?,
         sourceBitrate: Int?,

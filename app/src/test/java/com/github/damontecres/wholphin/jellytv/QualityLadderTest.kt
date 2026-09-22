@@ -362,4 +362,16 @@ class QualityLadderTest {
                     ),
                 ),
         )
+
+    @Test
+    fun `every rung knows its height and other bitrates do not`() {
+        val options = QualityLadder.options(2160, 200_000_000).drop(1)
+        assertEquals(13, options.size)
+        for (option in options) {
+            val height = QualityLadder.heightFor(option.bitsPerSecond!!)
+            val expected = if (option.label.startsWith("4K")) 2160 else option.label.substringBefore('P').toInt()
+            assertEquals(option.label, expected, height)
+        }
+        assertNull(QualityLadder.heightFor(4_000_000))
+    }
 }

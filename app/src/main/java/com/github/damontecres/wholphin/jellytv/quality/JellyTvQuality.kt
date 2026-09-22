@@ -31,17 +31,24 @@ object JellyTvQuality {
     fun maxBitrateOverride(): Int? = _choice.value
 
     /**
-     * Read by `changeStreams` for a transcoded stream. With a quality chosen, the server must re-encode the video:
-     * otherwise it copies a source whose reported bitrate is below the cap, and live channels report only their
-     * audio's bitrate (a 720p channel shows as 0.19 Mbps), so a lower choice changed nothing. Jellyfin 10.10 leaves
-     * `AllowVideoStreamCopy` out of the transcoding URL even when the request disallowed it, so it is added here.
+     * Read by `changeStreams` for a transcoded stream. With a quality chosen, the server must re-encode the video, at
+     * no more than the chosen rung's height:
+     *  - `AllowVideoStreamCopy=false`: otherwise it copies a source whose reported bitrate is below the cap, and live
+     *    channels report only their audio's bitrate (a 720p channel shows as 0.19 Mbps). Jellyfin 10.10 leaves the
+     *    flag out of the transcoding URL even when the request disallowed it.
+     *  - `MaxHeight`: Jellyfin also caps the output bitrate at ten times the source's reported video bitrate, which
+     *    for a live channel is 18 bits/s, so a bitrate cap alone left live video at full resolution (measured:
+     *    1080p at ~4.9 Mbps for "480P · 2"). The height is what reliably lowers it, and it makes every rung's label
+     *    true (a 1 Mbps cap alone gave 480p where the label says 360p).
      */
-    fun transcodingUrl(url: String): String =
-        if (_choice.value == null || url.contains("AllowVideoStreamCopy=", ignoreCase = true)) {
-            url
-        } else {
-            "$url&AllowVideoStreamCopy=false"
-        }
+    fun transcodingUrl(url: String): String {
+        val choice = _choice.value ?: return url
+        var result = url
+        if (!url.contains("AllowVideoStreamCopy=", ignoreCase = true)) result += "&AllowVideoStreamCopy=false"
+        val height = QualityLadder.heightFor(choice)
+        if (height != null && !url.contains("MaxHeight=", ignoreCase = true)) result += "&MaxHeight=$height"
+        return result
+    }
 
     /** The dialog chose a quality: remember it and restart the stream at the current position. */
     fun choose(bitsPerSecond: Int?) {
