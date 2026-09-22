@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="jtv_together_kicker">WATCH TOGETHER</string>
+    <string name="jtv_together_title">Watch with friends</string>
+    <string name="jtv_together_body">Everyone in the party plays, pauses and skips together.</string>
+    <string name="jtv_together_start">Start a party</string>
+    <string name="jtv_together_parties">Parties on this server</string>
+    <string name="jtv_together_watching">%1$d WATCHING</string>
+    <string name="jtv_together_looking">Looking for parties…</string>
+    <string name="jtv_together_leave">Leave the party</string>
+    <string name="jtv_together_close">Close</string>
+    <string name="jtv_together_party_name">%1$s\'s party</string>
+    <string name="jtv_together_party_fallback">Party</string>
+    <string name="jtv_together_name_separator"> · </string>
+</resources>
