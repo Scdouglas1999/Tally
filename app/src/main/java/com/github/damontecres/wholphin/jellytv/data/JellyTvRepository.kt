@@ -67,6 +67,15 @@ internal object SettingsJson {
         only: Boolean,
     ): JsonObject = JsonObject(raw + ("onlyWatchable" to JsonPrimitive(only)))
 
+    fun toggleFavoriteTeam(
+        raw: JsonObject,
+        teamKey: String,
+    ): JsonObject {
+        val current = (raw["favoriteTeams"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.content } ?: emptyList()
+        val next = if (teamKey in current) current - teamKey else current + teamKey
+        return JsonObject(raw + ("favoriteTeams" to JsonArray(next.map(::JsonPrimitive))))
+    }
+
     fun setLastChannel(
         raw: JsonObject,
         channelId: String,
@@ -231,6 +240,8 @@ class JellyTvRepository
         suspend fun setHideScores(hide: Boolean) = mutateSettings { SettingsJson.setHideScores(it, hide) }
 
         suspend fun setOnlyWatchable(only: Boolean) = mutateSettings { SettingsJson.setOnlyWatchable(it, only) }
+
+        suspend fun toggleFavoriteTeam(teamKey: String) = mutateSettings { SettingsJson.toggleFavoriteTeam(it, teamKey) }
 
         suspend fun setLastChannel(channelId: String) = mutateSettings { SettingsJson.setLastChannel(it, channelId) }
 

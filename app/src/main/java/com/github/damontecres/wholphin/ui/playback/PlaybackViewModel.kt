@@ -462,6 +462,9 @@ class PlaybackViewModel
                 }
                 this@PlaybackViewModel.currentItem = playlistItem
                 this@PlaybackViewModel.itemId = item.id
+                // JELLYTV: begin
+                com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.nowPlayingItemId = item.id
+                // JELLYTV: end
 
                 val isLiveTv = item.type == BaseItemKind.TV_CHANNEL
                 val base = item.data

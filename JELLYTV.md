@@ -48,6 +48,10 @@ file is a future merge conflict.** Therefore:
 | W17 | `ui/main/HomePage.kt` | `JellyTvHomeRow` as a fixed band above the library rows; `JellyTvHomeHeader` while a game card has focus; `JellyTvHomeFocus` hand-off in the initial-focus step |
 | W18 | `MainContent.kt` | `JellyTvScreensaver` before upstream's screensaver |
 | W19 | `MainActivity.kt` (same region as W7) | `JellyTvFirstRun`: one-time theme switch for stores written by earlier builds |
+| W20 | `ui/playback/PlaybackDialog.kt` (`PlaybackDialogType` + SETTINGS list) | "Sleep timer" and "Send to another screen" entries → `JellyTvPlayerMenu` |
+| W21 | `ui/playback/PlaybackViewModel.kt` (item set) | publishes the now-playing item id for Send |
+| W22 | `MainContent.kt` | `JellyTvGlobalOverlays` (sleep chip, menu dialogs) above every screen |
+| W23 | `ui/main/HomePage.kt` | `HouseholdRow` item after the JellyTV row |
 
 ## Releases and self-update
 

@@ -44,8 +44,9 @@ object BoardOrganizer {
         games: List<JtvGame>,
         favoriteChannelIds: Set<String>,
         onlyWatchable: Boolean,
+        favoriteTeams: Set<String> = emptySet(),
     ): List<BoardRow> {
-        fun JtvGame.isFavorite() = watch?.channelId?.let { it in favoriteChannelIds } == true
+        fun JtvGame.isFavorite() = isFollowed(favoriteTeams) || watch?.channelId?.let { it in favoriteChannelIds } == true
 
         val visible = if (onlyWatchable) games.filter { it.watch != null } else games
         return visible
@@ -78,3 +79,6 @@ object BoardOrganizer {
         games: List<JtvGame>,
     ): JtvGame? = games.firstOrNull { it.isLive && it.watch?.channelId == channelId }
 }
+
+/** True when either team of this game is followed. */
+fun JtvGame.isFollowed(favoriteTeams: Set<String>): Boolean = teamKey(away) in favoriteTeams || teamKey(home) in favoriteTeams

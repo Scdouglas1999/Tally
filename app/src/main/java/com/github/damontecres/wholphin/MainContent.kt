@@ -143,11 +143,17 @@ fun MainContent(
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     // JELLYTV: begin
-                    if (!com.github.damontecres.wholphin.jellytv.ui.screensaver.JellyTvScreensaver(Modifier.fillMaxSize())) {
+                    if (!com.github.damontecres.wholphin.jellytv.ui.screensaver
+                            .JellyTvScreensaver(Modifier.fillMaxSize())
+                    ) {
                         AppScreensaver(userPreferences.appPreferences, Modifier.fillMaxSize())
                     }
                     // JELLYTV: end
                 }
+                // JELLYTV: begin
+                com.github.damontecres.wholphin.jellytv.ui
+                    .JellyTvGlobalOverlays()
+                // JELLYTV: end
             }
             AnimatedVisibility(
                 visible = screenSaverState.showDim || (screenSaverState.dimEnabled && screenSaverState.show),

@@ -92,4 +92,6 @@
         <item>@string/brown</item>
         <item>@string/jtv_theme_name</item>
     </string-array>
+    <string name="jtv_sleep_timer">Sleep timer</string>
+    <string name="jtv_send_to">Send to another screen</string>
 </resources>

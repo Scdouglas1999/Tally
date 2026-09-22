@@ -60,6 +60,11 @@ enum class PlaybackDialogType {
     PLAYBACK_SPEED,
     VIDEO_SCALE,
     SUBTITLE_DELAY,
+
+    // JELLYTV: begin
+    JELLYTV_SLEEP_TIMER,
+    JELLYTV_SEND_TO,
+    // JELLYTV: end
 }
 
 data class PlaybackSettings(
@@ -169,16 +174,45 @@ fun PlaybackDialog(
                             supporting = null,
                         ),
                     )
+                    // JELLYTV: begin
+                    add(
+                        BottomDialogItem(
+                            PlaybackDialogType.JELLYTV_SLEEP_TIMER,
+                            stringResource(com.github.damontecres.wholphin.R.string.jtv_sleep_timer),
+                            null,
+                        ),
+                    )
+                    add(
+                        BottomDialogItem(
+                            PlaybackDialogType.JELLYTV_SEND_TO,
+                            stringResource(com.github.damontecres.wholphin.R.string.jtv_send_to),
+                            null,
+                        ),
+                    )
+                    // JELLYTV: end
                 }
             BottomDialog(
                 choices = options,
                 currentChoice = null,
                 onDismissRequest = onDismissRequest,
                 onSelectChoice = { _, choice ->
-                    if (choice.data == PlaybackDialogType.DEBUG) {
-                        onPlaybackActionClick.invoke(PlaybackAction.ShowDebug)
+                    // JELLYTV: begin
+                    val jellyTvRequest =
+                        when (choice.data) {
+                            PlaybackDialogType.JELLYTV_SLEEP_TIMER -> com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.Request.SLEEP_TIMER
+                            PlaybackDialogType.JELLYTV_SEND_TO -> com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.Request.SEND_TO
+                            else -> null
+                        }
+                    if (jellyTvRequest != null) {
+                        com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.request.value = jellyTvRequest
+                        onDismissRequest.invoke()
                     } else {
-                        onClickPlaybackDialogType(choice.data)
+                        // JELLYTV: end
+                        if (choice.data == PlaybackDialogType.DEBUG) {
+                            onPlaybackActionClick.invoke(PlaybackAction.ShowDebug)
+                        } else {
+                            onClickPlaybackDialogType(choice.data)
+                        }
                     }
                 },
                 gravity = leftGravity,
@@ -245,6 +279,13 @@ fun PlaybackDialog(
                 gravity = leftGravity,
             )
         }
+
+        // JELLYTV: begin
+        PlaybackDialogType.JELLYTV_SLEEP_TIMER, PlaybackDialogType.JELLYTV_SEND_TO -> {
+            // handled by JellyTvGlobalOverlays
+        }
+
+        // JELLYTV: end
 
         PlaybackDialogType.SUBTITLE_DELAY -> {
             Dialog(

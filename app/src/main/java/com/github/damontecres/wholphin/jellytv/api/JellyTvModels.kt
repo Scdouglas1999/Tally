@@ -54,6 +54,8 @@ data class JtvTeam(
     val record: String? = null,
     val possession: Boolean = false,
     val winner: Boolean = false,
+    /** Points per period (quarter, inning, …) in order; empty before the game starts. */
+    val periods: List<Int> = emptyList(),
 )
 
 /** Where to watch a game. Resolved on the server. */
@@ -106,6 +108,10 @@ data class JtvGame(
     val extras: Map<String, JsonElement> = emptyMap(),
 ) {
     val isLive: Boolean get() = state == "in"
+
+    /** The settings key under which [team] is followed. */
+    fun teamKey(team: JtvTeam): String = "${league.uppercase()}:${team.abbr.uppercase()}"
+
     val isUpcoming: Boolean get() = state == "pre"
     val isFinal: Boolean get() = state == "post"
 }
@@ -152,4 +158,6 @@ data class JtvSettings(
     val lastChannel: String? = null,
     /** "My channels only" on the Games board; null = never chosen, so the app decides from the board. */
     val onlyWatchable: Boolean? = null,
+    /** Followed teams as "LEAGUE:ABBR" (e.g. "NFL:KC"); their games are pinned first and get start nudges. */
+    val favoriteTeams: List<String> = emptyList(),
 )
