@@ -62,6 +62,7 @@ file is a future merge conflict.** Therefore:
 | W31 | `ui/nav/DestinationContent.kt` (top of `DestinationContent`) | `JellyTvRoutes.Content`: JellyTV-owned screens (JELLYTV theme only), see `jellytv/UI.md` |
 | W32 | `ui/theme/Theme.kt` (W15 region) | square theme shapes for JELLYTV (`JellyTvShapes`, `JellyTvMaterialShapes`) |
 | W33 | `ui/playback/PlaybackViewModel.kt` (`init` W29 region; `changeStreams` bitrate), `PlaybackDialog.kt` (W20 region) | in-player Quality: `JellyTvQuality` override before the global max bitrate, restart at the current position; "Quality" menu entry |
+| W34 | `ui/nav/ApplicationContent.kt` (NavDrawer call) | `TallyNavDrawer` replaces upstream's drawer while the JELLYTV theme is selected |
 
 ## Releases and self-update
 

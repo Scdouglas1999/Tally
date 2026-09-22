@@ -86,6 +86,21 @@ fun ApplicationContent(
                             modifier = Modifier.fillMaxSize(),
                         )
                     } else if (user != null && server != null) {
+                        // JELLYTV: begin
+                        if (com.github.damontecres.wholphin.jellytv.media.drawer.tallyDrawerActive()) {
+                            com.github.damontecres.wholphin.jellytv.media.drawer.TallyNavDrawer(
+                                destination = key,
+                                preferences = preferences,
+                                user = user,
+                                server = server,
+                                drawerState = drawerState,
+                                navDrawerListState = navDrawerListState,
+                                onClearBackdrop = viewModel::clearBackdrop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                            return@NavEntry
+                        }
+                        // JELLYTV: end
                         NavDrawer(
                             destination = key,
                             preferences = preferences,
