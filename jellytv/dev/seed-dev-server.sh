@@ -90,7 +90,8 @@ for it in items:
         continue
     when_year = year if rnd.random() < 0.8 else year - 1
     month = rnd.randint(1, 12 if when_year < year else __import__("datetime").date.today().month)
-    day = rnd.randint(1, 28)
+    today = __import__("datetime").date.today()
+    day = rnd.randint(1, 28 if (when_year, month) != (today.year, today.month) else max(1, today.day - 1))
     plays = 1 + (rnd.random() < 0.2) + (rnd.random() < 0.05)
     call(f"/UserItems/{it['Id']}/UserData?userId={user}", {"Played": True, "PlayCount": plays,
          "LastPlayedDate": f"{when_year}-{month:02d}-{day:02d}T{rnd.randint(17,23):02d}:{rnd.randint(0,59):02d}:00Z"})
