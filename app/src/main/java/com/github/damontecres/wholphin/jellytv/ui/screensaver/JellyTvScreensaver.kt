@@ -43,6 +43,7 @@ import com.github.damontecres.wholphin.jellytv.api.JtvGame
 import com.github.damontecres.wholphin.jellytv.api.JtvTeam
 import com.github.damontecres.wholphin.jellytv.ui.components.IndicatorSquare
 import com.github.damontecres.wholphin.jellytv.ui.components.JtvSamples
+import com.github.damontecres.wholphin.jellytv.ui.components.LineScore
 import com.github.damontecres.wholphin.jellytv.ui.components.TeamMark
 import com.github.damontecres.wholphin.jellytv.ui.components.gameStatusLabel
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
@@ -219,6 +220,12 @@ private fun GameScore(
         Spacer(Modifier.height(16.dp))
         TeamLine(team = game.away, hideScores = hideScores)
         TeamLine(team = game.home, hideScores = hideScores)
+        LineScore(
+            game = game,
+            hideScores = hideScores,
+            compact = true,
+            modifier = Modifier.padding(top = 12.dp),
+        )
         val lastPlay = game.lastPlay?.takeIf { it.isNotBlank() && !hideScores }
         if (lastPlay != null) {
             Spacer(Modifier.height(16.dp))
@@ -280,13 +287,35 @@ private fun rememberClock(): String {
     return clock
 }
 
+/** DET @ BUF quarters from board-sample-periods.json, so the preview shows a line score. */
+private val previewScreensaverGame =
+    JtvSamples.liveFootball.copy(
+        state = "in",
+        league = "NFL",
+        detail = "2:11 - 4th",
+        away =
+            JtvSamples.liveFootball.away.copy(
+                abbr = "DET",
+                shortName = "Lions",
+                score = 31,
+                periods = listOf(0, 10, 7, 14),
+            ),
+        home =
+            JtvSamples.liveFootball.home.copy(
+                abbr = "BUF",
+                shortName = "Bills",
+                score = 41,
+                periods = listOf(14, 13, 7, 7),
+            ),
+    )
+
 @PreviewTvSpec
 @Composable
 private fun JellyTvScreensaverPreview() {
     JtvScale {
         IdleScreen(
-            games = listOf(JtvSamples.liveFootball, JtvSamples.liveBaseball),
-            shown = JtvSamples.liveFootball,
+            games = listOf(previewScreensaverGame, JtvSamples.liveBaseball),
+            shown = previewScreensaverGame,
             hideScores = false,
             clock = "9:41 PM",
             offsetX = 0.dp,
