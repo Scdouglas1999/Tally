@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.api.JtvGame
+import com.github.damontecres.wholphin.jellytv.data.isFollowed
 import com.github.damontecres.wholphin.jellytv.ui.components.GameCard
 import com.github.damontecres.wholphin.jellytv.ui.components.JtvSamples
 import com.github.damontecres.wholphin.jellytv.ui.components.KeyHint
@@ -38,7 +39,7 @@ import kotlinx.coroutines.delay
 /**
  * The in-player "also on now" switcher: a bottom-anchored scrim with a header and a
  * horizontal row of live game cards over the picture. Focus lands on the first card.
- * OK switches channel; hold adds the focused game to multiview.
+ * OK switches channel; hold opens the game actions menu.
  *
  * [onRowFocusChanged] reports whether focus is inside the card row so the page can
  * decide whether DPAD_UP should close the switcher.
@@ -48,8 +49,9 @@ fun GameSwitcher(
     games: List<JtvGame>,
     hideScores: Boolean,
     favorites: Set<String>,
+    favoriteTeams: Set<String>,
     onSwitch: (JtvGame) -> Unit,
-    onAddToMultiview: (JtvGame) -> Unit,
+    onLongClick: (JtvGame) -> Unit,
     onRowFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -100,7 +102,7 @@ fun GameSwitcher(
                 )
                 KeyHint(
                     key = stringResource(R.string.jtv_key_hold),
-                    label = stringResource(R.string.jtv_add_to_multiview),
+                    label = stringResource(R.string.jtv_actions_menu),
                 )
             }
         }
@@ -114,9 +116,10 @@ fun GameSwitcher(
                 GameCard(
                     game = game,
                     hideScores = hideScores,
-                    isFavorite = game.watch?.channelId in favorites,
+                    isFavorite = game.watch?.channelId in favorites || game.isFollowed(favoriteTeams),
+                    followed = game.isFollowed(favoriteTeams),
                     onClick = { onSwitch(game) },
-                    onLongClick = { onAddToMultiview(game) },
+                    onLongClick = { onLongClick(game) },
                     modifier =
                         if (index == 0) {
                             Modifier.focusRequester(firstCardFocus)
@@ -137,8 +140,9 @@ private fun GameSwitcherPreview() {
             games = JtvSamples.games.filter { it.isLive },
             hideScores = false,
             favorites = setOf("dea2bdfac2d6739c"),
+            favoriteTeams = setOf("NFL:KC"),
             onSwitch = {},
-            onAddToMultiview = {},
+            onLongClick = {},
             onRowFocusChanged = {},
             modifier = Modifier.align(Alignment.BottomCenter),
         )

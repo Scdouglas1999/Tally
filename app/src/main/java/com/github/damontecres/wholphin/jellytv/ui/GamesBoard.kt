@@ -1,5 +1,6 @@
 package com.github.damontecres.wholphin.jellytv.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
@@ -29,14 +30,19 @@ import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.api.JtvGame
 import com.github.damontecres.wholphin.jellytv.data.BoardRow
+import com.github.damontecres.wholphin.jellytv.data.isFollowed
 import com.github.damontecres.wholphin.jellytv.ui.components.EmptyState
 import com.github.damontecres.wholphin.jellytv.ui.components.FocusedGamePanel
+import com.github.damontecres.wholphin.jellytv.ui.components.GameActionsDialog
 import com.github.damontecres.wholphin.jellytv.ui.components.GameCard
 import com.github.damontecres.wholphin.jellytv.ui.components.RowHeader
+import com.github.damontecres.wholphin.jellytv.ui.components.gameActions
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
@@ -73,7 +79,14 @@ fun GamesBoard(
 ) {
     var focusedGameId by rememberSaveable { mutableStateOf<String?>(null) }
     var focusedPosition by rememberPosition()
+    var menuGameId by rememberSaveable { mutableStateOf<String?>(null) }
     val boardFocusRequester = remember { FocusRequester() }
+    val menuReturnFocus = remember { FocusRequester() }
+    // The page that hosts this board cannot grow the parameter list, so follow/hide read the same
+    // view model the page already owns (one store, one instance).
+    val viewModel: JellyTvViewModel = hiltViewModel()
+    val ui by viewModel.uiState.collectAsStateWithLifecycle()
+    val teams = ui.favoriteTeams
 
     val focusedGame =
         remember(rows, focusedGameId) {
@@ -89,6 +102,11 @@ fun GamesBoard(
         }
     }
 
+    val menuGame = rows.asSequence().flatMap { it.games }.firstOrNull { it.id == menuGameId }
+    BackHandler(enabled = menuGame != null) {
+        menuReturnFocus.tryRequestFocus("jtv-actions-return")
+        menuGameId = null
+    }
     Column(modifier = modifier.fillMaxSize()) {
         FocusedGamePanel(
             game = focusedGame,
@@ -182,11 +200,35 @@ fun GamesBoard(
                             },
                             onWatch = onWatch,
                             onAddToMultiview = onAddToMultiview,
+                            favoriteTeams = teams,
+                            menuGameId = menuGameId,
+                            menuReturnFocus = menuReturnFocus,
+                            onLongClick = { menuGameId = it.id },
                         )
                     }
                 }
             }
         }
+    }
+    if (menuGame != null) {
+        GameActionsDialog(
+            game = menuGame,
+            actions =
+                gameActions(
+                    game = menuGame,
+                    favoriteTeams = teams,
+                    hideScores = hideScores,
+                    onWatch = onWatch,
+                    onAddToMultiview = { game -> game.watch?.channelId?.let(onAddToMultiview) },
+                    onWatchInCorner = null,
+                    onToggleFollow = viewModel::toggleFollow,
+                    onToggleHideScores = { viewModel.setHideScores(!hideScores) },
+                ),
+            onDismiss = {
+                menuReturnFocus.tryRequestFocus("jtv-actions-return")
+                menuGameId = null
+            },
+        )
     }
 }
 
@@ -205,6 +247,10 @@ private fun GameRow(
     onCardFocused: (Int, JtvGame) -> Unit,
     onWatch: (JtvGame) -> Unit,
     onAddToMultiview: (String) -> Unit,
+    favoriteTeams: Set<String>,
+    menuGameId: String?,
+    menuReturnFocus: FocusRequester,
+    onLongClick: (JtvGame) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state = rememberLazyListState()
@@ -242,9 +288,10 @@ private fun GameRow(
                 GameCard(
                     game = game,
                     hideScores = hideScores,
-                    isFavorite = game.watch?.channelId in favorites,
+                    isFavorite = game.watch?.channelId in favorites || game.isFollowed(favoriteTeams),
+                    followed = game.isFollowed(favoriteTeams),
                     onClick = { onWatch(game) },
-                    onLongClick = { game.watch?.channelId?.let(onAddToMultiview) },
+                    onLongClick = { onLongClick(game) },
                     onFocused = {
                         position = index
                         onCardFocused(index, game)
@@ -252,7 +299,8 @@ private fun GameRow(
                     modifier =
                         Modifier
                             .ifElse(index == position, Modifier.focusRequester(firstFocus))
-                            .ifElse(index == boardFocusIndex, Modifier.focusRequester(boardFocusRequester)),
+                            .ifElse(index == boardFocusIndex, Modifier.focusRequester(boardFocusRequester))
+                            .ifElse(game.id == menuGameId, Modifier.focusRequester(menuReturnFocus)),
                 )
             }
         }

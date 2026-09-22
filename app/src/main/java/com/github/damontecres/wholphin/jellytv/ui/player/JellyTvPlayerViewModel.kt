@@ -10,6 +10,7 @@ import com.github.damontecres.wholphin.jellytv.data.JellyTvMultiviewState
 import com.github.damontecres.wholphin.jellytv.data.JellyTvRepository
 import com.github.damontecres.wholphin.services.NavigationManager
 import com.github.damontecres.wholphin.services.PlayerFactory
+import com.github.damontecres.wholphin.ui.launchIO
 import com.github.damontecres.wholphin.ui.nav.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -89,20 +90,27 @@ class JellyTvPlayerViewModel
                 .map { it.favorites.toSet() }
                 .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
+        val favoriteTeams: StateFlow<Set<String>> =
+            repository.settings
+                .map { settings -> settings.favoriteTeams.map { it.uppercase() }.toSet() }
+                .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
+
         /**
          * Other live games on real channels (excludes the bound channel), flattened in
-         * [BoardOrganizer.rows] order — favorites/league/start — capped at [MAX_OTHERS].
+         * [BoardOrganizer.rows] order — followed teams and favorite channels first, then
+         * league and start — capped at [MAX_OTHERS].
          */
         val others: StateFlow<List<JtvGame>> =
-            combine(channelId, repository.board, favorites) { id, board, favs ->
+            combine(channelId, repository.board, repository.settings) { id, board, settings ->
                 BoardOrganizer
                     .rows(
                         games =
                             board?.games.orEmpty().filter {
                                 it.isLive && it.watch != null && it.watch?.channelId != id
                             },
-                        favoriteChannelIds = favs,
+                        favoriteChannelIds = settings.favorites.toSet(),
                         onlyWatchable = true,
+                        favoriteTeams = settings.favoriteTeams.map { it.uppercase() }.toSet(),
                     ).flatMap { it.games }
                     .take(MAX_OTHERS)
             }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -150,6 +158,19 @@ class JellyTvPlayerViewModel
             }
             navigationManager.backStack.removeLastOrNull()
             navigationManager.navigateTo(Destination.JellyTvPlayback(itemId, watch.channelId))
+        }
+
+        /** Asks the corner overlay (owned elsewhere) to show [game]. */
+        fun watchInCorner(game: JtvGame) {
+            CornerRequests.request(game)
+        }
+
+        fun toggleFollow(teamKey: String) {
+            viewModelScope.launchIO { repository.toggleFavoriteTeam(teamKey) }
+        }
+
+        fun toggleHideScores() {
+            viewModelScope.launchIO { repository.setHideScores(!hideScores.value) }
         }
 
         fun addToMultiview(game: JtvGame) {

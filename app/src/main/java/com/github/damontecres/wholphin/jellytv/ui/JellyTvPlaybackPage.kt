@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.github.damontecres.wholphin.jellytv.api.JtvEvent
+import com.github.damontecres.wholphin.jellytv.ui.components.GameActionsDialog
+import com.github.damontecres.wholphin.jellytv.ui.components.gameActions
 import com.github.damontecres.wholphin.jellytv.ui.player.EventBanner
 import com.github.damontecres.wholphin.jellytv.ui.player.GameSwitcher
 import com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerViewModel
@@ -71,8 +73,10 @@ fun JellyTvPlaybackPage(
     val banner by viewModel.banner.collectAsState()
     val hideScores by viewModel.hideScores.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
+    val favoriteTeams by viewModel.favoriteTeams.collectAsState()
 
     var switcherOpen by remember { mutableStateOf(false) }
+    var actionsGameId by remember { mutableStateOf<String?>(null) }
     var switcherRowFocused by remember { mutableStateOf(false) }
     var switcherWasOpen by remember { mutableStateOf(false) }
 
@@ -110,7 +114,13 @@ fun JellyTvPlaybackPage(
         }
     }
 
-    BackHandler(enabled = switcherOpen) { switcherOpen = false }
+    BackHandler(enabled = switcherOpen || actionsGameId != null) {
+        if (actionsGameId != null) {
+            actionsGameId = null
+        } else {
+            switcherOpen = false
+        }
+    }
 
     Box(
         modifier
@@ -227,12 +237,34 @@ fun JellyTvPlaybackPage(
                     games = others,
                     hideScores = hideScores,
                     favorites = favorites,
+                    favoriteTeams = favoriteTeams,
                     onSwitch = {
                         switcherOpen = false
                         viewModel.switchTo(it)
                     },
-                    onAddToMultiview = viewModel::addToMultiview,
+                    onLongClick = { actionsGameId = it.id },
                     onRowFocusChanged = { switcherRowFocused = it },
+                )
+            }
+            val actionsGame = actionsGameId?.let { id -> others.firstOrNull { it.id == id } }
+            if (actionsGame != null) {
+                GameActionsDialog(
+                    game = actionsGame,
+                    actions =
+                        gameActions(
+                            game = actionsGame,
+                            favoriteTeams = favoriteTeams,
+                            hideScores = hideScores,
+                            onWatch = {
+                                switcherOpen = false
+                                viewModel.switchTo(it)
+                            },
+                            onAddToMultiview = viewModel::addToMultiview,
+                            onWatchInCorner = viewModel::watchInCorner,
+                            onToggleFollow = viewModel::toggleFollow,
+                            onToggleHideScores = viewModel::toggleHideScores,
+                        ),
+                    onDismiss = { actionsGameId = null },
                 )
             }
         }

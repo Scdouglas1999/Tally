@@ -45,6 +45,7 @@ data class JellyTvUiState(
     val games: List<JtvGame> = emptyList(),
     val hideScores: Boolean = false,
     val favorites: Set<String> = emptySet(),
+    val favoriteTeams: Set<String> = emptySet(),
     val onlyWatchable: Boolean = false,
     val boardError: String? = null,
     val hasBoard: Boolean = false,
@@ -97,16 +98,21 @@ class JellyTvViewModel
             ) { repo, selectedTab, onlyWatchableChoice ->
                 val games = repo.board?.games.orEmpty()
                 val favorites = repo.settings.favorites.toSet()
+                val teams =
+                    repo.settings.favoriteTeams
+                        .map { it.uppercase() }
+                        .toSet()
                 // Default on when at least one game is watchable so the board is
                 // never mysteriously empty.
                 val onlyWatchable = onlyWatchableChoice ?: repo.settings.onlyWatchable ?: games.any { it.watch != null }
                 JellyTvUiState(
                     availability = repo.availability,
-                    rows = BoardOrganizer.rows(games, favorites, onlyWatchable),
+                    rows = BoardOrganizer.rows(games, favorites, onlyWatchable, teams),
                     channels = repo.board?.channels.orEmpty(),
                     games = games,
                     hideScores = repo.settings.hideScores,
                     favorites = favorites,
+                    favoriteTeams = teams,
                     onlyWatchable = onlyWatchable,
                     boardError = repo.boardError,
                     hasBoard = repo.board != null,
@@ -169,6 +175,10 @@ class JellyTvViewModel
 
         fun toggleFavorite(channelId: String) {
             viewModelScope.launchIO { repository.toggleFavorite(channelId) }
+        }
+
+        fun toggleFollow(teamKey: String) {
+            viewModelScope.launchIO { repository.toggleFavoriteTeam(teamKey) }
         }
 
         fun watch(game: JtvGame) {

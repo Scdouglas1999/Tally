@@ -1,5 +1,6 @@
 package com.github.damontecres.wholphin.jellytv.ui.home
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,10 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -27,11 +31,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
+import com.github.damontecres.wholphin.jellytv.data.isFollowed
+import com.github.damontecres.wholphin.jellytv.ui.components.GameActionsDialog
 import com.github.damontecres.wholphin.jellytv.ui.components.GameCard
+import com.github.damontecres.wholphin.jellytv.ui.components.gameActions
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvScale
 import com.github.damontecres.wholphin.ui.cards.ItemRowTitle
 import com.github.damontecres.wholphin.ui.showToast
+import com.github.damontecres.wholphin.ui.tryRequestFocus
 
 /**
  * The JellyTV row on Wholphin's home screen: live and upcoming games as cards, above the library rows.
@@ -49,10 +57,20 @@ fun JellyTvHomeRow(modifier: Modifier = Modifier) {
     val viewModel: JellyTvHomeRowViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var menuGameId by rememberSaveable { mutableStateOf<String?>(null) }
+    val menuReturnFocus = remember { FocusRequester() }
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { resId -> showToast(context, context.getString(resId)) }
     }
+    LaunchedEffect(viewModel) {
+        viewModel.notices.collect { text -> showToast(context, text) }
+    }
     LaunchedEffect(state.hideScores) { JellyTvHomeHeaderState.hideScores.value = state.hideScores }
+    val menuGame = state.games.firstOrNull { it.id == menuGameId }
+    BackHandler(enabled = menuGame != null) {
+        menuReturnFocus.tryRequestFocus("jtv-home-actions-return")
+        menuGameId = null
+    }
     if (state.games.isEmpty()) return
 
     // When the cards first appear right after the page opened, they take the initial focus (see JellyTvHomeFocus).
@@ -89,13 +107,51 @@ fun JellyTvHomeRow(modifier: Modifier = Modifier) {
                     GameCard(
                         game = game,
                         hideScores = state.hideScores,
-                        isFavorite = game.watch?.channelId in state.favorites,
+                        isFavorite = game.watch?.channelId in state.favorites || game.isFollowed(state.favoriteTeams),
+                        followed = game.isFollowed(state.favoriteTeams),
                         onClick = { viewModel.watch(game) },
-                        onLongClick = { game.watch?.channelId?.let(viewModel::addToMultiview) },
-                        modifier = if (index == 0) Modifier.focusRequester(firstCardFocus) else Modifier,
+                        onLongClick = { menuGameId = game.id },
+                        modifier =
+                            when {
+                                index == 0 && game.id == menuGameId -> {
+                                    Modifier.focusRequester(firstCardFocus).focusRequester(menuReturnFocus)
+                                }
+
+                                index == 0 -> {
+                                    Modifier.focusRequester(firstCardFocus)
+                                }
+
+                                game.id == menuGameId -> {
+                                    Modifier.focusRequester(menuReturnFocus)
+                                }
+
+                                else -> {
+                                    Modifier
+                                }
+                            },
                         onFocused = { viewModel.onCardFocused(game) },
                     )
                 }
+            }
+            if (menuGame != null) {
+                GameActionsDialog(
+                    game = menuGame,
+                    actions =
+                        gameActions(
+                            game = menuGame,
+                            favoriteTeams = state.favoriteTeams,
+                            hideScores = state.hideScores,
+                            onWatch = viewModel::watch,
+                            onAddToMultiview = { game -> game.watch?.channelId?.let(viewModel::addToMultiview) },
+                            onWatchInCorner = null,
+                            onToggleFollow = viewModel::toggleFollow,
+                            onToggleHideScores = viewModel::toggleHideScores,
+                        ),
+                    onDismiss = {
+                        menuReturnFocus.tryRequestFocus("jtv-home-actions-return")
+                        menuGameId = null
+                    },
+                )
             }
         }
     }
