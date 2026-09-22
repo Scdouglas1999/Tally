@@ -54,12 +54,24 @@ fun WholphinTheme(
             colorScheme = if (darkTheme) themeColors.darkSchemeMaterial else themeColors.lightSchemeMaterial,
             // JELLYTV: begin
             typography = if (jellyTv) com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvMaterialTypography else androidx.compose.material3.Typography(),
+            shapes =
+                if (jellyTv) {
+                    com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvMaterialShapes
+                } else {
+                    androidx.compose.material3.Shapes()
+                },
             // JELLYTV: end
         ) {
             MaterialTheme(
                 colorScheme = colorScheme,
                 // JELLYTV: begin
                 typography = if (jellyTv) com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvTypography else AppTypography,
+                shapes =
+                    if (jellyTv) {
+                        com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvShapes
+                    } else {
+                        androidx.tv.material3.Shapes()
+                    },
                 // JELLYTV: end
                 content = content,
             )

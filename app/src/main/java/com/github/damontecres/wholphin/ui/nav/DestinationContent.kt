@@ -72,6 +72,13 @@ fun DestinationContent(
     if (destination.fullScreen) {
         LaunchedEffect(Unit) { onClearBackdrop.invoke() }
     }
+    // JELLYTV: begin
+    if (com.github.damontecres.wholphin.jellytv.media.JellyTvRoutes
+            .Content(destination, preferences, onClearBackdrop, modifier)
+    ) {
+        return
+    }
+    // JELLYTV: end
     when (destination) {
         is Destination.Home -> {
             HomePage(

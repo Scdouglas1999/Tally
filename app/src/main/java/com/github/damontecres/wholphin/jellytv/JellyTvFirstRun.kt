@@ -6,6 +6,7 @@ import androidx.datastore.core.DataStore
 import androidx.preference.PreferenceManager
 import com.github.damontecres.wholphin.preferences.AppPreferences
 import com.github.damontecres.wholphin.preferences.AppThemeColors
+import com.github.damontecres.wholphin.preferences.BackdropStyle
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import timber.log.Timber
@@ -17,6 +18,9 @@ import javax.inject.Singleton
  * is the default for fresh installs, but a store written by an earlier build already holds a theme value
  * (Purple, the proto default), so the default never applies to it: switch that once. Anyone who picks another
  * theme afterwards keeps it.
+ *
+ * Second step (JellyTV UI takeover): the backdrop shows the image only, without Wholphin's full-page colour wash
+ * (gradients as decoration are not part of the JellyTV look). Once, so a user who turns the wash back on keeps it.
  */
 @Singleton
 class JellyTvFirstRun
@@ -27,6 +31,7 @@ class JellyTvFirstRun
     ) {
         suspend fun apply() {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            migrateBackdrop(prefs)
             if (prefs.getBoolean(KEY_THEME_MIGRATED, false)) return
             val current =
                 dataStore.data
@@ -44,7 +49,27 @@ class JellyTvFirstRun
             prefs.edit { putBoolean(KEY_THEME_MIGRATED, true) }
         }
 
+        private suspend fun migrateBackdrop(prefs: android.content.SharedPreferences) {
+            if (prefs.getBoolean(KEY_BACKDROP_MIGRATED, false)) return
+            val current =
+                dataStore.data
+                    .first()
+                    .interfacePreferences.backdropStyle
+            if (current == BackdropStyle.BACKDROP_DYNAMIC_COLOR || current == BackdropStyle.UNRECOGNIZED) {
+                Timber.i("JellyTV look: backdrop colour wash off (image only)")
+                dataStore.updateData { data ->
+                    data
+                        .toBuilder()
+                        .setInterfacePreferences(
+                            data.interfacePreferences.toBuilder().setBackdropStyle(BackdropStyle.BACKDROP_IMAGE_ONLY),
+                        ).build()
+                }
+            }
+            prefs.edit { putBoolean(KEY_BACKDROP_MIGRATED, true) }
+        }
+
         private companion object {
             const val KEY_THEME_MIGRATED = "jellytv.firstRun.themeMigrated"
+            const val KEY_BACKDROP_MIGRATED = "jellytv.firstRun.backdropImageOnly"
         }
     }

@@ -59,6 +59,8 @@ file is a future merge conflict.** Therefore:
 | W28 | `services/ServerEventListener.kt` | advertise `JellyTvRemoteCommands.SUPPORTED`; start/stop `JellyTvRemoteCommands.listen` with the socket |
 | W29 | `ui/playback/PlaybackViewModel.kt` (`init`) | bind the player to `JellyTvRemoteBus` for remote audio/subtitle track switching |
 | W30 | `ui/playback/PlaybackDialog.kt` (W20 region), `ui/main/HomePage.kt` (W23 region) | "Watch together" menu entry (`JELLYTV_TOGETHER`); `TogetherRow` after the household row |
+| W31 | `ui/nav/DestinationContent.kt` (top of `DestinationContent`) | `JellyTvRoutes.Content`: JellyTV-owned screens (JELLYTV theme only), see `jellytv/UI.md` |
+| W32 | `ui/theme/Theme.kt` (W15 region) | square theme shapes for JELLYTV (`JellyTvShapes`, `JellyTvMaterialShapes`) |
 
 ## Releases and self-update
 
