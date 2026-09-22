@@ -52,7 +52,8 @@ def fmt_time(value: dt.datetime) -> str:
 
 
 class Peer:
-    def __init__(self, server: str, user: str, password: str, device: str, load_ms: int):
+    def __init__(self, server: str, user: str, password: str, device: str, load_ms: int, raw=None):
+        self.raw = raw
         self.server = server.rstrip("/")
         self.device = device
         self.load_ms = load_ms
@@ -119,6 +120,9 @@ class Peer:
         def on_message(ws, raw):
             msg = json.loads(raw)
             kind = msg.get("MessageType")
+            if self.raw and kind in ("SyncPlayGroupUpdate", "SyncPlayCommand"):
+                self.raw.write(raw.strip() + "\n")
+                self.raw.flush()
             if kind == "ForceKeepAlive":
                 ws.send(json.dumps({"MessageType": "KeepAlive"}))
                 return
@@ -240,9 +244,11 @@ def main():
     ap.add_argument("--device", default=f"syncplay-peer-{uuid.uuid4().hex[:6]}")
     ap.add_argument("--load-ms", type=int, default=1500, help="simulated time to load an item before Ready")
     ap.add_argument("--do", default="list", help="comma-separated script (see above)")
+    ap.add_argument("--raw", help="also append every SyncPlay websocket frame, verbatim, to this file")
     args = ap.parse_args()
 
-    peer = Peer(args.server, args.user, args.password, args.device, args.load_ms)
+    raw = open(args.raw, "a") if args.raw else None
+    peer = Peer(args.server, args.user, args.password, args.device, args.load_ms, raw)
     rtt, offset = peer.sync_clock()
     peer.emit("clock", rttMs=int(rtt.total_seconds() * 1000), offsetMs=int(offset.total_seconds() * 1000))
     threading.Thread(target=peer.socket_loop, daemon=True).start()
