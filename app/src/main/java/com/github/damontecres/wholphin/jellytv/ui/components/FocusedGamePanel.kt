@@ -137,10 +137,18 @@ fun FocusedGamePanel(
                                     text = it,
                                     style = JtvType.body,
                                     color = JtvColors.textSecondary,
-                                    maxLines = 3,
+                                    maxLines = 2,
                                     overflow = TextOverflow.Ellipsis,
                                 )
                             }
+                        }
+                        if (!hideScores && (game.isLive || game.isFinal)) {
+                            Spacer(Modifier.height(10.dp))
+                            LineScore(
+                                game = game,
+                                hideScores = false,
+                                compact = true,
+                            )
                         }
                     }
                 }
@@ -349,7 +357,30 @@ private fun FocusedGamePanelPreview() {
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.padding(24.dp),
         ) {
-            FocusedGamePanel(game = JtvSamples.liveFootball, hideScores = false)
+            FocusedGamePanel(
+                game =
+                    JtvSamples.final.copy(
+                        detail = "Final",
+                        broadcasts = listOf("Prime Video"),
+                        away =
+                            JtvSamples.final.away.copy(
+                                abbr = "DET",
+                                shortName = "Lions",
+                                score = 31,
+                                winner = false,
+                                periods = listOf(0, 10, 7, 14),
+                            ),
+                        home =
+                            JtvSamples.final.home.copy(
+                                abbr = "BUF",
+                                shortName = "Bills",
+                                score = 41,
+                                winner = true,
+                                periods = listOf(14, 13, 7, 7),
+                            ),
+                    ),
+                hideScores = false,
+            )
             FocusedGamePanel(game = JtvSamples.liveBaseball, hideScores = false)
         }
     }
