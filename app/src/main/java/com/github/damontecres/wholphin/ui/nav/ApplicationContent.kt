@@ -69,9 +69,37 @@ fun ApplicationContent(
             viewModel = viewModel,
         )
         val navDrawerListState = rememberLazyListState()
+        // JELLYTV: begin
+        val tallyCut =
+            com.github.damontecres.wholphin.jellytv.ui.TallyTransitions
+                .active()
+        // JELLYTV: end
         NavDisplay(
             backStack = navigationManager.backStack,
             onBack = { navigationManager.goBack() },
+            // JELLYTV: begin
+            transitionSpec =
+                if (tallyCut) {
+                    com.github.damontecres.wholphin.jellytv.ui.TallyTransitions
+                        .cut()
+                } else {
+                    androidx.navigation3.ui.defaultTransitionSpec()
+                },
+            popTransitionSpec =
+                if (tallyCut) {
+                    com.github.damontecres.wholphin.jellytv.ui.TallyTransitions
+                        .cut()
+                } else {
+                    androidx.navigation3.ui.defaultPopTransitionSpec()
+                },
+            predictivePopTransitionSpec =
+                if (tallyCut) {
+                    com.github.damontecres.wholphin.jellytv.ui.TallyTransitions
+                        .predictiveCut()
+                } else {
+                    androidx.navigation3.ui.defaultPredictivePopTransitionSpec()
+                },
+            // JELLYTV: end
             entryDecorators =
                 listOf(
                     rememberSaveableStateHolderNavEntryDecorator(),
