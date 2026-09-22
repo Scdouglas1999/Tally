@@ -9,7 +9,7 @@ import java.util.UUID
  * upstream's dialog only knows how to name an entry, the JellyTV overlays do the rest.
  */
 object JellyTvPlayerMenu {
-    enum class Request { SLEEP_TIMER, SEND_TO, TOGETHER }
+    enum class Request { SLEEP_TIMER, SEND_TO, TOGETHER, QUALITY }
 
     val request = mutableStateOf<Request?>(null)
 
@@ -19,6 +19,7 @@ object JellyTvPlayerMenu {
             PlaybackDialogType.JELLYTV_SLEEP_TIMER -> Request.SLEEP_TIMER
             PlaybackDialogType.JELLYTV_SEND_TO -> Request.SEND_TO
             PlaybackDialogType.JELLYTV_TOGETHER -> Request.TOGETHER
+            PlaybackDialogType.JELLYTV_QUALITY -> Request.QUALITY
             else -> null
         }
 

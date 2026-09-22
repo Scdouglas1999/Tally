@@ -204,6 +204,25 @@ class PlaybackViewModel
                 onAudio = ::changeAudioStream,
                 onSubtitle = { changeSubtitleStream(it) },
             )
+            viewModelScope.launch {
+                state.collect {
+                    com.github.damontecres.wholphin.jellytv.quality.JellyTvQuality
+                        .publish(it.currentPlayback)
+                }
+            }
+            com.github.damontecres.wholphin.jellytv.quality.JellyTvQuality.bindPlayer(viewModelScope) { original ->
+                val playback = state.value.currentPlayback ?: return@bindPlayer
+                val positionMs = withContext(WholphinDispatchers.Main) { player.currentPosition }
+                changeStreams(
+                    item = playback.item,
+                    sourceId = playback.mediaSourceInfo.id,
+                    audioIndex = playback.audioIndex,
+                    subtitleIndex = playback.subtitleIndex,
+                    positionMs = positionMs,
+                    enableDirectPlay = original && !forceTranscoding,
+                    enableDirectStream = original && !forceTranscoding,
+                )
+            }
             // JELLYTV: end
             initJob =
                 viewModelScope.launchIO {
@@ -655,8 +674,14 @@ class PlaybackViewModel
                 )
 
                 val maxBitrate =
-                    preferences.appPreferences.playbackPreferences.maxBitrate
-                        .takeIf { it > 0 } ?: AppPreference.DEFAULT_BITRATE
+                    // JELLYTV: begin
+                    // in-player quality choice first, then upstream's preference
+                    com.github.damontecres.wholphin.jellytv.quality.JellyTvQuality
+                        .maxBitrateOverride()
+                        ?.toLong()
+                        // JELLYTV: end
+                        ?: preferences.appPreferences.playbackPreferences.maxBitrate
+                            .takeIf { it > 0 } ?: AppPreference.DEFAULT_BITRATE
                 val response by
                     api.mediaInfoApi
                         .getPostedPlaybackInfo(

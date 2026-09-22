@@ -65,6 +65,7 @@ enum class PlaybackDialogType {
     JELLYTV_SLEEP_TIMER,
     JELLYTV_SEND_TO,
     JELLYTV_TOGETHER,
+    JELLYTV_QUALITY,
     // JELLYTV: end
 }
 
@@ -192,6 +193,13 @@ fun PlaybackDialog(
                     )
                     add(
                         BottomDialogItem(
+                            PlaybackDialogType.JELLYTV_QUALITY,
+                            stringResource(com.github.damontecres.wholphin.R.string.jtv_quality),
+                            null,
+                        ),
+                    )
+                    add(
+                        BottomDialogItem(
                             PlaybackDialogType.JELLYTV_TOGETHER,
                             stringResource(com.github.damontecres.wholphin.R.string.jtv_together),
                             null,
@@ -289,6 +297,7 @@ fun PlaybackDialog(
         PlaybackDialogType.JELLYTV_SLEEP_TIMER,
         PlaybackDialogType.JELLYTV_SEND_TO,
         PlaybackDialogType.JELLYTV_TOGETHER,
+        PlaybackDialogType.JELLYTV_QUALITY,
         -> {
             // handled by JellyTvGlobalOverlays
         }

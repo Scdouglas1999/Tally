@@ -6,5 +6,7 @@
     <string name="jtv_year_name">Your %1$d</string>
     <!-- Player settings menu entry for Watch Together (SyncPlay). -->
     <string name="jtv_together">Watch together</string>
+    <!-- Player settings menu entry for choosing streaming quality. -->
+    <string name="jtv_quality">Quality</string>
     <string name="jtv_fa_calendar" translatable="false">&#xf073;</string>
 </resources>

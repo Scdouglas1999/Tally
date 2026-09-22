@@ -66,6 +66,12 @@ fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
                     }
                 }
 
+                JellyTvPlayerMenu.Request.QUALITY -> {
+                    com.github.damontecres.wholphin.jellytv.quality.QualityDialog(
+                        onDismiss = { JellyTvPlayerMenu.request.value = null },
+                    )
+                }
+
                 JellyTvPlayerMenu.Request.TOGETHER -> {
                     TogetherDialog(
                         itemId = JellyTvPlayerMenu.nowPlayingItemId,
