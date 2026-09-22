@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="jtv_surprise_movies">Movies</string>
+    <string name="jtv_surprise_shows">Shows</string>
+    <string name="jtv_surprise_genre">Genre: %1$s</string>
+    <string name="jtv_surprise_genre_any">Any</string>
+    <string name="jtv_surprise_under_two_hours">Under 2h</string>
+    <string name="jtv_surprise_kid_friendly">Kid-friendly</string>
+    <string name="jtv_surprise_unwatched">Unwatched</string>
+    <plurals name="jtv_surprise_matches">
+        <item quantity="one">%1$d match</item>
+        <item quantity="other">%1$d matches</item>
+    </plurals>
+    <string name="jtv_surprise_kicker">Tonight\'s pick</string>
+    <string name="jtv_surprise_play">Play</string>
+    <string name="jtv_surprise_resume">Resume</string>
+    <string name="jtv_surprise_shuffle">Shuffle again</string>
+    <string name="jtv_surprise_details">Details</string>
+    <string name="jtv_surprise_resume_percent">Resume %1$d%%</string>
+    <plurals name="jtv_surprise_seasons">
+        <item quantity="one">%1$d season</item>
+        <item quantity="other">%1$d seasons</item>
+    </plurals>
+    <string name="jtv_surprise_runtime_hm">%1$dH %2$dM</string>
+    <string name="jtv_surprise_runtime_h">%1$dH</string>
+    <string name="jtv_surprise_runtime_m">%1$dM</string>
+    <string name="jtv_surprise_rating">★ %1$.1f</string>
+    <string name="jtv_surprise_empty_title">Nothing matches</string>
+    <string name="jtv_surprise_empty_subtitle">Loosen a filter and try again.</string>
+    <string name="jtv_surprise_error_title">Couldn\'t reach the server</string>
+    <string name="jtv_surprise_error_generic">The request failed.</string>
+    <string name="jtv_surprise_try_again">Try again</string>
+    <string name="jtv_surprise_key_up">Up</string>
+    <string name="jtv_surprise_key_filters">Filters</string>
+</resources>
