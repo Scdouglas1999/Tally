@@ -1,5 +1,5 @@
 #!/bin/bash
-# Builds signed release APKs of JellyTV for Android TV; with --publish also creates the GitHub release that
+# Builds signed release APKs of Tally for Android TV; with --publish also creates the GitHub release that
 # installed apps update themselves from.
 # The signing key lives OUTSIDE the repository: ~/.config/jellytv/release.jks + release.env
 # (KEY_ALIAS, KEY_PASSWORD, KEY_STORE_PASSWORD). Keep a backup of both: an APK signed with a
@@ -26,6 +26,8 @@ for abi in arm64-v8a armeabi-v7a x86_64; do cp "$SRC"/*-"$abi".apk "$OUT/Wholphi
 # the universal APK is the one without an ABI suffix
 UNIVERSAL="$(ls "$SRC"/*.apk | grep -v -E -- '-(arm64-v8a|armeabi-v7a|x86_64)\.apk$')"
 cp "$UNIVERSAL" "$OUT/Wholphin-release.apk"
+cp "$UNIVERSAL" "$OUT/Tally.apk"
+# JellyTV.apk: the name older plugin installs and Downloader short codes point at; keep publishing it
 cp "$UNIVERSAL" "$OUT/JellyTV.apk"
 ls -lh "$OUT"
 
@@ -44,7 +46,7 @@ fi
 if [ $PUBLISH = 1 ]; then
   TAG="jtv-${VERSION#v}"
   git tag -f "$TAG" && git push -f origin "refs/tags/$TAG" && git push origin main
-  NOTES="${JELLYTV_NOTES:-JellyTV for Android TV $VERSION}"
-  gh release create "$TAG" "$OUT"/JellyTV.apk "$OUT"/Wholphin-release*.apk --repo Scdouglas1999/Tally --title "$VERSION" --notes "$NOTES" --latest
+  NOTES="${JELLYTV_NOTES:-Tally for Android TV $VERSION}"
+  gh release create "$TAG" "$OUT"/Tally.apk "$OUT"/JellyTV.apk "$OUT"/Wholphin-release*.apk --repo Scdouglas1999/Tally --title "$VERSION" --notes "$NOTES" --latest
   echo "published $VERSION"
 fi

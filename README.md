@@ -1,142 +1,100 @@
-# Wholphin - an OSS Android TV client for Jellyfin
+<p align="center"><img src="jellytv/readme/header.png" alt="Tally, a Jellyfin client for Android TV" width="100%"/></p>
 
-> "Never half-phin two jellies. Always wholphin one jelly."
+# Tally
 
-Wholphin is an open-source Android TV client for Jellyfin. It aims to provide a different app UI that's inspired by Plex for users interested in migrating to Jellyfin.
+**Tally is a Jellyfin client for Android TV.** It is a fork of the excellent
+[Wholphin](https://github.com/damontecres/Wholphin) by damontecres: Wholphin's playback, library browsing and
+settings are the foundation, and Tally adds a new look, live sports and a set of features for watching together
+and deciding what to watch.
 
-This is not a fork of the [official client](https://github.com/jellyfin/jellyfin-androidtv). Wholphin's user interface and controls have been written completely from scratch. Wholphin supports playing media using either ExoPlayer or MPV.
+The name comes from the *tally light*, the red lamp on a broadcast camera that says "you're on air". The design
+follows the same idea: a calm, dark control room with one accent colour for what is focused or live.
+
+> Tally is an independent fork. It is not made, reviewed or endorsed by the Wholphin project or by Jellyfin.
+> Please report problems with Tally [here](https://github.com/Scdouglas1999/Tally/issues), not to Wholphin.
 
 <p align="center">
-<a href="https://github.com/damontecres/Wholphin/releases">
-<img alt="Current Release" src="https://img.shields.io/github/release/damontecres/wholphin.svg"/>
-</a>
-<a href="https://translate.codeberg.org/engage/wholphin/">
-<img src="https://translate.codeberg.org/widget/wholphin/wholphin/svg-badge.svg" alt="Translation status" />
-</a>
-<br/>
-<a href="https://play.google.com/store/apps/details?id=com.github.damontecres.wholphin">
-<img width="180" alt="Get Wholphin on Google Play" src="https://github.com/user-attachments/assets/2550a4cb-ce46-47a1-ae24-f33a169234b7"/>
-</a>
-<a href="https://www.amazon.com/gp/product/B0G8RQQR9T/ref=mas_pm_wholphin">
-<img width="180" alt="Get Wholphin on Amazon AppStore" src="https://github.com/user-attachments/assets/1f3a3b26-4b4f-44b1-9741-f4c895c8a53b"/>
-</a>
-
-
+<img src="jellytv/readme/screen-film.jpg" alt="A film's page in Tally" width="49%"/>
+<img src="jellytv/readme/screen-surprise.jpg" alt="Surprise me picking a film" width="49%"/>
 </p>
 
-![v0_5_1_home](https://github.com/user-attachments/assets/62bb1703-abdf-4154-9054-e00b6ceb57b5)
+## What Tally adds
 
-## Features
+**For everything you watch**
+- **A new look.** Square, quiet and legible from the sofa: IBM Plex type, one amber accent, the whole app
+  being redrawn in one style. Wholphin's own themes are still in Settings if you prefer them.
+- **Surprise me.** One press picks tonight's film or show from your library, with quick filters (under two
+  hours, kid-friendly, unwatched, genre).
+- **Your year.** A look back at your year in watching: hours, films and episodes, most-watched shows, top
+  genres, your busiest month, and which year your taste lives in.
+- **Watch together.** Start or join a watch party (Jellyfin SyncPlay): everyone plays, pauses and skips
+  together, each on their own TV.
+- **Up next for films.** When a film in a collection ends, Tally offers the next one; otherwise "More like this".
+- **Playing in the house.** See what is playing on the other screens in your home, and send what you are
+  watching to another TV.
+- **Sleep timer**, in the player's menu: after a number of minutes or when the current item ends.
+- **Play on TV.** Start something on the TV from your phone's Jellyfin web page.
 
-### User interface
+**Live sports** (needs the Tally server plugin, below)
+- Today's games on the home screen and in their own section, with live scores, clocks and line scores.
+- A score bug in the player, a box score one press away, and a switcher for the other games on now.
+- Multiview: up to four games at once, sound following the one you focus. Or keep one game in a corner while
+  you watch something else.
+- Follow your teams so their games come first; hide scores when you are catching up later.
+- A live-scores screensaver.
 
-- Customize the home page to see the content you are interested in
-    - Use poster or thumb images, show/hide titles, add/remove/re-order different types of rows!
-    - Option to combine the Continue Watching & Next Up into a single row
-    - Pin collections, playlists, favorites, genres, and studios
-    - Remove series from next up
-- A navigation drawer for quick access to libraries, favorites, search, and settings from almost anywhere in the app
-- Integration with [Seerr](https://github.com/seerr-team/seerr) to discover new movies and TV shows
-    - Note: only available when installed from [GitHub](https://github.com/damontecres/Wholphin/releases/latest) or the [Play store](https://play.google.com/store/apps/details?id=com.github.damontecres.wholphin)
-- Customize library display
-  - Option to show Movie/TV Show titles
-  - Choose image types & size
-  - Choose from grid or list layouts
-- Play theme music, if available
-- Customize subtitle style for plain text subtitles with separate HDR settings
-- Search & download subtitles (requires compatible server plugin such as [OpenSubtitles](https://github.com/jellyfin/jellyfin-plugin-opensubtitles))
-- Multiple app color themes
-- Protect user profile switches with PIN code or require server login
-- Change the user interface language per user
-- In-app & Android OS screensaver support
+Everything else, from direct play and transcoding to subtitles, Seerr, profiles and ExoPlayer/MPV playback, is
+Wholphin's. Its README describes those features in detail: <https://github.com/damontecres/Wholphin>.
 
-### Playback
+## Install
 
-- Different media playback engines:
-  - **ExoPlayer** w/ optional extra audio, SSA/ASS, & AV1 software decoding
-  - **MPV** for direct playing anything with great SSA/ASS subtitle support
-- Plex inspired playback controls:
-  - Using D-Pad left/right for seeking during playback
-  - Quickly access video chapters & queue during playback
-  - Optionally skip back a few seconds when resuming playback
-- Live TV & DVR support
-- Music & music video support
-- Cinema mode/pre-roll intro support (requires compatible server plugin such as [Intros](https://github.com/jellyfin/jellyfin-plugin-intros))
-- Auto play next episodes with pass out protection
-- Option for automatic refresh rate & resolution switching on supported displays
-- Trickplay (video preview) support
-- Subtly show playback position along the bottom of the screen while seeking w/ D-Pad
+Tally is not in an app store yet. On an Android TV, Google TV, Fire TV or Nvidia Shield:
 
-### Roadmap
+1. Install the free **Downloader** app from your TV's app store.
+2. In Downloader, enter the address of the newest APK:
+   `https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk`
+   (or the short link your server's owner gave you, see below).
+3. Install it, then open Tally and sign in. Downloader can be deleted afterwards.
 
-See [here for the roadmap](https://github.com/damontecres/Wholphin/wiki#roadmap)
+Tally installs next to Wholphin and the official Jellyfin app; it does not replace either. When a new version is
+out, Tally offers to update itself on launch.
 
-## Installation
+**If you run the server:** the Tally server plugin adds an install page to your Jellyfin server. It serves the APK
+already set to your server's address, so your friends skip typing it, and lets them sign in from their phone with
+Quick Connect.
 
-Using [Google Play](https://play.google.com/store/apps/details?id=com.github.damontecres.wholphin) or [Amazon appstore](https://www.amazon.com/gp/product/B0G8RQQR9T/ref=mas_pm_wholphin) are the fastest way to install. But you can follow these instructions to install without needing an app store
+## The server plugin
 
-Downloader Code: `8668671`
+Live sports, the install page and Play on TV come from **Tally for Jellyfin**, a server plugin for Jellyfin 10.10
+and 12. Without it, Tally is a complete Jellyfin client and simply hides the sports section. Plugin
+downloads will be attached to Tally's [releases](https://github.com/Scdouglas1999/Tally/releases), starting with
+the next one.
 
-1. Enable side-loading "unknown" apps
-    - https://androidtvnews.com/unknown-sources-chromecast-google-tv/
-    - https://www.xda-developers.com/how-to-sideload-apps-android-tv/
-    - https://developer.android.com/distribute/marketing-tools/alternative-distribution#unknown-sources
-    - https://www.aftvnews.com/how-to-enable-apps-from-unknown-sources-on-an-amazon-fire-tv-or-fire-tv-stick/
-2. Install the APK on your Android TV device with one of these options:
-    - Install a browser program such as [Downloader](https://www.aftvnews.com/downloader/), use it to get the latest apk with short code `8668671` or URL: http://aftv.news/8668671
-    - Download the latest APK release from the [releases page](https://github.com/damontecres/Wholphin/releases/latest) or http://aftv.news/8668671
-        - Put the APK on an SD Card/USB stick/network share and use a file manager app from the Google Play Store / Amazon AppStore (e.g. `FX File Explorer`). Android's preinstalled file manager probably will not work!
-        - Use `Send files to TV` from the Google Play Store on your phone & TV
-        - (Expert) Use [ADB](https://developer.android.com/studio/command-line/adb) to install the APK from your computer ([guide](https://fossbytes.com/side-load-apps-android-tv/#h-how-to-sideload-apps-on-your-android-tv-using-adb))
+## Building
 
-### Upgrading the app
+```sh
+./gradlew :app:assembleDefaultDebug
+```
 
-After the initial install above, the app will automatically check for updates. The updates can be installed in settings.
+Maintainer notes (how the fork is kept close to Wholphin, releases and signing) are in
+[`jellytv/README.md`](jellytv/README.md) and the engineering rules in [`JELLYTV.md`](JELLYTV.md). Inside the code
+the fork's working name, *JellyTV*, is still used for package and file names.
 
-The first time you attempt an update, the OS should guide you through enabling the required additional permissions for the app to install updates.
+## Credits
 
-Note: if installed via an app store, the app store will handle updates.
+Tally exists because of **[Wholphin](https://github.com/damontecres/Wholphin)**, written by
+[damontecres](https://github.com/damontecres) and its contributors and translators. Its player, library,
+settings and most of what makes Tally work are theirs. If you like Tally, please star Wholphin and consider
+supporting its author.
 
-## Compatibility
+Also thanks to [Jellyfin](https://jellyfin.org), the free software media system Tally connects to, and to the
+projects Wholphin builds on.
 
-Requires Android 6+ (or Fire TV OS 6+) and Jellyfin server `10.10.x` or `10.11.x` (tested on primarily `10.11`).
+## License
 
-The app is tested on a variety of Android TV/Fire TV OS devices, but if you encounter issues, please file an issue!
+Tally is free software under the **GNU General Public License, version 2**, the same license as Wholphin: see
+[LICENSE](LICENSE). [NOTICE.md](NOTICE.md) records that Tally is a modified version of Wholphin, where and when it
+was changed, and the third-party material it includes (IBM Plex fonts under the SIL Open Font License).
 
-Seerr integration is generally tested with the latest stable version. Older versions may not work as expected. The Seerr server should configured with integration to your Jellyfin server for full compatibility.
-
-## Contributions
-
-Issues and pull requests are always welcome! Please check before submitting that your issue or pull request is not a duplicate.
-
-If you plan to contribute, please read the [contributing guide](CONTRIBUTING.md)!
-
-You can [help translate Wholphin](https://translate.codeberg.org/engage/wholphin/)!
-
-## Acknowledgements
-
-- Thanks to the Jellyfin team for creating and maintaining such a great open-source media server
-- Thanks to the official Jellyfin Android TV client developers, some code for creating the device direct play profile is adapted from there
-- Thanks to the Jellyfin Kotlin SDK developers for making it easier to interact with the Jellyfin server API
-- Thanks to numerous other libraries that make app development even possible
-
-## Additional screenshots
-
-### Customized home page
-![customize_home_example](https://github.com/user-attachments/assets/9a4f04b7-9604-4ea7-b352-50f2b15dc2f1)
-
-### Movie library browsing
-![v0_5_1_library](https://github.com/user-attachments/assets/fad0424b-0631-4438-a8bc-d4fbb95a5bf3)
-
-### Movie page
-![v0_5_1_movie](https://github.com/user-attachments/assets/849aad34-49d5-4864-8de7-005bbcb68ac6)
-
-### Series page
-![v0_5_1_series](https://github.com/user-attachments/assets/655389e1-6a6f-43bc-85e1-e2feffb20429)
-
-### Genres in library
-![v0_5_1_genres](https://github.com/user-attachments/assets/5bbcbeb6-edc9-42c7-a1d8-d92fa432a498)
-
-
-### Playlist
-![v0_5_1_playlist](https://github.com/user-attachments/assets/98268f7d-479d-41c6-b47b-3e67bbe661bc)
+Jellyfin is a trademark of the Jellyfin project. League and team names and logos belong to their owners; Tally is
+not affiliated with any league, team or data provider.

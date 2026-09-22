@@ -1,35 +1,43 @@
-# JellyTV for Android TV
+# Tally: maintainer notes
 
-[Wholphin](https://github.com/damontecres/Wholphin) with one addition: a native **JellyTV** section for
-live sports, backed by the `Jellyfin.Plugin.JellyTV` server plugin. Everything else (movies, shows, music,
-playback settings) is Wholphin, unchanged. GPL-2.0, same as upstream.
+Tally is a fork of [Wholphin](https://github.com/damontecres/Wholphin) (GPL-2.0). The user-facing description is
+the [root README](../README.md); the licensing record is [NOTICE.md](../NOTICE.md). This file is for whoever builds,
+releases and rebases the fork. Inside the code the fork still uses its working name, *JellyTV*: the package
+`…/wholphin/jellytv/`, `strings_jellytv*.xml`, the `JELLYTV` theme and the `JELLYTV: begin/end` markers.
 
-The JellyTV entry appears in the navigation drawer only when the signed-in server has the plugin. Against any
-other Jellyfin server this app behaves exactly like Wholphin.
+## Keeping close to Wholphin
 
-## What it adds
+The rules that keep rebases onto upstream releases cheap are in [`JELLYTV.md`](../JELLYTV.md): all Tally code
+lives under one package, and Wholphin's files are edited only at a short list of marked seams, each listed there.
+Each modified Wholphin file also carries a "Modified for Tally" notice at its top (required by GPL-2.0 §2a); a
+new seam in a file that has no notice yet must add one. `app/src/main/res/values/strings.xml` cannot carry one
+(Weblate rewrites it) and is listed in NOTICE.md instead. Locally, `upstream-main` tracks Wholphin's `main`.
 
-- **Games**: every live and upcoming game as a card, with a large panel for the focused game (score, clock,
-  situation, last play). OK watches it.
-- **Player**: the normal Wholphin player plus a score bug and an "also on now" switcher.
-- **Multiview**: up to four games at once; audio follows focus.
-- **Play on TV**: the JellyTV web UI on a phone can start a game on this app.
-
-## Install (sideload)
-
-1. Download the APK for your device from Releases: `arm64-v8a` for almost every modern Android TV, Fire TV and
-   Shield; `armeabi-v7a` for older 32-bit sticks.
-2. Install it with your usual sideloading tool (Downloader, `adb install`, Send Files to TV).
-3. It installs next to Wholphin and the official Jellyfin app; it does not replace either.
-
-In-app updating is switched off in this fork. Update by installing a newer APK over the old one.
+The UI is redrawn screen by screen while the `JELLYTV` theme is selected: `jellytv/media/JellyTvRoutes.kt` decides
+which destinations Tally draws, reusing Wholphin's view models. Design rules are in [`UI.md`](UI.md).
 
 ## Building
 
-`./gradlew :app:assembleDefaultDebug` for a debug build. `jellytv/release.sh` builds signed release APKs; it
-expects the signing key in `~/.config/jellytv/` (never in the repository).
+- Debug: `./gradlew :app:assembleDefaultDebug`.
+- Release: `jellytv/release.sh` builds signed APKs into `jellytv/out/`; `--publish` also tags `jtv-<version>`, pushes
+  and creates the GitHub release; `--stores` adds the Play bundle and Amazon APK (see [`store/`](store/)).
+- Signing key: `~/.config/jellytv/release.jks` + `release.env`, never in the repository. Keep a backup: without
+  it nobody can update their installed app.
 
-## Maintaining the fork
+## Release assets
 
-The rules that keep rebases onto upstream releases cheap are in [`JELLYTV.md`](../JELLYTV.md): all JellyTV code
-lives under one package, and upstream files are edited only at a short list of marked seams.
+| Asset | Used by |
+|---|---|
+| `Tally.apk` | the README's install link (`releases/latest/download/Tally.apk`) |
+| `JellyTV.apk` | the same file under its old name, for plugin installs and Downloader short codes made before the rename |
+| `Wholphin-release-<abi>.apk`, `Wholphin-release.apk` | the in-app updater, which Wholphin wrote to look for these names |
+
+The updater reads the release *name* as the version; release tags are `jtv-*` so they never collide with the
+`v*` tags Gradle derives `versionName`/`versionCode` from.
+
+## Development helpers
+
+- `dev/make-test-library.sh` builds a small media library of test-pattern files named after real titles, so a
+  dev Jellyfin server fills in real metadata; `dev/seed-dev-server.sh` sets that server up.
+- `dev/syncplay-peer.py` is a scripted second SyncPlay member for testing Watch together.
+- `art/` holds the scripts that generate the TV banner and the README art.
