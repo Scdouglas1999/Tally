@@ -67,8 +67,9 @@ generic over labels: `JtvTabs(labels, selected, onSelect)`.
 **SearchField** — square, height 48, 1dp `ruleStrong` (focused: 3dp accent), mono placeholder in `muted`
 (`SEARCH MOVIES, SHOWS, PEOPLE`), Sans 20sp input; an IconButton for voice sits to its left.
 **DetailHeader** — the top of every detail page:
-- backdrop: the item's backdrop, top-right, 64% of the page width and full height, `Crop`, under a horizontal
-  scrim `ground` → transparent across its left 45% and a vertical scrim transparent → `ground` from 55% down;
+- backdrop: the app-wide backdrop (upstream `BackdropService`, drawn once by `ApplicationContent`, image-only in
+  the JellyTV look: top-right, fading out to the left and bottom). A page submits its item, exactly as upstream's
+  VM does; it never draws a second backdrop of its own, so moving between pages crossfades;
 - left column (max 480): kicker (mono `label`, `muted`: `FILM`, `SERIES · 2 SEASONS`, `S1 · E4`), logo (max
   360x96, Fit) or title (Sans SemiBold 40sp/46sp, 2 lines), meta line (mono `label` `textSecondary`: year ·
   official rating in a 1dp `ruleStrong` box · runtime `2H 28M` · `★ 8.4` · critic score `RT 87%` · `ENDS 9:41 PM`),
@@ -79,6 +80,11 @@ generic over labels: `JtvTabs(labels, selected, onSelect)`.
 **EpisodeRow** — list row for episodes: 16:9 thumb (200 wide) with progress; right of it: mono `label` accent
 `E4 · 52M` (plus `SEEN` muted when played), title Sans SemiBold 20sp, overview `body` `muted` 2 lines. Focused: 3dp
 accent border around the whole row, `groundRaised` fill.
+**ItemDialogsHost** — one reusable host for the dialogs every item page needs, reusing upstream's composables
+as they are (restyled later at the theme level): the context menu (`ContextMenuDialog` with `ContextMenu.ForBaseItem`
+— it carries the version/audio/subtitle pickers, add to queue/playlist, delete), `PlaylistDialog` via
+`AddPlaylistViewModel`, `ItemDetailsDialog` (full overview) and `ConfirmDialog`. Pages open them through a small
+state object instead of wiring each dialog themselves.
 **TrackRow** — music: number mono muted (right-aligned, 32 wide), title Sans 18sp, artist Sans 15sp muted, duration
 mono right; playing = accent indicator square before the number. Focus like EpisodeRow.
 
