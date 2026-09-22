@@ -133,6 +133,7 @@ fun ChannelsGrid(
                         modifier =
                             Modifier
                                 .fillMaxWidth()
+                                .then(if (index < 4) Modifier.upToTab() else Modifier)
                                 .ifElse(
                                     index == position,
                                     Modifier

@@ -24,6 +24,7 @@ import com.github.damontecres.wholphin.jellytv.ui.components.JtvRow
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
+import com.github.damontecres.wholphin.jellytv.ui.upToTab
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 
 /**
@@ -57,7 +58,7 @@ fun JtvSettingsContent(
             description = stringResource(R.string.jtv_settings_my_channels_desc),
             onClick = onToggleOnlyWatchable,
             trailing = { JtvSwitch(checked = onlyWatchable) },
-            modifier = Modifier.focusRequester(firstRowFocus),
+            modifier = Modifier.focusRequester(firstRowFocus).upToTab(),
         )
         JtvRow(
             label = stringResource(R.string.jtv_settings_hide_scores),

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,59 +68,61 @@ fun JellyTvPage(
                 // Upstream draws its own clock in this corner when the user has it enabled; never show two.
                 clock = if (preferences.appPreferences.interfacePreferences.showClock) "" else clock,
             )
-            Box(Modifier.focusProperties { up = selectedTabFocus }) {
-                when (state.selectedTab) {
-                    JtvTab.GAMES -> {
-                        GamesBoard(
-                            rows = state.rows,
-                            favorites = state.favorites,
-                            hideScores = state.hideScores,
-                            loading = state.loading,
-                            hasBoard = state.hasBoard,
-                            boardError = state.boardError,
-                            feedErrors = state.feedErrors,
-                            hasGames = state.games.isNotEmpty(),
-                            onWatch = viewModel::watch,
-                            onAddToMultiview = viewModel::addToMultiview,
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    }
+            CompositionLocalProvider(LocalJtvUpTarget provides selectedTabFocus) {
+                Box(Modifier.focusProperties { up = selectedTabFocus }) {
+                    when (state.selectedTab) {
+                        JtvTab.GAMES -> {
+                            GamesBoard(
+                                rows = state.rows,
+                                favorites = state.favorites,
+                                hideScores = state.hideScores,
+                                loading = state.loading,
+                                hasBoard = state.hasBoard,
+                                boardError = state.boardError,
+                                feedErrors = state.feedErrors,
+                                hasGames = state.games.isNotEmpty(),
+                                onWatch = viewModel::watch,
+                                onAddToMultiview = viewModel::addToMultiview,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
 
-                    JtvTab.CHANNELS -> {
-                        ChannelsGrid(
-                            channels = state.channels,
-                            games = state.games,
-                            favorites = state.favorites,
-                            hideScores = state.hideScores,
-                            loading = state.loading,
-                            hasBoard = state.hasBoard,
-                            boardError = state.boardError,
-                            cardUrl = { viewModel.absoluteUrl(it.cardPath) },
-                            onWatch = viewModel::watchChannel,
-                            onAddToMultiview = viewModel::addToMultiview,
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    }
+                        JtvTab.CHANNELS -> {
+                            ChannelsGrid(
+                                channels = state.channels,
+                                games = state.games,
+                                favorites = state.favorites,
+                                hideScores = state.hideScores,
+                                loading = state.loading,
+                                hasBoard = state.hasBoard,
+                                boardError = state.boardError,
+                                cardUrl = { viewModel.absoluteUrl(it.cardPath) },
+                                onWatch = viewModel::watchChannel,
+                                onAddToMultiview = viewModel::addToMultiview,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
 
-                    JtvTab.MULTIVIEW -> {
-                        MultiviewQueue(
-                            channelIds = state.multiview,
-                            channels = state.channels,
-                            onRemove = viewModel::removeFromMultiview,
-                            onOpen = viewModel::openMultiview,
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    }
+                        JtvTab.MULTIVIEW -> {
+                            MultiviewQueue(
+                                channelIds = state.multiview,
+                                channels = state.channels,
+                                onRemove = viewModel::removeFromMultiview,
+                                onOpen = viewModel::openMultiview,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
 
-                    JtvTab.SETTINGS -> {
-                        JtvSettingsContent(
-                            onlyWatchable = state.onlyWatchable,
-                            hideScores = state.hideScores,
-                            info = (state.availability as? JellyTvRepository.Availability.Available)?.info,
-                            onToggleOnlyWatchable = viewModel::toggleOnlyWatchable,
-                            onHideScoresChange = viewModel::setHideScores,
-                            modifier = Modifier.fillMaxSize(),
-                        )
+                        JtvTab.SETTINGS -> {
+                            JtvSettingsContent(
+                                onlyWatchable = state.onlyWatchable,
+                                hideScores = state.hideScores,
+                                info = (state.availability as? JellyTvRepository.Availability.Available)?.info,
+                                onToggleOnlyWatchable = viewModel::toggleOnlyWatchable,
+                                onHideScoresChange = viewModel::setHideScores,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
                     }
                 }
             }
@@ -167,7 +170,7 @@ private fun MultiviewQueue(
                 label = stringResource(R.string.jtv_open_multiview),
                 onClick = onOpen,
                 primary = true,
-                modifier = Modifier.focusRequester(firstRowFocus),
+                modifier = Modifier.focusRequester(firstRowFocus).upToTab(),
             )
             channelIds.forEach { channelId ->
                 JtvRow(

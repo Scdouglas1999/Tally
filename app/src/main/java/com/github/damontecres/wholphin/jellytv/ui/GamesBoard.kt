@@ -168,6 +168,7 @@ fun GamesBoard(
                 ) {
                     itemsIndexed(rows, key = { _, row -> row.key }) { rowIndex, row ->
                         GameRow(
+                            isFirstRow = rowIndex == 0,
                             row = row,
                             favorites = favorites,
                             hideScores = hideScores,
@@ -195,6 +196,7 @@ fun GamesBoard(
  */
 @Composable
 private fun GameRow(
+    isFirstRow: Boolean,
     row: BoardRow,
     favorites: Set<String>,
     hideScores: Boolean,
@@ -233,7 +235,8 @@ private fun GameRow(
                     .fillMaxWidth()
                     .focusGroup()
                     .focusRestorer(firstFocus)
-                    .focusRequester(rowFocus),
+                    .focusRequester(rowFocus)
+                    .then(if (isFirstRow) Modifier.upToTab() else Modifier),
         ) {
             itemsIndexed(row.games, key = { _, game -> game.id }) { index, game ->
                 GameCard(
