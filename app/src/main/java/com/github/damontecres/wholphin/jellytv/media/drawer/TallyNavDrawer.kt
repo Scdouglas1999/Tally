@@ -160,15 +160,22 @@ fun TallyNavDrawer(
             val lastRowRequester = remember { FocusRequester() }
             val hideLiveTv = NavDrawerItem.JellyTv in serviceState.items
             val visible = indexedDrawerItems(serviceState.items, hideLiveTv)
-            val sections = visible.filter { it.value.isTallyAppSection() }
-            val libraries = visible.filterNot { it.value.isTallyAppSection() }
+            // Ordered by how much people use them (user, 2026-09-22): Movies, TV Shows, Sports first (sortedBy is
+            // stable: server order within a type), then the remaining libraries, then the other app sections. Indexes stay the original ones (see indexedDrawerItems).
+            val primary =
+                visible
+                    .filter { it.value.tallyPrimaryRank() != null }
+                    .sortedBy { it.value.tallyPrimaryRank() }
+            val sections = visible.filter { it.value.tallyPrimaryRank() == null && it.value.isTallyAppSection() }
+            val libraries = visible.filter { it.value.tallyPrimaryRank() == null && !it.value.isTallyAppSection() }
             val moreVisible = indexedDrawerItems(serviceState.moreItems, hideLiveTv)
             val lastRowId =
                 when {
+                    sections.isNotEmpty() -> sections.last().value.id
                     moreVisible.isNotEmpty() && moreExpanded -> "more-" + moreVisible.last().value.id
                     moreVisible.isNotEmpty() -> "more"
                     libraries.isNotEmpty() -> libraries.last().value.id
-                    sections.isNotEmpty() -> sections.last().value.id
+                    primary.isNotEmpty() -> primary.last().value.id
                     else -> "home"
                 }
             val lastRow = Modifier.focusRequester(lastRowRequester)
@@ -296,7 +303,7 @@ fun TallyNavDrawer(
                                 )
                             }
                             items(
-                                items = sections,
+                                items = primary,
                                 key = { it.value.id },
                             ) { indexed ->
                                 DrawerItemEntry(
@@ -374,6 +381,26 @@ fun TallyNavDrawer(
                                         modifier = if (lastRowId == "more-" + indexed.value.id) lastRow else Modifier,
                                     )
                                 }
+                            }
+                            if (sections.isNotEmpty() && (primary.isNotEmpty() || libraries.isNotEmpty() || moreVisible.isNotEmpty())) {
+                                item(key = "sections-rule") {
+                                    TallyDrawerDivider(title = null, drawerOpen = isOpen)
+                                }
+                            }
+                            items(
+                                items = sections,
+                                key = { it.value.id },
+                            ) { indexed ->
+                                DrawerItemEntry(
+                                    index = indexed.index,
+                                    item = indexed.value,
+                                    selectedIndex = selectedIndex,
+                                    drawerOpen = isOpen,
+                                    context = context,
+                                    focusRequester = focusRequester,
+                                    onClick = viewModel::onClickDrawerItem,
+                                    modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
+                                )
                             }
                         }
                         // Settings: upstream's footer, pinned to the bottom so it is always visible

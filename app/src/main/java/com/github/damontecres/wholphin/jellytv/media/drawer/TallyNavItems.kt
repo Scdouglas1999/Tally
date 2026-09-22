@@ -71,6 +71,18 @@ internal fun indexedDrawerItems(
         hideLiveTv && item is ServerNavDrawerItem && item.type == CollectionType.LIVETV
     }
 
+/**
+ * The first group under Home (user's order, 2026-09-22): Movies, TV Shows, then Sports. Every movies- and
+ * TV-type library belongs to it, in the server's order within each type.
+ */
+internal fun NavDrawerItem.tallyPrimaryRank(): Int? =
+    when {
+        this is ServerNavDrawerItem && type == CollectionType.MOVIES -> 0
+        this is ServerNavDrawerItem && type == CollectionType.TVSHOWS -> 1
+        this == NavDrawerItem.JellyTv -> 2
+        else -> null
+    }
+
 internal fun NavDrawerItem.isTallyAppSection(): Boolean =
     when (this) {
         NavDrawerItem.Discover,
@@ -100,7 +112,8 @@ internal fun tallyGlyph(item: NavDrawerItem): TallyGlyph =
         }
 
         NavDrawerItem.JellyTv -> {
-            TallyGlyph.Font(R.string.fa_tv)
+            // not fa_tv: TV Shows sits right above Sports and uses it
+            TallyGlyph.Font(R.string.jtv_drawer_fa_trophy)
         }
 
         NavDrawerItem.JellyTvSurprise -> {
