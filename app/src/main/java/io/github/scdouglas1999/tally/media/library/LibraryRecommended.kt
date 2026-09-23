@@ -182,13 +182,10 @@ private fun tvRows(
                     includeItemTypes = listOf(BaseItemKind.EPISODE),
                     recursive = true,
                     enableUserData = true,
-                    sortBy =
-                        listOf(
-                            ItemSortBy.PREMIERE_DATE,
-                            ItemSortBy.SERIES_SORT_NAME,
-                            ItemSortBy.AIRED_EPISODE_ORDER,
-                        ),
-                    sortOrder = listOf(SortOrder.DESCENDING, SortOrder.ASCENDING, SortOrder.DESCENDING),
+                    // Upstream also sorts by AIRED_EPISODE_ORDER; Jellyfin 10.10 answers that with HTTP 500, which
+                    // left the row showing the error. Premiere date then series name orders the row the same way.
+                    sortBy = listOf(ItemSortBy.PREMIERE_DATE, ItemSortBy.SERIES_SORT_NAME),
+                    sortOrder = listOf(SortOrder.DESCENDING, SortOrder.ASCENDING),
                     enableTotalRecordCount = false,
                     maxPremiereDate = LocalDateTime.now(),
                     isUnaired = false,

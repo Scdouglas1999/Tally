@@ -83,10 +83,10 @@ import io.github.scdouglas1999.tally.media.pages.countNoun
 import io.github.scdouglas1999.tally.media.pages.totalRuntimeTicks
 import io.github.scdouglas1999.tally.media.pages.yearRange
 import io.github.scdouglas1999.tally.media.search.GridCardWidth
-import io.github.scdouglas1999.tally.media.search.PageScrollSpec
 import io.github.scdouglas1999.tally.media.search.PagesItemCard
 import io.github.scdouglas1999.tally.media.search.PagesItemRow
 import io.github.scdouglas1999.tally.media.search.PagesLoading
+import io.github.scdouglas1999.tally.media.search.rememberPageScrollSpec
 import io.github.scdouglas1999.tally.media.search.typeTitle
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
@@ -295,7 +295,7 @@ private fun CollectionLoaded(
             state.items.isEmpty()
         }
 
-    CompositionLocalProvider(LocalBringIntoViewSpec provides PageScrollSpec) {
+    CompositionLocalProvider(LocalBringIntoViewSpec provides rememberPageScrollSpec()) {
         LazyColumn(
             contentPadding = PaddingValues(bottom = TallyDimens.marginVertical),
             modifier = Modifier.fillMaxSize(),

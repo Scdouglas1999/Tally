@@ -1046,6 +1046,7 @@ internal fun MusicVideosRow(
                     imageUrl = item?.let { rememberWideImageUrl(it) },
                     onClick = { item?.let(onClick) },
                     onLongClick = { item?.let(onLongClick) },
+                    favorite = item?.favorite == true,
                     onFocused = onFocused,
                     modifier = cardModifier,
                 )

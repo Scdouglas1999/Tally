@@ -890,6 +890,10 @@ private fun SurpriseBackdrop(
                         Brush.verticalGradient(
                             colorStops =
                                 arrayOf(
+                                    // The app clock sits over the top-right corner: keep it on ground, not on a
+                                    // bright picture.
+                                    0f to TallyColors.ground,
+                                    TOP_SCRIM to Color.Transparent,
                                     0.55f to Color.Transparent,
                                     1f to TallyColors.ground,
                                 ),
@@ -1030,6 +1034,9 @@ private fun resumePercent(item: BaseItem): Int? {
 
 private const val BACKDROP_WIDTH = 0.64f
 private const val BACKDROP_FADE_MS = 400
+
+/** Where the scrim at the top of the backdrop (under the clock) has faded out, as a fraction of its height. */
+private const val TOP_SCRIM = 0.24f
 private const val TEXT_FADE_OUT_MS = 120
 private const val TEXT_FADE_IN_MS = 300
 private const val PRELOAD_MS = 800L

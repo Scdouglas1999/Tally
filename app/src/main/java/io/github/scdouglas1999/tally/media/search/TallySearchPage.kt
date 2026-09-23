@@ -1,6 +1,7 @@
 package io.github.scdouglas1999.tally.media.search
 
 import android.Manifest
+import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -32,6 +33,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -50,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -58,6 +61,8 @@ import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.key.Key
@@ -66,8 +71,10 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -76,6 +83,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.tv.material3.LocalContentColor
@@ -166,6 +175,7 @@ fun TallySearchPage(
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
+    val view = LocalView.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val state by viewModel.state.collectAsState()
     val programDialogState by viewModel.programDialogState.collectAsState()
@@ -353,14 +363,19 @@ fun TallySearchPage(
                                         if (!it.isFocused) isSearchActive = false
                                     }.onPreviewKeyEvent { event ->
                                         val activation = event.key == Key.DirectionCenter || event.key == Key.Enter
+                                        // Typing = the on-screen keyboard is up. BACK closes the keyboard without
+                                        // reaching the page, so the field stays editable after it: without this, LEFT
+                                        // and RIGHT went on moving the cursor and never reached the voice and view
+                                        // buttons.
+                                        val typing = isSearchActive && imeShown(view)
                                         // Up and down always leave the field (a single line has nowhere to go, and while the
                                         // keyboard is up it gets the arrows, not the field); left and right only when not typing.
                                         val direction =
                                             focusDirectionFor(event.key)?.takeIf {
-                                                !isSearchActive || it == FocusDirection.Up || it == FocusDirection.Down
+                                                !typing || it == FocusDirection.Up || it == FocusDirection.Down
                                             }
                                         when {
-                                            event.type == KeyEventType.KeyUp && activation && !isSearchActive -> {
+                                            event.type == KeyEventType.KeyUp && activation && !typing -> {
                                                 isSearchActive = true
                                                 keyboardController?.show()
                                                 true
@@ -525,6 +540,9 @@ fun TallySearchPage(
     }
 }
 
+/** Whether the on-screen keyboard is up (the window's IME inset is visible). */
+private fun imeShown(view: View): Boolean = ViewCompat.getRootWindowInsets(view)?.isVisible(WindowInsetsCompat.Type.ime()) == true
+
 private fun focusDirectionFor(key: Key): FocusDirection? =
     when (key) {
         Key.DirectionDown -> FocusDirection.Down
@@ -650,14 +668,31 @@ private fun RowResults(
         )
         return
     }
-    CompositionLocalProvider(LocalBringIntoViewSpec provides PageScrollSpec) {
+    val listState = rememberLazyListState()
+    CompositionLocalProvider(LocalBringIntoViewSpec provides rememberPageScrollSpec()) {
         LazyColumn(
+            state = listState,
             contentPadding = PaddingValues(top = 16.dp, bottom = TallyDimens.marginVertical),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .focusGroup(),
+                    .drawWithContent {
+                        drawContent()
+                        // Rows scrolled up fade out under the search field instead of being cut, as on the
+                        // library grid.
+                        if (listState.canScrollBackward) {
+                            drawRect(
+                                brush =
+                                    Brush.verticalGradient(
+                                        0f to TallyColors.ground,
+                                        1f to Color.Transparent,
+                                        endY = ScrollFade.toPx(),
+                                    ),
+                                size = Size(size.width, ScrollFade.toPx()),
+                            )
+                        }
+                    }.focusGroup(),
         ) {
             // Only rows with something to show: an empty row would still take the list's spacing.
             val shown =
@@ -903,22 +938,38 @@ internal fun providerContextMenu(
 
 /**
  * Scroll a page's list only as far as needed to show the focused row, as the film page does
- * (the TV default parks it a third of the way down).
+ * (the TV default parks it a third of the way down), and keep [bottomRoom] (px) under it so the last row rests
+ * inside the safe area instead of on the screen's bottom edge.
  */
 @OptIn(ExperimentalFoundationApi::class)
-internal object PageScrollSpec : BringIntoViewSpec {
+internal class PageScrollSpec(
+    private val bottomRoom: Float,
+) : BringIntoViewSpec {
     override fun calculateScrollDistance(
         offset: Float,
         size: Float,
         containerSize: Float,
     ): Float {
         val trailing = offset + size
+        val limit = containerSize - bottomRoom
         return when {
+            offset >= 0f && trailing <= limit -> 0f
+            size <= limit && trailing > limit -> trailing - limit
             offset >= 0f && trailing <= containerSize -> 0f
             size <= containerSize && trailing > containerSize -> trailing - containerSize
             else -> offset
         }
     }
+}
+
+/** Height of the fade at the top of the scrolled results. */
+private val ScrollFade = 32.dp
+
+/** [PageScrollSpec] with the page's bottom safe margin. */
+@Composable
+internal fun rememberPageScrollSpec(): BringIntoViewSpec {
+    val density = LocalDensity.current
+    return remember(density) { PageScrollSpec(with(density) { TallyDimens.marginVertical.toPx() }) }
 }
 
 /** A [MediaRow] of [PagesItemCard]s. Keys are position + id, so a repeated id never collides. */
