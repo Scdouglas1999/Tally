@@ -27,6 +27,8 @@ object TallyQuality {
 
     private val requests = MutableSharedFlow<Int?>(extraBufferCapacity = 4)
 
+    @Volatile private var bindings = 0
+
     /** Read by `changeStreams`: the bitrate cap for this request, or null to use the preference. */
     fun maxBitrateOverride(): Int? = _choice.value
 
@@ -68,12 +70,17 @@ object TallyQuality {
         scope: CoroutineScope,
         restart: suspend (original: Boolean) -> Unit,
     ) {
+        val binding = ++bindings
         scope.launch {
             try {
                 requests.collect { restart(it == null) }
             } finally {
-                _choice.value = null
-                _nowPlaying.value = null
+                // When one player replaces another (a deep link, Send to), the old player's scope ends after the new
+                // one has bound: only the player that bound last may clear the shared state.
+                if (bindings == binding) {
+                    _choice.value = null
+                    _nowPlaying.value = null
+                }
             }
         }
     }
