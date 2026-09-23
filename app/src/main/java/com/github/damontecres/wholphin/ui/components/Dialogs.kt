@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.components
 
 import android.content.res.Resources
@@ -212,6 +215,20 @@ fun DialogPopup(
     properties: DialogProperties = DialogProperties(),
     elevation: Dp = 1.dp,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings.TallyDialogPopup(
+            showDialog,
+            title,
+            dialogItems,
+            onDismissRequest,
+            dismissOnClick,
+            waitToLoad,
+            properties,
+        )
+        return
+    }
+    // TALLY: end
     var waiting by remember { mutableStateOf(waitToLoad) }
     if (showDialog) {
         if (waitToLoad) {
@@ -267,6 +284,19 @@ fun DialogPopupContent(
     dismissOnClick: Boolean = true,
     elevation: Dp = 8.dp,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings.TallyDialogPopupContent(
+            title,
+            dialogItems,
+            waiting,
+            onDismissRequest,
+            modifier,
+            dismissOnClick,
+        )
+        return
+    }
+    // TALLY: end
     val elevatedContainerColor =
         MaterialTheme.colorScheme.surfaceColorAtElevation(elevation)
     Column(
@@ -364,6 +394,13 @@ fun ScrollableDialog(
     itemSpacing: Dp = 8.dp,
     content: LazyListScope.() -> Unit,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings
+            .TallyScrollableDialog(onDismissRequest, width, maxHeight, itemSpacing, content)
+        return
+    }
+    // TALLY: end
     val scrollAmount = 100f
     val columnState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -422,6 +459,13 @@ fun BasicDialog(
     elevation: Dp = 1.dp,
     content: @Composable () -> Unit,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings
+            .TallyBasicDialog(onDismissRequest, properties, content)
+        return
+    }
+    // TALLY: end
     Dialog(
         onDismissRequest = onDismissRequest,
         properties = properties,
@@ -473,6 +517,19 @@ fun ConfirmDialogContent(
     modifier: Modifier = Modifier,
     bodyColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings.TallyConfirmDialogContent(
+            title = title,
+            body = body,
+            onCancel = onCancel,
+            onConfirm = onConfirm,
+            modifier = modifier,
+            bodyIsError = bodyColor == MaterialTheme.colorScheme.error,
+        )
+        return
+    }
+    // TALLY: end
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(16.dp),
@@ -521,6 +578,13 @@ fun ConfirmDeleteDialog(
     onConfirm: () -> Unit,
     elevation: Dp = 3.dp,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings
+            .TallyConfirmDeleteDialog(itemTitle, onCancel, onConfirm)
+        return
+    }
+    // TALLY: end
     BasicDialog(
         onDismissRequest = onCancel,
         properties = DialogProperties(usePlatformDefaultWidth = false),

@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.preferences
 
 import android.widget.Toast
@@ -207,16 +210,25 @@ fun PreferencesContent(
         Column(
             modifier = Modifier.background(MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)),
         ) {
-            Text(
-                text = stringResource(screenTitle),
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-            )
+            // TALLY: begin
+            if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+                io.github.scdouglas1999.tally.ui.settings
+                    .TallySettingsTitle(stringResource(screenTitle))
+            } else {
+                // TALLY: end
+                Text(
+                    text = stringResource(screenTitle),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                )
+                // TALLY: begin
+            }
+            // TALLY: end
             LazyColumn(
                 state = state,
                 horizontalAlignment = Alignment.Start,
@@ -250,6 +262,13 @@ fun PreferencesContent(
                 }
                 prefList.forEachIndexed { groupIndex, group ->
                     item {
+                        // TALLY: begin
+                        if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+                            io.github.scdouglas1999.tally.ui.settings
+                                .TallySettingsGroupHeader(stringResource(group.title))
+                            return@item
+                        }
+                        // TALLY: end
                         Text(
                             text = stringResource(group.title),
                             style = MaterialTheme.typography.titleMedium,

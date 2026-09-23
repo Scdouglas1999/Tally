@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.preferences
 
 import androidx.compose.animation.AnimatedVisibility
@@ -27,6 +30,22 @@ fun <T> MultiChoicePreference(
     valueDisplay: @Composable (index: Int, item: T) -> Unit = { _, item -> Text(item.toString()) },
     subtitleDisplay: @Composable (index: Int, item: T) -> Unit = { _, item -> },
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings.TallyMultiChoicePreference(
+            title = title,
+            summary = summary,
+            possibleValues = possibleValues,
+            selectedValues = selectedValues,
+            onValueChange = onValueChange,
+            modifier = modifier,
+            interactionSource = interactionSource,
+            valueDisplay = valueDisplay,
+            subtitleDisplay = subtitleDisplay,
+        )
+        return
+    }
+    // TALLY: end
 //    val values = stringArrayResource(preference.displayValues).toList()
 //    val summary =
 //        preference.summary?.let { stringResource(it) }

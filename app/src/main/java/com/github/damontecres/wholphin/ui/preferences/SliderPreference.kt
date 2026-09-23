@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.preferences
 
 import androidx.compose.foundation.background
@@ -37,6 +40,21 @@ fun SliderPreference(
     summaryBelow: Boolean = false,
     additionalSummary: @Composable (ColumnScope.() -> Unit)? = null,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings.TallySliderPreference(
+            preference = preference,
+            title = title,
+            summary = summary,
+            value = value,
+            onChange = onChange,
+            modifier = modifier,
+            interactionSource = interactionSource,
+            additionalSummary = additionalSummary,
+        )
+        return
+    }
+    // TALLY: end
     val focused = interactionSource.collectIsFocusedAsState().value
     val background =
         if (focused) {
