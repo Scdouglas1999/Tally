@@ -55,11 +55,15 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.preferences.AppPreference
 import com.github.damontecres.wholphin.preferences.AppPreferences
+import com.github.damontecres.wholphin.ui.playback.CurrentPlayback
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.scdouglas1999.tally.quality.phone.PhoneQualityPanel
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -67,6 +71,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyType
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jellyfin.sdk.model.api.TranscodeReason
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -93,7 +98,7 @@ fun QualityDialog(
 ) {
     val playback by TallyQuality.nowPlaying.collectAsStateWithLifecycle()
     val choice by TallyQuality.choice.collectAsStateWithLifecycle()
-    val now = QualityStatus.now(playback)
+    val now = shownStatus(playback)
     val options =
         QualityLadder.options(
             QualityStatus.sourceHeight(playback),
@@ -110,6 +115,16 @@ fun QualityDialog(
             now,
             now?.reasons,
         )
+    }
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneQualityPanel(
+            now = now,
+            options = options,
+            choice = choice,
+            onChoose = { bits, megabits, asDefault -> viewModel.choose(bits, megabits, asDefault, onDismiss) },
+            onDismiss = onDismiss,
+        )
+        return
     }
     Dialog(
         onDismissRequest = onDismiss,
@@ -421,3 +436,28 @@ class QualityDialogViewModel
             }
         }
     }
+
+/**
+ * What the quality panel says is playing: [QualityStatus.now], corrected for streams the server only repackages.
+ * Jellyfin reports a stream as transcoded (PlayMethod Transcode) whenever it serves it as HLS, even when it copies
+ * both the video and the audio untouched (`IsVideoDirect` and `IsAudioDirect`): a live channel always, and a film the
+ * player could not direct play (the emulator has no AC3 decoder, so upstream retries without direct play). That is a
+ * direct stream at the source's quality, not a transcode:
+ *  - the method is DIRECT STREAM;
+ *  - for a live stream the bitrate is unknown (the server's figure for a channel is its audio's, e.g. "0.3 Mbps" for a
+ *    720p channel) and the "Direct play failed" reason is dropped: nothing failed, the server always serves live TV so.
+ * A film keeps its reason: direct play really did fail on this device.
+ */
+internal fun shownStatus(playback: CurrentPlayback?): QualityStatus.Playing? {
+    val now = QualityStatus.now(playback) ?: return null
+    val info = playback?.transcodeInfo ?: return now
+    if (now.method != QualityStatus.Method.TRANSCODING || info.isVideoDirect != true || info.isAudioDirect != true) {
+        return now
+    }
+    val live = playback.mediaSourceInfo.isInfiniteStream
+    return now.copy(
+        method = QualityStatus.Method.DIRECT_STREAM,
+        bitrateLabel = if (live) null else now.bitrateLabel,
+        reasons = if (live) now.reasons.filter { it != TranscodeReason.DIRECT_PLAY_ERROR } else now.reasons,
+    )
+}

@@ -65,6 +65,7 @@ import com.github.damontecres.wholphin.ui.tryRequestFocus
 import com.github.damontecres.wholphin.util.DataLoadingState
 import com.github.damontecres.wholphin.util.ExceptionHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.scdouglas1999.tally.media.episode.phone.PhoneEpisodeLoaded
 import io.github.scdouglas1999.tally.media.kit.DetailHeader
 import io.github.scdouglas1999.tally.media.kit.DetailMetaPart
 import io.github.scdouglas1999.tally.media.kit.FocusEdge
@@ -93,6 +94,8 @@ import io.github.scdouglas1999.tally.media.series.episodeCode
 import io.github.scdouglas1999.tally.media.series.episodeNumber
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -276,15 +279,27 @@ fun TallyEpisodePage(
                                 }
                             }
                             LaunchedEffect(ep.id, ep.data.userData) { extrasViewModel.load(ep) }
-                            EpisodeLoaded(
-                                episode = ep,
-                                extras = extras,
-                                chosenStreams = state.chosenStreams,
-                                canDelete = canDelete,
-                                dialogs = dialogs,
-                                contextActions = contextActions,
-                                viewModel = viewModel,
-                            )
+                            if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+                                PhoneEpisodeLoaded(
+                                    episode = ep,
+                                    extras = extras,
+                                    chosenStreams = state.chosenStreams,
+                                    canDelete = canDelete,
+                                    dialogs = dialogs,
+                                    contextActions = contextActions,
+                                    viewModel = viewModel,
+                                )
+                            } else {
+                                EpisodeLoaded(
+                                    episode = ep,
+                                    extras = extras,
+                                    chosenStreams = state.chosenStreams,
+                                    canDelete = canDelete,
+                                    dialogs = dialogs,
+                                    contextActions = contextActions,
+                                    viewModel = viewModel,
+                                )
+                            }
                         }
                     }
                 }
@@ -766,7 +781,7 @@ private fun EpisodeActionRow(
 
 /** `JAN 20, 2008` · rating box · `47M` · `★ 8.2`. */
 @Composable
-private fun episodeMeta(episode: BaseItem): List<DetailMetaPart> {
+internal fun episodeMeta(episode: BaseItem): List<DetailMetaPart> {
     val runtimeTicks = episode.data.runTimeTicks ?: 0L
     return buildList {
         airDate(episode.data.premiereDate)?.let { add(DetailMetaPart.Plain(it)) }
@@ -788,7 +803,7 @@ private fun episodeMeta(episode: BaseItem): List<DetailMetaPart> {
 }
 
 @Composable
-private fun episodeEnds(episode: BaseItem): String? {
+internal fun episodeEnds(episode: BaseItem): String? {
     val context = LocalContext.current
     val runtimeTicks = episode.data.runTimeTicks ?: 0L
     val positionTicks = episode.data.userData?.playbackPositionTicks ?: 0L
@@ -804,7 +819,7 @@ private fun episodeEnds(episode: BaseItem): String? {
 }
 
 @Composable
-private fun directorLine(episode: BaseItem): String? {
+internal fun directorLine(episode: BaseItem): String? {
     val names =
         episode.data.people
             ?.filter { it.type == PersonKind.DIRECTOR && it.name.isNotNullOrBlank() }
@@ -817,7 +832,7 @@ private fun directorLine(episode: BaseItem): String? {
 
 /** `E04 · 47M` */
 @Composable
-private fun seasonCardKicker(item: BaseItem): String? {
+internal fun seasonCardKicker(item: BaseItem): String? {
     val number = episodeNumber(item.indexNumber)
     val runtime = (item.data.runTimeTicks ?: 0L).takeIf { it > 0L }?.let { formatRuntime(it) }
     return when {
@@ -827,7 +842,7 @@ private fun seasonCardKicker(item: BaseItem): String? {
 }
 
 @Composable
-private fun chapterImage(chapter: Chapter): String? {
+internal fun chapterImage(chapter: Chapter): String? {
     val density = LocalDensity.current
     val service = LocalImageUrlService.current
     return remember(chapter.itemId, chapter.index, chapter.tag, density) {

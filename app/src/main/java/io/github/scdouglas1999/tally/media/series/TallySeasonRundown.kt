@@ -92,8 +92,12 @@ import io.github.scdouglas1999.tally.media.kit.formatEndsAt
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.requestUntilFocused
 import io.github.scdouglas1999.tally.media.kit.resumePercent
+import io.github.scdouglas1999.tally.media.series.phone.PhoneSeriesLoaded
+import io.github.scdouglas1999.tally.media.series.phone.PhoneSeriesMode
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -237,16 +241,30 @@ fun TallySeasonRundown(
                                     viewModel.release()
                                 }
                             }
-                            RundownLoaded(
-                                preferences = preferences,
-                                series = loading.data,
-                                viewModel = viewModel,
-                                position = position,
-                                nextUp = nextUp,
-                                episodeList = episodeList,
-                                dialogs = dialogs,
-                                contextActions = contextActions,
-                            )
+                            if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+                                PhoneSeriesLoaded(
+                                    mode = PhoneSeriesMode.RUNDOWN,
+                                    preferences = preferences,
+                                    series = loading.data,
+                                    state = state,
+                                    nextUp = nextUp,
+                                    dialogs = dialogs,
+                                    contextActions = contextActions,
+                                    viewModel = viewModel,
+                                    onWatchSeries = null,
+                                )
+                            } else {
+                                RundownLoaded(
+                                    preferences = preferences,
+                                    series = loading.data,
+                                    viewModel = viewModel,
+                                    position = position,
+                                    nextUp = nextUp,
+                                    episodeList = episodeList,
+                                    dialogs = dialogs,
+                                    contextActions = contextActions,
+                                )
+                            }
                         }
                     }
                 }

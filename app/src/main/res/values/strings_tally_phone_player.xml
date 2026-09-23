@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Phone player: the side panel's close button (accessibility) -->
+    <string name="tally_phone_player_close">Close</string>
+    <!-- Phone quality panel: remember the chosen quality as this phone's default bitrate -->
+    <string name="tally_phone_quality_default">Use as my default on this phone</string>
+</resources>

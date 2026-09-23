@@ -59,6 +59,9 @@ import com.github.damontecres.wholphin.ui.playback.overlay.PlaybackAction
 import com.github.damontecres.wholphin.ui.playback.overlay.PlaybackDebugOverlay
 import com.github.damontecres.wholphin.ui.util.LocalClock
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.player.controls.phone.PhonePlaybackOverlay
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -126,6 +129,31 @@ fun TallyPlaybackOverlay(
     onClickPlaylist: (BaseItem) -> Unit = {},
     seekBarInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhonePlaybackOverlay(
+            item = item,
+            chapters = chapters,
+            player = player,
+            controllerViewState = controllerViewState,
+            showPlay = showPlay,
+            previousEnabled = previousEnabled,
+            nextEnabled = nextEnabled,
+            seekEnabled = seekEnabled,
+            seekBack = seekBack,
+            skipBackOnResume = skipBackOnResume,
+            seekForward = seekForward,
+            onPlaybackActionClick = onPlaybackActionClick,
+            onClickPlaybackDialogType = onClickPlaybackDialogType,
+            showDebugInfo = showDebugInfo,
+            currentPlayback = currentPlayback,
+            currentSegment = currentSegment,
+            analyticsState = analyticsState,
+            trickplayInfo = trickplayInfo,
+            trickplayUrlFor = trickplayUrlFor,
+            modifier = modifier,
+        )
+        return
+    }
     var state by remember(controllerViewState.controlsVisible) {
         mutableStateOf(if (controllerViewState.controlsVisible) OverlayViewState.CONTROLLER else OverlayViewState.HIDDEN)
     }

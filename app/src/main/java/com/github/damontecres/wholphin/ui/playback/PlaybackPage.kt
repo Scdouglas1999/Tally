@@ -122,6 +122,10 @@ fun PlaybackPage(
             creationCallback = { it.create(destination) },
         ),
 ) {
+    // TALLY: begin
+    io.github.scdouglas1999.tally.ui.player.controls.phone
+        .PhonePlayerWindow()
+    // TALLY: end
     LifecycleStartEffect(destination) {
         onStopOrDispose {
             viewModel.release()
@@ -216,6 +220,12 @@ fun PlaybackPageContent(
         focusRequester.tryRequestFocus()
     }
     val controllerViewState = remember { viewModel.controllerViewState }
+    // TALLY: begin
+    io.github.scdouglas1999.tally.ui.player.controls.TallyPlayerBack(
+        controllerViewState = controllerViewState,
+        navigationManager = viewModel.navigationManager,
+    )
+    // TALLY: end
 
     var skipIndicatorDuration by remember { mutableLongStateOf(0L) }
     LaunchedEffect(controllerViewState.controlsVisible) {

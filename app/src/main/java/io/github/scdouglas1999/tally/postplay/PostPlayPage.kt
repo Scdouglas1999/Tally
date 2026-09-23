@@ -63,9 +63,13 @@ import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
+import io.github.scdouglas1999.tally.postplay.phone.PhonePostPlay
 import io.github.scdouglas1999.tally.ui.components.LabelBar
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.player.controls.phone.PhonePlayerWindow
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -98,6 +102,18 @@ fun PostPlayPage(
     LaunchedEffect(destination.itemId) {
         Timber.i("Post-play page %s", destination.itemId)
         viewModel.load(destination.itemId)
+    }
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // The player is landscape: the post-play page that follows it stays so.
+        PhonePlayerWindow()
+        PhonePostPlay(
+            film = state.film,
+            similar = state.similar,
+            onWatchAgain = viewModel::watchAgain,
+            onDone = viewModel::done,
+            onOpen = viewModel::open,
+        )
+        return
     }
 
     val watchAgainFocus = remember { FocusRequester() }
@@ -229,7 +245,7 @@ fun PostPlayPage(
 }
 
 @Composable
-private fun FilmBackdrop(film: BaseItemDto) {
+internal fun FilmBackdrop(film: BaseItemDto) {
     val images = LocalImageUrlService.current
     val backdropUrl =
         remember(film.id) {
@@ -325,7 +341,7 @@ private fun LogoOrTitle(film: BaseItemDto) {
 }
 
 @Composable
-private fun metaLine(film: BaseItemDto): String =
+internal fun metaLine(film: BaseItemDto): String =
     remember(film.id) {
         buildList {
             film.productionYear?.let { add(it.toString()) }

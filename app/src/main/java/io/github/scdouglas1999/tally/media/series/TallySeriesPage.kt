@@ -106,8 +106,12 @@ import io.github.scdouglas1999.tally.media.kit.bleedHorizontal
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.rememberWideImageUrl
 import io.github.scdouglas1999.tally.media.kit.resumePercent
+import io.github.scdouglas1999.tally.media.series.phone.PhoneSeriesLoaded
+import io.github.scdouglas1999.tally.media.series.phone.PhoneSeriesMode
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -298,17 +302,31 @@ fun TallySeriesPage(
                             LaunchedEffect(series.data.userData) {
                                 extras.load(destination.itemId, withSeasons = true)
                             }
-                            SeriesLoaded(
-                                preferences = preferences,
-                                series = series,
-                                state = state,
-                                nextUp = nextUp,
-                                seasonWatched = seasonWatched,
-                                dialogs = dialogs,
-                                contextActions = contextActions,
-                                viewModel = viewModel,
-                                onWatch = { showWatchConfirmation = true },
-                            )
+                            if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+                                PhoneSeriesLoaded(
+                                    mode = PhoneSeriesMode.SHOW,
+                                    preferences = preferences,
+                                    series = series,
+                                    state = state,
+                                    nextUp = nextUp,
+                                    dialogs = dialogs,
+                                    contextActions = contextActions,
+                                    viewModel = viewModel,
+                                    onWatchSeries = { showWatchConfirmation = true },
+                                )
+                            } else {
+                                SeriesLoaded(
+                                    preferences = preferences,
+                                    series = series,
+                                    state = state,
+                                    nextUp = nextUp,
+                                    seasonWatched = seasonWatched,
+                                    dialogs = dialogs,
+                                    contextActions = contextActions,
+                                    viewModel = viewModel,
+                                    onWatch = { showWatchConfirmation = true },
+                                )
+                            }
                             if (showWatchConfirmation) {
                                 val played = series.played
                                 ConfirmDialog(
@@ -929,7 +947,7 @@ private fun SeriesActionRow(
 }
 
 @Composable
-private fun seriesMeta(
+internal fun seriesMeta(
     series: BaseItem,
     loadedSeasons: Int,
 ): List<DetailMetaPart> {
@@ -962,7 +980,7 @@ private fun seriesMeta(
 
 /** `Created by …` from the Creator credits, else the Writer credits; null when there are none. */
 @Composable
-private fun createdByLine(series: BaseItem): String? {
+internal fun createdByLine(series: BaseItem): String? {
     val people = series.data.people.orEmpty()
     val creators =
         people

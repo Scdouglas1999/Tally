@@ -79,7 +79,7 @@ private val SeekAreaHeight = 20.dp
 private val PreviewGap = 14.dp
 
 /** What the player is doing, polled like upstream's seek bar (every 250 ms). */
-private class PlayerProgress(
+internal class PlayerProgress(
     player: Player,
 ) {
     var position by mutableLongStateOf(player.currentPosition)
@@ -91,7 +91,7 @@ private class PlayerProgress(
 }
 
 @Composable
-private fun rememberPlayerProgress(player: Player): PlayerProgress {
+internal fun rememberPlayerProgress(player: Player): PlayerProgress {
     val progress = remember(player) { PlayerProgress(player) }
     LaunchedEffect(player) {
         while (isActive) {
@@ -422,7 +422,7 @@ internal fun scrubberCenter(
  * the next item. Takes no height itself, so the band does not grow while seeking.
  */
 @Composable
-private fun PreviewAbove(
+internal fun PreviewAbove(
     fraction: Float,
     gap: Dp,
     content: @Composable () -> Unit,

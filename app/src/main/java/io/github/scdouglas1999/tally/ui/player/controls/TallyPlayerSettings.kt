@@ -30,6 +30,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -58,7 +59,11 @@ import io.github.scdouglas1999.tally.ui.TallyGlobalOverlaysViewModel
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.TallyRow
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.player.TallyPlayerMenu
+import io.github.scdouglas1999.tally.ui.player.controls.phone.PhonePanelRow
+import io.github.scdouglas1999.tally.ui.player.controls.phone.PhoneSidePanel
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -210,6 +215,16 @@ fun TallyPlayerSettings(
             else -> rows.indexOfFirst { it.current }.coerceAtLeast(0)
         }
 
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneSidePanel(
+            kicker = stringResource(kicker),
+            readout = readout,
+            rows = rows.map { PhonePanelRow(it.key, it.label, it.value, it.current, it.onClick) },
+            onDismiss = onDismissRequest,
+            onBack = if (page == PlaybackDialogType.SETTINGS) null else back,
+        )
+        return
+    }
     Dialog(
         onDismissRequest = back,
         properties =
@@ -221,18 +236,28 @@ fun TallyPlayerSettings(
     ) {
         val view = LocalView.current
         SideEffect {
-            // The picture stays as it is; the panel brings its own scrim, on the right half only.
+            // The picture stays as it is; the panel brings its own scrim.
             (view.parent as? DialogWindowProvider)?.window?.setDimAmount(0f)
         }
         TallyScale {
             Box(modifier = Modifier.fillMaxSize()) {
+                // The picture stays visible (subtitle and scale changes can be seen), dimmed by a horizontal gradient:
+                // nothing at the left edge, rising to the panel's edge (no hard edge across the picture).
                 Box(
                     modifier =
                         Modifier
-                            .align(Alignment.CenterEnd)
-                            .fillMaxHeight()
-                            .fillMaxWidth(0.5f)
-                            .background(Color.Black.copy(alpha = 0.4f)),
+                            .fillMaxSize()
+                            .drawBehind {
+                                drawRect(
+                                    brush =
+                                        Brush.horizontalGradient(
+                                            0f to Color.Transparent,
+                                            1f to Color.Black.copy(alpha = 0.4f),
+                                            startX = 0f,
+                                            endX = (size.width - PanelWidth.toPx()).coerceAtLeast(1f),
+                                        ),
+                                )
+                            },
                 )
                 Panel(
                     kicker = stringResource(kicker),

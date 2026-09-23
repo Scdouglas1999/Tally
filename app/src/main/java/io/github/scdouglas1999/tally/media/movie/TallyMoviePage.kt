@@ -105,8 +105,11 @@ import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.rememberWideImageUrl
 import io.github.scdouglas1999.tally.media.kit.resumePercent
 import io.github.scdouglas1999.tally.media.kit.techBoxes
+import io.github.scdouglas1999.tally.media.movie.phone.PhoneMovieLoaded
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -203,14 +206,25 @@ fun TallyMoviePage(
                                 viewModel.maybePlayThemeSong(destination.itemId)
                                 onPauseOrDispose { viewModel.release() }
                             }
-                            MovieLoaded(
-                                preferences = preferences,
-                                movie = loading.data,
-                                state = state,
-                                dialogs = dialogs,
-                                contextActions = contextActions,
-                                viewModel = viewModel,
-                            )
+                            if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+                                PhoneMovieLoaded(
+                                    preferences = preferences,
+                                    movie = loading.data,
+                                    state = state,
+                                    dialogs = dialogs,
+                                    contextActions = contextActions,
+                                    viewModel = viewModel,
+                                )
+                            } else {
+                                MovieLoaded(
+                                    preferences = preferences,
+                                    movie = loading.data,
+                                    state = state,
+                                    dialogs = dialogs,
+                                    contextActions = contextActions,
+                                    viewModel = viewModel,
+                                )
+                            }
                         }
                     }
                 }
@@ -874,7 +888,7 @@ private fun ActionRow(
 }
 
 @Composable
-private fun movieMeta(movie: BaseItem): List<DetailMetaPart> {
+internal fun movieMeta(movie: BaseItem): List<DetailMetaPart> {
     val runtimeTicks = movie.data.runTimeTicks ?: 0L
     return buildList {
         movie.data.productionYear?.let { add(DetailMetaPart.Plain(it.toString())) }
@@ -899,7 +913,7 @@ private fun movieMeta(movie: BaseItem): List<DetailMetaPart> {
 }
 
 @Composable
-private fun movieEnds(movie: BaseItem): String? {
+internal fun movieEnds(movie: BaseItem): String? {
     val context = LocalContext.current
     val runtimeTicks = movie.data.runTimeTicks ?: 0L
     val positionTicks = movie.data.userData?.playbackPositionTicks ?: 0L
@@ -915,7 +929,7 @@ private fun movieEnds(movie: BaseItem): String? {
 }
 
 @Composable
-private fun directorLine(movie: BaseItem): String? {
+internal fun directorLine(movie: BaseItem): String? {
     val names =
         movie.data.people
             ?.filter { it.type == PersonKind.DIRECTOR && it.name.isNotNullOrBlank() }
@@ -927,7 +941,7 @@ private fun directorLine(movie: BaseItem): String? {
 }
 
 @Composable
-private fun chapterImage(chapter: Chapter): String? {
+internal fun chapterImage(chapter: Chapter): String? {
     val density = LocalDensity.current
     val service = LocalImageUrlService.current
     return remember(chapter.itemId, chapter.index, chapter.tag, density) {

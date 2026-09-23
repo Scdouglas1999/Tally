@@ -48,6 +48,10 @@ import io.github.scdouglas1999.tally.formatSleepClock
 import io.github.scdouglas1999.tally.sleepChipUrgent
 import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.player.controls.phone.PhonePanelRow
+import io.github.scdouglas1999.tally.ui.player.controls.phone.PhoneSidePanel
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -95,6 +99,15 @@ fun SleepTimerDialog(
             }
         }
     LaunchedEffect(Unit) { Timber.i("Sleep timer dialog open; remaining=%s", remaining) }
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // On a phone: the player's side panel, as every page of the player's settings.
+        PhoneSidePanel(
+            kicker = stringResource(R.string.tally_sleep_dialog_title),
+            rows = rows.mapIndexed { index, choice -> PhonePanelRow(index, choice.label, onClick = choice.onChoose) },
+            onDismiss = onDismiss,
+        )
+        return
+    }
     Dialog(
         onDismissRequest = onDismiss,
         properties =
