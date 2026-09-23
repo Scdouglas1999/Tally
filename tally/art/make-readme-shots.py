@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Turns full-resolution emulator captures into the README's images: JPEGs with a thin frame (a dark screenshot on
-GitHub's dark theme otherwise has no visible edge) and animated WebPs from screen recordings, framed the same way.
+GitHub's dark theme otherwise has no visible edge) and animated WebPs (libwebp_anim: plain libwebp keeps only the first frame) from screen recordings, framed the same way.
 Run from the repository root:
   python3 tally/art/make-readme-shots.py <captures dir>
 The captures dir holds the 1920x1080 PNGs and MP4s named in SHOTS and CLIPS; anything missing is skipped."""
@@ -15,13 +15,15 @@ FRAME, FRAME_PX = (58, 61, 56), 2
 
 # name -> output width. Full-width images get more pixels than the ones shown two to a row.
 SHOTS = {
-    "home": 1280, "film": 1280, "series": 1280, "music": 1280, "sports": 1600,
+    "library": 1280, "film": 1280, "series": 1280, "album": 1280,
     "live": 1280, "multiview": 1280, "together": 1280, "surprise": 1280,
 }
 # name -> (ffmpeg video filter before the frame, fps, quality)
 CLIPS = {
-    "tour": ("scale=1280:-2:flags=lanczos", 15, 72),
-    "score": (None, 24, 80),
+    # the dark backdrops band below about q 95; the tour stays under ~8 MB at 960 wide and 20 fps
+    "tour": ("scale=960:-2:flags=lanczos", 20, 95),
+    # the Sports page's focused-game panel, where the score rolls (crop found in the 1920x1080 recording)
+    "score": ("crop=1628:504:218:148", 24, 92),
 }
 
 
@@ -45,7 +47,7 @@ def clip(src, name, pre, fps, quality):
     chain = ",".join(f for f in [pre, f"fps={fps}", f"drawbox=x=0:y=0:w=iw:h=ih:color={color}:t={t}"] if f)
     out = f"{OUT}{name}.webp"
     subprocess.run(
-        ["ffmpeg", "-y", "-loglevel", "error", "-i", src, "-vf", chain, "-vcodec", "libwebp", "-lossless", "0",
+        ["ffmpeg", "-y", "-loglevel", "error", "-i", src, "-vf", chain, "-vcodec", "libwebp_anim", "-lossless", "0",
          "-q:v", str(quality), "-compression_level", "6", "-loop", "0", "-an", out],
         check=True,
     )

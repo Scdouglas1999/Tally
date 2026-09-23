@@ -6,7 +6,7 @@
   <a href="https://github.com/Scdouglas1999/Tally/releases/latest"><img src="tally/readme/button-releases.svg" alt="What's new" height="44"/></a>
 </p>
 
-<p align="center"><img src="tally/readme/tour.webp" alt="Tally starting up: the tally light flickers on, then the home screen with today's games and a film's page" width="100%"/></p>
+<p align="center"><img src="tally/readme/tour.webp" alt="Moving through Tally: the home screen with today's games, then a film's page" width="100%"/></p>
 
 ## Why it looks like this
 
@@ -25,13 +25,13 @@ you've selected, so you never have to hunt for it.
 ## Your library
 
 <p align="center">
-  <img src="tally/readme/home.jpg" alt="The home screen" width="49%"/>
+  <img src="tally/readme/library.jpg" alt="The Movies library" width="49%"/>
   <img src="tally/readme/film.jpg" alt="A film's page" width="49%"/>
   <img src="tally/readme/series.jpg" alt="A season as a numbered episode list" width="49%"/>
-  <img src="tally/readme/music.jpg" alt="Now playing, with synced lyrics" width="49%"/>
+  <img src="tally/readme/album.jpg" alt="An album page" width="49%"/>
 </p>
 
-Home opens on what you were in the middle of, then what's new in each library. A film's page has the title art, the
+Home opens on what you were in the middle of, then what's new in each library, and every library has its own page to sort, filter and jump through by letter. A film's page has the title art, the
 cast, and the format, audio and subtitle tracks, so you know what you're about to play before you press it. A season
 reads like a rundown sheet: numbered episodes, the one you're up to marked, and how far you got through it.
 
@@ -44,13 +44,11 @@ right there: 4K down to 360p, in small steps, and it works on live channels too.
 
 ## Live sports
 
-<p align="center"><img src="tally/readme/sports.jpg" alt="The Sports section: a live game with its line score, and today's other games" width="100%"/></p>
+<p align="center"><img src="tally/readme/score.webp" alt="The Sports section: a live game's score rolls from 3 to 4 as the Gulls score" width="100%"/></p>
 
 With the Tally server plugin, Tally knows what's being played today and which of your channels carries each game.
 Today's games show up on the home screen and get a section of their own, with the score, the inning or quarter and
 the clock. When a team scores, the numbers roll over like an old stadium scoreboard.
-
-<p align="center"><img src="tally/readme/score.webp" alt="A score changing on a game card" width="60%"/></p>
 
 - **Watch from any game card.** Tally opens the channel the game is on.
 - **A score bug in the player**, a box score one press away, and a list of whatever else is on right now.
