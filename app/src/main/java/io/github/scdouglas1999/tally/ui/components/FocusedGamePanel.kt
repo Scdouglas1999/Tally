@@ -217,7 +217,7 @@ private fun HeroTeamLine(
             IndicatorSquare(color = TallyColors.accent, size = 10.dp)
         }
         val score = team.score
-        if (!game.isUpcoming && (score != null || hideScores)) {
+        if (!game.isUpcoming && !game.hasNoResult && (score != null || hideScores)) {
             ScoreDigits(
                 gameId = game.id,
                 score = score ?: 0,

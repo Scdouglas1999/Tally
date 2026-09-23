@@ -215,7 +215,7 @@ private fun GameCardTeamLine(
             IndicatorSquare(color = TallyColors.accent)
         }
         val score = team.score
-        if (!game.isUpcoming && (score != null || hideScores)) {
+        if (!game.isUpcoming && !game.hasNoResult && (score != null || hideScores)) {
             ScoreDigits(
                 gameId = game.id,
                 score = score ?: 0,

@@ -28,6 +28,7 @@ import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
 import io.github.scdouglas1999.tally.media.home.HomeHeaderHeight
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
+import io.github.scdouglas1999.tally.ui.components.hasNoResult
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
@@ -123,7 +124,7 @@ fun TallyGameHeader(
 ) {
     val kicker = listOf(game.league, gameStatusLabel(game)).filter { it.isNotBlank() }.joinToString(" · ")
     val title = stringResource(R.string.tally_actions_at, game.away.headerName(), game.home.headerName())
-    val showScore = !hideScores && !game.isUpcoming
+    val showScore = !hideScores && !game.isUpcoming && !game.hasNoResult
     val meta =
         if (showScore) {
             "${game.away.abbr} ${game.away.score ?: 0} · ${game.home.abbr} ${game.home.score ?: 0}"

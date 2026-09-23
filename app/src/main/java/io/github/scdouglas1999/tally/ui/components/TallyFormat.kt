@@ -63,6 +63,15 @@ internal fun formatGameStart(
 internal fun gameStatusLabel(game: TallyGame): String =
     when {
         game.isLive -> game.detail
+
         game.isUpcoming -> formatGameStart(game.start).ifBlank { game.detail }
-        else -> stringResource(R.string.tally_final).uppercase()
+
+        // the feed's own wording for finished games: "Final", "Final/12" (extra innings), "Postponed"
+        else -> game.detail.ifBlank { stringResource(R.string.tally_final) }.uppercase()
     }
+
+private val NO_RESULT = Regex("postponed|canceled|cancelled|suspended|delayed|forfeit", RegexOption.IGNORE_CASE)
+
+/** A finished game that was never played to a result (postponed, canceled…): its 0–0 is not a score. */
+internal val TallyGame.hasNoResult: Boolean
+    get() = state == "post" && NO_RESULT.containsMatchIn(detail)
