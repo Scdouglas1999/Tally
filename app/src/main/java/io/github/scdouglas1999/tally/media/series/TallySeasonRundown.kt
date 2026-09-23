@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -49,6 +50,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -79,7 +81,6 @@ import com.github.damontecres.wholphin.ui.detail.series.SeriesPageType
 import com.github.damontecres.wholphin.ui.detail.series.SeriesViewModel
 import com.github.damontecres.wholphin.ui.detail.series.buildDialogForSeason
 import com.github.damontecres.wholphin.ui.nav.Destination
-import com.github.damontecres.wholphin.ui.tryRequestFocus
 import com.github.damontecres.wholphin.util.DataLoadingState
 import com.github.damontecres.wholphin.util.ExceptionHandler
 import io.github.scdouglas1999.tally.media.kit.CapsLift
@@ -89,6 +90,7 @@ import io.github.scdouglas1999.tally.media.kit.MediaRow
 import io.github.scdouglas1999.tally.media.kit.PersonCard
 import io.github.scdouglas1999.tally.media.kit.formatEndsAt
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
+import io.github.scdouglas1999.tally.media.kit.requestUntilFocused
 import io.github.scdouglas1999.tally.media.kit.resumePercent
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
@@ -586,9 +588,11 @@ private fun RundownList(
     ) {
         itemsIndexed(episodes.episodes, key = { index, ep -> ep?.id ?: "placeholder-$index" }) { index, episode ->
             val requester = remember { FocusRequester() }
+            var rowFocused by remember { mutableStateOf(false) }
             if (pendingRow == index && episode != null) {
+                val focusManager = LocalFocusManager.current
                 LaunchedEffect(Unit) {
-                    requester.tryRequestFocus("jtv-rundown-row")
+                    requestUntilFocused(requester, { rowFocused }, focusManager, "jtv-rundown-row")
                     onPendingDone()
                 }
             }
@@ -644,7 +648,10 @@ private fun RundownList(
                     onClick = { onClick(episode) },
                     onLongClick = { onLongClick(episode) },
                     onFocused = { onFocusEpisode(index) },
-                    modifier = Modifier.focusRequester(requester),
+                    modifier =
+                        Modifier
+                            .focusRequester(requester)
+                            .onFocusChanged { rowFocused = it.hasFocus },
                 )
             }
         }

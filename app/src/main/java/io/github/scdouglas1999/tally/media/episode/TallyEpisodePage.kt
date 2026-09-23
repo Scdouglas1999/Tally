@@ -48,7 +48,6 @@ import com.github.damontecres.wholphin.data.model.Person
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.services.PeopleFavorites
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
-import com.github.damontecres.wholphin.ui.RequestOrRestoreFocus
 import com.github.damontecres.wholphin.ui.components.ContextMenu
 import com.github.damontecres.wholphin.ui.components.ContextMenuActions
 import com.github.damontecres.wholphin.ui.components.DialogParams
@@ -76,6 +75,7 @@ import io.github.scdouglas1999.tally.media.kit.LandscapeWidth
 import io.github.scdouglas1999.tally.media.kit.MediaRow
 import io.github.scdouglas1999.tally.media.kit.PersonCard
 import io.github.scdouglas1999.tally.media.kit.TallyButton
+import io.github.scdouglas1999.tally.media.kit.arrivalFocus
 import io.github.scdouglas1999.tally.media.kit.bleedHorizontal
 import io.github.scdouglas1999.tally.media.kit.formatEndsAt
 import io.github.scdouglas1999.tally.media.kit.formatPosition
@@ -342,7 +342,7 @@ private fun EpisodeLoaded(
             POS_SEASON -> if (moreFromSeason.isNotEmpty()) seasonFocus else primaryFocus
             else -> primaryFocus
         }
-    RequestOrRestoreFocus(restore, "jtv-episode")
+    val arrival = arrivalFocus(restore, "jtv-episode")
 
     val onActionFocused: () -> Unit = {
         position = POS_ACTIONS
@@ -390,7 +390,7 @@ private fun EpisodeLoaded(
         }
 
     val listState = rememberLazyListState()
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().then(arrival)) {
         CompositionLocalProvider(LocalBringIntoViewSpec provides MinScrollBringIntoViewSpec) {
             LazyColumn(
                 state = listState,

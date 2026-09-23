@@ -399,38 +399,44 @@ private fun CardPage(
     modifier: Modifier = Modifier,
 ) {
     val stats = ready.stats
-    when (card) {
-        YearCard.COVER -> {
-            YearCover(stats, ready.serverName, modifier)
-        }
+    if (card == YearCard.SHOWS) {
+        // The backdrop fills the card; the text centers itself like the other cards.
+        YearShows(stats, modifier)
+        return
+    }
+    // Every other card is only as tall as its content, centered in the same band above the key hints, so the
+    // cards share one center line and one height of page.
+    Box(modifier.padding(bottom = aboveHints), contentAlignment = Alignment.CenterStart) {
+        when (card) {
+            YearCard.COVER -> {
+                YearCover(stats, ready.serverName)
+            }
 
-        YearCard.FILMS -> {
-            YearFilms(stats, modifier)
-        }
+            YearCard.FILMS -> {
+                YearFilms(stats)
+            }
 
-        YearCard.SHOWS -> {
-            YearShows(stats, modifier)
-        }
+            YearCard.GENRES -> {
+                YearGenres(stats)
+            }
 
-        YearCard.GENRES -> {
-            YearGenres(stats, modifier)
-        }
+            YearCard.MONTHS -> {
+                YearMonths(stats)
+            }
 
-        YearCard.MONTHS -> {
-            YearMonths(stats, modifier)
-        }
+            YearCard.DECADE -> {
+                YearDecade(stats)
+            }
 
-        YearCard.DECADE -> {
-            YearDecade(stats, modifier)
-        }
+            YearCard.SUMMARY -> {
+                YearSummary(
+                    stats = stats,
+                    firstPlayed = ready.firstPlayed,
+                    latestPlayed = ready.latestPlayed,
+                )
+            }
 
-        YearCard.SUMMARY -> {
-            YearSummary(
-                stats = stats,
-                firstPlayed = ready.firstPlayed,
-                latestPlayed = ready.latestPlayed,
-                modifier = modifier,
-            )
+            YearCard.SHOWS -> {}
         }
     }
 }

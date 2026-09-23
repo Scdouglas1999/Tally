@@ -39,11 +39,11 @@ import com.github.damontecres.wholphin.ui.data.ItemDetailsDialogInfo
 import com.github.damontecres.wholphin.ui.detail.music.ArtistViewModel
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.rememberInt
-import com.github.damontecres.wholphin.ui.tryRequestFocus
 import com.github.damontecres.wholphin.util.ExceptionHandler
 import com.github.damontecres.wholphin.util.LoadingState
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
+import io.github.scdouglas1999.tally.media.kit.arrivalFocus
 import io.github.scdouglas1999.tally.media.library.LoadingMark
 import io.github.scdouglas1999.tally.media.series.MinScrollBringIntoViewSpec
 import io.github.scdouglas1999.tally.media.series.TopScrim
@@ -145,8 +145,8 @@ private fun ArtistLoaded(
     val bringHeader = remember { BringIntoViewRequester() }
     val listState = rememberLazyListState()
 
-    LaunchedEffect(Unit) {
-        val target =
+    val arrivalTarget =
+        remember {
             when {
                 position >= 0 && state.topSongs.isNotEmpty() -> songFocus
                 position == POS_ALBUMS && state.albums.isNotEmpty() -> albumsFocus
@@ -155,9 +155,9 @@ private fun ArtistLoaded(
                 position == POS_SIMILAR && state.similar.isNotEmpty() -> similarFocus
                 else -> primaryFocus
             }
-        requestFocusSoon(target, "tally-artist")
-        viewModel.refresh()
-    }
+        }
+    val arrival = arrivalFocus(arrivalTarget, "tally-artist")
+    LaunchedEffect(Unit) { viewModel.refresh() }
 
     fun menuFor(
         item: BaseItem,
@@ -192,7 +192,7 @@ private fun ArtistLoaded(
             else -> null
         }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().then(arrival)) {
         CompositionLocalProvider(LocalBringIntoViewSpec provides MinScrollBringIntoViewSpec) {
             LazyColumn(
                 state = listState,

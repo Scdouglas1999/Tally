@@ -1,5 +1,6 @@
 package io.github.scdouglas1999.tally.ui.setup
 
+import android.os.SystemClock
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -24,6 +25,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +37,6 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
@@ -447,43 +448,23 @@ internal fun SetupError(
     }
 }
 
-/**
- * Requests focus on [requester] until [isFocused] says it (or something under it) has it. It waits a frame first:
- * a request made before the target's own effects start is lost to its focus visuals (the interaction is emitted
- * before anything collects it, so the element is focused but draws unfocused), and the tiles of a LazyRow are not
- * attached on the first frame (the old "nothing focused on Select Server" bug).
- */
+/** The kit's [io.github.scdouglas1999.tally.media.kit.requestUntilFocused], for the setup screens. */
 internal suspend fun requestUntilFocused(
     requester: FocusRequester,
     isFocused: () -> Boolean,
     focusManager: FocusManager,
     tag: String,
-) {
-    delay(50)
-    // Compose may already have moved focus here on the first frame (the element focused before was removed), before
-    // this element collects focus interactions: it is then focused but draws unfocused. Take focus again.
-    if (isFocused()) focusManager.clearFocus(force = true)
-    repeat(40) {
-        if (isFocused()) return
-        requester.tryRequestFocus(tag)
-        delay(50)
-    }
-}
+) = io.github.scdouglas1999.tally.media.kit
+    .requestUntilFocused(requester, isFocused, focusManager, tag)
 
-/** A modifier that gives its element focus on arrival (again whenever [key] changes), via [requestUntilFocused]. */
+/** The kit's [io.github.scdouglas1999.tally.media.kit.initialFocus], for the setup screens. */
 @Composable
 internal fun initialFocus(
     tag: String,
     key: Any? = Unit,
-): Modifier {
-    val requester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
-    var focused by remember { mutableStateOf(false) }
-    LaunchedEffect(key) { requestUntilFocused(requester, { focused }, focusManager, tag) }
-    return Modifier
-        .focusRequester(requester)
-        .onFocusChanged { focused = it.hasFocus }
-}
+): Modifier =
+    io.github.scdouglas1999.tally.media.kit
+        .initialFocus(tag, key)
 
 /** Address entry for a new server: the field, errors under it, `CONNECT`. */
 @Composable
@@ -540,6 +521,17 @@ internal fun TallyQuickConnect(
     modifier: Modifier = Modifier,
     trouble: @Composable () -> Unit = {},
 ) {
+    DisposableEffect(Unit) {
+        TallyQuickConnectHold.shown = true
+        onDispose {
+            TallyQuickConnectHold.shown = false
+            TallyQuickConnectHold.approvedAt = 0L
+        }
+    }
+    val approved = status?.authenticated == true
+    LaunchedEffect(approved) {
+        TallyQuickConnectHold.approvedAt = if (approved) SystemClock.uptimeMillis() else 0L
+    }
     Column(
         modifier = modifier.width(SetupFormWidth + 80.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -575,6 +567,30 @@ internal fun TallyQuickConnect(
             modifier = initialFocus("tally-quick-connect"),
         )
         trouble()
+    }
+}
+
+/**
+ * Quick Connect approval is held on screen for [HOLD_MS] before the app moves on, so the kicker lamp's catch (it lights
+ * on approval) is seen. Called by the `SwitchUserViewModel.initiateQuickConnect` seam just before it navigates; it
+ * waits only while the Tally Quick Connect step is on screen (upstream's screens under other themes are unaffected),
+ * and counts from the moment that step showed the approval.
+ */
+object TallyQuickConnectHold {
+    @Volatile
+    internal var shown = false
+
+    /** Uptime at which the step showed the approval; 0 while it has not. */
+    @Volatile
+    internal var approvedAt = 0L
+
+    const val HOLD_MS = 600L
+
+    suspend fun holdForCatch() {
+        if (!shown) return
+        val since = approvedAt
+        val wait = if (since == 0L) HOLD_MS else HOLD_MS - (SystemClock.uptimeMillis() - since)
+        if (wait > 0) delay(wait)
     }
 }
 

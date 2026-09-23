@@ -2,6 +2,7 @@ package io.github.scdouglas1999.tally.ui.player.controls
 
 import android.text.format.DateFormat
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +48,7 @@ import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
+import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -269,6 +271,66 @@ fun TallyDpadSeekOverlay(
     }
 }
 
+/**
+ * D-pad seeking in upstream's default "Minimal" mode while the controls are hidden: only the 4dp track (played in
+ * `text`) with the accent scrubber square at the target, and the target time in mono on a black label bar riding
+ * above the scrubber, at the bottom of the picture. No spinner, no buttons, no preview. [skippedMs] is upstream's
+ * running skip amount: every press changes it and restarts the linger; after [MINIMAL_LINGER_MS] without a press
+ * [onFinish] clears it (upstream's spinner did that before).
+ */
+@Composable
+fun TallyDpadSeekMinimal(
+    player: Player,
+    seekPositionMs: Long,
+    skippedMs: Long,
+    onFinish: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LaunchedEffect(skippedMs) {
+        delay(MINIMAL_LINGER_MS)
+        onFinish()
+    }
+    io.github.scdouglas1999.tally.ui.theme.TallyScale {
+        val progress = rememberPlayerProgress(player)
+        val fraction = progress.fraction(seekPositionMs)
+        Column(
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = TallyDimens.marginHorizontal)
+                    .padding(bottom = TallyDimens.marginVertical),
+        ) {
+            PreviewAbove(fraction = fraction, gap = 4.dp) {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier =
+                        Modifier
+                            .height(26.dp)
+                            .background(TallyColors.labelBar)
+                            .padding(horizontal = 10.dp),
+                ) {
+                    Text(
+                        text = PlayerFormat.clock(seekPositionMs),
+                        style = timeStyle,
+                        color = TallyColors.text,
+                        maxLines = 1,
+                    )
+                }
+            }
+            TrackCanvas(
+                progress = fraction,
+                buffered = 0f,
+                ticks = emptyList(),
+                scrubber = ScrubberSize,
+                modifier = Modifier.fillMaxWidth().height(ScrubberSize),
+            )
+        }
+    }
+}
+
+/** How long the minimal seek bar stays after the last press (as long as upstream's spinner turned). */
+internal const val MINIMAL_LINGER_MS = 800L
+
 /** Elapsed at the left; time left and the end time at the right (`-34:28 · ENDS 9:41 PM`). */
 @Composable
 private fun Times(
@@ -308,9 +370,13 @@ private fun Times(
     }
 }
 
-/** The track, buffered and played spans, chapter ticks and the square scrubber. */
+/**
+ * The track, buffered and played spans, chapter ticks and the square scrubber. The scrubber stays inside the track: at
+ * 0% its left edge is the track's start, at 100% its right edge is the track's end, and the played span ends under its
+ * center.
+ */
 @Composable
-private fun TrackCanvas(
+internal fun TrackCanvas(
     progress: Float,
     buffered: Float,
     ticks: List<Float>,
@@ -320,9 +386,13 @@ private fun TrackCanvas(
     Canvas(modifier = modifier) {
         val track = TrackHeight.toPx()
         val top = (size.height - track) / 2f
+        val square = scrubber.toPx()
+        val center = scrubberCenter(progress, size.width, square)
         drawRect(TallyColors.rule, topLeft = Offset(0f, top), size = Size(size.width, track))
         drawRect(TallyColors.muted, topLeft = Offset(0f, top), size = Size(size.width * buffered, track))
-        drawRect(TallyColors.text, topLeft = Offset(0f, top), size = Size(size.width * progress, track))
+        if (progress > 0f) {
+            drawRect(TallyColors.text, topLeft = Offset(0f, top), size = Size(center, track))
+        }
         val tick = TickHeight.toPx()
         val tickWidth = 1.dp.toPx()
         ticks.filter { it > 0f && it < 1f }.forEach { at ->
@@ -332,14 +402,20 @@ private fun TrackCanvas(
                 size = Size(tickWidth, tick),
             )
         }
-        val square = scrubber.toPx()
         drawRect(
             TallyColors.accent,
-            topLeft = Offset(size.width * progress - square / 2f, (size.height - square) / 2f),
+            topLeft = Offset(center - square / 2f, (size.height - square) / 2f),
             size = Size(square, square),
         )
     }
 }
+
+/** Center of a [square] scrubber at [progress] on a track [width] wide, kept whole inside the track. */
+internal fun scrubberCenter(
+    progress: Float,
+    width: Float,
+    square: Float,
+): Float = square / 2f + (width - square).coerceAtLeast(0f) * progress.coerceIn(0f, 1f)
 
 /**
  * Places [content] above this point, centered on [fraction] of the available width and kept inside it, [gap] above

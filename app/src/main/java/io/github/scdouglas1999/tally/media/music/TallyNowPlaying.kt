@@ -30,7 +30,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,6 +86,7 @@ import com.github.damontecres.wholphin.util.LoadingState
 import io.github.scdouglas1999.tally.media.kit.FocusEdge
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
+import io.github.scdouglas1999.tally.media.kit.arrivalFocus
 import io.github.scdouglas1999.tally.media.kit.bleedHorizontal
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.library.LoadingMark
@@ -174,7 +174,7 @@ fun TallyNowPlaying(
     var panelHasFocus by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) { requestFocusSoon(playFocus, "tally-now-playing") }
+    val arrival = arrivalFocus(playFocus, "tally-now-playing")
     // BACK from the queue or the lyrics comes back to the controls first, as upstream's queue goes back to its top.
     BackHandler(panelHasFocus) { playFocus.tryRequestFocus("tally-now-playing-back") }
 
@@ -184,6 +184,7 @@ fun TallyNowPlaying(
                 modifier
                     .fillMaxSize()
                     .background(TallyColors.ground)
+                    .then(arrival)
                     .onPreviewKeyEvent { if (isMedia(it)) keyHandler.onKeyEvent(it) else false },
         ) {
             Row(

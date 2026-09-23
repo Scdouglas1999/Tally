@@ -11,6 +11,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
@@ -42,6 +44,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -179,6 +182,44 @@ fun TallyNavDrawer(
                     else -> "home"
                 }
             val lastRow = Modifier.focusRequester(lastRowRequester)
+            // Rows the list has scrolled part-way out are not drawn; the current page is kept whole while collapsed.
+            val rail = remember { RailViewport() }
+            val whole = Modifier.wholeInRail(rail, navDrawerListState)
+            val listKeys =
+                buildList {
+                    add("search")
+                    add("home")
+                    primary.forEach { add(it.value.id) }
+                    if (libraries.isNotEmpty() || moreVisible.isNotEmpty()) add("libraries")
+                    libraries.forEach { add(it.value.id) }
+                    if (moreVisible.isNotEmpty()) add("more")
+                    if (moreExpanded) moreVisible.forEach { add("more-" + it.value.id) }
+                    if (sections.isNotEmpty() && (primary.isNotEmpty() || libraries.isNotEmpty() || moreVisible.isNotEmpty())) {
+                        add("sections-rule")
+                    }
+                    sections.forEach { add(it.value.id) }
+                }
+            val selectedKey =
+                when (selectedIndex) {
+                    SEARCH_INDEX -> {
+                        "search"
+                    }
+
+                    HOME_INDEX -> {
+                        "home"
+                    }
+
+                    else -> {
+                        (primary + libraries + sections).firstOrNull { it.index == selectedIndex }?.value?.id
+                            ?: moreVisible
+                                .firstOrNull { it.index + serviceState.items.size == selectedIndex }
+                                ?.let { "more-" + it.value.id }
+                    }
+                }
+            val selectedListIndex = selectedKey?.let { listKeys.indexOf(it) } ?: -1
+            LaunchedEffect(isOpen, selectedListIndex) {
+                if (!isOpen && selectedListIndex >= 0) keepWhole(navDrawerListState, selectedListIndex)
+            }
             val userImageUrl = remember(user) { viewModel.getUserImage(user) }
             val userName = user.name ?: user.id.toString()
 
@@ -267,7 +308,11 @@ fun TallyNavDrawer(
                             // room for the focus border of the first and last rows (never clipped by the list)
                             contentPadding = PaddingValues(vertical = TallyDimens.focusBorder + 1.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.weight(1f).fillMaxWidth(),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .onPlaced { rail.coordinates = it },
                         ) {
                             item(key = "search") {
                                 TallyEntry(
@@ -281,6 +326,7 @@ fun TallyNavDrawer(
                                     },
                                     focusRequester = focusRequester,
                                     modifier = Modifier.focusRequester(searchFocusRequester),
+                                    outerModifier = whole,
                                 )
                             }
                             item(key = "home") {
@@ -290,6 +336,7 @@ fun TallyNavDrawer(
                                     selected = selectedIndex == HOME_INDEX,
                                     drawerOpen = isOpen,
                                     modifier = if (lastRowId == "home") lastRow else Modifier,
+                                    outerModifier = whole,
                                     onClick = {
                                         viewModel.setIndex(HOME_INDEX)
                                         if (destination is Destination.Home) {
@@ -315,6 +362,7 @@ fun TallyNavDrawer(
                                     focusRequester = focusRequester,
                                     onClick = viewModel::onClickDrawerItem,
                                     modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
+                                    outerModifier = whole,
                                 )
                             }
                             if (libraries.isNotEmpty() || moreVisible.isNotEmpty()) {
@@ -322,6 +370,7 @@ fun TallyNavDrawer(
                                     TallyDrawerDivider(
                                         title = stringResource(R.string.tally_drawer_libraries),
                                         drawerOpen = isOpen,
+                                        modifier = whole,
                                     )
                                 }
                             }
@@ -338,6 +387,7 @@ fun TallyNavDrawer(
                                     focusRequester = focusRequester,
                                     onClick = viewModel::onClickDrawerItem,
                                     modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
+                                    outerModifier = whole,
                                 )
                             }
                             if (moreVisible.isNotEmpty()) {
@@ -361,6 +411,7 @@ fun TallyNavDrawer(
                                             viewModel.onClickDrawerItem(moreIndex, NavDrawerItem.More)
                                         },
                                         modifier = if (lastRowId == "more") lastRow else Modifier,
+                                        outerModifier = whole,
                                         focusRequester = focusRequester,
                                     )
                                 }
@@ -379,12 +430,13 @@ fun TallyNavDrawer(
                                         focusRequester = focusRequester,
                                         onClick = viewModel::onClickDrawerItem,
                                         modifier = if (lastRowId == "more-" + indexed.value.id) lastRow else Modifier,
+                                        outerModifier = whole,
                                     )
                                 }
                             }
                             if (sections.isNotEmpty() && (primary.isNotEmpty() || libraries.isNotEmpty() || moreVisible.isNotEmpty())) {
                                 item(key = "sections-rule") {
-                                    TallyDrawerDivider(title = null, drawerOpen = isOpen)
+                                    TallyDrawerDivider(title = null, drawerOpen = isOpen, modifier = whole)
                                 }
                             }
                             items(
@@ -400,6 +452,7 @@ fun TallyNavDrawer(
                                     focusRequester = focusRequester,
                                     onClick = viewModel::onClickDrawerItem,
                                     modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
+                                    outerModifier = whole,
                                 )
                             }
                         }
@@ -480,6 +533,7 @@ private fun DrawerItemEntry(
     focusRequester: FocusRequester,
     onClick: (Int, NavDrawerItem) -> Unit,
     modifier: Modifier = Modifier,
+    outerModifier: Modifier = Modifier,
 ) {
     TallyEntry(
         label = item.name(context),
@@ -489,6 +543,7 @@ private fun DrawerItemEntry(
         onClick = { onClick(index, item) },
         focusRequester = focusRequester,
         modifier = modifier,
+        outerModifier = outerModifier,
     )
 }
 
@@ -504,6 +559,7 @@ private fun TallyEntry(
     kicker: String? = null,
     @StringRes trailingGlyph: Int? = null,
     focusTarget: Boolean = selected,
+    outerModifier: Modifier = Modifier,
 ) {
     TallyDrawerRow(
         label = label,
@@ -513,6 +569,7 @@ private fun TallyEntry(
         onClick = onClick,
         kicker = kicker,
         trailingGlyph = if (drawerOpen) trailingGlyph else null,
+        outerModifier = outerModifier,
         modifier =
             modifier.ifElse(
                 focusTarget,
@@ -535,5 +592,33 @@ private class ListEntryTracker {
         const val NONE = 0
         const val HEADER = 1
         const val LIST = 2
+    }
+}
+
+/**
+ * While the rail is collapsed, keeps the list row at [index] (the current page) whole in view: whenever the list's
+ * layout changes (Now Playing appearing above it shrinks the list) and the row is cut or out of view, the list scrolls
+ * just enough to show all of it.
+ */
+private suspend fun keepWhole(
+    state: LazyListState,
+    index: Int,
+) {
+    snapshotFlow { state.layoutInfo }.collect { info ->
+        if (info.totalItemsCount <= index || info.viewportEndOffset <= info.viewportStartOffset) return@collect
+        val row = info.visibleItemsInfo.firstOrNull { it.index == index }
+        when {
+            row == null -> {
+                state.scrollToItem(index)
+            }
+
+            row.offset < info.viewportStartOffset -> {
+                state.scrollBy((row.offset - info.viewportStartOffset).toFloat())
+            }
+
+            row.offset + row.size > info.viewportEndOffset -> {
+                state.scrollBy((row.offset + row.size - info.viewportEndOffset).toFloat())
+            }
+        }
     }
 }

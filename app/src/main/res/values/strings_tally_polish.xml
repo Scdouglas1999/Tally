@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Polish pass. Names are prefixed tally_polish_; never add these to strings.xml. -->
+    <string name="tally_polish_year_most_watched">Most watched</string>
+</resources>

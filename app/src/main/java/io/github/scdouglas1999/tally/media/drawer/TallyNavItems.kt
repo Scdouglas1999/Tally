@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -32,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -337,6 +341,7 @@ internal fun TallyDrawerDivider(
  * One drawer entry. Collapsed: the glyph centered in a 40x40 focus square, with the tally light (3x20dp accent bar
  * flush against the rail's left edge) beside the current page. Expanded: a full-width 40dp row, indicator slot,
  * glyph, label. With a [kicker] (Now Playing) the row is 52dp in both states and the label sits under the kicker.
+ * [modifier] goes to the focusable square, [outerModifier] to the whole row (the tally light included).
  */
 @Composable
 internal fun TallyDrawerRow(
@@ -348,11 +353,12 @@ internal fun TallyDrawerRow(
     modifier: Modifier = Modifier,
     kicker: String? = null,
     @StringRes trailingGlyph: Int? = null,
+    outerModifier: Modifier = Modifier,
 ) {
     val height = if (kicker != null) NowPlayingHeight else RowHeight
     val glyphColor = if (selected) TallyColors.text else TallyColors.muted
     Box(
-        modifier = Modifier.fillMaxWidth().height(height),
+        modifier = outerModifier.fillMaxWidth().height(height),
         contentAlignment = Alignment.Center,
     ) {
         if (!drawerOpen && selected) {
@@ -548,3 +554,37 @@ private fun TallyFocusSurface(
         )
     }
 }
+
+/** The drawer list's own placement, for [wholeInRail]. Plain bookkeeping: read only while drawing. */
+internal class RailViewport {
+    var coordinates: LayoutCoordinates? = null
+}
+
+/**
+ * Draws a list row only while it is whole inside the drawer list: a row the list has scrolled part-way out is not
+ * drawn at all (glyph, label and the current-page light), so the rail never shows half an entry. Moving focus onto
+ * such a row scrolls it into view first, and it is drawn again. [state] is read while drawing so every scroll or
+ * resize of the list redraws the rows.
+ */
+internal fun Modifier.wholeInRail(
+    rail: RailViewport,
+    state: LazyListState,
+): Modifier =
+    composed {
+        val own = remember { RailViewport() }
+        onPlaced { own.coordinates = it }
+            .drawWithContent {
+                // subscribe to the list's scroll and size
+                state.firstVisibleItemScrollOffset
+                state.layoutInfo.viewportEndOffset
+                val list = rail.coordinates
+                val row = own.coordinates
+                if (list == null || row == null || !list.isAttached || !row.isAttached) {
+                    drawContent()
+                    return@drawWithContent
+                }
+                val bounds = list.localBoundingBoxOf(row, clipBounds = false)
+                val slack = 0.5f
+                if (bounds.top >= -slack && bounds.bottom <= list.size.height + slack) drawContent()
+            }
+    }

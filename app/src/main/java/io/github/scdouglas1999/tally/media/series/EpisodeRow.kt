@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -212,43 +213,47 @@ fun EpisodeRow(
                     )
                 }
             }
-            Box(
-                contentAlignment = Alignment.CenterEnd,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(StatusGap, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically,
                 modifier =
                     Modifier
                         .padding(start = 16.dp, end = 13.dp)
-                        .width(StatusWidth),
+                        // Wider only for a row that shows both NEXT UP and its progress.
+                        .widthIn(min = StatusWidth),
             ) {
-                when (status) {
-                    EpisodeStatus.NextUp -> {
-                        Text(
-                            text = stringResource(R.string.tally_series_next_up).uppercase(),
-                            style = statusStyle,
-                            color = TallyColors.accent,
-                            maxLines = 1,
-                            softWrap = false,
-                            modifier =
-                                Modifier
-                                    .border(TallyDimens.hairline, TallyColors.accent)
-                                    .padding(start = 6.dp, end = 6.dp, top = 2.dp, bottom = 3.dp),
-                        )
-                    }
-
-                    is EpisodeStatus.InProgress -> {
-                        Text(
-                            text = "${status.percent}%",
-                            style = statusStyle,
-                            color = TallyColors.text,
-                            maxLines = 1,
-                            softWrap = false,
-                        )
-                    }
-
-                    EpisodeStatus.None -> {}
+                // An episode can be next up and in progress at once: the NEXT UP box, then the percent beside it.
+                if (status == EpisodeStatus.NextUp || (nextUp && status is EpisodeStatus.InProgress)) {
+                    NextUpBox()
+                }
+                if (status is EpisodeStatus.InProgress) {
+                    Text(
+                        text = "${status.percent}%",
+                        style = statusStyle,
+                        color = TallyColors.text,
+                        maxLines = 1,
+                        softWrap = false,
+                    )
                 }
             }
         }
     }
+}
+
+/** `NEXT UP` in accent inside a 1dp accent box. */
+@Composable
+private fun NextUpBox() {
+    Text(
+        text = stringResource(R.string.tally_series_next_up).uppercase(),
+        style = statusStyle,
+        color = TallyColors.accent,
+        maxLines = 1,
+        softWrap = false,
+        modifier =
+            Modifier
+                .border(TallyDimens.hairline, TallyColors.accent)
+                .padding(start = 6.dp, end = 6.dp, top = 2.dp, bottom = 3.dp),
+    )
 }
 
 /** 16:9 still with a 1dp rule frame, the progress bar at its foot and a watched tick. */
@@ -336,6 +341,7 @@ private val StillWidth = 160.dp
 private val StillHeight = 90.dp
 private val NumberColumnWidth = 56.dp
 private val StatusWidth = 72.dp
+private val StatusGap = 10.dp
 
 private val numberStyle =
     TextStyle(

@@ -86,6 +86,7 @@ import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.kit.LandscapeCard
 import io.github.scdouglas1999.tally.media.kit.MediaRow
 import io.github.scdouglas1999.tally.media.kit.TallyButton
+import io.github.scdouglas1999.tally.media.kit.arrivalFocus
 import io.github.scdouglas1999.tally.media.kit.bleedHorizontal
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
@@ -209,8 +210,8 @@ private fun AlbumLoaded(
             initialFirstVisibleItemIndex = if (initialSong != null && entryOfTrack >= 0) ITEMS_BEFORE_TRACKS + entryOfTrack else 0,
         )
 
-    LaunchedEffect(Unit) {
-        val target =
+    val arrivalTarget =
+        remember {
             when {
                 position >= 0 -> trackFocus
                 position == POS_VIDEOS && state.musicVideos.isNotEmpty() -> videosFocus
@@ -218,9 +219,9 @@ private fun AlbumLoaded(
                 position == POS_SIMILAR && state.similar.isNotEmpty() -> similarFocus
                 else -> primaryFocus
             }
-        requestFocusSoon(target, "tally-album")
-        viewModel.updateBackDrop()
-    }
+        }
+    val arrival = arrivalFocus(arrivalTarget, "tally-album")
+    LaunchedEffect(Unit) { viewModel.updateBackDrop() }
     // As upstream: BACK from further down the list goes back to the first track before it leaves the page.
     val backToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > ITEMS_BEFORE_TRACKS } }
     BackHandler(backToTop) {
@@ -271,7 +272,7 @@ private fun AlbumLoaded(
             else -> null
         }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().then(arrival)) {
         CompositionLocalProvider(LocalBringIntoViewSpec provides MinScrollBringIntoViewSpec) {
             LazyColumn(
                 state = listState,
@@ -504,9 +505,7 @@ fun TallySongPage(
                 val song = state.song ?: return@MusicPageFrame
                 val primaryFocus = remember { FocusRequester() }
                 val actionFocus = remember { FocusRequester() }
-                LaunchedEffect(Unit) {
-                    requestFocusSoon(primaryFocus, "tally-song")
-                }
+                val arrival = arrivalFocus(primaryFocus, "tally-song")
                 val artistId =
                     song.data.artistItems
                         ?.firstOrNull()
@@ -557,7 +556,7 @@ fun TallySongPage(
                             },
                         )
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().then(arrival),
                 )
             }
         }

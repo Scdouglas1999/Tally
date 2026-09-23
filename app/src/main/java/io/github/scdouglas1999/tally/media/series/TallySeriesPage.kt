@@ -63,7 +63,6 @@ import com.github.damontecres.wholphin.data.stringRes
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.services.TrailerService
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
-import com.github.damontecres.wholphin.ui.RequestOrRestoreFocus
 import com.github.damontecres.wholphin.ui.components.ConfirmDialog
 import com.github.damontecres.wholphin.ui.components.ContextMenu
 import com.github.damontecres.wholphin.ui.components.ContextMenuActions
@@ -102,6 +101,7 @@ import io.github.scdouglas1999.tally.media.kit.MediaRow
 import io.github.scdouglas1999.tally.media.kit.PersonCard
 import io.github.scdouglas1999.tally.media.kit.PosterCard
 import io.github.scdouglas1999.tally.media.kit.TallyButton
+import io.github.scdouglas1999.tally.media.kit.arrivalFocus
 import io.github.scdouglas1999.tally.media.kit.bleedHorizontal
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.rememberWideImageUrl
@@ -409,7 +409,7 @@ private fun SeriesLoaded(
             POS_DISCOVER -> if (state.discovered.isNotEmpty()) discoverFocus else primaryFocus
             else -> primaryFocus
         }
-    RequestOrRestoreFocus(restore, "jtv-series")
+    val arrival = arrivalFocus(restore, "jtv-series")
 
     val onActionFocused: () -> Unit = {
         position = POS_ACTIONS
@@ -463,7 +463,7 @@ private fun SeriesLoaded(
     }
 
     val listState = rememberLazyListState()
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize().then(arrival)) {
         CompositionLocalProvider(LocalBringIntoViewSpec provides MinScrollBringIntoViewSpec) {
             LazyColumn(
                 state = listState,
