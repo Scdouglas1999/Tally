@@ -45,6 +45,20 @@ fun SwitchPreference(
     onLongClick: (() -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings.TallySwitchPreference(
+            title,
+            value,
+            onClick,
+            modifier,
+            summary,
+            onLongClick,
+            interactionSource,
+        )
+        return
+    }
+    // TALLY: end
     ListItem(
         selected = false,
         onClick = onClick,

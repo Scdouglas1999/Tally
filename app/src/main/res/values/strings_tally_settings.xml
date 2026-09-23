@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings rows -->
+    <string name="tally_prefs_on" translatable="false">ON</string>
+    <string name="tally_prefs_off" translatable="false">OFF</string>
+
+    <!-- Dialog panels -->
+    <string name="tally_prefs_key_back" translatable="false">BACK</string>
+    <string name="tally_prefs_close">Close</string>
+    <string name="tally_prefs_confirm_kicker">Confirm</string>
+    <string name="tally_prefs_delete_kicker">Delete?</string>
+    <string name="tally_prefs_loading">Loading</string>
+
+    <!-- Context menu labels that read plainer than upstream's -->
+    <string name="tally_menu_go_to">Go to</string>
+    <string name="tally_menu_play_from_start">Play from start</string>
+    <string name="tally_menu_mark_watched">Mark watched</string>
+    <string name="tally_menu_mark_unwatched">Mark unwatched</string>
+    <string name="tally_menu_media_information">Media information</string>
+</resources>
