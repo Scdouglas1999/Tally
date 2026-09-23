@@ -75,6 +75,7 @@ import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.media.pages.joinMeta
 import io.github.scdouglas1999.tally.media.pages.personLifeLine
 import io.github.scdouglas1999.tally.media.pages.primaryRole
+import io.github.scdouglas1999.tally.media.person.phone.PhonePersonPage
 import io.github.scdouglas1999.tally.media.search.PagesItemRow
 import io.github.scdouglas1999.tally.media.search.PagesLoading
 import io.github.scdouglas1999.tally.media.search.rememberPageScrollSpec
@@ -84,6 +85,8 @@ import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -174,6 +177,21 @@ fun TallyPersonPage(
             creationCallback = { it.create(destination.itemId) },
         ),
     roleViewModel: TallyPersonRoleViewModel = hiltViewModel(),
+) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhonePersonPage(preferences, destination, modifier, viewModel, roleViewModel)
+    } else {
+        TvPersonPage(preferences, destination, modifier, viewModel, roleViewModel)
+    }
+}
+
+@Composable
+private fun TvPersonPage(
+    preferences: UserPreferences,
+    destination: Destination.MediaItem,
+    modifier: Modifier,
+    viewModel: PersonViewModel,
+    roleViewModel: TallyPersonRoleViewModel,
 ) {
     val state by viewModel.state.collectAsState()
     val role by roleViewModel.role.collectAsState()
@@ -378,7 +396,7 @@ private fun CreditRow(
 
 /** Episodes carry their year, show and number (`2008 · BREAKING BAD · S1 E3`); films and shows show the year on the label. */
 @Composable
-private fun creditKicker(item: BaseItem): String? =
+internal fun creditKicker(item: BaseItem): String? =
     if (item.type == BaseItemKind.EPISODE) {
         joinMeta(
             item.data.productionYear?.toString() ?: item.data.premiereDate
@@ -573,7 +591,7 @@ private fun Portrait(
 }
 
 @Composable
-private fun roleLabel(role: PersonKind?): String =
+internal fun roleLabel(role: PersonKind?): String =
     stringResource(
         when (role) {
             PersonKind.ACTOR -> R.string.tally_pages_role_actor

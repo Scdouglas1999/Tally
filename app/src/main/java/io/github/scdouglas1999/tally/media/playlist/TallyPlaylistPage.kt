@@ -114,6 +114,7 @@ import io.github.scdouglas1999.tally.media.pages.joinMeta
 import io.github.scdouglas1999.tally.media.pages.rundownMeta
 import io.github.scdouglas1999.tally.media.pages.rundownNumber
 import io.github.scdouglas1999.tally.media.pages.totalRuntimeTicks
+import io.github.scdouglas1999.tally.media.playlist.phone.PhonePlaylistLoaded
 import io.github.scdouglas1999.tally.media.search.IconSlot
 import io.github.scdouglas1999.tally.media.search.PagesLoading
 import io.github.scdouglas1999.tally.media.search.rememberPageScrollSpec
@@ -122,6 +123,8 @@ import io.github.scdouglas1999.tally.media.series.episodeCode
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -393,6 +396,23 @@ private fun PlaylistLoaded(
     sortControl: @Composable (onFocused: () -> Unit) -> Unit,
     filterControl: @Composable (onFocused: () -> Unit) -> Unit,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        val phoneFilters = state.filterAndSort.filter.countFilters(DefaultPlaylistItemsOptions)
+        PhonePlaylistLoaded(
+            playlist = playlist,
+            state = state,
+            playingId = playingId,
+            canMove = state.canEdit && state.filterAndSort.sortAndDirection.sort == ItemSortBy.DEFAULT && phoneFilters == 0,
+            onPlayAll = onPlayAll,
+            onMore = onMore,
+            onClickItem = onClickItem,
+            onMenu = onMenu,
+            onMove = onMove,
+            sortControl = sortControl,
+            filterControl = filterControl,
+        )
+        return
+    }
     val items = state.items
     val focusManager = LocalFocusManager.current
     var savedIndex by rememberSaveable { mutableIntStateOf(0) }

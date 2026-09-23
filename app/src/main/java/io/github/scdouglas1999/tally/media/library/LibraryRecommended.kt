@@ -62,7 +62,10 @@ import io.github.scdouglas1999.tally.media.kit.FocusEdge
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.kit.MediaRow
 import io.github.scdouglas1999.tally.media.kit.PosterWidth
+import io.github.scdouglas1999.tally.media.library.phone.PhoneRecommendedRows
 import io.github.scdouglas1999.tally.ui.components.RowHeader
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -332,6 +335,20 @@ private fun RecommendedLoaded(
                 },
             )
         }
+
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneRecommendedRows(
+            preferences = preferences,
+            rows = rows,
+            viewModel = viewModel,
+            watchingRows = watchingRows,
+            dialogs = dialogs,
+            contextActions = contextActions,
+            onPosition = { position = it },
+            modifier = modifier,
+        )
+        return
+    }
 
     LaunchedEffect(rows) {
         if (!firstFocused && rows.isNotEmpty()) {

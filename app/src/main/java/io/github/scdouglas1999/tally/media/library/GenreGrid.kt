@@ -29,7 +29,10 @@ import io.github.scdouglas1999.tally.media.kit.CardFrame
 import io.github.scdouglas1999.tally.media.kit.CardTitleStyle
 import io.github.scdouglas1999.tally.media.kit.MediaGrid
 import io.github.scdouglas1999.tally.media.kit.rememberMediaGridState
+import io.github.scdouglas1999.tally.media.library.phone.PhoneNameGrid
 import io.github.scdouglas1999.tally.ui.components.EmptyState
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -182,7 +185,7 @@ internal fun StudioGrid(
     }
 }
 
-private data class NameCell(
+internal data class NameCell(
     val id: UUID,
     val name: String,
     val imageUrl: String?,
@@ -194,6 +197,10 @@ private fun NameGrid(
     onClick: (NameCell) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneNameGrid(names = names, onClick = onClick, modifier = modifier)
+        return
+    }
     if (names.isEmpty()) {
         EmptyState(
             title = stringResource(R.string.tally_library_empty_title),

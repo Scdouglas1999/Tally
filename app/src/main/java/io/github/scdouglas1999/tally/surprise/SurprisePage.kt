@@ -77,11 +77,14 @@ import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.media.kit.CapsLift
 import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
+import io.github.scdouglas1999.tally.surprise.phone.PhoneSurpriseContent
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -195,6 +198,20 @@ fun SurprisePage(
             state.pick != null -> playFocus
             else -> null
         }
+
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneSurpriseContent(
+            state = state,
+            shownPick = shownPick,
+            poster = poster,
+            slide = slide,
+            textAlpha = textAlpha.value,
+            spinning = spinning,
+            viewModel = viewModel,
+            modifier = modifier,
+        )
+        return
+    }
 
     TallySurface(modifier) {
         Box(Modifier.fillMaxSize()) {
@@ -591,7 +608,7 @@ private fun PosterSlot(
 }
 
 @Composable
-private fun PosterImage(
+internal fun PosterImage(
     item: BaseItem?,
     modifier: Modifier = Modifier,
 ) {
@@ -754,7 +771,7 @@ private fun TitleOrLogo(item: BaseItem) {
 }
 
 @Composable
-private fun metaLine(
+internal fun metaLine(
     item: BaseItem,
     kind: SurpriseKind,
 ): String {
@@ -1015,6 +1032,9 @@ private fun posterInMemory(
     loader: ImageLoader,
     url: String,
 ): Boolean = loader.memoryCache?.get(MemoryCache.Key(url)) != null
+
+/** The share of a partly watched film, for RESUME; null otherwise. */
+internal fun surpriseResumePercent(item: BaseItem): Int? = resumePercent(item)
 
 private fun resumePercent(item: BaseItem): Int? {
     if (item.type != BaseItemKind.MOVIE || item.resumeMs <= 0L) return null

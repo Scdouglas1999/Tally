@@ -50,6 +50,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import io.github.scdouglas1999.tally.media.favorites.phone.PhoneFavoritesPage
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.search.PagesItemRow
@@ -60,6 +61,8 @@ import io.github.scdouglas1999.tally.media.search.typeTitle
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -82,6 +85,21 @@ fun TallyFavoritesPage(
     modifier: Modifier = Modifier,
     viewModel: FavoritesViewModel = hiltViewModel(),
     playlistViewModel: AddPlaylistViewModel = hiltViewModel(),
+) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneFavoritesPage(preferences, modifier, viewModel, playlistViewModel)
+    } else {
+        TvFavoritesPage(preferences, modifier, viewModel, playlistViewModel)
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun TvFavoritesPage(
+    preferences: UserPreferences,
+    modifier: Modifier,
+    viewModel: FavoritesViewModel,
+    playlistViewModel: AddPlaylistViewModel,
 ) {
     OneTimeLaunchedEffect { viewModel.init() }
     val state by viewModel.state.collectAsState()
@@ -292,7 +310,7 @@ private fun RowNote(
  * it marks the item unwatched (or watched) and leaves it a favorite. Here it calls the favorite API, as the film
  * page's FAVORITE button does, then [reload]s the row.
  */
-private class FavoriteFixProvider(
+internal class FavoriteFixProvider(
     private val upstream: ContextMenuProvider,
     private val favorites: FavoriteWatchManager,
     private val scope: CoroutineScope,

@@ -11,6 +11,7 @@ import io.github.scdouglas1999.tally.media.collection.TallyCollectionPage
 import io.github.scdouglas1999.tally.media.episode.TallyEpisodePage
 import io.github.scdouglas1999.tally.media.favorites.TallyFavoritesPage
 import io.github.scdouglas1999.tally.media.home.TallyHomePage
+import io.github.scdouglas1999.tally.media.home.phone.PhoneViewAllPage
 import io.github.scdouglas1999.tally.media.library.TallyFilteredCollection
 import io.github.scdouglas1999.tally.media.library.TallyLibraryPage
 import io.github.scdouglas1999.tally.media.movie.TallyMoviePage
@@ -184,6 +185,19 @@ object TallyRoutes {
                 )
                 true
             }
+
+            // TALLY phone-browse: begin — "view all" of a home row gets a phone page (upstream's grid on a TV).
+            is Destination.MoreHomeRow -> {
+                if (phone) {
+                    LaunchedEffect(Unit) { onClearBackdrop() }
+                    PhoneViewAllPage(preferences = preferences, destination = destination, modifier = modifier)
+                    true
+                } else {
+                    false
+                }
+            }
+
+            // TALLY phone-browse: end
 
             else -> {
                 false

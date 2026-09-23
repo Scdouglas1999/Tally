@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tally phone layouts of home, the libraries, search and the browsing pages (task phone-browse). -->
+<resources>
+    <string name="tally_phone_browse_all">All</string>
+    <string name="tally_phone_browse_details">Details</string>
+    <string name="tally_phone_browse_resume_percent">Resume · %1$d%%</string>
+    <string name="tally_phone_browse_watch">Watch</string>
+    <string name="tally_phone_browse_not_on_channels">Not on your channels</string>
+    <string name="tally_phone_browse_search_hint">Results appear as you type.</string>
+    <string name="tally_phone_browse_clear">Clear</string>
+    <string name="tally_phone_browse_age">Age %1$d</string>
+    <string name="tally_phone_browse_died">Died %1$s</string>
+</resources>

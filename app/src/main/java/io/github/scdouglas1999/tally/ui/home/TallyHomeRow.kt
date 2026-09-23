@@ -36,9 +36,12 @@ import com.github.damontecres.wholphin.ui.showToast
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.data.isFollowed
 import io.github.scdouglas1999.tally.media.home.HomeRowTitle
+import io.github.scdouglas1999.tally.media.kit.phone.PhoneCardRow
 import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.GameCard
 import io.github.scdouglas1999.tally.ui.components.gameActions
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
 
@@ -55,6 +58,10 @@ import io.github.scdouglas1999.tally.ui.theme.TallyScale
  */
 @Composable
 fun TallyHomeRow(modifier: Modifier = Modifier) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneTallyHomeRow(modifier)
+        return
+    }
     val viewModel: TallyHomeRowViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -182,5 +189,62 @@ private fun TallyHomeRowTitle(
                 maxLines = 1,
             )
         }
+    }
+}
+
+/**
+ * The Tally row on a phone: the same view model, toasts, card actions and game menu as on the TV, as a phone row
+ * (`PhoneType.labelLarge` header with the count, the cards scrolling with the page margin as content padding). The
+ * cards are the current [GameCard] at its own size (squeezed to `PhoneDimens.gameCardWidth` its league label is cut);
+ * the sports task gives it its phone variant and the game sheet a tap opens.
+ */
+@Composable
+private fun PhoneTallyHomeRow(modifier: Modifier = Modifier) {
+    val viewModel: TallyHomeRowViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var menuGameId by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(viewModel) {
+        viewModel.messages.collect { resId -> showToast(context, context.getString(resId)) }
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.notices.collect { text -> showToast(context, text) }
+    }
+    LaunchedEffect(state.hideScores) { TallyHomeHeaderState.hideScores.value = state.hideScores }
+    if (state.games.isEmpty()) return
+    val title = stringResource(if (state.anyLive) R.string.tally_home_row_live else R.string.tally_home_row_today)
+    PhoneCardRow(
+        title = title,
+        items = state.games,
+        count = state.games.size,
+        key = { _, game -> game.id },
+        modifier = modifier,
+    ) { game, _ ->
+        GameCard(
+            game = game,
+            hideScores = state.hideScores,
+            isFavorite = game.watch?.channelId in state.favorites || game.isFollowed(state.favoriteTeams),
+            followed = game.isFollowed(state.favoriteTeams),
+            onClick = { viewModel.watch(game) },
+            onLongClick = { menuGameId = game.id },
+        )
+    }
+    val menuGame = state.games.firstOrNull { it.id == menuGameId }
+    if (menuGame != null) {
+        GameActionsDialog(
+            game = menuGame,
+            actions =
+                gameActions(
+                    game = menuGame,
+                    favoriteTeams = state.favoriteTeams,
+                    hideScores = state.hideScores,
+                    onWatch = viewModel::watch,
+                    onAddToMultiview = { game -> game.watch?.channelId?.let(viewModel::addToMultiview) },
+                    onWatchInCorner = null,
+                    onToggleFollow = viewModel::toggleFollow,
+                    onToggleHideScores = viewModel::toggleHideScores,
+                ),
+            onDismiss = { menuGameId = null },
+        )
     }
 }

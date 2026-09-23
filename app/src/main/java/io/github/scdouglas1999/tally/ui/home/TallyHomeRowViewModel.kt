@@ -19,6 +19,7 @@ import io.github.scdouglas1999.tally.data.TallyRepository
 import io.github.scdouglas1999.tally.data.isFollowed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -125,6 +126,31 @@ class TallyHomeRowViewModel
                 .map { pregameChannelIds(it) }
                 .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
+        /** Set once the shared settings (favorites, followed teams, hide scores) have been read, or failed to. */
+        private val settingsLoaded = MutableStateFlow(false)
+
+        /**
+         * True once the row knows what it will show: the server has no plugin, or it has one and the first board (or
+         * its failure) and the settings that order the row are in. The home page waits for this before it shows its
+         * rows and picks the initial focus, so no row appears above the focused one afterwards.
+         */
+        val settled: StateFlow<Boolean> =
+            combine(
+                repository.availability,
+                repository.board,
+                repository.boardError,
+                settingsLoaded,
+            ) { availability, board, boardError, settings ->
+                when (availability) {
+                    TallyRepository.Availability.Unknown -> false
+                    is TallyRepository.Availability.Available -> (board != null || boardError != null) && settings
+                    else -> true
+                }
+            }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+        /** The row's art for [game] (the server-rendered matchup backdrop), absolute; null when the server has none. */
+        fun artUrl(game: TallyGame): String? = game.backdropPath?.takeIf { it.isNotBlank() }?.let(repository::absoluteUrl)
+
         /** One-shot string resource ids surfaced as toasts. */
         private val _messages = MutableSharedFlow<Int>(extraBufferCapacity = 8)
         val messages: SharedFlow<Int> = _messages.asSharedFlow()
@@ -137,7 +163,12 @@ class TallyHomeRowViewModel
         // the LazyColumn disposes the row whenever it scrolls out of view, which must not cancel the fetch.
         init {
             viewModelScope.launch {
-                repository.availability.collect { TallyHomeFocus.rowExpected = it is TallyRepository.Availability.Available }
+                // A row is coming only when the plugin is there and the board has games for it: the home page's
+                // initial focus waits for the row's claim only then.
+                combine(repository.availability, repository.board, repository.settings) { availability, board, settings ->
+                    availability is TallyRepository.Availability.Available &&
+                        HomeRowSelection.select(board, settings.favorites.toSet(), Instant.now()).isNotEmpty()
+                }.collect { TallyHomeFocus.rowExpected = it }
             }
             repository.startPolling()
             viewModelScope.launchIO {
@@ -147,6 +178,7 @@ class TallyHomeRowViewModel
                 // Favorites and "hide scores" live in the shared settings document; without this
                 // the row would order and render as if the user had never set either.
                 repository.loadSettings()
+                settingsLoaded.value = true
                 val board = repository.board.value ?: repository.board.filterNotNull().first()
                 if (!startupNudgeSent.compareAndSet(false, true)) return@launchIO
                 val nudge =
