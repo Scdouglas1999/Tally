@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tally player controls. Kickers and labels are drawn uppercase (tallyUppercase), units keep their case. -->
+    <string name="tally_player_kicker_film">Film</string>
+    <string name="tally_player_kicker_live">Live</string>
+    <string name="tally_player_ends">Ends %1$s</string>
+    <string name="tally_player_paused">Paused</string>
+
+    <!-- Captions under a focused control button -->
+    <string name="tally_player_previous">Previous</string>
+    <string name="tally_player_rewind">Rewind</string>
+    <string name="tally_player_play">Play</string>
+    <string name="tally_player_pause">Pause</string>
+    <string name="tally_player_fast_forward">Fast-forward</string>
+    <string name="tally_player_next">Next</string>
+    <string name="tally_player_chapters">Chapters</string>
+    <string name="tally_player_queue">Queue</string>
+    <string name="tally_player_subtitles">Subtitles</string>
+    <string name="tally_player_audio">Audio</string>
+    <string name="tally_player_settings">Settings</string>
+
+    <!-- Chapter and queue rows -->
+    <string name="tally_player_chapter">Chapter</string>
+    <string name="tally_player_queue_next">Next</string>
+
+    <!-- Next up lower third -->
+    <string name="tally_player_up_next">Up next</string>
+    <string name="tally_player_play_now">Play now</string>
+    <string name="tally_player_dismiss">Dismiss</string>
+
+    <!-- Settings panel -->
+    <string name="tally_player_speed">Speed</string>
+    <string name="tally_player_video_scale">Video scale</string>
+    <string name="tally_player_subtitle_delay">Subtitle delay</string>
+    <string name="tally_player_quality">Quality</string>
+    <string name="tally_player_sleep_timer">Sleep timer</string>
+    <string name="tally_player_together">Watch together</string>
+    <string name="tally_player_send_to">Send to…</string>
+    <string name="tally_player_off">Off</string>
+    <string name="tally_player_original">Original</string>
+    <string name="tally_player_until_end">Until the end</string>
+    <string name="tally_player_forced_only">Forced only</string>
+    <string name="tally_player_subtitles_off">Off</string>
+    <string name="tally_player_subtitles_forced">Only forced subtitles</string>
+    <string name="tally_player_subtitles_search">Search and download</string>
+    <string name="tally_player_delay_reset">Reset</string>
+    <string name="tally_player_track">Track %1$d</string>
+
+    <!-- Font Awesome glyphs for the control buttons (not text) -->
+    <string name="tally_player_glyph_previous" translatable="false">&#xf048;</string>
+    <string name="tally_player_glyph_rewind" translatable="false">&#xf04a;</string>
+    <string name="tally_player_glyph_play" translatable="false">&#xf04b;</string>
+    <string name="tally_player_glyph_pause" translatable="false">&#xf04c;</string>
+    <string name="tally_player_glyph_fast_forward" translatable="false">&#xf04e;</string>
+    <string name="tally_player_glyph_next" translatable="false">&#xf051;</string>
+    <string name="tally_player_glyph_chapters" translatable="false">&#xf02e;</string>
+    <string name="tally_player_glyph_queue" translatable="false">&#xf03a;</string>
+    <string name="tally_player_glyph_subtitles" translatable="false">&#xf20a;</string>
+    <string name="tally_player_glyph_audio" translatable="false">&#xf028;</string>
+    <string name="tally_player_glyph_settings" translatable="false">&#xf013;</string>
+</resources>

@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.playback
 
 import android.view.Gravity
@@ -390,6 +393,21 @@ fun PlaybackPageContent(
                         .align(Alignment.BottomCenter),
             ) {
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    // TALLY: begin
+                    if (io.github.scdouglas1999.tally.ui.player.controls
+                            .tallyPlayerActive()
+                    ) {
+                        io.github.scdouglas1999.tally.ui.player.controls.TallyDpadSeekOverlay(
+                            player = player,
+                            seekPositionMs = skipPosition,
+                            trickplayInfo = state.currentMediaInfo.trickPlayInfo,
+                            trickplayUrlFor = viewModel::getTrickplayUrl,
+                            chapters = state.currentMediaInfo.chapters,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        return@CompositionLocalProvider
+                    }
+                    // TALLY: end
                     DpadSeekOverlay(
                         player = player,
                         seekPositionMs = skipPosition,
@@ -454,46 +472,94 @@ fun PlaybackPageContent(
                         subtitleSearchState.status != SubtitleSearchStatus.Inactive
                 }
             if (!controlsVisible && skipIndicatorDuration == 0L) {
-                PauseIndicator(
-                    player = player,
-                    modifier =
-                        Modifier
-                            .align(Alignment.Center),
-                )
+                // TALLY: begin
+                if (io.github.scdouglas1999.tally.ui.player.controls
+                        .tallyPlayerActive()
+                ) {
+                    io.github.scdouglas1999.tally.ui.player.controls.TallyPausedLabel(
+                        player = player,
+                        modifier = Modifier.align(Alignment.TopCenter),
+                    )
+                } else {
+                    PauseIndicator(
+                        player = player,
+                        modifier =
+                            Modifier
+                                .align(Alignment.Center),
+                    )
+                }
+                // TALLY: end
             }
 
             // The playback controls
 
-            PlaybackOverlay(
-                modifier =
-                    Modifier
-                        .padding(WindowInsets.systemBars.asPaddingValues())
-                        .fillMaxSize()
-                        .background(Color.Transparent),
-                item = state.currentPlayback?.item,
-                player = player,
-                controllerViewState = controllerViewState,
-                showPlay = playPauseState.showPlay,
-                previousEnabled = true,
-                nextEnabled = state.hasNext,
-                seekEnabled = true,
-                seekForward = preferences.appPreferences.playbackPreferences.skipForwardMs.milliseconds,
-                seekBack = preferences.appPreferences.playbackPreferences.skipBackMs.milliseconds,
-                skipBackOnResume = preferences.appPreferences.playbackPreferences.skipBackOnResume,
-                onPlaybackActionClick = onPlaybackActionClick,
-                onClickPlaybackDialogType = { playbackDialog = it },
-                onSeekBarChange = seekBarState::onValueChange,
-                showDebugInfo = showDebugInfo,
-                currentPlayback = state.currentPlayback,
-                chapters = state.currentMediaInfo.chapters,
-                trickplayInfo = state.currentMediaInfo.trickPlayInfo,
-                trickplayUrlFor = viewModel::getTrickplayUrl,
-                queue = remember(state.playlistIndex, state.playlist) { state.upcomingItems },
-                onClickPlaylist = viewModel::playItemInPlaylist,
-                currentSegment = state.currentSegment?.segment,
-                showClock = preferences.appPreferences.interfacePreferences.showClock,
-                analyticsState = state.analyticsState,
-            )
+            // TALLY: begin
+            if (io.github.scdouglas1999.tally.ui.player.controls
+                    .tallyPlayerActive()
+            ) {
+                io.github.scdouglas1999.tally.ui.player.controls.TallyPlaybackOverlay(
+                    modifier =
+                        Modifier
+                            .padding(WindowInsets.systemBars.asPaddingValues())
+                            .fillMaxSize()
+                            .background(Color.Transparent),
+                    item = state.currentPlayback?.item,
+                    player = player,
+                    controllerViewState = controllerViewState,
+                    showPlay = playPauseState.showPlay,
+                    previousEnabled = true,
+                    nextEnabled = state.hasNext,
+                    seekEnabled = true,
+                    seekForward = preferences.appPreferences.playbackPreferences.skipForwardMs.milliseconds,
+                    seekBack = preferences.appPreferences.playbackPreferences.skipBackMs.milliseconds,
+                    skipBackOnResume = preferences.appPreferences.playbackPreferences.skipBackOnResume,
+                    onPlaybackActionClick = onPlaybackActionClick,
+                    onClickPlaybackDialogType = { playbackDialog = it },
+                    onSeekBarChange = seekBarState::onValueChange,
+                    showDebugInfo = showDebugInfo,
+                    currentPlayback = state.currentPlayback,
+                    chapters = state.currentMediaInfo.chapters,
+                    trickplayInfo = state.currentMediaInfo.trickPlayInfo,
+                    trickplayUrlFor = viewModel::getTrickplayUrl,
+                    queue = remember(state.playlistIndex, state.playlist) { state.upcomingItems },
+                    onClickPlaylist = viewModel::playItemInPlaylist,
+                    currentSegment = state.currentSegment?.segment,
+                    showClock = preferences.appPreferences.interfacePreferences.showClock,
+                    analyticsState = state.analyticsState,
+                )
+            } else {
+                PlaybackOverlay(
+                    modifier =
+                        Modifier
+                            .padding(WindowInsets.systemBars.asPaddingValues())
+                            .fillMaxSize()
+                            .background(Color.Transparent),
+                    item = state.currentPlayback?.item,
+                    player = player,
+                    controllerViewState = controllerViewState,
+                    showPlay = playPauseState.showPlay,
+                    previousEnabled = true,
+                    nextEnabled = state.hasNext,
+                    seekEnabled = true,
+                    seekForward = preferences.appPreferences.playbackPreferences.skipForwardMs.milliseconds,
+                    seekBack = preferences.appPreferences.playbackPreferences.skipBackMs.milliseconds,
+                    skipBackOnResume = preferences.appPreferences.playbackPreferences.skipBackOnResume,
+                    onPlaybackActionClick = onPlaybackActionClick,
+                    onClickPlaybackDialogType = { playbackDialog = it },
+                    onSeekBarChange = seekBarState::onValueChange,
+                    showDebugInfo = showDebugInfo,
+                    currentPlayback = state.currentPlayback,
+                    chapters = state.currentMediaInfo.chapters,
+                    trickplayInfo = state.currentMediaInfo.trickPlayInfo,
+                    trickplayUrlFor = viewModel::getTrickplayUrl,
+                    queue = remember(state.playlistIndex, state.playlist) { state.upcomingItems },
+                    onClickPlaylist = viewModel::playItemInPlaylist,
+                    currentSegment = state.currentSegment?.segment,
+                    showClock = preferences.appPreferences.interfacePreferences.showClock,
+                    analyticsState = state.analyticsState,
+                )
+            }
+            // TALLY: end
 
             var subtitleStyleAppliedForHdr by remember { mutableStateOf(state.currentMediaInfo.videoStream?.hdr == true) }
             val subtitleSettings =
@@ -611,6 +677,18 @@ fun PlaybackPageContent(
                     delay(10.seconds)
                     viewModel.updateSegment(segment.segment.id, true)
                 }
+                // TALLY: begin
+                if (io.github.scdouglas1999.tally.ui.player.controls
+                        .tallyPlayerActive()
+                ) {
+                    io.github.scdouglas1999.tally.ui.player.controls.TallySkipSegment(
+                        type = segment.segment.type,
+                        onClick = { viewModel.updateSegment(segment.segment.id, false) },
+                        modifier = Modifier.focusRequester(focusRequester),
+                    )
+                    return@let
+                }
+                // TALLY: end
                 SkipSegmentButton(
                     type = segment.segment.type,
                     onClick = {
@@ -663,6 +741,26 @@ fun PlaybackPageContent(
                         }
                     }
                 }
+                // TALLY: begin
+                if (io.github.scdouglas1999.tally.ui.player.controls
+                        .tallyPlayerActive()
+                ) {
+                    io.github.scdouglas1999.tally.ui.player.controls.TallyNextUp(
+                        item = it,
+                        viewModel = viewModel,
+                        player = player,
+                        timeLeft = timeLeft,
+                        countdownSeconds = preferences.appPreferences.playbackPreferences.autoPlayNextDelaySeconds,
+                        autoPlayEnabled = autoPlayEnabled,
+                        onPlayNow = {
+                            viewModel.reportInteraction()
+                            controllerViewState.hideControls()
+                            viewModel.playNextUp()
+                        },
+                    )
+                    return@let
+                }
+                // TALLY: end
                 NextUpEpisode(
                     title =
                         listOfNotNull(

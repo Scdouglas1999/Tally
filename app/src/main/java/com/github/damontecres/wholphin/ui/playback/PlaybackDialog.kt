@@ -105,6 +105,24 @@ fun PlaybackDialog(
     onPlaybackActionClick: (PlaybackAction) -> Unit,
     onChangeSubtitleDelay: (Duration) -> Unit,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.player.controls
+            .tallyPlayerActive()
+    ) {
+        io.github.scdouglas1999.tally.ui.player.controls.TallyPlayerSettings(
+            enableSubtitleDelay = enableSubtitleDelay,
+            enableVideoScale = enableVideoScale,
+            type = type,
+            settings = settings,
+            onDismissRequest = onDismissRequest,
+            onControllerInteraction = onControllerInteraction,
+            onClickPlaybackDialogType = onClickPlaybackDialogType,
+            onPlaybackActionClick = onPlaybackActionClick,
+            onChangeSubtitleDelay = onChangeSubtitleDelay,
+        )
+        return
+    }
+    // TALLY: end
     val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
     // TODO, shouldn't this work out of the box?
     val leftGravity = remember(isLtr) { if (isLtr) Gravity.START else Gravity.END }
