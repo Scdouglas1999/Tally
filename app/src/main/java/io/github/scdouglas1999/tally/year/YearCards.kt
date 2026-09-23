@@ -156,7 +156,15 @@ private val monthLetter =
     )
 
 private val columnWidth = 560.dp
-private val aboveHints = 72.dp
+
+/** Room kept free above the key hints; the cards center in what is left. */
+internal val aboveHints = 72.dp
+
+/** From a card's number to the facts under it. */
+private val FactsGap = 16.dp
+private val FactRowGap = 10.dp
+private val FactLabelWidth = 180.dp
+private val MonthChartHeight = 160.dp
 
 @Composable
 internal fun YearCover(
@@ -179,30 +187,21 @@ internal fun YearCover(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
-        Spacer(Modifier.height(16.dp))
-        CountUpNumber(
+        Spacer(Modifier.height(8.dp))
+        CountLine(
             stats = stats,
             slot = YearCard.COVER,
-            value = duration.amount.toLongOrNull() ?: 0L,
+            amount = duration.amount.toLongOrNull() ?: 0L,
+            unit = stringResource(duration.unitRes),
             style = heroNumber,
             color = TallyColors.accent,
         )
-        Text(
-            text = stringResource(duration.unitRes).uppercase(),
-            style = TallyType.labelLarge,
-            color = TallyColors.text,
-            maxLines = 1,
-        )
-        Spacer(Modifier.height(18.dp))
-        Text(
-            text =
-                stringResource(
-                    R.string.tally_year_mix,
-                    pluralStringResource(R.plurals.tally_year_film_count, stats.movies, stats.movies),
-                    pluralStringResource(R.plurals.tally_year_episode_count, stats.episodes, stats.episodes),
-                ),
-            style = TallyType.body,
-            color = TallyColors.textSecondary,
+        Spacer(Modifier.height(FactsGap))
+        FactList(
+            listOf(
+                Fact(stringResource(R.string.tally_year_films), stats.movies.toString()),
+                Fact(stringResource(R.string.tally_year_episodes), stats.episodes.toString()),
+            ),
         )
     }
 }
@@ -213,23 +212,17 @@ internal fun YearFilms(
     modifier: Modifier = Modifier,
 ) {
     val word = if (stats.movies == 1) R.string.tally_year_film else R.string.tally_year_films
-    Column(modifier.fillMaxSize()) {
+    Column(modifier) {
         CountLine(stats = stats, slot = YearCard.FILMS, amount = stats.movies.toLong(), unit = stringResource(word))
-        Spacer(Modifier.height(20.dp))
+        stats.topMovies.firstOrNull()?.let { top ->
+            Spacer(Modifier.height(FactsGap))
+            FactList(listOf(Fact(stringResource(R.string.tally_polish_year_most_watched), top.name)))
+        }
+        Spacer(Modifier.height(24.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             stats.topMovies.forEach { movie ->
                 Poster(movie)
             }
-        }
-        stats.topMovies.firstOrNull()?.let { top ->
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.tally_year_most_watched, top.name),
-                style = TallyType.body,
-                color = TallyColors.text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
         }
     }
 }
@@ -253,23 +246,23 @@ internal fun YearShows(
         Column(
             modifier =
                 Modifier
+                    .align(Alignment.CenterStart)
                     .fillMaxWidth(0.4f)
-                    .fillMaxHeight()
                     .padding(start = TallyDimens.marginHorizontal, end = 20.dp, bottom = aboveHints),
         ) {
             val word = if (stats.episodes == 1) R.string.tally_year_episode else R.string.tally_year_episodes
             CountLine(stats = stats, slot = YearCard.SHOWS, amount = stats.episodes.toLong(), unit = stringResource(word))
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(FactsGap))
             Text(
                 text = pluralStringResource(R.plurals.tally_year_across, stats.series, stats.series).uppercase(),
                 style = TallyType.label,
                 color = TallyColors.muted,
                 maxLines = 1,
             )
-            Spacer(Modifier.height(22.dp))
+            Spacer(Modifier.height(12.dp))
             stats.topSeries.forEachIndexed { index, series ->
                 SeriesLine(rank = index + 1, series = series)
-                if (index != stats.topSeries.lastIndex) Spacer(Modifier.height(10.dp))
+                if (index != stats.topSeries.lastIndex) Spacer(Modifier.height(FactRowGap))
             }
         }
     }
@@ -297,12 +290,7 @@ private fun GenreColumn(
     genres: List<GenreShare>,
     widest: Float,
 ) {
-    Column(
-        Modifier
-            .widthIn(max = columnWidth)
-            .fillMaxHeight()
-            .padding(bottom = aboveHints),
-    ) {
+    Column(Modifier.widthIn(max = columnWidth)) {
         Text(
             text = stringResource(R.string.tally_year_top_genres).uppercase(),
             style = TallyType.label,
@@ -329,11 +317,7 @@ internal fun YearMonths(
     val month = stats.busiestMonth ?: return
     val names = stringArrayResource(R.array.tally_year_months)
     val letters = stringArrayResource(R.array.tally_year_month_letters)
-    Column(
-        modifier
-            .fillMaxSize()
-            .padding(bottom = aboveHints),
-    ) {
+    Column(modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.tally_year_busiest).uppercase(),
             style = TallyType.label,
@@ -351,7 +335,7 @@ internal fun YearMonths(
             minutes = stats.monthMinutes,
             busiest = month,
             letters = letters,
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier = Modifier.fillMaxWidth().height(MonthChartHeight),
         )
     }
 }
@@ -368,14 +352,14 @@ internal fun YearDecade(
             style = TallyType.label,
             color = TallyColors.muted,
         )
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
         Text(
             text = year.toString(),
             style = heroNumber,
             color = TallyColors.accent,
             maxLines = 1,
         )
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(FactsGap))
         Text(
             text = stringResource(R.string.tally_year_half, year),
             style = TallyType.body,
@@ -426,9 +410,7 @@ internal fun YearSummary(
             )
     }
     Column(
-        modifier
-            .fillMaxSize()
-            .padding(bottom = aboveHints),
+        modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(22.dp),
     ) {
         cells.chunked(2).forEach { row ->
@@ -496,29 +478,68 @@ internal fun YearChip(
     }
 }
 
+/** The card's big number with its unit beside it, the two vertically centered on each other. */
 @Composable
 private fun CountLine(
     stats: YearStats,
     slot: YearCard,
     amount: Long,
     unit: String,
+    style: TextStyle = countNumber,
+    color: Color = TallyColors.text,
 ) {
-    Row(verticalAlignment = Alignment.Bottom) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         CountUpNumber(
             stats = stats,
             slot = slot,
             value = amount,
-            style = countNumber,
-            color = TallyColors.text,
+            style = style,
+            color = color,
         )
-        Spacer(Modifier.width(14.dp))
+        Spacer(Modifier.width(16.dp))
         Text(
             text = unit.uppercase(),
             style = TallyType.labelLarge,
             color = TallyColors.text,
-            modifier = Modifier.padding(bottom = 10.dp),
             maxLines = 1,
         )
+    }
+}
+
+private data class Fact(
+    val label: String,
+    val value: String,
+)
+
+/**
+ * Secondary facts under a card's number: a two-column mono list, labels `muted` in a fixed column, values in
+ * `text`, each row one line.
+ */
+@Composable
+private fun FactList(facts: List<Fact>) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(FactRowGap),
+        modifier = Modifier.widthIn(max = columnWidth),
+    ) {
+        facts.forEach { fact ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = fact.label.uppercase(),
+                    style = TallyType.label,
+                    color = TallyColors.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.width(FactLabelWidth),
+                )
+                Text(
+                    text = fact.value,
+                    style = monoBody,
+                    color = TallyColors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
     }
 }
 
@@ -697,7 +718,7 @@ private fun SeriesLine(
         )
         Text(
             text = series.name,
-            style = TallyType.body,
+            style = monoBody,
             color = TallyColors.text,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

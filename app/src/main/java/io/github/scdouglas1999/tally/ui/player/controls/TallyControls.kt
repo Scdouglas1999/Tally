@@ -91,7 +91,8 @@ private val captionStyle =
 /**
  * A square glyph button in the kit's [io.github.scdouglas1999.tally.media.kit.TallyIconButton] style: 1dp
  * `ruleStrong` border, focused 3dp accent; [primary] is accent-filled with a 3dp `text` border when focused. While
- * focused its [label] shows under it as a muted caption.
+ * focused its [label] shows under it as a muted caption, centered on the button, or lined up with its left or right
+ * edge ([captionAlign]) for the first and last button of the row, so the caption stays inside the margins.
  */
 @Composable
 fun PlayerIconButton(
@@ -101,6 +102,7 @@ fun PlayerIconButton(
     modifier: Modifier = Modifier,
     primary: Boolean = false,
     onFocused: () -> Unit = {},
+    captionAlign: Alignment.Horizontal = Alignment.CenterHorizontally,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
@@ -176,7 +178,7 @@ fun PlayerIconButton(
                     .padding(top = 5.dp)
                     .height(16.dp)
                     .width(ControlSize)
-                    .wrapContentWidth(unbounded = true),
+                    .wrapContentWidth(align = captionAlign, unbounded = true),
         )
     }
 }
@@ -232,6 +234,7 @@ fun TallyControlsRow(
                     },
                     onFocused = interaction,
                     modifier = down,
+                    captionAlign = Alignment.Start,
                 )
             }
             if (nextEnabled) {
@@ -244,6 +247,7 @@ fun TallyControlsRow(
                     },
                     onFocused = interaction,
                     modifier = down,
+                    captionAlign = if (hasChapters) Alignment.CenterHorizontally else Alignment.Start,
                 )
             }
         }
@@ -361,6 +365,7 @@ fun TallyControlsRow(
                 },
                 onFocused = interaction,
                 modifier = down,
+                captionAlign = Alignment.End,
             )
         }
     }

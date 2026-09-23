@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,21 +22,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Density
@@ -56,7 +57,6 @@ import com.github.damontecres.wholphin.preferences.AppThemeColors
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.components.ContextMenu
 import com.github.damontecres.wholphin.ui.components.ContextMenuActions
-import com.github.damontecres.wholphin.ui.components.HeaderUtils
 import com.github.damontecres.wholphin.ui.data.ItemDetailsDialogInfo
 import com.github.damontecres.wholphin.ui.data.RowColumn
 import com.github.damontecres.wholphin.ui.indexOfFirstOrNull
@@ -75,11 +75,12 @@ import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.kit.MediaRow
 import io.github.scdouglas1999.tally.media.kit.PosterWidth
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
+import io.github.scdouglas1999.tally.media.kit.requestUntilFocused
 import io.github.scdouglas1999.tally.together.ui.TogetherRow
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.RowHeader
+import io.github.scdouglas1999.tally.ui.home.TallyGameHeader
 import io.github.scdouglas1999.tally.ui.home.TallyHomeFocus
-import io.github.scdouglas1999.tally.ui.home.TallyHomeHeader
 import io.github.scdouglas1999.tally.ui.home.TallyHomeHeaderState
 import io.github.scdouglas1999.tally.ui.home.TallyHomeRow
 import io.github.scdouglas1999.tally.ui.household.HouseholdRow
@@ -88,6 +89,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
@@ -326,11 +328,19 @@ private fun HomeContent(
     val currentOnFocusPosition by rememberUpdatedState(onFocusPosition)
     val currentOnClickPlay by rememberUpdatedState(onClickPlay)
 
+    // Focus on arrival goes through the kit's requestUntilFocused (a card focused in the first frame can draw
+    // unfocused). It runs in its own scope: rows loading one by one restart the effect below, not the request.
+    val focusManager = LocalFocusManager.current
+    val arrivalScope = rememberCoroutineScope()
+    var rowsFocused by remember { mutableStateOf(false) }
+    val focusRow = { requester: FocusRequester ->
+        arrivalScope.launch { requestUntilFocused(requester, { rowsFocused }, focusManager, "jtv-home-row") }
+    }
     LaunchedEffect(homeRows) {
         if (!firstFocused && homeRows.isNotEmpty()) {
             if (position.row >= 0) {
                 val index = position.row.coerceIn(0, rowFocusRequesters.lastIndex)
-                rowFocusRequesters.getOrNull(index)?.tryRequestFocus()
+                rowFocusRequesters.getOrNull(index)?.let { focusRow(it) }
                 firstFocused = true
             } else {
                 TallyHomeFocus.pageOpened()
@@ -342,7 +352,7 @@ private fun HomeContent(
                             firstFocused = true
                             return@let
                         }
-                        rowFocusRequesters[it].tryRequestFocus()
+                        focusRow(rowFocusRequesters[it])
                         firstFocused = true
                         delay(50)
                         listState.scrollToItem(it)
@@ -409,13 +419,10 @@ private fun HomeContent(
             val game by TallyHomeHeaderState.focusedGame
             val focusedGame = game
             if (focusedGame != null) {
-                GameHeaderBand(unscaled = unscaled) {
-                    TallyHomeHeader(
-                        game = focusedGame,
-                        hideScores = TallyHomeHeaderState.hideScores.value,
-                        modifier = it,
-                    )
-                }
+                TallyGameHeader(
+                    game = focusedGame,
+                    hideScores = TallyHomeHeaderState.hideScores.value,
+                )
             } else {
                 HomeHeader(
                     item = focusedItem,
@@ -432,6 +439,7 @@ private fun HomeContent(
                         Modifier
                             .fillMaxWidth()
                             .weight(1f)
+                            .onFocusChanged { rowsFocused = it.hasFocus }
                             .focusRestorer(),
                 ) {
                     // The Tally rows draw themselves outside the scale (their cards carry their own TallyScale):
@@ -677,34 +685,6 @@ private fun Modifier.gapBelowWhenShown(gap: Dp): Modifier =
         val extra = if (placeable.height > 0) gap.roundToPx().coerceAtLeast(0) else 0
         layout(placeable.width, placeable.height + extra) { placeable.place(0, 0) }
     }
-
-/**
- * The game header ([TallyHomeHeader], unchanged) in the header band: drawn at the unscaled density it
- * was made for, its text lined up with the page margin, cut to the band's fixed height so rows never move.
- */
-@Composable
-private fun GameHeaderBand(
-    unscaled: Density,
-    content: @Composable (Modifier) -> Unit,
-) {
-    val marginPx = with(LocalDensity.current) { TallyDimens.marginHorizontal.toPx() }
-    Box(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(HomeHeaderHeight)
-                .clipToBounds(),
-    ) {
-        CompositionLocalProvider(LocalDensity provides unscaled) {
-            val start = with(unscaled) { marginPx.toDp() } - HeaderUtils.startPadding
-            content(
-                Modifier
-                    .padding(start = start)
-                    .wrapContentHeight(align = Alignment.Top, unbounded = true),
-            )
-        }
-    }
-}
 
 /**
  * Brings the requesting card to [spaceAbovePx] under the top of the list, like upstream's
