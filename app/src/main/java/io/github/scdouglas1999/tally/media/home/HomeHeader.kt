@@ -162,7 +162,7 @@ internal data class HomeMetaPart(
  * ENDS 9:41 PM` for a film, years for a series. Month-first dates; durations keep their lowercase units.
  */
 @Composable
-private fun homeMeta(item: BaseItem): List<HomeMetaPart> {
+internal fun homeMeta(item: BaseItem): List<HomeMetaPart> {
     val context = LocalContext.current
     val special = stringResource(R.string.tally_series_special)
     val community =

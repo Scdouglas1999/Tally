@@ -63,6 +63,7 @@ import com.github.damontecres.wholphin.ui.tryRequestFocus
 import com.github.damontecres.wholphin.util.ExceptionHandler
 import com.github.damontecres.wholphin.util.HomeRowLoadingState
 import com.github.damontecres.wholphin.util.LoadingState
+import io.github.scdouglas1999.tally.media.collection.phone.PhoneCollectionPage
 import io.github.scdouglas1999.tally.media.kit.DetailHeader
 import io.github.scdouglas1999.tally.media.kit.DetailMetaPart
 import io.github.scdouglas1999.tally.media.kit.FocusEdge
@@ -92,6 +93,8 @@ import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -117,6 +120,21 @@ fun TallyCollectionPage(
             creationCallback = { it.create(itemId) },
         ),
     playlistViewModel: AddPlaylistViewModel = hiltViewModel(),
+) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneCollectionPage(preferences, itemId, modifier, viewModel, playlistViewModel)
+    } else {
+        TvCollectionPage(preferences, itemId, modifier, viewModel, playlistViewModel)
+    }
+}
+
+@Composable
+private fun TvCollectionPage(
+    preferences: UserPreferences,
+    itemId: UUID,
+    modifier: Modifier,
+    viewModel: CollectionViewModel,
+    playlistViewModel: AddPlaylistViewModel,
 ) {
     val state by viewModel.state.collectAsState()
     val dialogs = remember { ItemDialogsState() }
@@ -450,7 +468,7 @@ private fun RowNote(
 
 /** `3 FILMS · 1995–2010 · 4h 50m`: the count, the span of release years and the total running time. */
 @Composable
-private fun collectionMeta(
+internal fun collectionMeta(
     collection: BaseItem,
     sample: List<BaseItem>,
 ): List<DetailMetaPart> {

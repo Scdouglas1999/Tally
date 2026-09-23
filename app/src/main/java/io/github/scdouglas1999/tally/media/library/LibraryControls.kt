@@ -83,10 +83,13 @@ import com.github.damontecres.wholphin.ui.data.SortAndDirection
 import com.github.damontecres.wholphin.ui.data.getStringRes
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.media.kit.CapsLift
+import io.github.scdouglas1999.tally.media.library.phone.PhonePanelSheet
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -116,6 +119,15 @@ internal fun LibraryControlButton(
     suffix: String? = null,
     maxLabelWidth: Dp = Dp.Unspecified,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        io.github.scdouglas1999.tally.media.kit.phone.PhoneChip(
+            label = if (suffix != null) "$label $suffix" else label,
+            onClick = { if (enabled) onClick() },
+            onLongClick = onLongClick,
+            modifier = modifier,
+        )
+        return
+    }
     Surface(
         onClick = onClick,
         onLongClick = onLongClick,
@@ -293,6 +305,11 @@ internal fun LibraryPanel(
     backLabel: String,
     message: String? = null,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // On a phone every panel is a bottom sheet with the same rows.
+        PhonePanelSheet(kicker = kicker, rows = rows, onBack = onBack, message = message)
+        return
+    }
     // BACK reaches a dialog as a dismiss request (the platform handles it before the content sees the key): it
     // means "go back one level", which closes the panel only on its first level.
     Dialog(

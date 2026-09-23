@@ -38,6 +38,7 @@ import io.github.scdouglas1999.tally.media.kit.PosterWidth
 import io.github.scdouglas1999.tally.media.kit.posterDetail
 import io.github.scdouglas1999.tally.media.kit.resumePercent
 import io.github.scdouglas1999.tally.media.series.episodeCode
+import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -53,6 +54,27 @@ private val LabelBarHeight = 40.dp
  */
 internal fun homeImageHeight(viewOptions: HomeRowViewOptions): Dp =
     PosterWidth * 1.5f * viewOptions.heightDp.toFloat() / Cards.HEIGHT_2X3_DP.toFloat()
+
+/**
+ * Picture height of a home card on a phone: a poster ([PhoneDimens.posterWidth] wide) for tall and square pictures, a
+ * landscape card ([PhoneDimens.landscapeCardWidth] wide) for wide ones, whatever height the row's options ask for.
+ */
+internal fun phoneHomeImageHeight(
+    item: BaseItem?,
+    viewOptions: HomeRowViewOptions,
+): Dp {
+    val ratio = ratioFor(item, viewOptions).ratio
+    val width = if (ratio > PHONE_WIDE_RATIO) PhoneDimens.landscapeCardWidth else PhoneDimens.posterWidth
+    return width / ratio
+}
+
+/** Full card height of a phone home row (picture plus label bar), for loading rows. */
+internal fun phoneHomeCardHeight(
+    viewOptions: HomeRowViewOptions,
+    namesOnly: Boolean,
+): Dp = phoneHomeImageHeight(null, viewOptions) + if (homeLabelShown(viewOptions, namesOnly)) LabelBarHeight else 0.dp
+
+private const val PHONE_WIDE_RATIO = 1.2f
 
 /** Whether a row's cards carry the label bar: the row's "show titles" option, always for genres and studios. */
 internal fun homeLabelShown(
@@ -140,8 +162,8 @@ fun HomeItemCard(
     modifier: Modifier = Modifier,
     onPlay: (() -> Unit)? = null,
     onFocused: () -> Unit = {},
+    imageHeight: Dp = homeImageHeight(viewOptions),
 ) {
-    val imageHeight = homeImageHeight(viewOptions)
     val width = imageHeight * ratioFor(item, viewOptions).ratio
     val imageType =
         if (item.isEpisode()) viewOptions.episodeImageType.imageType else viewOptions.imageType.imageType

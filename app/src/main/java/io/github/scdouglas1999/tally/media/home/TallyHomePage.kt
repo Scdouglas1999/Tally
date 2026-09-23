@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.ProvideTextStyle
 import androidx.tv.material3.Text
@@ -69,6 +72,7 @@ import com.github.damontecres.wholphin.ui.theme.LocalTheme
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import com.github.damontecres.wholphin.util.HomeRowLoadingState
 import com.github.damontecres.wholphin.util.LoadingState
+import io.github.scdouglas1999.tally.media.home.phone.PhoneHomePage
 import io.github.scdouglas1999.tally.media.kit.FocusEdge
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
@@ -79,6 +83,8 @@ import io.github.scdouglas1999.tally.media.kit.requestUntilFocused
 import io.github.scdouglas1999.tally.together.ui.TogetherRow
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.RowHeader
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.home.TallyGameHeader
 import io.github.scdouglas1999.tally.ui.home.TallyHomeFocus
 import io.github.scdouglas1999.tally.ui.home.TallyHomeHeaderState
@@ -91,7 +97,9 @@ import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
 /**
@@ -106,6 +114,19 @@ fun TallyHomePage(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneHomePage(preferences, modifier, viewModel)
+    } else {
+        TvHomePage(preferences, modifier, viewModel)
+    }
+}
+
+@Composable
+private fun TvHomePage(
+    preferences: UserPreferences,
+    modifier: Modifier,
+    viewModel: HomeViewModel,
+) {
     LifecycleStartEffect(Unit) {
         viewModel.init()
         onStopOrDispose { }
@@ -116,11 +137,22 @@ fun TallyHomePage(
     val pregame by tallyRow.pregameChannels.collectAsState()
     val dialogs = remember { ItemDialogsState() }
     val unscaled = LocalDensity.current
+    // The rows are shown once the Tally row knows what it will show (see rememberTallyRowSettled), and the page holds
+    // focus until its first card has it, so home opens once, settled: the drawer never takes the focus meanwhile and
+    // no row appears above the focused one afterwards.
+    val tallySettled = rememberTallyRowSettled(tallyRow)
+    // Collected from the start so the row's games are ready when the rows are shown, and the initial-focus step knows
+    // whether a row will claim the focus (TallyHomeFocus) before it picks a library row.
+    val tallyGames by tallyRow.uiState.collectAsStateWithLifecycle()
+    val rowComing = tallyGames.games.isNotEmpty()
+    SideEffect { if (tallySettled) TallyHomeFocus.rowExpected = rowComing }
+    var rowsFocused by remember { mutableStateOf(false) }
 
     TallyScale {
         CompositionLocalProvider(LocalContentColor provides TallyColors.text) {
             ProvideTextStyle(TallyType.body) {
                 Box(modifier = modifier.fillMaxSize()) {
+                    if (!rowsFocused) HomeFocusHolder()
                     when (val loading = state.loadingState) {
                         is LoadingState.Error -> {
                             EmptyState(
@@ -143,15 +175,29 @@ fun TallyHomePage(
                         }
 
                         LoadingState.Success -> {
-                            HomeLoaded(
-                                preferences = preferences,
-                                homeRows = remember(state.homeRows, pregame) { state.homeRows.withoutPregameChannels(pregame) },
-                                rowOptions = state.settings.rows.map { it.config },
-                                refreshing = state.refreshState,
-                                dialogs = dialogs,
-                                viewModel = viewModel,
-                                unscaled = unscaled,
-                            )
+                            if (!tallySettled) {
+                                LoadingMark(Modifier.fillMaxSize())
+                            } else {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxSize()
+                                            .onFocusChanged { if (it.hasFocus) rowsFocused = true },
+                                ) {
+                                    HomeLoaded(
+                                        preferences = preferences,
+                                        homeRows =
+                                            remember(state.homeRows, pregame) {
+                                                state.homeRows.withoutPregameChannels(pregame)
+                                            },
+                                        rowOptions = state.settings.rows.map { it.config },
+                                        refreshing = state.refreshState,
+                                        dialogs = dialogs,
+                                        viewModel = viewModel,
+                                        unscaled = unscaled,
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -183,6 +229,52 @@ private fun LoadingMark(modifier: Modifier = Modifier) {
         )
     }
 }
+
+/**
+ * Holds the page's focus from its first frame until a card has it: without it the focus falls to the drawer while the
+ * rows load (the drawer opens on its account row), and again between the loading mark leaving and a card taking it.
+ */
+@Composable
+private fun HomeFocusHolder() {
+    val requester = remember { FocusRequester() }
+    var held by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        repeat(HOLD_ATTEMPTS) {
+            if (held) return@LaunchedEffect
+            requester.tryRequestFocus("tally-home-hold")
+            delay(HOLD_RETRY_MS)
+        }
+    }
+    Box(
+        modifier =
+            Modifier
+                .size(1.dp)
+                .focusRequester(requester)
+                .onFocusChanged { if (it.isFocused) held = true }
+                .focusable(),
+    )
+}
+
+private const val HOLD_ATTEMPTS = 60
+private const val HOLD_RETRY_MS = 50L
+
+/**
+ * True once the Tally row has settled ([TallyHomeRowViewModel.settled]: no plugin, or the first board and the settings
+ * that order it are in), or after [TALLY_SETTLE_TIMEOUT_MS] at most, so a slow server never keeps home from opening.
+ */
+@Composable
+internal fun rememberTallyRowSettled(tallyRow: TallyHomeRowViewModel): Boolean {
+    var settled by remember { mutableStateOf(tallyRow.settled.value) }
+    LaunchedEffect(tallyRow) {
+        if (!settled) {
+            withTimeoutOrNull(TALLY_SETTLE_TIMEOUT_MS) { tallyRow.settled.first { it } }
+            settled = true
+        }
+    }
+    return settled
+}
+
+private const val TALLY_SETTLE_TIMEOUT_MS = 6_000L
 
 /** The home rows in the lazy list sit after the Tally, household and watch-party items. */
 private sealed interface HomeCell {

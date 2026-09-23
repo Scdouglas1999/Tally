@@ -96,9 +96,15 @@ import io.github.scdouglas1999.tally.media.kit.FocusEdge
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.kit.rememberMediaGridState
+import io.github.scdouglas1999.tally.media.library.phone.PhoneFolderItems
+import io.github.scdouglas1999.tally.media.library.phone.PhoneHeaderCount
+import io.github.scdouglas1999.tally.media.library.phone.PhoneLibraryError
+import io.github.scdouglas1999.tally.media.library.phone.PhoneLibraryScaffold
 import io.github.scdouglas1999.tally.media.series.wholePx
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -272,7 +278,7 @@ private fun LibraryFrame(
 }
 
 /** The tabs of a library, in upstream's order. */
-private enum class LibraryTab(
+internal enum class LibraryTab(
     @param:StringRes val title: Int,
 ) {
     RECOMMENDED(R.string.recommended),
@@ -282,8 +288,8 @@ private enum class LibraryTab(
     STUDIOS(R.string.studios),
 }
 
-private val MovieTabs = listOf(LibraryTab.RECOMMENDED, LibraryTab.LIBRARY, LibraryTab.COLLECTIONS, LibraryTab.GENRES)
-private val TvTabs = listOf(LibraryTab.RECOMMENDED, LibraryTab.LIBRARY, LibraryTab.GENRES, LibraryTab.STUDIOS)
+internal val MovieTabs = listOf(LibraryTab.RECOMMENDED, LibraryTab.LIBRARY, LibraryTab.COLLECTIONS, LibraryTab.GENRES)
+internal val TvTabs = listOf(LibraryTab.RECOMMENDED, LibraryTab.LIBRARY, LibraryTab.GENRES, LibraryTab.STUDIOS)
 
 /** How a grid's click opens an item, as each upstream page does it. */
 internal enum class ClickKind {
@@ -668,6 +674,11 @@ internal fun LibraryScaffold(
     controls: @Composable () -> Unit,
     body: @Composable () -> Unit,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // On a phone the controls sit at the top of the folder's grid (PhoneFolderItems), not in the header.
+        PhoneLibraryScaffold(kicker, tabs, selectedTab, onSelectTab, count, body)
+        return
+    }
     Column(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier =
@@ -820,6 +831,10 @@ private fun LibraryTabView(
 /** The mono `muted` count after the kicker (` · 22 FILMS`). */
 @Composable
 internal fun HeaderCount(text: String) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneHeaderCount(text)
+        return
+    }
     Text(
         text = " · " + text.tallyUppercase(),
         style = TallyType.label,
@@ -961,7 +976,7 @@ internal fun FolderControls(
 }
 
 /** Upstream's play-all: a photo album starts its slideshow, anything else plays the list as sorted and filtered. */
-private fun playAll(
+internal fun playAll(
     spec: FolderSpec,
     state: com.github.damontecres.wholphin.ui.components.CollectionFolderState,
     viewModel: CollectionFolderViewModel,
@@ -1236,6 +1251,18 @@ private fun FolderItems(
         }
     val onClickPlay: (Int, BaseItem) -> Unit = spec.onPlayItem ?: playInPlayer
 
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneFolderItems(
+            spec = spec,
+            viewModel = viewModel,
+            ui = ui,
+            items = items,
+            onClickItem = onClickItem,
+            onLongClickItem = onLongClickItem,
+        )
+        return
+    }
+
     if (items.isEmpty()) {
         val filtered = state.filter.countFilters(spec.filterOptions) > 0
         EmptyState(
@@ -1315,6 +1342,11 @@ private const val FOCUS_ATTEMPTS = 8
 /** Mono `LOADING…` in `muted`, centered. */
 @Composable
 internal fun LoadingMark(modifier: Modifier = Modifier) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        io.github.scdouglas1999.tally.media.kit.phone
+            .PhoneLoading(modifier)
+        return
+    }
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Text(
             text = stringResource(R.string.tally_library_loading).tallyUppercase(),
@@ -1331,6 +1363,10 @@ internal fun LibraryError(
     modifier: Modifier = Modifier,
     takeFocus: Boolean = true,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneLibraryError(message, modifier)
+        return
+    }
     EmptyState(
         title = stringResource(R.string.tally_media_error_title),
         subtitle = message.ifBlank { stringResource(R.string.tally_media_error_body) },

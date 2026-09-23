@@ -139,10 +139,13 @@ import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.rememberWideImageUrl
 import io.github.scdouglas1999.tally.media.kit.resumePercent
 import io.github.scdouglas1999.tally.media.pages.joinMeta
+import io.github.scdouglas1999.tally.media.search.phone.PhoneSearchPage
 import io.github.scdouglas1999.tally.media.series.episodeCode
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -172,6 +175,21 @@ fun TallySearchPage(
     modifier: Modifier = Modifier,
     viewModel: SearchViewModel = hiltViewModel(),
     playlistViewModel: AddPlaylistViewModel = hiltViewModel(),
+) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneSearchPage(initialQuery, userPreferences, modifier, viewModel, playlistViewModel)
+    } else {
+        TvSearchPage(initialQuery, userPreferences, modifier, viewModel, playlistViewModel)
+    }
+}
+
+@Composable
+private fun TvSearchPage(
+    initialQuery: String,
+    userPreferences: UserPreferences,
+    modifier: Modifier,
+    viewModel: SearchViewModel,
+    playlistViewModel: AddPlaylistViewModel,
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current

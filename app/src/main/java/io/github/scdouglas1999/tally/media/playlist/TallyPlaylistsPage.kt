@@ -68,10 +68,14 @@ import io.github.scdouglas1999.tally.media.library.SortDialog
 import io.github.scdouglas1999.tally.media.library.directionArrow
 import io.github.scdouglas1999.tally.media.library.sortLabel
 import io.github.scdouglas1999.tally.media.pages.joinMeta
+import io.github.scdouglas1999.tally.media.playlist.phone.PhonePlaylistGrid
+import io.github.scdouglas1999.tally.media.playlist.phone.PhonePlaylistsHeader
 import io.github.scdouglas1999.tally.media.search.PagesLoading
 import io.github.scdouglas1999.tally.media.search.providerContextMenu
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -270,6 +274,18 @@ private fun PlaylistsHeader(
     filterControl: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhonePlaylistsHeader(
+            title = title,
+            countText = count?.let { pluralStringResource(R.plurals.tally_qa_count_playlists, it, it) },
+            onRandom = onRandom,
+            randomEnabled = randomEnabled,
+            sortControl = sortControl,
+            filterControl = filterControl,
+            modifier = modifier,
+        )
+        return
+    }
     Column(
         modifier =
             Modifier
@@ -321,6 +337,10 @@ private fun PlaylistGrid(
     onPlay: (BaseItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhonePlaylistGrid(items = items, onClick = onClick, onLongClick = onLongClick, modifier = modifier)
+        return
+    }
     var focused by rememberSaveable { mutableIntStateOf(initialPosition.coerceIn(0, (items.size - 1).coerceAtLeast(0))) }
     val restore = remember { FocusRequester() }
     val gridFocus = remember { FocusRequester() }
