@@ -1051,6 +1051,7 @@ internal fun ExtraCard(
         kicker = stringResource(extra.type.stringRes),
         imageUrl = image,
         progress = progress,
+        favorite = single?.item?.favorite == true,
         onClick = onClick,
         // Upstream's extras rows have no long-press menu.
         onLongClick = {},

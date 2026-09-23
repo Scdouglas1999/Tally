@@ -974,6 +974,7 @@ private fun ExtraCard(
         kicker = stringResource(extra.type.stringRes),
         imageUrl = image,
         progress = progress,
+        favorite = single?.item?.favorite == true,
         onClick = onClick,
         onLongClick = onLongClick,
         onPlay = onPlay,

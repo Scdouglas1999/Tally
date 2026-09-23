@@ -578,6 +578,7 @@ private fun EpisodeLoaded(
                                         kicker = seasonCardKicker(item),
                                         imageUrl = rememberWideImageUrl(item),
                                         progress = if (!item.played && percent in 1..99) percent / 100f else null,
+                                        favorite = item.favorite,
                                         onClick = {
                                             position = POS_SEASON
                                             viewModel.navigateTo(Destination.MediaItem(item))
