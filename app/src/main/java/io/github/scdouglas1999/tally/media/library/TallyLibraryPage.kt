@@ -593,8 +593,8 @@ private val BodyEndPadding = 12.dp
 internal val GridEndPadding = BodyEndPadding + JumpBarWidth + 16.dp - FocusEdge
 
 /**
- * The fixed header over the tab content: the kicker, then the strip: [tabs] (if any) on the left, [count] and
- * [controls] at the right end, a hairline under it all. [body] fills the rest.
+ * The fixed header over the tab content: the kicker with the [count] after it, then the strip: [tabs] (if any) on
+ * the left, [controls] at the right end, a hairline under it all. [body] fills the rest.
  */
 @Composable
 internal fun LibraryScaffold(
@@ -615,13 +615,18 @@ internal fun LibraryScaffold(
                     .padding(top = 24.dp)
                     .padding(start = TallyDimens.marginHorizontal, end = BodyEndPadding + FocusEdge),
         ) {
-            Text(
-                text = kicker.tallyUppercase(),
-                style = TallyType.label,
-                color = TallyColors.accent,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            // `MOVIES · 23 FILMS`: the count sits on the kicker line, so a full strip never pushes it out.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = kicker.tallyUppercase(),
+                    style = TallyType.label,
+                    color = TallyColors.accent,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                count()
+            }
             HeaderStrip(
                 modifier =
                     Modifier
@@ -656,7 +661,6 @@ internal fun LibraryScaffold(
                         }
                     }
                 },
-                count = count,
                 controls = {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(ControlGap),
@@ -752,21 +756,19 @@ private fun LibraryTabView(
     }
 }
 
-/** The mono `muted` count at the right end of the strip (`22 FILMS`). */
+/** The mono `muted` count after the kicker (` · 22 FILMS`). */
 @Composable
 internal fun HeaderCount(text: String) {
     Text(
-        text = text.tallyUppercase(),
+        text = " · " + text.tallyUppercase(),
         style = TallyType.label,
         color = TallyColors.muted,
         maxLines = 1,
-        modifier = Modifier.offset(y = CapsLift),
     )
 }
 
-/** Space between the controls, and the least space kept around the count. */
+/** Space between the controls, and the least space kept between the tabs and the controls. */
 private val ControlGap = 6.dp
-private val CountGap = 16.dp
 
 /** Widest the sort button's label runs (`SORT · DATE RELEASED` fits). */
 private val SortLabelMaxWidth = 200.dp
@@ -775,38 +777,26 @@ private val SortLabelMaxWidth = 200.dp
 private val TabPadding = 12.dp
 
 /**
- * The header strip: [tabs] at the left, [controls] at the right end, [count] just left of the controls. The tabs
- * and the controls always get their room; the count is left out when it would not fit between them with
- * [CountGap] on both sides (a long count in a narrow strip), rather than squeezing anything.
+ * The header strip: [tabs] at the left, [controls] at the right end. The controls always get their room; the tabs
+ * get what is left.
  */
 @Composable
 private fun HeaderStrip(
     tabs: @Composable () -> Unit,
-    count: @Composable () -> Unit,
     controls: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Layout(contents = listOf(tabs, count, controls), modifier = modifier) { (tabsM, countM, controlsM), constraints ->
+    Layout(contents = listOf(tabs, controls), modifier = modifier) { (tabsM, controlsM), constraints ->
         val loose = constraints.copy(minWidth = 0, minHeight = 0)
         val width = constraints.maxWidth
         val controlsP = controlsM.map { it.measure(loose) }
         val controlsW = controlsP.maxOfOrNull { it.width } ?: 0
-        val tabsP = tabsM.map { it.measure(loose.copy(maxWidth = (width - controlsW).coerceAtLeast(0))) }
-        val tabsW = tabsP.maxOfOrNull { it.width } ?: 0
-        val countP = countM.map { it.measure(loose) }
-        val countW = countP.maxOfOrNull { it.width } ?: 0
-        val gap = CountGap.roundToPx()
         val controlsGap = if (controlsW > 0) ControlGap.roundToPx() * 2 else 0
-        val showCount = countW > 0 && tabsW + gap + countW + controlsGap + controlsW <= width
+        val tabsP = tabsM.map { it.measure(loose.copy(maxWidth = (width - controlsW - controlsGap).coerceAtLeast(0))) }
         val rowHeight = ControlHeight.roundToPx()
         layout(width, constraints.maxHeight) {
             tabsP.forEach { it.place(0, 0) }
             controlsP.forEach { it.place(width - it.width, (rowHeight - it.height) / 2) }
-            if (showCount) {
-                countP.forEach {
-                    it.place(width - controlsW - controlsGap - it.width, (rowHeight - it.height) / 2)
-                }
-            }
         }
     }
 }
@@ -1223,11 +1213,12 @@ private fun FolderItems(
                 onClickPlay = onClickPlay,
                 letterPosition = { viewModel.positionOfLetter(it) ?: -1 },
                 onFocusIndex = { viewModel.position = it },
+                // The gap is inside the grid, so rows scrolled up fade out under the strip.
+                topPadding = BodyTopGap,
                 modifier =
                     Modifier
                         .weight(1f)
-                        .padding(start = TallyDimens.marginHorizontal, end = BodyEndPadding)
-                        .padding(top = BodyTopGap),
+                        .padding(start = TallyDimens.marginHorizontal, end = BodyEndPadding),
             )
         } else {
             // The list layouts are upstream's list, as they are, until they get a Tally look of their own.

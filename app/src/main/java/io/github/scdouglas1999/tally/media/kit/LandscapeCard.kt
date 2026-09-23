@@ -13,7 +13,7 @@ import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import org.jellyfin.sdk.model.api.ImageType
 
-/** 16:9 artwork. Label bar is an accent kicker over the title. */
+/** 16:9 artwork. Label bar is an accent kicker over the title; [favorite] puts the 8dp accent square top-right. */
 @Composable
 fun LandscapeCard(
     title: String,
@@ -25,6 +25,7 @@ fun LandscapeCard(
     onPlay: (() -> Unit)? = null,
     onFocused: () -> Unit = {},
     progress: Float? = null,
+    favorite: Boolean = false,
     width: Dp = LandscapeWidth,
 ) {
     CardFrame(
@@ -38,6 +39,7 @@ fun LandscapeCard(
         onPlay = onPlay,
         onFocused = onFocused,
         progress = progress,
+        favorite = favorite,
         label = {
             if (!kicker.isNullOrBlank()) {
                 Text(

@@ -1,7 +1,10 @@
 package io.github.scdouglas1999.tally.media.search
 
+import android.Manifest
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -21,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,9 +47,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
@@ -83,6 +90,8 @@ import com.github.damontecres.wholphin.ui.LocalImageUrlService
 import com.github.damontecres.wholphin.ui.components.ContextMenu
 import com.github.damontecres.wholphin.ui.components.ContextMenuActions
 import com.github.damontecres.wholphin.ui.components.ContextMenuProvider
+import com.github.damontecres.wholphin.ui.components.VoiceInputManager
+import com.github.damontecres.wholphin.ui.components.VoiceInputState
 import com.github.damontecres.wholphin.ui.components.VoiceSearchButton
 import com.github.damontecres.wholphin.ui.data.AddPlaylistViewModel
 import com.github.damontecres.wholphin.ui.data.ItemDetailsDialogInfo
@@ -318,12 +327,12 @@ fun TallySearchPage(
                                 .focusRequester(focusRequesters[SEARCH_ROW]),
                     ) {
                         if (voiceSearchButtonVisible) {
-                            VoiceSearchButton(
+                            TallyVoiceButton(
+                                voiceInputManager = viewModel.voiceInputManager,
                                 onSpeechResult = { spokenText ->
                                     query = spokenText
                                     triggerImmediateSearch(spokenText)
                                 },
-                                voiceInputManager = viewModel.voiceInputManager,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                         }
@@ -1013,6 +1022,7 @@ internal fun PagesItemCard(
                 kicker = kicker,
                 imageUrl = url,
                 progress = if (item?.played != true && percent in 1..99) percent / 100f else null,
+                favorite = item?.favorite == true,
                 onClick = onClick,
                 onLongClick = onLongClick,
                 onPlay = onPlay,
@@ -1128,6 +1138,62 @@ internal fun PagesItemGrid(
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * Voice search as the kit's square icon button. A click does what upstream's round [VoiceSearchButton] does: listen
+ * (asking for the microphone first), or stop while listening. Upstream's button still runs, hidden and out of the
+ * focus order, because its listening overlay and its hand-off of the result live in it and are not reusable alone.
+ */
+@Composable
+private fun TallyVoiceButton(
+    voiceInputManager: VoiceInputManager,
+    onSpeechResult: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (!voiceInputManager.isAvailable) return
+    val state by voiceInputManager.state.collectAsState()
+    val permissionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) voiceInputManager.onPermissionGranted() else voiceInputManager.onPermissionDenied()
+        }
+    Box(modifier = modifier) {
+        Box(
+            modifier =
+                Modifier
+                    .size(0.dp)
+                    .clipToBounds()
+                    .alpha(0f),
+        ) {
+            VoiceSearchButton(
+                onSpeechResult = onSpeechResult,
+                voiceInputManager = voiceInputManager,
+                modifier = Modifier.focusProperties { canFocus = false },
+            )
+        }
+        IconSlot {
+            TallyIconButton(
+                glyph = stringResource(R.string.fa_microphone),
+                label = stringResource(R.string.voice_search),
+                onClick = {
+                    when (state) {
+                        VoiceInputState.Starting, VoiceInputState.Listening -> {
+                            voiceInputManager.stopListening()
+                        }
+
+                        else -> {
+                            if (voiceInputManager.hasPermission) {
+                                voiceInputManager.startListening()
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                            }
+                        }
+                    }
+                },
+                modifier = it,
+            )
         }
     }
 }
