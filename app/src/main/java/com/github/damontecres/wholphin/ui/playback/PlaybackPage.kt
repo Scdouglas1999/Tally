@@ -431,38 +431,55 @@ fun PlaybackPageContent(
             if (!controllerViewState.controlsVisible && skipIndicatorDuration != 0L &&
                 prefs.dpadSeekMode != DpadSeekMode.SEEKBAR_TRICKPLAY
             ) {
-                // Skip time mode: show seek distance indicator
-                SkipIndicator(
-                    durationMs = skipIndicatorDuration,
-                    onFinish = {
-                        skipIndicatorDuration = 0L
-                    },
-                    modifier =
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 70.dp),
-                )
-                // Show a small progress bar along the bottom of the screen
-                if (prefs.dpadSeekMode == DpadSeekMode.SEEKBAR_MINIMAL) {
-                    val percent = skipPosition.toFloat() / player.duration.toFloat()
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                        Box(
+                // TALLY: begin
+                if (io.github.scdouglas1999.tally.ui.player.controls
+                        .tallyPlayerActive() &&
+                    prefs.dpadSeekMode == DpadSeekMode.SEEKBAR_MINIMAL
+                ) {
+                    io.github.scdouglas1999.tally.ui.player.controls.TallyDpadSeekMinimal(
+                        player = player,
+                        seekPositionMs = skipPosition,
+                        skippedMs = skipIndicatorDuration,
+                        onFinish = { skipIndicatorDuration = 0L },
+                        modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+                    )
+                } else {
+                    // TALLY: end
+                    // Skip time mode: show seek distance indicator
+                    SkipIndicator(
+                        durationMs = skipIndicatorDuration,
+                        onFinish = {
+                            skipIndicatorDuration = 0L
+                        },
+                        modifier =
                             Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
-                        ) {
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 70.dp),
+                    )
+                    // Show a small progress bar along the bottom of the screen
+                    if (prefs.dpadSeekMode == DpadSeekMode.SEEKBAR_MINIMAL) {
+                        val percent = skipPosition.toFloat() / player.duration.toFloat()
+                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                             Box(
-                                modifier =
-                                    Modifier
-                                        .align(Alignment.BottomStart)
-                                        .background(MaterialTheme.colorScheme.border)
-                                        .clip(RectangleShape)
-                                        .height(3.dp)
-                                        .fillMaxWidth(percent),
-                            )
+                                Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.BottomCenter),
+                            ) {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomStart)
+                                            .background(MaterialTheme.colorScheme.border)
+                                            .clip(RectangleShape)
+                                            .height(3.dp)
+                                            .fillMaxWidth(percent),
+                                )
+                            }
                         }
                     }
+                    // TALLY: begin
                 }
+                // TALLY: end
             }
 
             val controlsVisible =
