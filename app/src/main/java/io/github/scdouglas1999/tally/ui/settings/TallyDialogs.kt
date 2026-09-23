@@ -95,6 +95,15 @@ import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.phone.PhoneSheet
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneConfirmContent
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneDialogRow
+import io.github.scdouglas1999.tally.ui.settings.phone.PhonePanelFrame
+import io.github.scdouglas1999.tally.ui.settings.phone.PhonePanelList
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneStringInput
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
+import io.github.scdouglas1999.tally.ui.settings.phone.phoneSheetMaxHeight
+import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -238,6 +247,13 @@ internal fun TallyPanelWindow(
     contentAlignment: Alignment = Alignment.Center,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    if (isPhone()) {
+        // A phone: the panel is a bottom sheet (its frame and rows draw their phone forms).
+        PhoneSheet(onDismiss = onDismissRequest) {
+            Box(modifier = Modifier.fillMaxWidth(), content = content)
+        }
+        return
+    }
     Dialog(
         onDismissRequest = onDismissRequest,
         properties =
@@ -276,6 +292,10 @@ internal fun TallyPanelFrame(
     onPreviewKey: (androidx.compose.ui.input.key.KeyEvent) -> Boolean = { false },
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    if (isPhone()) {
+        PhonePanelFrame(title = kicker, content = content)
+        return
+    }
     Column(
         modifier =
             modifier
@@ -364,6 +384,10 @@ internal fun TallyPanelList(
     onUpFromFirst: (() -> Unit)? = null,
     refocusOnChange: Boolean = true,
 ) {
+    if (isPhone()) {
+        PhonePanelList(entries = entries, initialIndex = initialIndex, canClick = canClick)
+        return
+    }
     val requesters = remember(focusKey, entries.size) { List(entries.size) { FocusRequester() } }
     val bringers = remember(focusKey, entries.size) { List(entries.size) { BringIntoViewRequester() } }
     val scope = rememberCoroutineScope()
@@ -466,6 +490,21 @@ internal fun TallyDialogRow(
     leading: (@Composable BoxScope.() -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
+    if (isPhone()) {
+        PhoneDialogRow(
+            onClick = onClick,
+            headline = headline,
+            modifier = modifier,
+            enabled = enabled,
+            marked = marked,
+            destructive = destructive,
+            overline = overline,
+            supporting = supporting,
+            leading = leading,
+            trailing = trailing,
+        )
+        return
+    }
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     LaunchedEffect(focused) {
@@ -601,9 +640,11 @@ fun TallyDialogPopup(
     properties: DialogProperties = DialogProperties(),
 ) {
     if (!showDialog) return
-    var waiting by remember { mutableStateOf(waitToLoad) }
+    // On a phone the long press that opened it ends outside the sheet: no wait.
+    val phone = isPhone()
+    var waiting by remember { mutableStateOf(waitToLoad && !phone) }
     LaunchedEffect(waitToLoad) {
-        if (waitToLoad) {
+        if (waitToLoad && !phone) {
             delay(LONG_PRESS_WAIT_MS)
         }
         waiting = false
@@ -879,6 +920,19 @@ internal fun TallyConfirmPanel(
     detailIsError: Boolean = false,
 ) {
     val openedAt = remember { SystemClock.elapsedRealtime() }
+    if (isPhone()) {
+        PhoneConfirmContent(
+            kicker = kicker,
+            message = message,
+            detail = detail,
+            confirmLabel = confirmLabel,
+            cancelLabel = stringResource(R.string.cancel),
+            onCancel = onCancel,
+            onConfirm = { if (SystemClock.elapsedRealtime() - openedAt >= OPEN_GRACE_MS) onConfirm() },
+            detailIsError = detailIsError,
+        )
+        return
+    }
     val cancelFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         repeat(8) {
@@ -998,68 +1052,77 @@ fun TallyStringInputDialog(
             onDismissRequest()
         }
     }
-    // The field takes focus on open, so the TV keyboard comes up at once (as upstream's does) over the lower half
-    // of the screen: the panel sits in the upper half, where the keyboard cannot cover it.
-    TallyPanelWindow(onDismissRequest = dismiss, contentAlignment = Alignment.TopCenter) {
-        val fieldFocus = remember { FocusRequester() }
-        LaunchedEffect(Unit) {
-            repeat(8) {
-                if (fieldFocus.tryRequestFocus("tally-text-input")) return@LaunchedEffect
-                delay(40)
+    if (isPhone()) {
+        // A phone: a sheet with the field at its top and the keyboard up; the discard question replaces it.
+        if (!showConfirm) {
+            PhoneSheet(onDismiss = dismiss) {
+                PhoneStringInput(input = input, state = state, onSave = onDone, onCancel = dismiss)
             }
         }
-        TallyPanelFrame(
-            kicker = input.title,
-            onBack = dismiss,
-            modifier = Modifier.padding(top = 64.dp),
-            width = 640.dp,
-            trapHorizontal = false,
-        ) {
-            val interactionSource = remember { MutableInteractionSource() }
-            val focused by interactionSource.collectIsFocusedAsState()
-            BasicTextField(
-                state = state,
-                keyboardOptions = input.keyboardOptions,
-                onKeyboardAction = { onDone() },
-                lineLimits =
-                    if (input.maxLines > 1) {
-                        TextFieldLineLimits.MultiLine(input.maxLines, input.maxLines)
-                    } else {
-                        TextFieldLineLimits.SingleLine
-                    },
-                textStyle = TallyType.body.copy(color = TallyColors.text),
-                cursorBrush = SolidColor(TallyColors.accent),
-                interactionSource = interactionSource,
-                decorator = { innerTextField ->
-                    Box(
-                        contentAlignment = Alignment.CenterStart,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 48.dp)
-                                .background(TallyColors.groundRaised, RectangleShape)
-                                .border(
-                                    if (focused) TallyDimens.focusBorder else TallyDimens.hairline,
-                                    if (focused) TallyColors.accent else TallyColors.ruleStrong,
-                                    RectangleShape,
-                                ).padding(horizontal = 14.dp, vertical = 10.dp),
-                    ) {
-                        innerTextField()
-                    }
-                },
-                modifier =
-                    Modifier
-                        .padding(horizontal = 20.dp)
-                        .padding(top = FOCUS_ROOM)
-                        .fillMaxWidth()
-                        .focusRequester(fieldFocus),
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(horizontal = 20.dp).padding(top = 18.dp, bottom = 20.dp),
+    } else {
+        // The field takes focus on open, so the TV keyboard comes up at once (as upstream's does) over the lower half
+        // of the screen: the panel sits in the upper half, where the keyboard cannot cover it.
+        TallyPanelWindow(onDismissRequest = dismiss, contentAlignment = Alignment.TopCenter) {
+            val fieldFocus = remember { FocusRequester() }
+            LaunchedEffect(Unit) {
+                repeat(8) {
+                    if (fieldFocus.tryRequestFocus("tally-text-input")) return@LaunchedEffect
+                    delay(40)
+                }
+            }
+            TallyPanelFrame(
+                kicker = input.title,
+                onBack = dismiss,
+                modifier = Modifier.padding(top = 64.dp),
+                width = 640.dp,
+                trapHorizontal = false,
             ) {
-                TallyButton(label = stringResource(R.string.cancel), onClick = dismiss)
-                TallyButton(label = stringResource(R.string.save), onClick = onDone, primary = true)
+                val interactionSource = remember { MutableInteractionSource() }
+                val focused by interactionSource.collectIsFocusedAsState()
+                BasicTextField(
+                    state = state,
+                    keyboardOptions = input.keyboardOptions,
+                    onKeyboardAction = { onDone() },
+                    lineLimits =
+                        if (input.maxLines > 1) {
+                            TextFieldLineLimits.MultiLine(input.maxLines, input.maxLines)
+                        } else {
+                            TextFieldLineLimits.SingleLine
+                        },
+                    textStyle = TallyType.body.copy(color = TallyColors.text),
+                    cursorBrush = SolidColor(TallyColors.accent),
+                    interactionSource = interactionSource,
+                    decorator = { innerTextField ->
+                        Box(
+                            contentAlignment = Alignment.CenterStart,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 48.dp)
+                                    .background(TallyColors.groundRaised, RectangleShape)
+                                    .border(
+                                        if (focused) TallyDimens.focusBorder else TallyDimens.hairline,
+                                        if (focused) TallyColors.accent else TallyColors.ruleStrong,
+                                        RectangleShape,
+                                    ).padding(horizontal = 14.dp, vertical = 10.dp),
+                        ) {
+                            innerTextField()
+                        }
+                    },
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 20.dp)
+                            .padding(top = FOCUS_ROOM)
+                            .fillMaxWidth()
+                            .focusRequester(fieldFocus),
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(horizontal = 20.dp).padding(top = 18.dp, bottom = 20.dp),
+                ) {
+                    TallyButton(label = stringResource(R.string.cancel), onClick = dismiss)
+                    TallyButton(label = stringResource(R.string.save), onClick = onDone, primary = true)
+                }
             }
         }
     }
@@ -1090,6 +1153,10 @@ fun TallyBasicDialog(
     properties: DialogProperties = DialogProperties(),
     content: @Composable () -> Unit,
 ) {
+    if (isPhone()) {
+        PhoneSheet(onDismiss = onDismissRequest) { content() }
+        return
+    }
     Dialog(onDismissRequest = onDismissRequest, properties = properties) {
         Box(
             modifier =
@@ -1114,6 +1181,17 @@ fun TallyScrollableDialog(
     itemSpacing: Dp,
     content: LazyListScope.() -> Unit,
 ) {
+    if (isPhone()) {
+        PhoneSheet(onDismiss = onDismissRequest) {
+            LazyColumn(
+                contentPadding = PaddingValues(horizontal = PhoneDimens.margin, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(itemSpacing),
+                content = content,
+                modifier = Modifier.fillMaxWidth().heightIn(max = phoneSheetMaxHeight()),
+            )
+        }
+        return
+    }
     val scrollAmount = 100f
     val columnState = rememberLazyListState()
     val scope = rememberCoroutineScope()

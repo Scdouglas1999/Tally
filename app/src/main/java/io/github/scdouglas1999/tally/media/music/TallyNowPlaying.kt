@@ -90,9 +90,12 @@ import io.github.scdouglas1999.tally.media.kit.arrivalFocus
 import io.github.scdouglas1999.tally.media.kit.bleedHorizontal
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.library.LoadingMark
+import io.github.scdouglas1999.tally.media.music.phone.PhoneNowPlaying
+import io.github.scdouglas1999.tally.media.music.phone.PhoneNowPlayingQueue
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.player.controls.TallySeekBar
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -184,165 +187,206 @@ fun TallyNowPlaying(
     // BACK from the queue or the lyrics comes back to the controls first, as upstream's queue goes back to its top.
     BackHandler(panelHasFocus) { playFocus.tryRequestFocus("tally-now-playing-back") }
 
-    TallyScale {
-        Box(
-            modifier =
-                modifier
-                    .fillMaxSize()
-                    .background(TallyColors.ground)
-                    .then(arrival)
-                    .onPreviewKeyEvent { if (isMedia(it)) keyHandler.onKeyEvent(it) else false },
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(40.dp),
+    val onLyrics = {
+        when {
+            // Lyrics on, the queue opened over them: back to the lyrics.
+            lyricsOn && queueRequested && current?.hasLyrics == true -> {
+                queueRequested = false
+            }
+
+            lyricsOn -> {
+                viewModel.updatePreferences(preferences.updateMusicPreferences { showLyrics = false })
+            }
+
+            else -> {
+                queueRequested = false
+                viewModel.updatePreferences(preferences.updateMusicPreferences { showLyrics = true })
+            }
+        }
+    }
+    val onQueueMenu: (Int, AudioItem) -> Unit = { index, song ->
+        dialogs.contextMenu =
+            ContextMenu.ForQueue(
+                fromLongClick = true,
+                item = song,
+                index = index,
+                actions = queueActions,
+            )
+    }
+    if (isPhone()) {
+        PhoneNowPlaying(
+            player = player,
+            current = current,
+            lyricsOn = lyricsOn,
+            showLyrics = panel == NowPlayingPanel.LYRICS,
+            lyrics = { lyricsModifier ->
+                TallyLyrics(
+                    lyrics = state.lyrics,
+                    currentIndex = state.currentLyricIndex,
+                    onSeek = { line ->
+                        line.start
+                            ?.ticks
+                            ?.inWholeMilliseconds
+                            ?.let { player.seekTo(it) }
+                    },
+                    entryFocus = panelFocus,
+                    up = playFocus,
+                    // The lines' focus frames stand off the text: the text lines up with the title under it.
+                    modifier = lyricsModifier.bleedHorizontal(LyricInset),
+                )
+            },
+            visualizer = viz.takeIf { musicPrefs.showVisualizer && state.visualizerPermissions },
+            queue =
+                PhoneNowPlayingQueue(
+                    version = state.musicServiceState.queueVersion,
+                    size = state.musicServiceState.queueSize,
+                    currentIndex = state.musicServiceState.currentIndex,
+                    onPlay = { index -> viewModel.play(index) },
+                    onMenu = onQueueMenu,
+                    onMove = { index, direction -> viewModel.moveQueue(index, direction) },
+                ),
+            onLyrics = onLyrics,
+            onStop = { viewModel.stop() },
+            onInteraction = viewModel::reportInteraction,
+            modifier = modifier,
+        )
+    } else {
+        TallyScale {
+            Box(
                 modifier =
-                    Modifier
+                    modifier
                         .fillMaxSize()
-                        .padding(horizontal = TallyDimens.marginHorizontal, vertical = TallyDimens.marginVertical),
+                        .background(TallyColors.ground)
+                        .then(arrival)
+                        .onPreviewKeyEvent { if (isMedia(it)) keyHandler.onKeyEvent(it) else false },
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    SquareCover(imageUrl = current?.imageUrl, contentDescription = current?.title, size = NowPlayingCover)
-                    if (musicPrefs.showVisualizer && state.visualizerPermissions && viz.isNotEmpty()) {
-                        TallyVisualizer(data = viz, modifier = Modifier.width(NowPlayingCover).height(VisualizerHeight))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(40.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = TallyDimens.marginHorizontal, vertical = TallyDimens.marginVertical),
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SquareCover(imageUrl = current?.imageUrl, contentDescription = current?.title, size = NowPlayingCover)
+                        if (musicPrefs.showVisualizer && state.visualizerPermissions && viz.isNotEmpty()) {
+                            TallyVisualizer(data = viz, modifier = Modifier.width(NowPlayingCover).height(VisualizerHeight))
+                        }
                     }
-                }
-                Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                    Text(
-                        text = stringResource(R.string.tally_music_now_playing).tallyUppercase(),
-                        style = TallyType.label,
-                        color = TallyColors.accent,
-                        maxLines = 1,
-                    )
-                    Text(
-                        text = current?.title ?: stringResource(R.string.tally_music_nothing_playing),
-                        style = TitleStyle,
-                        color = if (current != null) TallyColors.text else TallyColors.muted,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 8.dp),
-                    )
-                    current?.artistNames?.takeIf { it.isNotBlank() }?.let {
+                    Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
                         Text(
-                            text = it,
-                            style = ArtistStyle,
-                            color = TallyColors.textSecondary,
+                            text = stringResource(R.string.tally_music_now_playing).tallyUppercase(),
+                            style = TallyType.label,
+                            color = TallyColors.accent,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 6.dp),
                         )
-                    }
-                    current?.albumTitle?.takeIf { it.isNotBlank() }?.let {
                         Text(
-                            text = it,
-                            style = AlbumStyle,
-                            color = TallyColors.textSecondary,
-                            maxLines = 1,
+                            text = current?.title ?: stringResource(R.string.tally_music_nothing_playing),
+                            style = TitleStyle,
+                            color = if (current != null) TallyColors.text else TallyColors.muted,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 2.dp),
+                            modifier = Modifier.padding(top = 8.dp),
                         )
-                    }
-                    TallySeekBar(
-                        player = player,
-                        controllerViewState = viewModel.controllerViewState,
-                        chapters = emptyList(),
-                        seekEnabled = false,
-                        seekBack = Duration.ZERO,
-                        seekForward = Duration.ZERO,
-                        onSeekProgress = {},
-                        interactionSource = remember { MutableInteractionSource() },
-                        trickplayInfo = null,
-                        trickplayUrlFor = { null },
-                        modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
-                    )
-                    NowPlayingControls(
-                        player = player,
-                        lyricsOn = lyricsOn,
-                        queueShown = panel == NowPlayingPanel.QUEUE,
-                        playFocus = playFocus,
-                        down = panelFocus,
-                        onInteraction = viewModel::reportInteraction,
-                        onLyrics = {
-                            when {
-                                // Lyrics on, the queue opened over them: back to the lyrics.
-                                lyricsOn && queueRequested && current?.hasLyrics == true -> {
-                                    queueRequested = false
+                        current?.artistNames?.takeIf { it.isNotBlank() }?.let {
+                            Text(
+                                text = it,
+                                style = ArtistStyle,
+                                color = TallyColors.textSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 6.dp),
+                            )
+                        }
+                        current?.albumTitle?.takeIf { it.isNotBlank() }?.let {
+                            Text(
+                                text = it,
+                                style = AlbumStyle,
+                                color = TallyColors.textSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 2.dp),
+                            )
+                        }
+                        TallySeekBar(
+                            player = player,
+                            controllerViewState = viewModel.controllerViewState,
+                            chapters = emptyList(),
+                            seekEnabled = false,
+                            seekBack = Duration.ZERO,
+                            seekForward = Duration.ZERO,
+                            onSeekProgress = {},
+                            interactionSource = remember { MutableInteractionSource() },
+                            trickplayInfo = null,
+                            trickplayUrlFor = { null },
+                            modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+                        )
+                        NowPlayingControls(
+                            player = player,
+                            lyricsOn = lyricsOn,
+                            queueShown = panel == NowPlayingPanel.QUEUE,
+                            playFocus = playFocus,
+                            down = panelFocus,
+                            onInteraction = viewModel::reportInteraction,
+                            onLyrics = onLyrics,
+                            onQueue = {
+                                queueRequested = true
+                                queueFocusRequests++
+                            },
+                            onStop = { viewModel.stop() },
+                            modifier = Modifier.padding(top = 12.dp).focusRequester(controlsFocus),
+                        )
+                        Box(
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .fillMaxWidth()
+                                    .padding(top = 12.dp)
+                                    .onFocusChanged { panelHasFocus = it.hasFocus },
+                        ) {
+                            when (panel) {
+                                NowPlayingPanel.LYRICS -> {
+                                    Column(modifier = Modifier.fillMaxSize()) {
+                                        RowHeader(title = stringResource(R.string.tally_music_lyrics))
+                                        TallyLyrics(
+                                            lyrics = state.lyrics,
+                                            currentIndex = state.currentLyricIndex,
+                                            onSeek = { line ->
+                                                line.start
+                                                    ?.ticks
+                                                    ?.inWholeMilliseconds
+                                                    ?.let { player.seekTo(it) }
+                                            },
+                                            entryFocus = panelFocus,
+                                            up = playFocus,
+                                            // The lines' focus frames stand off the text: the text itself lines up
+                                            // with the heading.
+                                            modifier = Modifier.fillMaxSize().padding(top = 8.dp).bleedHorizontal(LyricInset),
+                                        )
+                                    }
                                 }
 
-                                lyricsOn -> {
-                                    viewModel.updatePreferences(preferences.updateMusicPreferences { showLyrics = false })
-                                }
-
-                                else -> {
-                                    queueRequested = false
-                                    viewModel.updatePreferences(preferences.updateMusicPreferences { showLyrics = true })
-                                }
-                            }
-                        },
-                        onQueue = {
-                            queueRequested = true
-                            queueFocusRequests++
-                        },
-                        onStop = { viewModel.stop() },
-                        modifier = Modifier.padding(top = 12.dp).focusRequester(controlsFocus),
-                    )
-                    Box(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .padding(top = 12.dp)
-                                .onFocusChanged { panelHasFocus = it.hasFocus },
-                    ) {
-                        when (panel) {
-                            NowPlayingPanel.LYRICS -> {
-                                Column(modifier = Modifier.fillMaxSize()) {
-                                    RowHeader(title = stringResource(R.string.tally_music_lyrics))
-                                    TallyLyrics(
-                                        lyrics = state.lyrics,
-                                        currentIndex = state.currentLyricIndex,
-                                        onSeek = { line ->
-                                            line.start
-                                                ?.ticks
-                                                ?.inWholeMilliseconds
-                                                ?.let { player.seekTo(it) }
-                                        },
+                                NowPlayingPanel.QUEUE -> {
+                                    QueuePanel(
+                                        player = player,
+                                        queueVersion = state.musicServiceState.queueVersion,
+                                        queueSize = state.musicServiceState.queueSize,
+                                        currentIndex = state.musicServiceState.currentIndex,
+                                        currentId = current?.id,
                                         entryFocus = panelFocus,
                                         up = playFocus,
-                                        // The lines' focus frames stand off the text: the text itself lines up
-                                        // with the heading.
-                                        modifier = Modifier.fillMaxSize().padding(top = 8.dp).bleedHorizontal(LyricInset),
+                                        onClickSong = { index -> viewModel.play(index) },
+                                        onMenu = onQueueMenu,
+                                        onMove = { index, direction -> viewModel.moveQueue(index, direction) },
                                     )
                                 }
-                            }
-
-                            NowPlayingPanel.QUEUE -> {
-                                QueuePanel(
-                                    player = player,
-                                    queueVersion = state.musicServiceState.queueVersion,
-                                    queueSize = state.musicServiceState.queueSize,
-                                    currentIndex = state.musicServiceState.currentIndex,
-                                    currentId = current?.id,
-                                    entryFocus = panelFocus,
-                                    up = playFocus,
-                                    onClickSong = { index -> viewModel.play(index) },
-                                    onMenu = { index, song ->
-                                        dialogs.contextMenu =
-                                            ContextMenu.ForQueue(
-                                                fromLongClick = true,
-                                                item = song,
-                                                index = index,
-                                                actions = queueActions,
-                                            )
-                                    },
-                                    onMove = { index, direction -> viewModel.moveQueue(index, direction) },
-                                )
                             }
                         }
                     }
                 }
-            }
-            if (state.musicServiceState.loadingState is LoadingState.Loading) {
-                LoadingMark(Modifier.fillMaxSize().background(TallyColors.ground.copy(alpha = 0.7f)))
+                if (state.musicServiceState.loadingState is LoadingState.Loading) {
+                    LoadingMark(Modifier.fillMaxSize().background(TallyColors.ground.copy(alpha = 0.7f)))
+                }
             }
         }
     }

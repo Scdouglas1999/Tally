@@ -77,9 +77,16 @@ import com.github.damontecres.wholphin.ui.theme.LocalTheme
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import com.github.damontecres.wholphin.util.LoadingState
 import io.github.scdouglas1999.tally.media.kit.TallyButton
+import io.github.scdouglas1999.tally.media.kit.tallyClickable
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.setup.phone.PhoneCredentials
+import io.github.scdouglas1999.tally.ui.setup.phone.PhoneField
+import io.github.scdouglas1999.tally.ui.setup.phone.PhoneQuickConnect
+import io.github.scdouglas1999.tally.ui.setup.phone.PhoneSetupFrame
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -188,6 +195,10 @@ internal fun TallySetupFrame(
     subtitle: String? = null,
     content: @Composable BoxScope.() -> Unit,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneSetupFrame(kicker = kicker, kickerLamp = kickerLamp, subtitle = subtitle, modifier = modifier, content = content)
+        return
+    }
     TallySurface(modifier) {
         content()
         Column(
@@ -286,7 +297,7 @@ internal fun SetupTile(
                     pressedBorder = Border(BorderStroke(TallyDimens.focusBorder, TallyColors.accent), shape = RectangleShape),
                 ),
             glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
-            modifier = tileModifier.size(SetupTileSize),
+            modifier = tileModifier.size(SetupTileSize).tallyClickable(onClick = onClick, onLongClick = onLongClick),
         ) {
             // A fixed-size tv Surface lays its content out top-left: fill it and center.
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center, content = face)
@@ -367,6 +378,19 @@ internal fun TallyField(
     imeAction: ImeAction = ImeAction.Done,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneField(
+            value = value,
+            onValueChange = onValueChange,
+            placeholder = placeholder,
+            modifier = modifier,
+            password = password,
+            keyboardType = keyboardType,
+            imeAction = imeAction,
+            keyboardActions = keyboardActions,
+        )
+        return
+    }
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     val focusManager = LocalFocusManager.current
@@ -520,6 +544,7 @@ internal fun TallyQuickConnect(
     onUsePassword: () -> Unit,
     modifier: Modifier = Modifier,
     trouble: @Composable () -> Unit = {},
+    lamp: LampState = LampState.Sputtering,
 ) {
     DisposableEffect(Unit) {
         TallyQuickConnectHold.shown = true
@@ -531,6 +556,16 @@ internal fun TallyQuickConnect(
     val approved = status?.authenticated == true
     LaunchedEffect(approved) {
         TallyQuickConnectHold.approvedAt = if (approved) SystemClock.uptimeMillis() else 0L
+    }
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // Under the phone's sign-in form (the user picker puts it there); its errors show with the form's.
+        PhoneQuickConnect(
+            serverName = serverName,
+            code = status?.code,
+            lamp = lamp,
+            showWaiting = switchUserState !is LoadingState.Error,
+        )
+        return
     }
     Column(
         modifier = modifier.width(SetupFormWidth + 80.dp),
@@ -612,6 +647,17 @@ internal fun TallyCredentials(
     var password by remember { mutableStateOf("") }
     val passwordFocus = remember { FocusRequester() }
     val startOnPassword = remember { initialUsername.isNotBlank() }
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneCredentials(
+            serverName = serverName,
+            initialUsername = initialUsername,
+            switchUserState = switchUserState,
+            onPasswordChanged = onPasswordChanged,
+            onSubmit = onSubmit,
+            below = trouble,
+        )
+        return
+    }
     LaunchedEffect(password) { onPasswordChanged() }
     val submit = { if (username.isNotBlank()) onSubmit(username, password) }
     Column(

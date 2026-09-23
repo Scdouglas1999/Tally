@@ -54,6 +54,11 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.preferences.AppSliderPreference
 import com.github.damontecres.wholphin.ui.handleDPadKeyEvents
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneSettingsRow
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneSliderRow
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneValueText
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
+import io.github.scdouglas1999.tally.ui.theme.PhoneType
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -211,6 +216,22 @@ internal fun PreferenceRowContent(
     extra: (@Composable ColumnScope.() -> Unit)? = null,
     trailing: @Composable RowScope.() -> Unit,
 ) {
+    if (isPhone()) {
+        PhoneSettingsRow(
+            title = title,
+            summary = summary,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            interactionSource = interactionSource,
+            modifier = modifier,
+            enabled = enabled,
+            moving = moving,
+            leading = leading,
+            extra = extra,
+            trailing = trailing,
+        )
+        return
+    }
     val arrival = rowFocusModifier(title)
     Box(modifier.padding(vertical = ROW_GAP)) {
         Surface(
@@ -326,6 +347,10 @@ private fun ValueText(
     text: String,
     modifier: Modifier = Modifier,
 ) {
+    if (isPhone()) {
+        PhoneValueText(text)
+        return
+    }
     Text(
         text = text,
         style = prefValueStyle,
@@ -338,7 +363,7 @@ private fun ValueText(
 
 @Composable
 private fun Chevron(text: String = CHEVRON) {
-    Text(text = text, style = prefValueStyle, color = TallyColors.muted, maxLines = 1)
+    Text(text = text, style = if (isPhone()) PhoneType.body else prefValueStyle, color = TallyColors.muted, maxLines = 1)
 }
 
 /** The square switch: a 36x18 track (rule off, accent on) with a 14dp square thumb, and ON/OFF before it. */
@@ -555,6 +580,23 @@ fun TallySliderPreference(
     fun step(forward: Boolean) {
         current = sliderStep(current, preference.min, preference.max, preference.interval, forward)
         onChange(current)
+    }
+    if (isPhone()) {
+        PhoneSliderRow(
+            title = title,
+            valueText = summary ?: current.toString(),
+            value = current,
+            min = preference.min,
+            max = preference.max,
+            interval = preference.interval,
+            onChange = {
+                current = it
+                onChange(it)
+            },
+            modifier = modifier,
+            extra = additionalSummary,
+        )
+        return
     }
     TallyScale {
         Box(Modifier.padding(vertical = ROW_GAP)) {

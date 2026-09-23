@@ -68,6 +68,17 @@ import timber.log.Timber
  */
 @Composable
 fun UserProfilePreferencesPage(modifier: Modifier = Modifier) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.phone
+            .isPhone()
+    ) {
+        UserProfilePreferencesContent(
+            io.github.scdouglas1999.tally.ui.settings.phone
+                .phoneFullPage(modifier),
+        )
+        return
+    }
+    // TALLY: end
     Box(
         modifier = modifier.background(MaterialTheme.colorScheme.background),
     ) {

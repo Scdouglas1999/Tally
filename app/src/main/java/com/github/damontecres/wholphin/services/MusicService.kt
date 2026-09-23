@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
 import android.content.Context
@@ -134,6 +137,12 @@ class MusicService
                                 }
                             }.also { player.addListener(it) }
                         websocketJob = subscribe()
+                        // TALLY: begin
+                        mediaSession?.let {
+                            io.github.scdouglas1999.tally.playback.TallyMusicPlayback
+                                .onSessionStarted(context, it)
+                        }
+                        // TALLY: end
                     }
                 }
             }
@@ -152,6 +161,10 @@ class MusicService
                 if (mediaSession == null) {
                     Timber.w("Stopping but no MediaSession")
                 }
+                // TALLY: begin
+                io.github.scdouglas1999.tally.playback.TallyMusicPlayback
+                    .onSessionStopping(mediaSession)
+                // TALLY: end
                 mediaSession?.release()
                 mediaSession = null
                 onMain {

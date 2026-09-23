@@ -28,6 +28,9 @@ import io.github.scdouglas1999.tally.media.series.TallySeasonRundown
 import io.github.scdouglas1999.tally.media.series.TallySeriesPage
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.phone.phoneStatusBarPadding
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneLicensePage
+import io.github.scdouglas1999.tally.ui.settings.phone.phoneFullPage
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.CollectionType
 
@@ -198,6 +201,25 @@ object TallyRoutes {
             }
 
             // TALLY phone-browse: end
+
+            // phone-system: begin (leftover destinations with a phone layout; a TV keeps upstream's)
+            Destination.License -> {
+                if (phone) PhoneLicensePage(modifier)
+                phone
+            }
+
+            // Upstream's diagnostics as they are, below the status bar and above the gesture bar.
+            Destination.Debug -> {
+                if (phone) {
+                    com.github.damontecres.wholphin.ui.detail.DebugPage(
+                        preferences = preferences,
+                        modifier = phoneFullPage(modifier).phoneStatusBarPadding(),
+                    )
+                }
+                phone
+            }
+
+            // phone-system: end
 
             else -> {
                 false

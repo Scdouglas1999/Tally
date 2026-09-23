@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -34,6 +35,8 @@ import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.nav.DestinationContent
 import com.github.damontecres.wholphin.ui.nav.NavDrawerViewModel
 import com.github.damontecres.wholphin.ui.preferences.PreferenceScreenOption
+import io.github.scdouglas1999.tally.media.music.phone.PhoneMiniPlayer
+import io.github.scdouglas1999.tally.media.music.phone.phoneMiniPlayerSpace
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
@@ -87,9 +90,16 @@ fun PhoneShell(
     val showBar = !WindowInsets.isImeVisible
     val navigationBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val keyboard = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+    // While music plays, the mini player sits on the bar: pages end above it too.
+    val miniPlayer = phoneMiniPlayerSpace()
     val contentPadding =
         PaddingValues(
-            bottom = if (showBar) PhoneDimens.bottomBarHeight + navigationBar else max(keyboard, navigationBar),
+            bottom =
+                if (showBar) {
+                    PhoneDimens.bottomBarHeight + navigationBar + miniPlayer
+                } else {
+                    max(keyboard, navigationBar)
+                },
         )
 
     Box(modifier = modifier) {
@@ -102,6 +112,12 @@ fun PhoneShell(
             )
         }
         if (showBar) {
+            PhoneMiniPlayer(
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = PhoneDimens.bottomBarHeight + navigationBar),
+            )
             PhoneBottomBar(
                 nav = nav,
                 current = current,

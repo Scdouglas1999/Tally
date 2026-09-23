@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Phone layouts: sign-in, settings, music, menus -->
+    <string name="tally_phone_system_or_quick_connect">Or use Quick Connect</string>
+    <string name="tally_phone_system_show_password">Show password</string>
+    <string name="tally_phone_system_hide_password">Hide password</string>
+    <string name="tally_phone_system_address_hint" translatable="false">https://</string>
+    <string name="tally_phone_system_later">Later</string>
+</resources>
