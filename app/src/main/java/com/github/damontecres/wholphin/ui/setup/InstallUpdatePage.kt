@@ -169,6 +169,15 @@ fun InstallUpdatePage(
     modifier: Modifier = Modifier,
     viewModel: UpdateViewModel = hiltViewModel(),
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.setup
+            .tallySetupActive()
+    ) {
+        io.github.scdouglas1999.tally.ui.setup
+            .TallyUpdatePage(viewModel, modifier)
+        return
+    }
+    // TALLY: end
     OneTimeLaunchedEffect { viewModel.init() }
 
     val state by viewModel.state.collectAsState()

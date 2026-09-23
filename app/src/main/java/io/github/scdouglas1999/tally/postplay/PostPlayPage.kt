@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,7 +39,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -55,13 +55,14 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
-import com.github.damontecres.wholphin.ui.formatDuration
 import com.github.damontecres.wholphin.ui.logCoilError
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.media.kit.TallyButton
+import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.ui.components.LabelBar
 import io.github.scdouglas1999.tally.ui.components.RowHeader
-import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -69,12 +70,9 @@ import io.github.scdouglas1999.tally.ui.theme.TallyType
 import kotlinx.coroutines.delay
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.ImageType
-import org.jellyfin.sdk.model.extensions.ticks
 import timber.log.Timber
-import kotlin.time.Duration
 
 private val ColumnMaxWidth = 520.dp
-private val ActionWidth = 280.dp
 private val LogoMaxWidth = 360.dp
 private val LogoMaxHeight = 96.dp
 private val PosterWidth = 132.dp
@@ -161,11 +159,8 @@ fun PostPlayPage(
                     )
                 }
                 Spacer(Modifier.height(20.dp))
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.width(ActionWidth),
-                ) {
-                    TallyRow(
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    TallyButton(
                         label = stringResource(R.string.tally_postplay_watch_again),
                         onClick = viewModel::watchAgain,
                         primary = true,
@@ -174,25 +169,25 @@ fun PostPlayPage(
                                 .focusRequester(watchAgainFocus)
                                 .focusProperties {
                                     up = FocusRequester.Cancel
-                                    down = doneFocus
+                                    down = if (hasPosters) firstPosterFocus else FocusRequester.Cancel
                                     left = FocusRequester.Cancel
-                                    right = FocusRequester.Cancel
+                                    right = doneFocus
                                     start = FocusRequester.Cancel
-                                    end = FocusRequester.Cancel
+                                    end = doneFocus
                                 },
                     )
-                    TallyRow(
+                    TallyButton(
                         label = stringResource(R.string.tally_postplay_done),
                         onClick = viewModel::done,
                         modifier =
                             Modifier
                                 .focusRequester(doneFocus)
                                 .focusProperties {
-                                    up = watchAgainFocus
+                                    up = FocusRequester.Cancel
                                     down = if (hasPosters) firstPosterFocus else FocusRequester.Cancel
-                                    left = FocusRequester.Cancel
+                                    left = watchAgainFocus
                                     right = FocusRequester.Cancel
-                                    start = FocusRequester.Cancel
+                                    start = watchAgainFocus
                                     end = FocusRequester.Cancel
                                 },
                     )
@@ -320,19 +315,16 @@ private fun LogoOrTitle(film: BaseItemDto) {
 }
 
 @Composable
-private fun metaLine(film: BaseItemDto): String {
-    val resources = LocalResources.current
-    return remember(film.id, resources) {
+private fun metaLine(film: BaseItemDto): String =
+    remember(film.id) {
         buildList {
             film.productionYear?.let { add(it.toString()) }
             film.officialRating?.takeIf { it.isNotBlank() }?.let(::add)
             film.runTimeTicks
-                ?.ticks
-                ?.takeIf { it > Duration.ZERO }
-                ?.let { add(resources.formatDuration(it)) }
-        }.joinToString(" · ")
+                ?.takeIf { it > 0L }
+                ?.let { add(formatRuntime(it)) }
+        }.joinToString(" · ").tallyUppercase()
     }
-}
 
 @Composable
 private fun SimilarRow(

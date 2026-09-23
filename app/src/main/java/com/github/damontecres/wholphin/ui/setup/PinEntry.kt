@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.setup
 
 import androidx.annotation.StringRes
@@ -114,6 +117,15 @@ fun PinEntryCreate(
     onConfirm: ((String) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.setup
+            .tallySetupActive()
+    ) {
+        io.github.scdouglas1999.tally.ui.setup
+            .TallyPinEntryCreate(title, onTextChange, onConfirm, modifier)
+        return
+    }
+    // TALLY: end
     var input by remember { mutableStateOf("") }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -231,6 +243,15 @@ fun PinEntryDialog(
     onTextChange: (String) -> Unit,
     onClickServerAuth: () -> Unit,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.setup
+            .tallySetupActive()
+    ) {
+        io.github.scdouglas1999.tally.ui.setup
+            .TallyPinDialog(onDismissRequest, onTextChange, onClickServerAuth)
+        return
+    }
+    // TALLY: end
     BasicDialog(
         onDismissRequest = onDismissRequest,
     ) {

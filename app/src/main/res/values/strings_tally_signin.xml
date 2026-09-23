@@ -1,0 +1,64 @@
+<resources>
+    <!-- Tally setup screens: server and user pickers, sign-in, PIN, the update page. Never add these to strings.xml. -->
+
+    <!-- Step kickers under the TALLY wordmark (shown uppercase). -->
+    <string name="tally_signin_kicker_server">Select server</string>
+    <string name="tally_signin_kicker_add_server">Add server</string>
+    <string name="tally_signin_kicker_user">Select user</string>
+    <string name="tally_signin_kicker_sign_in">Sign in</string>
+    <string name="tally_signin_kicker_quick_connect">Quick Connect</string>
+    <string name="tally_signin_kicker_pin">Enter PIN</string>
+    <string name="tally_signin_kicker_update">Update</string>
+
+    <!-- Tiles and buttons. -->
+    <string name="tally_signin_add_server">Add Server</string>
+    <string name="tally_signin_add_user">Add User</string>
+    <string name="tally_signin_current_user">Signed in</string>
+    <string name="tally_signin_switch_server">Switch server</string>
+    <string name="tally_signin_found_on_network">Found on your network</string>
+    <string name="tally_signin_searching">Searching…</string>
+    <string name="tally_signin_enter_address">Enter address</string>
+
+    <!-- Address entry. -->
+    <string name="tally_signin_address_help">Type your server\'s IP address or URL.</string>
+    <string name="tally_signin_address_placeholder">Server IP or URL</string>
+    <string name="tally_signin_connect">Connect</string>
+    <string name="tally_signin_connecting">Connecting…</string>
+
+    <!-- Quick Connect. %1$s = the server's name. -->
+    <string name="tally_signin_quick_connect_waiting">Waiting for Quick Connect code…</string>
+    <string name="tally_signin_quick_connect_help">Use Quick Connect on your device to authenticate to %1$s</string>
+    <string name="tally_signin_use_password">Use username/password</string>
+
+    <!-- Username and password. %1$s = the server's name. -->
+    <string name="tally_signin_credentials_help">Enter your username and password to sign in to %1$s.</string>
+    <string name="tally_signin_username">Username</string>
+    <string name="tally_signin_password">Password</string>
+    <string name="tally_signin_sign_in">Sign in</string>
+    <string name="tally_signin_trouble">Trouble signing in?</string>
+    <string name="tally_signin_debug_info">Show debug info</string>
+    <!-- Under an error message: its underlying cause. -->
+    <string name="tally_signin_cause">Cause: %1$s</string>
+
+    <!-- PIN. -->
+    <string name="tally_signin_pin_digits" translatable="false">0–9</string>
+    <string name="tally_signin_pin_server">Sign in with the server</string>
+    <string name="tally_signin_pin_removes">This removes the PIN</string>
+    <string name="tally_signin_pin_confirm">Press OK to confirm</string>
+
+    <!-- Update page. %1$s = the new version (v1.0.8-130); %1$s / %2$s below = installed and new. -->
+    <string name="tally_signin_update_available">Tally %1$s is available</string>
+    <string name="tally_signin_update_versions">%1$s → %2$s</string>
+    <string name="tally_signin_update_download"><![CDATA[Download & update]]></string>
+    <string name="tally_signin_update_checking">Checking for updates…</string>
+    <string name="tally_signin_update_failed">Could not update</string>
+    <string name="tally_signin_update_none">No release found. Check the update URL.</string>
+    <string name="tally_signin_update_downloading">Downloading…</string>
+    <!-- %1$s = "DOWNLOADING…" (tally_signin_update_downloading, uppercased), %2$s = downloaded so far, %3$s = total (e.g. 12.3 MiB / 45.6 MiB). -->
+    <string name="tally_signin_update_progress">%1$s %2$s / %3$s</string>
+    <string name="tally_signin_cancel">Cancel</string>
+    <string name="tally_signin_back">Back</string>
+
+    <!-- Episode page: opens the season's rundown with this episode focused. -->
+    <string name="tally_signin_episodes">Episodes</string>
+</resources>
