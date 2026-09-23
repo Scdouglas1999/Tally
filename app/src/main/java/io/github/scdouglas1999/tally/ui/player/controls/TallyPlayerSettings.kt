@@ -76,7 +76,7 @@ private val PanelWidth = 360.dp
 /** Upstream's subtitle delay steps (`SubtitleDelay`), smallest last. */
 private val DelaySteps = listOf(1.seconds, 250.milliseconds, 50.milliseconds)
 
-/** One row of the panel. [onClick] null means the row is shown but cannot be chosen (upstream greys it). */
+/** One row of the panel. [onClick] null means the row is shown but cannot be chosen (upstream grays it). */
 private data class PanelRow(
     val key: Any,
     val label: String,
@@ -324,7 +324,7 @@ private fun Panel(
                             Modifier
                                 .focusRequester(requesters[index])
                                 .focusProperties {
-                                    // Like upstream's greyed entries, a row that cannot be chosen is skipped.
+                                    // Like upstream's grayed entries, a row that cannot be chosen is skipped.
                                     canFocus = row.onClick != null
                                     left = FocusRequester.Cancel
                                     right = FocusRequester.Cancel

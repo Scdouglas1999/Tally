@@ -40,7 +40,7 @@ object TallyQuality {
      *    flag out of the transcoding URL even when the request disallowed it.
      *  - `MaxHeight`: Jellyfin also caps the output bitrate at ten times the source's reported video bitrate, which
      *    for a live channel is 18 bits/s, so a bitrate cap alone left live video at full resolution (measured:
-     *    1080p at ~4.9 Mbps for "480P · 2"). The height is what reliably lowers it, and it makes every rung's label
+     *    1080p at ~4.9 Mbps for "480p · 2"). The height is what reliably lowers it, and it makes every rung's label
      *    true (a 1 Mbps cap alone gave 480p where the label says 360p).
      */
     fun transcodingUrl(url: String): String {
