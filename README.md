@@ -77,8 +77,9 @@ the next one.
 ```
 
 Maintainer notes (how the fork is kept close to Wholphin, releases and signing) are in
-[`tally/README.md`](tally/README.md) and the engineering rules in [`TALLY.md`](TALLY.md). Inside the code
-the fork's working name, *Tally*, is still used for package and file names.
+[`tally/README.md`](tally/README.md) and the engineering rules in [`TALLY.md`](TALLY.md). Tally's own code is
+in `app/src/main/java/io/github/scdouglas1999/tally/`; everything under `com/github/damontecres/wholphin/` is
+Wholphin's.
 
 ## Credits
 

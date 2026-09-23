@@ -2,8 +2,11 @@
 
 Tally is a fork of [Wholphin](https://github.com/damontecres/Wholphin) (GPL-2.0). The user-facing description is
 the [root README](../README.md); the licensing record is [NOTICE.md](../NOTICE.md). This file is for whoever builds,
-releases and rebases the fork. Inside the code the fork still uses its working name, *Tally*: the package
-`io/github/scdouglas1999/tally/`, `strings_tally*.xml`, the `TALLY` theme and the `TALLY: begin/end` markers.
+releases and rebases the fork. Tally's code is the package `io.github.scdouglas1999.tally`
+(`app/src/main/java/io/github/scdouglas1999/tally/`), with `strings_tally*.xml`, the `TALLY` theme and the
+`TALLY: begin/end` markers in Wholphin's files. A few names keep the earlier working name, JellyTV, because
+changing them would break installed apps or servers: the application id `io.github.scoduglas1999.jellytv`, stored
+preference keys, the plugin's `/JellyTV/` web paths and the `JellyTV.apk` release asset.
 
 ## Keeping close to Wholphin
 
