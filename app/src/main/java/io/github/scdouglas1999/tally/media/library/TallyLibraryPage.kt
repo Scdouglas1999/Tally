@@ -1,5 +1,6 @@
 package io.github.scdouglas1999.tally.media.library
 
+import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -249,6 +250,12 @@ internal data class FolderSpec(
     val click: ClickKind,
     val jumpBar: Boolean,
     val collectionType: CollectionType?,
+    /** Play all / shuffle, when the library plays in its own way (music: the music queue). Null: [playAll]. */
+    val onPlayAll: ((shuffle: Boolean) -> Unit)? = null,
+    /** The play key on a card, when the library plays in its own way. Null: the player. */
+    val onPlayItem: ((Int, BaseItem) -> Unit)? = null,
+    /** Plural resource for the count (`2 ALBUMS`). Null: the noun from the item types. */
+    @param:PluralsRes val countNoun: Int? = null,
 )
 
 /** The grid tabs of Movies and TV Shows, as `CollectionFolderMovie` / `CollectionFolderTv` set them up. */
@@ -378,7 +385,7 @@ private fun singleSpec(
 
 /** Upstream's `CollectionFolderViewModel` for [spec], created exactly as `CollectionFolderView` creates it. */
 @Composable
-private fun folderViewModel(spec: FolderSpec): CollectionFolderViewModel =
+internal fun folderViewModel(spec: FolderSpec): CollectionFolderViewModel =
     hiltViewModel<CollectionFolderViewModel, CollectionFolderViewModel.Factory>(key = spec.viewModelKey) {
         it.create(
             itemId = spec.itemId,
@@ -414,7 +421,7 @@ internal class FolderUi(
 }
 
 @Composable
-private fun rememberFolderUi(key: String): FolderUi {
+internal fun rememberFolderUi(key: String): FolderUi {
     val clickedRandom = rememberSaveable(key) { mutableStateOf(false) }
     return remember(key) { FolderUi(clickedRandom) }
 }
@@ -590,7 +597,7 @@ internal val GridEndPadding = BodyEndPadding + JumpBarWidth + 16.dp - FocusEdge
  * [controls] at the right end, a hairline under it all. [body] fills the rest.
  */
 @Composable
-private fun LibraryScaffold(
+internal fun LibraryScaffold(
     kicker: String,
     tabs: List<String>,
     selectedTab: Int,
@@ -811,7 +818,7 @@ private fun countText(
     count: Int,
 ): String {
     val res =
-        when (libraryNoun(filter.includeItemTypes ?: spec.initialFilter.filter.includeItemTypes, spec.collectionType)) {
+        spec.countNoun ?: when (libraryNoun(filter.includeItemTypes ?: spec.initialFilter.filter.includeItemTypes, spec.collectionType)) {
             LibraryNoun.FILMS -> R.plurals.tally_library_films
             LibraryNoun.SHOWS -> R.plurals.tally_library_shows
             LibraryNoun.COLLECTIONS -> R.plurals.tally_library_collections
@@ -824,7 +831,7 @@ private fun countText(
 
 /** A folder's count (`22 FILMS`), once its items are in. */
 @Composable
-private fun FolderCount(
+internal fun FolderCount(
     spec: FolderSpec,
     viewModel: CollectionFolderViewModel,
 ) {
@@ -838,7 +845,7 @@ private fun FolderCount(
  * on), VIEW, then random, and play / shuffle where upstream has them.
  */
 @Composable
-private fun FolderControls(
+internal fun FolderControls(
     spec: FolderSpec,
     viewModel: CollectionFolderViewModel,
     ui: FolderUi,
@@ -889,13 +896,13 @@ private fun FolderControls(
         LibraryIconButton(
             glyph = stringResource(R.string.fa_play),
             label = stringResource(R.string.tally_library_play),
-            onClick = { playAll(spec, state, viewModel, shuffle = false) },
+            onClick = { spec.onPlayAll?.invoke(false) ?: playAll(spec, state, viewModel, shuffle = false) },
             enabled = notEmpty,
         )
         LibraryIconButton(
             glyph = stringResource(R.string.fa_shuffle),
             label = stringResource(R.string.tally_library_shuffle),
-            onClick = { playAll(spec, state, viewModel, shuffle = true) },
+            onClick = { spec.onPlayAll?.invoke(true) ?: playAll(spec, state, viewModel, shuffle = true) },
             enabled = notEmpty,
             captionAtEnd = true,
         )
@@ -935,7 +942,7 @@ private fun playAll(
 
 /** The sort, filter and view dialogs, and the item dialogs (context menu and what it opens). */
 @Composable
-private fun FolderDialogs(
+internal fun FolderDialogs(
     spec: FolderSpec,
     preferences: UserPreferences,
     viewModel: CollectionFolderViewModel,
@@ -987,7 +994,7 @@ private fun FolderDialogs(
 
 /** A folder's content: loading, error, empty, or the grid (or upstream's list for the list layouts). */
 @Composable
-private fun FolderBody(
+internal fun FolderBody(
     spec: FolderSpec,
     preferences: UserPreferences,
     viewModel: CollectionFolderViewModel,
@@ -1157,7 +1164,7 @@ private fun FolderItems(
                     )
             }
         }
-    val onClickPlay: (Int, BaseItem) -> Unit =
+    val playInPlayer: (Int, BaseItem) -> Unit =
         remember(spec) {
             { index, item ->
                 val destination =
@@ -1176,6 +1183,7 @@ private fun FolderItems(
                 viewModel.navigateTo(destination)
             }
         }
+    val onClickPlay: (Int, BaseItem) -> Unit = spec.onPlayItem ?: playInPlayer
 
     if (items.isEmpty()) {
         val filtered = state.filter.countFilters(spec.filterOptions) > 0

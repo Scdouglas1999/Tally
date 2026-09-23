@@ -13,6 +13,11 @@ import io.github.scdouglas1999.tally.media.favorites.TallyFavoritesPage
 import io.github.scdouglas1999.tally.media.home.TallyHomePage
 import io.github.scdouglas1999.tally.media.library.TallyLibraryPage
 import io.github.scdouglas1999.tally.media.movie.TallyMoviePage
+import io.github.scdouglas1999.tally.media.music.TallyAlbumPage
+import io.github.scdouglas1999.tally.media.music.TallyArtistPage
+import io.github.scdouglas1999.tally.media.music.TallyMusicLibrary
+import io.github.scdouglas1999.tally.media.music.TallyNowPlaying
+import io.github.scdouglas1999.tally.media.music.TallySongPage
 import io.github.scdouglas1999.tally.media.person.TallyPersonPage
 import io.github.scdouglas1999.tally.media.playlist.TallyPlaylistPage
 import io.github.scdouglas1999.tally.media.playlist.TallyPlaylistsPage
@@ -70,6 +75,13 @@ object TallyRoutes {
                                 true
                             }
 
+                            // A music library (upstream's CollectionFolderMusic, for both folder kinds).
+                            destination.collectionType == CollectionType.MUSIC -> {
+                                LaunchedEffect(Unit) { onClearBackdrop() }
+                                TallyMusicLibrary(destination, preferences, modifier)
+                                true
+                            }
+
                             destination.type == BaseItemKind.COLLECTION_FOLDER &&
                                 destination.collectionType in LIBRARY_TYPES -> {
                                 LaunchedEffect(Unit) { onClearBackdrop.invoke() }
@@ -77,7 +89,7 @@ object TallyRoutes {
                                 true
                             }
 
-                            // Music, live TV, photos, books... stay upstream's for now.
+                            // Live TV, photos, books... stay upstream's for now.
                             else -> {
                                 false
                             }
@@ -102,6 +114,24 @@ object TallyRoutes {
                         true
                     }
 
+                    BaseItemKind.MUSIC_ALBUM -> {
+                        LaunchedEffect(Unit) { onClearBackdrop() }
+                        TallyAlbumPage(preferences, destination, modifier)
+                        true
+                    }
+
+                    BaseItemKind.MUSIC_ARTIST -> {
+                        LaunchedEffect(Unit) { onClearBackdrop() }
+                        TallyArtistPage(preferences, destination, modifier)
+                        true
+                    }
+
+                    BaseItemKind.AUDIO -> {
+                        LaunchedEffect(Unit) { onClearBackdrop() }
+                        TallySongPage(preferences, destination, modifier)
+                        true
+                    }
+
                     else -> {
                         false
                     }
@@ -121,6 +151,11 @@ object TallyRoutes {
             Destination.Favorites -> {
                 LaunchedEffect(Unit) { onClearBackdrop() }
                 TallyFavoritesPage(preferences = preferences, modifier = modifier)
+                true
+            }
+
+            Destination.NowPlaying -> {
+                TallyNowPlaying(modifier)
                 true
             }
 

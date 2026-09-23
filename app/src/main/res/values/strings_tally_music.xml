@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Library -->
+    <string name="tally_music_tab_recommended">Recommended</string>
+    <string name="tally_music_tab_albums">Albums</string>
+    <string name="tally_music_tab_artists">Artists</string>
+    <string name="tally_music_tab_genres">Genres</string>
+    <string name="tally_music_tab_songs">Songs</string>
+    <string name="tally_music_library">Music</string>
+
+    <!-- Album, artist and song pages -->
+    <string name="tally_music_album">Album</string>
+    <string name="tally_music_artist">Artist</string>
+    <string name="tally_music_song">Song</string>
+    <string name="tally_music_tracks">Tracks</string>
+    <string name="tally_music_disc">Disc %1$d</string>
+    <string name="tally_music_play">Play</string>
+    <string name="tally_music_shuffle">Shuffle</string>
+    <string name="tally_music_instant_mix">Instant mix</string>
+    <string name="tally_music_favorite">Favorite</string>
+    <string name="tally_music_favorited">Favorited</string>
+    <string name="tally_music_more">More</string>
+    <string name="tally_music_albums_row">Albums</string>
+    <string name="tally_music_appears_on">Appears on</string>
+    <string name="tally_music_top_songs">Top songs</string>
+    <string name="tally_music_music_videos">Music videos</string>
+    <string name="tally_music_extras">Extras</string>
+    <string name="tally_music_more_like_this">More like this</string>
+    <plurals name="tally_music_track_count">
+        <item quantity="one">%1$d track</item>
+        <item quantity="other">%1$d tracks</item>
+    </plurals>
+    <plurals name="tally_music_album_count">
+        <item quantity="one">%1$d album</item>
+        <item quantity="other">%1$d albums</item>
+    </plurals>
+    <plurals name="tally_music_song_count">
+        <item quantity="one">%1$d song</item>
+        <item quantity="other">%1$d songs</item>
+    </plurals>
+    <plurals name="tally_music_artist_count">
+        <item quantity="one">%1$d artist</item>
+        <item quantity="other">%1$d artists</item>
+    </plurals>
+
+    <!-- Now playing -->
+    <string name="tally_music_now_playing">Now playing</string>
+    <string name="tally_music_previous">Previous</string>
+    <string name="tally_music_next">Next</string>
+    <string name="tally_music_pause">Pause</string>
+    <string name="tally_music_repeat">Repeat</string>
+    <string name="tally_music_repeat_one">One</string>
+    <string name="tally_music_repeat_all">All</string>
+    <string name="tally_music_shuffle_on">On</string>
+    <string name="tally_music_lyrics">Lyrics</string>
+    <string name="tally_music_queue">Queue</string>
+    <string name="tally_music_stop">Stop</string>
+    <string name="tally_music_queue_empty">The queue is empty</string>
+    <string name="tally_music_nothing_playing">Nothing is playing</string>
+
+    <string name="tally_music_glyph_lyrics" translatable="false">&#xf10d;</string>
+    <string name="tally_music_glyph_stop" translatable="false">&#xf04d;</string>
+</resources>
