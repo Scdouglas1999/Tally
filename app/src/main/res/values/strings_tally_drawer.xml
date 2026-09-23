@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tally_drawer_wordmark" translatable="false">TALLY</string>
+    <string name="tally_drawer_libraries">Libraries</string>
+    <!-- Plain magnifying glass. fa_strings.xml only has the plus/minus variants, which Discover already uses. -->
+    <string name="tally_drawer_fa_search" translatable="false">&#xf002;</string>
+    <string name="tally_drawer_fa_trophy" translatable="false">&#xf091;</string>
+    <!-- Gear. fa_strings.xml has no gear; fa_sliders is the filter control elsewhere in the app. -->
+    <string name="tally_drawer_fa_settings" translatable="false">&#xf013;</string>
+</resources>

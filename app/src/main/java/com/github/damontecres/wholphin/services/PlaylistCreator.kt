@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
@@ -308,11 +308,11 @@ class PlaylistCreator
                                         PlaylistItem.Media(BaseItem(it, false))
                                     }.let(::addAll)
                             }
-                            // JELLYTV: begin
-                            com.github.damontecres.wholphin.jellytv.playback.CollectionNext
+                            // TALLY: begin
+                            io.github.scdouglas1999.tally.playback.CollectionNext
                                 .nextFor(api, item)
                                 ?.let { add(PlaylistItem.Media(BaseItem(it, false))) }
-                            // JELLYTV: end
+                            // TALLY: end
                         }
                     PlaylistCreationResult.Success(Playlist(list))
                 }

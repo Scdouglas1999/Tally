@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
@@ -40,19 +40,19 @@ class ServerEventListener
         @param:ActivityContext private val context: Context,
         private val api: ApiClient,
         private val serverRepository: ServerRepository,
-        // JELLYTV: begin
-        private val jellyTvPlayRouter: com.github.damontecres.wholphin.jellytv.JellyTvPlayRouter,
-        private val jellyTvRemoteCommands: com.github.damontecres.wholphin.jellytv.remote.JellyTvRemoteCommands,
-        // JELLYTV: end
+        // TALLY: begin
+        private val tallyPlayRouter: io.github.scdouglas1999.tally.TallyPlayRouter,
+        private val tallyRemoteCommands: io.github.scdouglas1999.tally.remote.TallyRemoteCommands,
+        // TALLY: end
     ) : DefaultLifecycleObserver {
         private val activity = (context as AppCompatActivity)
 
         private var listenJob: Job? = null
 
-        // JELLYTV: begin
+        // TALLY: begin
         private var playJob: Job? = null
         private var remoteJob: Job? = null
-        // JELLYTV: end
+        // TALLY: end
 
         init {
             activity.lifecycle.addObserver(this)
@@ -77,10 +77,10 @@ class ServerEventListener
                             listOf(
                                 GeneralCommandType.DISPLAY_MESSAGE,
                                 GeneralCommandType.SEND_STRING,
-                                // JELLYTV: begin
-                                *com.github.damontecres.wholphin.jellytv.remote.JellyTvRemoteCommands.SUPPORTED
+                                // TALLY: begin
+                                *io.github.scdouglas1999.tally.remote.TallyRemoteCommands.SUPPORTED
                                     .toTypedArray(),
-                                // JELLYTV: end
+                                // TALLY: end
                             ),
                         supportsMediaControl = true,
                     )
@@ -93,10 +93,10 @@ class ServerEventListener
             serverRepository.currentUser
             Timber.v("Subscribing to WebSocket")
             listenJob?.cancel()
-            // JELLYTV: begin
+            // TALLY: begin
             playJob?.cancel()
             remoteJob?.cancel()
-            // JELLYTV: end
+            // TALLY: end
             listenJob =
                 api.webSocket
                     .subscribe<GeneralCommandMessage>()
@@ -118,13 +118,13 @@ class ServerEventListener
                     }.catch { ex ->
                         Timber.e(ex, "Error in websocket subscription")
                     }.launchIn(activity.lifecycleScope)
-            // JELLYTV: begin
+            // TALLY: begin
             playJob?.cancel()
-            playJob = jellyTvPlayRouter.listen(api, activity.lifecycleScope)
+            playJob = tallyPlayRouter.listen(api, activity.lifecycleScope)
             remoteJob?.cancel()
-            remoteJob = jellyTvRemoteCommands.listen(api, activity)
-            jellyTvRemoteCommands.keepSocketOpen(api, activity)
-            // JELLYTV: end
+            remoteJob = tallyRemoteCommands.listen(api, activity)
+            tallyRemoteCommands.keepSocketOpen(api, activity)
+            // TALLY: end
         }
 
         override fun onResume(owner: LifecycleOwner) {
@@ -134,18 +134,18 @@ class ServerEventListener
         override fun onPause(owner: LifecycleOwner) {
             Timber.v("Cancelling WebSocket")
             listenJob?.cancel()
-            // JELLYTV: begin
+            // TALLY: begin
             playJob?.cancel()
             remoteJob?.cancel()
-            // JELLYTV: end
+            // TALLY: end
         }
 
         override fun onStop(owner: LifecycleOwner) {
             Timber.v("Cancelling WebSocket")
             listenJob?.cancel()
-            // JELLYTV: begin
+            // TALLY: begin
             playJob?.cancel()
             remoteJob?.cancel()
-            // JELLYTV: end
+            // TALLY: end
         }
     }

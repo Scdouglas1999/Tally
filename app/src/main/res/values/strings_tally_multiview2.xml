@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Quoted so the double spaces after OK and HOLD survive resource compilation. -->
+    <string name="tally_mv_hint_focus">"OK  Focus tile · HOLD  More"</string>
+    <string name="tally_mv_hint_equal">"OK  Equal tiles · HOLD  More"</string>
+</resources>

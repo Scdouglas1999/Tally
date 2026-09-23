@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="jtv_corner_muted">Muted</string>
-    <string name="jtv_corner_buffering">Buffering…</string>
-    <string name="jtv_corner_unavailable">Stream unavailable</string>
-    <string name="jtv_corner_no_decoder">This device can’t decode another stream</string>
-</resources>

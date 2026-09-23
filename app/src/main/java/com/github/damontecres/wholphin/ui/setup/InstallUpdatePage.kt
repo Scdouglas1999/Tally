@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.setup
 
@@ -316,12 +316,12 @@ fun InstallUpdatePageContent(
             TextButton(
                 stringRes = R.string.download_and_update,
                 onClick = onInstallRelease,
-                // JELLYTV: begin
+                // TALLY: begin
                 // The page is opened for people who did not ask for it: OK must mean "update".
                 modifier =
-                    com.github.damontecres.wholphin.jellytv.ui
+                    io.github.scdouglas1999.tally.ui
                         .initialFocusModifier("jellytv-update"),
-                // JELLYTV: end
+                // TALLY: end
             )
             TextButton(
                 stringRes = R.string.cancel,

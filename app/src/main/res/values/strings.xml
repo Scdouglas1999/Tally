@@ -1,8 +1,8 @@
 <resources>
-    <!-- JELLYTV: begin -->
+    <!-- TALLY: begin -->
     <string name="app_name" translatable="false">Tally</string>
     <string name="app_name_long" translatable="false">Tally</string>
-    <!-- JELLYTV: end -->
+    <!-- TALLY: end -->
 
     <string name="about">About</string>
     <string name="active_recordings">Active Recordings</string>

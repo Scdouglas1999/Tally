@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.setup
 
@@ -87,14 +87,14 @@ class SwitchServerViewModel
                 allServers.forEach { server ->
                     internalTestServer(server.server)
                 }
-                // JELLYTV: begin
-                // First launch of an APK handed out by a JellyTV server: it carries that server's address.
+                // TALLY: begin
+                // First launch of an APK handed out by a Tally server: it carries that server's address.
                 if (allServers.isEmpty()) {
-                    com.github.damontecres.wholphin.jellytv.JellyTvStampedServer
+                    io.github.scdouglas1999.tally.TallyStampedServer
                         .read(context)
                         ?.let { addServer(it, showToast = false) }
                 }
-                // JELLYTV: end
+                // TALLY: end
             }
         }
 

@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.cards
 
@@ -52,9 +52,9 @@ fun WatchedIconBackground(): Color =
         AppThemeColors.BROWN,
         -> MaterialTheme.colorScheme.border.copy(alpha = 1f)
 
-        // JELLYTV: begin
-        AppThemeColors.JELLYTV,
-        // JELLYTV: end
+        // TALLY: begin
+        AppThemeColors.TALLY,
+        // TALLY: end
         AppThemeColors.OLED_BLACK -> MaterialTheme.colorScheme.secondaryContainer
     }
 
@@ -68,9 +68,9 @@ fun WatchedIconColor(): Color =
         AppThemeColors.ORANGE,
         AppThemeColors.BOLD_BLUE,
         AppThemeColors.OLED_BLACK,
-        // JELLYTV: begin
-        AppThemeColors.JELLYTV,
-        // JELLYTV: end
+        // TALLY: begin
+        AppThemeColors.TALLY,
+        // TALLY: end
         AppThemeColors.RED,
         AppThemeColors.BROWN,
         -> Color.White // MaterialTheme.colorScheme.onSurface

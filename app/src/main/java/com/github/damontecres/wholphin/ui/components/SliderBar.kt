@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.components
 
@@ -163,9 +163,9 @@ fun sliderActiveColor(focused: Boolean): Color {
             }
         }
 
-        // JELLYTV: begin
-        AppThemeColors.JELLYTV,
-        // JELLYTV: end
+        // TALLY: begin
+        AppThemeColors.TALLY,
+        // TALLY: end
         AppThemeColors.OLED_BLACK -> {
             if (focused) {
                 MaterialTheme.colorScheme.primaryContainer
@@ -202,9 +202,9 @@ fun sliderInactiveColor(focused: Boolean): Color {
             MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .66f)
         }
 
-        // JELLYTV: begin
-        AppThemeColors.JELLYTV,
-        // JELLYTV: end
+        // TALLY: begin
+        AppThemeColors.TALLY,
+        // TALLY: end
         AppThemeColors.OLED_BLACK -> {
             if (focused) {
                 MaterialTheme.colorScheme.tertiaryContainer

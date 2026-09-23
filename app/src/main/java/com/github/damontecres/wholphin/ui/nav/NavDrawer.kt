@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.nav
 
@@ -141,25 +141,25 @@ class NavDrawerViewModel
                     )
                 }
 
-                // JELLYTV: begin
-                NavDrawerItem.JellyTv -> {
+                // TALLY: begin
+                NavDrawerItem.Sports -> {
                     setIndex(index)
                     navigationManager.navigateToFromDrawer(
-                        Destination.JellyTv,
+                        Destination.Sports,
                     )
                 }
 
-                NavDrawerItem.JellyTvSurprise -> {
+                NavDrawerItem.TallySurprise -> {
                     setIndex(index)
-                    navigationManager.navigateToFromDrawer(Destination.JellyTvSurprise)
+                    navigationManager.navigateToFromDrawer(Destination.TallySurprise)
                 }
 
-                NavDrawerItem.JellyTvYear -> {
+                NavDrawerItem.TallyYear -> {
                     setIndex(index)
-                    navigationManager.navigateToFromDrawer(Destination.JellyTvYear())
+                    navigationManager.navigateToFromDrawer(Destination.TallyYear())
                 }
 
-                // JELLYTV: end
+                // TALLY: end
 
                 is ServerNavDrawerItem -> {
                     setIndex(index)
@@ -195,12 +195,12 @@ class NavDrawerViewModel
 
                             is NavDrawerItem.Discover -> Destination.Discover
 
-                            // JELLYTV: begin
-                            is NavDrawerItem.JellyTv -> Destination.JellyTv
+                            // TALLY: begin
+                            is NavDrawerItem.Sports -> Destination.Sports
 
-                            is NavDrawerItem.JellyTvSurprise -> Destination.JellyTvSurprise
+                            is NavDrawerItem.TallySurprise -> Destination.TallySurprise
 
-                            // JELLYTV: end
+                            // TALLY: end
                             else -> null
                         }
                     }
@@ -276,34 +276,34 @@ sealed interface NavDrawerItem {
         override fun name(context: Context): String = context.getString(R.string.discover)
     }
 
-    // JELLYTV: begin
-    object JellyTv : NavDrawerItem {
+    // TALLY: begin
+    object Sports : NavDrawerItem {
         override val id: String
             get() = "a_jellytv"
 
-        override fun name(context: Context): String = context.getString(R.string.jtv_section_name)
+        override fun name(context: Context): String = context.getString(R.string.tally_section_name)
     }
 
-    object JellyTvSurprise : NavDrawerItem {
+    object TallySurprise : NavDrawerItem {
         override val id: String
             get() = "a_jellytv_surprise"
 
-        override fun name(context: Context): String = context.getString(R.string.jtv_surprise_name)
+        override fun name(context: Context): String = context.getString(R.string.tally_surprise_name)
     }
 
-    object JellyTvYear : NavDrawerItem {
+    object TallyYear : NavDrawerItem {
         override val id: String
             get() = "a_jellytv_year"
 
         override fun name(context: Context): String =
             context.getString(
-                R.string.jtv_year_name,
+                R.string.tally_year_name,
                 java.time.Year
                     .now()
                     .value,
             )
     }
-    // JELLYTV: end
+    // TALLY: end
 }
 
 /**
@@ -735,20 +735,20 @@ fun NavigationDrawerScope.NavItem(
                     R.string.fa_magnifying_glass_plus
                 }
 
-                // JELLYTV: begin
-                NavDrawerItem.JellyTv -> {
+                // TALLY: begin
+                NavDrawerItem.Sports -> {
                     R.string.fa_tv
                 }
 
-                NavDrawerItem.JellyTvSurprise -> {
+                NavDrawerItem.TallySurprise -> {
                     R.string.fa_dice
                 }
 
-                NavDrawerItem.JellyTvYear -> {
-                    R.string.jtv_fa_calendar
+                NavDrawerItem.TallyYear -> {
+                    R.string.tally_fa_calendar
                 }
 
-                // JELLYTV: end
+                // TALLY: end
 
                 is ServerNavDrawerItem -> {
                     when (library.type) {
@@ -856,10 +856,10 @@ fun navItemColor(
                     AppThemeColors.OLED_BLACK,
                     -> MaterialTheme.colorScheme.primary
 
-                    // JELLYTV: begin
+                    // TALLY: begin
                     // the selected pill is the accent itself, so the icon takes the pill's text color
-                    AppThemeColors.JELLYTV -> MaterialTheme.colorScheme.inverseOnSurface
-                    // JELLYTV: end
+                    AppThemeColors.TALLY -> MaterialTheme.colorScheme.inverseOnSurface
+                    // TALLY: end
                 }
             }
 

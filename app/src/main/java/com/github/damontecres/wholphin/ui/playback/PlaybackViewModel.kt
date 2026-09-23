@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.playback
 
@@ -201,19 +201,19 @@ class PlaybackViewModel
         val initJob: Job
 
         init {
-            // JELLYTV: begin
-            com.github.damontecres.wholphin.jellytv.remote.JellyTvRemoteBus.bindPlayer(
+            // TALLY: begin
+            io.github.scdouglas1999.tally.remote.TallyRemoteBus.bindPlayer(
                 scope = viewModelScope,
                 onAudio = ::changeAudioStream,
                 onSubtitle = { changeSubtitleStream(it) },
             )
             viewModelScope.launch {
                 state.collect {
-                    com.github.damontecres.wholphin.jellytv.quality.JellyTvQuality
+                    io.github.scdouglas1999.tally.quality.TallyQuality
                         .publish(it.currentPlayback)
                 }
             }
-            com.github.damontecres.wholphin.jellytv.quality.JellyTvQuality.bindPlayer(viewModelScope) { original ->
+            io.github.scdouglas1999.tally.quality.TallyQuality.bindPlayer(viewModelScope) { original ->
                 val playback = state.value.currentPlayback ?: return@bindPlayer
                 val positionMs = withContext(WholphinDispatchers.Main) { player.currentPosition }
                 changeStreams(
@@ -226,7 +226,7 @@ class PlaybackViewModel
                     enableDirectStream = original && !forceTranscoding,
                 )
             }
-            // JELLYTV: end
+            // TALLY: end
             initJob =
                 viewModelScope.launchIO {
                     addCloseable {
@@ -491,9 +491,9 @@ class PlaybackViewModel
                 }
                 this@PlaybackViewModel.currentItem = playlistItem
                 this@PlaybackViewModel.itemId = item.id
-                // JELLYTV: begin
-                com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.nowPlayingItemId = item.id
-                // JELLYTV: end
+                // TALLY: begin
+                io.github.scdouglas1999.tally.ui.player.TallyPlayerMenu.nowPlayingItemId = item.id
+                // TALLY: end
 
                 val isLiveTv = item.type == BaseItemKind.TV_CHANNEL
                 val base = item.data
@@ -677,12 +677,12 @@ class PlaybackViewModel
                 )
 
                 val maxBitrate =
-                    // JELLYTV: begin
+                    // TALLY: begin
                     // in-player quality choice first, then upstream's preference
-                    com.github.damontecres.wholphin.jellytv.quality.JellyTvQuality
+                    io.github.scdouglas1999.tally.quality.TallyQuality
                         .maxBitrateOverride()
                         ?.toLong()
-                        // JELLYTV: end
+                        // TALLY: end
                         ?: preferences.appPreferences.playbackPreferences.maxBitrate
                             .takeIf { it > 0 } ?: AppPreference.DEFAULT_BITRATE
                 val response by
@@ -739,9 +739,9 @@ class PlaybackViewModel
                             source.transcodingUrl?.let(api::createUrl)
                         } else {
                             source.transcodingUrl
-                                // JELLYTV: begin
-                                ?.let(com.github.damontecres.wholphin.jellytv.quality.JellyTvQuality::transcodingUrl)
-                                // JELLYTV: end
+                                // TALLY: begin
+                                ?.let(io.github.scdouglas1999.tally.quality.TallyQuality::transcodingUrl)
+                                // TALLY: end
                                 ?.let(api::createUrl)
                         }
                     if (mediaUrl.isNullOrBlank()) {
@@ -1140,14 +1140,14 @@ class PlaybackViewModel
 
                         null -> {
                             Timber.v("No next up")
-                            // JELLYTV: begin
-                            com.github.damontecres.wholphin.jellytv.postplay.JellyTvPostPlay
-                                .destinationFor(currentItem)
+                            // TALLY: begin
+                            io.github.scdouglas1999.tally.postplay.TallyPostPlay
+                                .destinationFor(currentItem, preferences.appPreferences)
                                 ?.let {
                                     navigationManager.replace(it)
                                     return@launchDefault
                                 }
-                            // JELLYTV: end
+                            // TALLY: end
                             navigationManager.goBack()
                         }
                     }
@@ -1421,13 +1421,13 @@ class PlaybackViewModel
 
         override fun onPlayerError(error: PlaybackException) {
             Timber.e(error, "Playback error")
-            // JELLYTV: begin
-            if (com.github.damontecres.wholphin.jellytv.JellyTvLivePlayback
+            // TALLY: begin
+            if (io.github.scdouglas1999.tally.TallyLivePlayback
                     .recover(player, error)
             ) {
                 return
             }
-            // JELLYTV: end
+            // TALLY: end
             viewModelScope.launch(WholphinDispatchers.Main + ExceptionHandler()) {
                 state.value.currentPlayback?.let {
                     when (it.playMethod) {

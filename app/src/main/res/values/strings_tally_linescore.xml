@@ -1,0 +1,10 @@
+<resources>
+    <!-- Line score and the in-player box score. Names are prefixed jtv_; never add these to strings.xml. -->
+
+    <!-- Column header for the running total. -->
+    <string name="tally_line_total">T</string>
+    <!-- A period that has not been played yet. -->
+    <string name="tally_line_unplayed">\u2013</string>
+    <!-- Box-score title. %1$s is the away team, %2$s the home team. -->
+    <string name="tally_box_matchup">%1$s at %2$s</string>
+</resources>

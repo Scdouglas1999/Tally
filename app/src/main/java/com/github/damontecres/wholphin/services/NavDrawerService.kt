@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
@@ -54,9 +54,9 @@ class NavDrawerService
         private val serverPreferencesDao: ServerPreferencesDao,
         private val seerrServerRepository: SeerrServerRepository,
         private val musicService: MusicService,
-        // JELLYTV: begin
-        private val jellyTvAvailability: com.github.damontecres.wholphin.jellytv.JellyTvAvailability,
-        // JELLYTV: end
+        // TALLY: begin
+        private val tallyAvailability: io.github.scdouglas1999.tally.TallyAvailability,
+        // TALLY: end
     ) {
         private val _state = MutableStateFlow(NavDrawerItemState())
         val state: StateFlow<NavDrawerItemState> = _state
@@ -199,11 +199,11 @@ class NavDrawerService
         ) {
             val builtins =
                 buildList {
-                    // JELLYTV: begin
-                    if (jellyTvAvailability.check()) add(NavDrawerItem.JellyTv)
-                    add(NavDrawerItem.JellyTvSurprise)
-                    add(NavDrawerItem.JellyTvYear)
-                    // JELLYTV: end
+                    // TALLY: begin
+                    if (tallyAvailability.check()) add(NavDrawerItem.Sports)
+                    add(NavDrawerItem.TallySurprise)
+                    add(NavDrawerItem.TallyYear)
+                    // TALLY: end
                     add(NavDrawerItem.Favorites)
                     if (discoverActive) add(NavDrawerItem.Discover)
                 }

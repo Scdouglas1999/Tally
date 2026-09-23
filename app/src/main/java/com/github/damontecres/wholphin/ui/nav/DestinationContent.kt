@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.nav
 
@@ -11,10 +11,6 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.data.filter.DefaultForGenresFilterOptions
 import com.github.damontecres.wholphin.data.filter.DefaultForStudiosFilterOptions
 import com.github.damontecres.wholphin.data.model.SeerrItemType
-import com.github.damontecres.wholphin.jellytv.ui.JellyTvMultiviewPage
-import com.github.damontecres.wholphin.jellytv.ui.JellyTvPage
-import com.github.damontecres.wholphin.jellytv.ui.JellyTvPlaybackPage
-import com.github.damontecres.wholphin.jellytv.ui.JellyTvSettingsPage
 import com.github.damontecres.wholphin.preferences.PlayerBackend
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.components.ItemGrid
@@ -58,6 +54,10 @@ import com.github.damontecres.wholphin.ui.preferences.user.UserProfilePreference
 import com.github.damontecres.wholphin.ui.search.SearchPage
 import com.github.damontecres.wholphin.ui.setup.InstallUpdatePage
 import com.github.damontecres.wholphin.ui.slideshow.SlideshowPage
+import io.github.scdouglas1999.tally.ui.TallyMultiviewPage
+import io.github.scdouglas1999.tally.ui.TallyPage
+import io.github.scdouglas1999.tally.ui.TallyPlaybackPage
+import io.github.scdouglas1999.tally.ui.TallySettingsPage
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.CollectionType
 import timber.log.Timber
@@ -75,13 +75,13 @@ fun DestinationContent(
     if (destination.fullScreen) {
         LaunchedEffect(Unit) { onClearBackdrop.invoke() }
     }
-    // JELLYTV: begin
-    if (com.github.damontecres.wholphin.jellytv.media.JellyTvRoutes
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.media.TallyRoutes
             .Content(destination, preferences, onClearBackdrop, modifier)
     ) {
         return
     }
-    // JELLYTV: end
+    // TALLY: end
     when (destination) {
         is Destination.Home -> {
             HomePage(
@@ -443,62 +443,62 @@ fun DestinationContent(
             )
         }
 
-        // JELLYTV: begin
-        Destination.JellyTv -> {
+        // TALLY: begin
+        Destination.Sports -> {
             LaunchedEffect(Unit) { onClearBackdrop.invoke() }
-            JellyTvPage(
+            TallyPage(
                 preferences = preferences,
                 modifier = modifier,
             )
         }
 
-        Destination.JellyTvSettings -> {
+        Destination.SportsSettings -> {
             LaunchedEffect(Unit) { onClearBackdrop.invoke() }
-            JellyTvSettingsPage(
+            TallySettingsPage(
                 preferences = preferences,
                 modifier = modifier,
             )
         }
 
-        Destination.JellyTvMultiview -> {
-            JellyTvMultiviewPage(
+        Destination.TallyMultiview -> {
+            TallyMultiviewPage(
                 preferences = preferences,
                 modifier = modifier,
             )
         }
 
-        is Destination.JellyTvPlayback -> {
-            JellyTvPlaybackPage(
+        is Destination.TallyPlayback -> {
+            TallyPlaybackPage(
                 preferences = preferences,
                 destination = destination,
                 modifier = modifier,
             )
         }
 
-        Destination.JellyTvSurprise -> {
+        Destination.TallySurprise -> {
             LaunchedEffect(Unit) { onClearBackdrop.invoke() }
-            com.github.damontecres.wholphin.jellytv.surprise.SurprisePage(
+            io.github.scdouglas1999.tally.surprise.SurprisePage(
                 preferences = preferences,
                 modifier = modifier,
             )
         }
 
-        is Destination.JellyTvYear -> {
+        is Destination.TallyYear -> {
             LaunchedEffect(Unit) { onClearBackdrop.invoke() }
-            com.github.damontecres.wholphin.jellytv.year.YearPage(
+            io.github.scdouglas1999.tally.year.YearPage(
                 destination = destination,
                 modifier = modifier,
             )
         }
 
-        is Destination.JellyTvPostPlay -> {
+        is Destination.TallyPostPlay -> {
             LaunchedEffect(Unit) { onClearBackdrop.invoke() }
-            com.github.damontecres.wholphin.jellytv.postplay.PostPlayPage(
+            io.github.scdouglas1999.tally.postplay.PostPlayPage(
                 destination = destination,
                 modifier = modifier,
             )
         }
-        // JELLYTV: end
+        // TALLY: end
     }
 }
 

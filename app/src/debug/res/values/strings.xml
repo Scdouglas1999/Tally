@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin, from September 2026. See NOTICE.md. -->
 <resources>
-    <!-- JELLYTV: begin -->
+    <!-- TALLY: begin -->
     <string name="app_name" translatable="false">Tally Debug</string>
-    <!-- JELLYTV: end -->
+    <!-- TALLY: end -->
 </resources>

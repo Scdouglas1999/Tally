@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services.hilt
 
@@ -85,11 +85,11 @@ object AppModule {
         @ApplicationContext context: Context,
     ): ClientInfo =
         ClientInfo(
-            // JELLYTV: begin
+            // TALLY: begin
             name =
-                com.github.damontecres.wholphin.jellytv.JellyTvClientName
+                io.github.scdouglas1999.tally.TallyClientName
                     .get(context, context.getString(R.string.app_name)),
-            // JELLYTV: end
+            // TALLY: end
             version = BuildConfig.VERSION_NAME,
         )
 

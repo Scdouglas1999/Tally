@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.main
 
@@ -325,22 +325,22 @@ fun HomePageContent(
                     rowFocusRequesters.getOrNull(index)?.tryRequestFocus()
                     firstFocused = true
                 } else {
-                    // JELLYTV: begin
-                    com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeFocus
+                    // TALLY: begin
+                    io.github.scdouglas1999.tally.ui.home.TallyHomeFocus
                         .pageOpened()
-                    // JELLYTV: end
+                    // TALLY: end
                     // Waiting for the first home row to load, then focus on it
                     homeRows
                         .indexOfFirstOrNull { it is HomeRowLoadingState.Success && it.items.isNotEmpty() }
                         ?.let {
-                            // JELLYTV: begin
-                            if (com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeFocus
+                            // TALLY: begin
+                            if (io.github.scdouglas1999.tally.ui.home.TallyHomeFocus
                                     .awaitPendingClaim()
                             ) {
                                 firstFocused = true
                                 return@let
                             }
-                            // JELLYTV: end
+                            // TALLY: end
                             rowFocusRequesters[it].tryRequestFocus()
                             firstFocused = true
                             delay(50)
@@ -363,18 +363,18 @@ fun HomePageContent(
                         }
                     }.fillMaxSize(),
         ) {
-            // JELLYTV: begin
+            // TALLY: begin
             // While a game card has focus the header describes the game instead of a library item.
-            val jellyTvGame by com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeHeaderState.focusedGame
-            if (jellyTvGame != null) {
-                com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeHeader(
-                    game = jellyTvGame!!,
-                    hideScores = com.github.damontecres.wholphin.jellytv.ui.home.JellyTvHomeHeaderState.hideScores.value,
+            val tallyGame by io.github.scdouglas1999.tally.ui.home.TallyHomeHeaderState.focusedGame
+            if (tallyGame != null) {
+                io.github.scdouglas1999.tally.ui.home.TallyHomeHeader(
+                    game = tallyGame!!,
+                    hideScores = io.github.scdouglas1999.tally.ui.home.TallyHomeHeaderState.hideScores.value,
                 )
             } else {
                 headerComposable.invoke(focusedItem)
             }
-            // JELLYTV: end
+            // TALLY: end
 
             val density = LocalDensity.current
             val spaceAbovePx =
@@ -399,21 +399,21 @@ fun HomePageContent(
                         Modifier
                             .focusRestorer(),
                 ) {
-                    // JELLYTV: begin
-                    // The JellyTV row scrolls with the others, at the top; it renders nothing without games.
+                    // TALLY: begin
+                    // The Tally row scrolls with the others, at the top; it renders nothing without games.
                     item(key = "jellytv") {
-                        com.github.damontecres.wholphin.jellytv.ui.home
-                            .JellyTvHomeRow(Modifier.animateItem(placementSpec = null))
+                        io.github.scdouglas1999.tally.ui.home
+                            .TallyHomeRow(Modifier.animateItem(placementSpec = null))
                     }
                     item(key = "household") {
-                        com.github.damontecres.wholphin.jellytv.ui.household
+                        io.github.scdouglas1999.tally.ui.household
                             .HouseholdRow(Modifier.animateItem(placementSpec = null))
                     }
                     item(key = "together") {
-                        com.github.damontecres.wholphin.jellytv.together.ui
+                        io.github.scdouglas1999.tally.together.ui
                             .TogetherRow(Modifier.animateItem(placementSpec = null))
                     }
-                    // JELLYTV: end
+                    // TALLY: end
                     itemsIndexed(homeRows) { rowIndex, row ->
                         val rowModifier =
                             Modifier

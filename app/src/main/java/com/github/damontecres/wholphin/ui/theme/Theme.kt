@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.theme
 
@@ -30,9 +30,9 @@ fun getThemeColors(appThemeColors: AppThemeColors): ThemeColors =
         AppThemeColors.BOLD_BLUE -> BoldBlueThemeColors
         AppThemeColors.RED -> RedThemeColors
         AppThemeColors.BROWN -> BrownThemeColors
-        // JELLYTV: begin
-        AppThemeColors.JELLYTV -> com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvThemeColors
-        // JELLYTV: end
+        // TALLY: begin
+        AppThemeColors.TALLY -> io.github.scdouglas1999.tally.ui.theme.material.TallyThemeColors
+        // TALLY: end
         AppThemeColors.UNRECOGNIZED -> PurpleThemeColors
     }
 
@@ -50,32 +50,32 @@ fun WholphinTheme(
             else -> themeColors.lightScheme
         }
     CompositionLocalProvider(LocalTheme provides appThemeColors) {
-        // JELLYTV: begin
-        val jellyTv = appThemeColors == AppThemeColors.JELLYTV
-        // JELLYTV: end
+        // TALLY: begin
+        val tally = appThemeColors == AppThemeColors.TALLY
+        // TALLY: end
         androidx.compose.material3.MaterialTheme(
             colorScheme = if (darkTheme) themeColors.darkSchemeMaterial else themeColors.lightSchemeMaterial,
-            // JELLYTV: begin
-            typography = if (jellyTv) com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvMaterialTypography else androidx.compose.material3.Typography(),
+            // TALLY: begin
+            typography = if (tally) io.github.scdouglas1999.tally.ui.theme.material.TallyMaterialTypography else androidx.compose.material3.Typography(),
             shapes =
-                if (jellyTv) {
-                    com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvMaterialShapes
+                if (tally) {
+                    io.github.scdouglas1999.tally.ui.theme.material.TallyMaterialShapes
                 } else {
                     androidx.compose.material3.Shapes()
                 },
-            // JELLYTV: end
+            // TALLY: end
         ) {
             MaterialTheme(
                 colorScheme = colorScheme,
-                // JELLYTV: begin
-                typography = if (jellyTv) com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvTypography else AppTypography,
+                // TALLY: begin
+                typography = if (tally) io.github.scdouglas1999.tally.ui.theme.material.TallyTypography else AppTypography,
                 shapes =
-                    if (jellyTv) {
-                        com.github.damontecres.wholphin.jellytv.ui.theme.wholphin.JellyTvShapes
+                    if (tally) {
+                        io.github.scdouglas1999.tally.ui.theme.material.TallyShapes
                     } else {
                         androidx.tv.material3.Shapes()
                     },
-                // JELLYTV: end
+                // TALLY: end
                 content = content,
             )
         }

@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.setup
 
@@ -107,16 +107,16 @@ fun SwitchUserContent(
         }
     }
 
-    // JELLYTV: begin
+    // TALLY: begin
     // Nobody has signed in on this TV yet: go straight to the Quick Connect code instead of an empty list.
-    var jellyTvOfferedSignIn by remember { mutableStateOf(false) }
+    var tallyOfferedSignIn by remember { mutableStateOf(false) }
     LaunchedEffect(state.loading, state.users.isEmpty(), state.quickConnectEnabled) {
-        if (!jellyTvOfferedSignIn && state.loading == LoadingState.Success && state.users.isEmpty() && state.quickConnectEnabled) {
-            jellyTvOfferedSignIn = true
+        if (!tallyOfferedSignIn && state.loading == LoadingState.Success && state.users.isEmpty() && state.quickConnectEnabled) {
+            tallyOfferedSignIn = true
             showAddUserDialog(null)
         }
     }
-    // JELLYTV: end
+    // TALLY: end
 
     LaunchedEffect(state.switchUserState) {
         if (!showAddUser) {

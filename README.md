@@ -1,4 +1,4 @@
-<p align="center"><img src="jellytv/readme/header.png" alt="Tally, a Jellyfin client for Android TV" width="100%"/></p>
+<p align="center"><img src="tally/readme/header.png" alt="Tally, a Jellyfin client for Android TV" width="100%"/></p>
 
 # Tally
 
@@ -14,8 +14,8 @@ follows the same idea: a calm, dark control room with one accent color for what 
 > Please report problems with Tally [here](https://github.com/Scdouglas1999/Tally/issues), not to Wholphin.
 
 <p align="center">
-<img src="jellytv/readme/screen-film.jpg" alt="A film's page in Tally" width="49%"/>
-<img src="jellytv/readme/screen-surprise.jpg" alt="Surprise me picking a film" width="49%"/>
+<img src="tally/readme/screen-film.jpg" alt="A film's page in Tally" width="49%"/>
+<img src="tally/readme/screen-surprise.jpg" alt="Surprise me picking a film" width="49%"/>
 </p>
 
 ## What Tally adds
@@ -77,8 +77,8 @@ the next one.
 ```
 
 Maintainer notes (how the fork is kept close to Wholphin, releases and signing) are in
-[`jellytv/README.md`](jellytv/README.md) and the engineering rules in [`JELLYTV.md`](JELLYTV.md). Inside the code
-the fork's working name, *JellyTV*, is still used for package and file names.
+[`tally/README.md`](tally/README.md) and the engineering rules in [`TALLY.md`](TALLY.md). Inside the code
+the fork's working name, *Tally*, is still used for package and file names.
 
 ## Credits
 

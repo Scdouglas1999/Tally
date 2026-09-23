@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.nav
 
@@ -89,11 +89,11 @@ fun ApplicationContent(
                             modifier = Modifier.fillMaxSize(),
                         )
                     } else if (user != null && server != null) {
-                        // JELLYTV: begin
-                        if (com.github.damontecres.wholphin.jellytv.media.drawer
+                        // TALLY: begin
+                        if (io.github.scdouglas1999.tally.media.drawer
                                 .tallyDrawerActive()
                         ) {
-                            com.github.damontecres.wholphin.jellytv.media.drawer.TallyNavDrawer(
+                            io.github.scdouglas1999.tally.media.drawer.TallyNavDrawer(
                                 destination = key,
                                 preferences = preferences,
                                 user = user,
@@ -105,7 +105,7 @@ fun ApplicationContent(
                             )
                             return@NavEntry
                         }
-                        // JELLYTV: end
+                        // TALLY: end
                         NavDrawer(
                             destination = key,
                             preferences = preferences,

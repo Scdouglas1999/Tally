@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.preferences
 
@@ -496,16 +496,16 @@ sealed interface AppPreference<Pref, T> {
         val ThemeColors =
             AppChoicePreference<AppPreferences, AppThemeColors>(
                 title = R.string.app_theme,
-                // JELLYTV: begin
-                defaultValue = AppThemeColors.JELLYTV,
-                // JELLYTV: end
+                // TALLY: begin
+                defaultValue = AppThemeColors.TALLY,
+                // TALLY: end
                 getter = { it.interfacePreferences.appThemeColors },
                 setter = { prefs, value ->
                     prefs.updateInterfacePreferences { appThemeColors = value }
                 },
-                // JELLYTV: begin
-                displayValues = R.array.jtv_app_theme_colors,
-                // JELLYTV: end
+                // TALLY: begin
+                displayValues = R.array.tally_app_theme_colors,
+                // TALLY: end
                 indexToValue = { AppThemeColors.forNumber(it) },
                 valueToIndex = { if (it != AppThemeColors.UNRECOGNIZED) it.number else 0 },
             )
@@ -570,9 +570,9 @@ sealed interface AppPreference<Pref, T> {
         val UpdateUrl =
             AppStringPreference<AppPreferences>(
                 title = R.string.update_url,
-                // JELLYTV: begin
+                // TALLY: begin
                 defaultValue = "https://api.github.com/repos/Scdouglas1999/Tally/releases/latest",
-                // JELLYTV: end
+                // TALLY: end
                 getter = { it.updateUrl },
                 setter = { prefs, value ->
                     prefs.update { updateUrl = value }

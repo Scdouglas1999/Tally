@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin
 
@@ -116,13 +116,13 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var updateChecker: UpdateChecker
 
-    // JELLYTV: begin
+    // TALLY: begin
     @Inject
-    lateinit var jellyTvUpdatePrompt: com.github.damontecres.wholphin.jellytv.JellyTvUpdatePrompt
+    lateinit var tallyUpdatePrompt: io.github.scdouglas1999.tally.TallyUpdatePrompt
 
     @Inject
-    lateinit var jellyTvFirstRun: com.github.damontecres.wholphin.jellytv.JellyTvFirstRun
-    // JELLYTV: end
+    lateinit var tallyFirstRun: io.github.scdouglas1999.tally.TallyFirstRun
+    // TALLY: end
 
     @Inject
     lateinit var playbackLifecycleObserver: PlaybackLifecycleObserver
@@ -349,9 +349,9 @@ class MainActivity : AppCompatActivity() {
         Timber.d("onStart")
 
         lifecycleScope.launchDefault {
-            // JELLYTV: begin
-            jellyTvFirstRun.apply()
-            // JELLYTV: end
+            // TALLY: begin
+            tallyFirstRun.apply()
+            // TALLY: end
             val appPreferences = userPreferencesDataStore.data.first()
             if (UpdateChecker.ACTIVE && appPreferences.autoCheckForUpdates) {
                 try {
@@ -364,13 +364,13 @@ class MainActivity : AppCompatActivity() {
                         "Exception during update check",
                     )
                 }
-                // JELLYTV: begin
+                // TALLY: begin
                 try {
-                    jellyTvUpdatePrompt.maybePrompt(appPreferences.updateUrl)
+                    tallyUpdatePrompt.maybePrompt(appPreferences.updateUrl)
                 } catch (ex: Exception) {
                     Timber.w(ex, "Exception offering the update")
                 }
-                // JELLYTV: end
+                // TALLY: end
             }
         }
     }

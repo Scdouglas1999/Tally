@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 @file:UseSerializers(UUIDSerializer::class)
 
@@ -178,33 +178,33 @@ sealed class Destination(
     @Serializable
     data object Debug : Destination(true)
 
-    // JELLYTV: begin
+    // TALLY: begin
     @Serializable
-    data object JellyTv : Destination()
+    data object Sports : Destination()
 
     @Serializable
-    data object JellyTvSettings : Destination()
+    data object SportsSettings : Destination()
 
     @Serializable
-    data object JellyTvMultiview : Destination(true)
+    data object TallyMultiview : Destination(true)
 
     @Serializable
-    data class JellyTvPlayback(
+    data class TallyPlayback(
         val itemId: UUID,
         val channelId: String,
     ) : Destination(true)
 
     @Serializable
-    data object JellyTvSurprise : Destination()
+    data object TallySurprise : Destination()
 
     @Serializable
-    data class JellyTvYear(
+    data class TallyYear(
         val year: Int? = null,
     ) : Destination(true)
 
     @Serializable
-    data class JellyTvPostPlay(
+    data class TallyPostPlay(
         val itemId: UUID,
     ) : Destination(true)
-    // JELLYTV: end
+    // TALLY: end
 }

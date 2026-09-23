@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.preferences
 
@@ -91,9 +91,9 @@ fun SwitchColors(): SwitchColors {
             )
         }
 
-        // JELLYTV: begin
+        // TALLY: begin
         // A focused row is an amber pill, so the track must not be amber: gray track, amber thumb when on.
-        AppThemeColors.JELLYTV -> {
+        AppThemeColors.TALLY -> {
             SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.primary,
                 checkedTrackColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -103,6 +103,6 @@ fun SwitchColors(): SwitchColors {
                 uncheckedBorderColor = MaterialTheme.colorScheme.border,
             )
         }
-        // JELLYTV: end
+        // TALLY: end
     }
 }

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Your Year recap. Names are prefixed tally_year_; never add these to strings.xml. -->
+    <string name="tally_year_kicker">Your year on %1$s</string>
+    <string name="tally_year_index">%1$d / %2$d</string>
+    <string name="tally_year_minute">Minute</string>
+    <string name="tally_year_minutes">Minutes</string>
+    <string name="tally_year_hour">Hour</string>
+    <string name="tally_year_hours">Hours</string>
+    <string name="tally_year_film">Film</string>
+    <string name="tally_year_films">Films</string>
+    <string name="tally_year_episode">Episode</string>
+    <string name="tally_year_episodes">Episodes</string>
+    <string name="tally_year_shows">Shows</string>
+    <plurals name="tally_year_film_count">
+        <item quantity="one">%d film</item>
+        <item quantity="other">%d films</item>
+    </plurals>
+    <plurals name="tally_year_episode_count">
+        <item quantity="one">%d episode</item>
+        <item quantity="other">%d episodes</item>
+    </plurals>
+    <plurals name="tally_year_across">
+        <item quantity="one">Across %d show</item>
+        <item quantity="other">Across %d shows</item>
+    </plurals>
+    <string name="tally_year_mix">%1$s and %2$s.</string>
+    <string name="tally_year_footnote">Counted from what you last watched and how often. Rewatches count in the year of the latest one.</string>
+    <string name="tally_year_most_watched">Most watched: %1$s</string>
+    <string name="tally_year_rewatch">×%1$d</string>
+    <string name="tally_year_runtime_m">%1$d min</string>
+    <string name="tally_year_runtime_h">%1$dh</string>
+    <string name="tally_year_runtime_hm">%1$dh %2$dm</string>
+    <string name="tally_year_ep">%1$d EP</string>
+    <string name="tally_year_top_genres">Top genres</string>
+    <string name="tally_year_percent">%1$d%%</string>
+    <string name="tally_year_busiest">Your busiest month</string>
+    <string name="tally_year_like">You watch like it\'s</string>
+    <string name="tally_year_half">Half of what you watched came out before %1$d, half after.</string>
+    <string name="tally_year_top_genre">Top genre</string>
+    <string name="tally_year_busiest_label">Busiest month</string>
+    <string name="tally_year_first">First watch</string>
+    <string name="tally_year_latest">Latest watch</string>
+    <string name="tally_year_key_arrows" translatable="false">◀ ▶</string>
+    <string name="tally_year_browse">Browse</string>
+    <string name="tally_year_back">Back</string>
+    <string name="tally_year_close">Close</string>
+    <string name="tally_year_empty_title">Nothing watched yet</string>
+    <string name="tally_year_empty_sub">Your year fills in as you watch.</string>
+    <string name="tally_year_counting">Counting…</string>
+    <string name="tally_year_error_title">Couldn\'t load your year</string>
+    <string name="tally_year_error_generic">Something went wrong.</string>
+    <string-array name="tally_year_months">
+        <item>January</item>
+        <item>February</item>
+        <item>March</item>
+        <item>April</item>
+        <item>May</item>
+        <item>June</item>
+        <item>July</item>
+        <item>August</item>
+        <item>September</item>
+        <item>October</item>
+        <item>November</item>
+        <item>December</item>
+    </string-array>
+    <string-array name="tally_year_month_letters">
+        <item>J</item>
+        <item>F</item>
+        <item>M</item>
+        <item>A</item>
+        <item>M</item>
+        <item>J</item>
+        <item>J</item>
+        <item>A</item>
+        <item>S</item>
+        <item>O</item>
+        <item>N</item>
+        <item>D</item>
+    </string-array>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tally_media_film">Film</string>
+    <string name="tally_media_video">Video</string>
+    <string name="tally_media_play">Play</string>
+    <string name="tally_media_resume">Resume %1$d%%</string>
+    <string name="tally_media_from_start">From the start</string>
+    <string name="tally_media_trailer">Trailer</string>
+    <string name="tally_media_watched">Watched</string>
+    <string name="tally_media_unwatched">Unwatched</string>
+    <string name="tally_media_favorite">Favorite</string>
+    <string name="tally_media_favorited">Favorited</string>
+    <string name="tally_media_version">Version</string>
+    <string name="tally_media_more">More</string>
+    <string name="tally_media_cast">Cast &amp; crew</string>
+    <string name="tally_media_chapters">Chapters</string>
+    <string name="tally_media_extras">Extras</string>
+    <string name="tally_media_more_like_this">More like this</string>
+    <string name="tally_media_loading">Loading…</string>
+    <string name="tally_media_error_title">Couldn\'t load this</string>
+    <string name="tally_media_error_body">Nothing came back from the server</string>
+    <string name="tally_media_directed_by">Directed by %1$s</string>
+    <string name="tally_media_community">★ %1$s</string>
+    <string name="tally_media_critic">RT %1$d%%</string>
+    <string name="tally_media_seen">Seen</string>
+    <string name="tally_media_new_count">%1$d new</string>
+    <string name="tally_media_season_left">S%1$d · %2$d left</string>
+    <string name="tally_media_chapter">Chapter %1$d · %2$s</string>
+    <plurals name="tally_media_seasons">
+        <item quantity="one">%1$d season</item>
+        <item quantity="other">%1$d seasons</item>
+    </plurals>
+</resources>

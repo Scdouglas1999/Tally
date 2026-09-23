@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Game actions menu and followed-team labels. Names are prefixed tally_actions_; never add these to strings.xml. -->
+    <string name="tally_actions_at">%1$s at %2$s</string>
+    <string name="tally_actions_watch">Watch</string>
+    <string name="tally_actions_multiview">Add to multiview</string>
+    <string name="tally_actions_corner">Watch in the corner</string>
+    <string name="tally_actions_follow">Follow the %1$s</string>
+    <string name="tally_actions_following">Following the %1$s</string>
+    <string name="tally_actions_hide_scores">Hide scores</string>
+    <string name="tally_actions_show_scores">Show scores</string>
+    <string name="tally_actions_following_mark">Following</string>
+    <string name="tally_actions_starting">Starting</string>
+    <string name="tally_actions_in_min">In %1$d min</string>
+    <string name="tally_actions_starts_in">Starts in %1$d min: %2$s at %3$s</string>
+    <string name="tally_actions_just_started">Just started: %1$s at %2$s</string>
+    <string name="tally_actions_more">More</string>
+    <string name="tally_actions_full_screen">Watch full screen</string>
+    <string name="tally_actions_remove_multiview">Remove from multiview</string>
+</resources>

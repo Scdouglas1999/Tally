@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin
 
@@ -145,19 +145,19 @@ fun MainContent(
                     exit = ScreensaverService.exitAnimation,
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    // JELLYTV: begin
-                    if (!com.github.damontecres.wholphin.jellytv.ui.screensaver
-                            .JellyTvScreensaver(Modifier.fillMaxSize())
+                    // TALLY: begin
+                    if (!io.github.scdouglas1999.tally.ui.screensaver
+                            .TallyScreensaver(Modifier.fillMaxSize())
                     ) {
                         AppScreensaver(userPreferences.appPreferences, Modifier.fillMaxSize())
                     }
-                    // JELLYTV: end
+                    // TALLY: end
                 }
             }
-            // JELLYTV: begin
-            com.github.damontecres.wholphin.jellytv.ui
-                .JellyTvGlobalOverlays()
-            // JELLYTV: end
+            // TALLY: begin
+            io.github.scdouglas1999.tally.ui
+                .TallyGlobalOverlays()
+            // TALLY: end
             AnimatedVisibility(
                 visible = screenSaverState.showDim || (screenSaverState.dimEnabled && screenSaverState.show),
                 enter = ScreensaverService.enterAnimation,

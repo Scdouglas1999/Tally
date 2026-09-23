@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 syntax = "proto3";
 
@@ -125,9 +125,9 @@ enum AppThemeColors {
   OLED_BLACK = 5;
   RED = 6;
   BROWN = 7;
-  // JELLYTV: begin
-  JELLYTV = 8;
-  // JELLYTV: end
+  // TALLY: begin
+  TALLY = 8;
+  // TALLY: end
 }
 
 enum EdgeStyle{

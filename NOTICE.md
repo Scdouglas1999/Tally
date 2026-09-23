@@ -18,11 +18,11 @@ The complete source for every Tally release is in this repository. Each release 
 Tally's changes to Wholphin began in September 2026. Every change, with its author and date, is recorded in this
 repository's git history; the fork starts after Wholphin's `v1.0.8` release.
 
-- **New code.** Everything Tally adds lives in its own package, `app/src/main/java/com/github/damontecres/wholphin/jellytv/`,
-  with its tests under `app/src/test/.../jellytv/` and its strings in `app/src/main/res/values/strings_jellytv*.xml`.
+- **New code.** Everything Tally adds lives in its own package, `app/src/main/java/io/github/scdouglas1999/tally/`,
+  with its tests under `app/src/test/java/io/github/scdouglas1999/tally/` and its strings in `app/src/main/res/values/strings_tally*.xml`.
 - **Modified Wholphin files.** Changes to Wholphin's own files are kept small and are marked in place with
-  `JELLYTV: begin` / `JELLYTV: end` comments; each modified source file also carries a notice at its top. The
-  complete list, with what each change does, is the seam table in [`JELLYTV.md`](JELLYTV.md).
+  `TALLY: begin` / `TALLY: end` comments; each modified source file also carries a notice at its top. The
+  complete list, with what each change does, is the seam table in [`TALLY.md`](TALLY.md).
 - **Changed without an in-file notice** (these files cannot carry one, or would lose it):
   - the launcher icons and TV banner (`app/src/main/res/mipmap-*/ic_launcher*`, `ic_banner*`), replaced with
     Tally's own artwork;

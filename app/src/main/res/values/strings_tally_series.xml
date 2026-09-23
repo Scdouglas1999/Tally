@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tally_series_kicker">Series</string>
+    <string name="tally_series_special">Special</string>
+    <string name="tally_series_specials">Specials</string>
+    <string name="tally_series_season_n">Season %1$d</string>
+    <string name="tally_series_next_up_code">Next up · %1$s</string>
+    <string name="tally_series_resume_code">Resume %1$s · %2$d%%</string>
+    <string name="tally_series_seasons">Seasons</string>
+    <string name="tally_series_series">Series</string>
+    <string name="tally_series_season">Season</string>
+    <string name="tally_series_created_by">Created by %1$s</string>
+    <string name="tally_series_left">%1$d left</string>
+    <string name="tally_series_watched_tag">Watched</string>
+    <string name="tally_series_next_up">Next up</string>
+    <string name="tally_series_guest_stars">Guest stars</string>
+    <string name="tally_series_more_from">More from %1$s</string>
+    <string name="tally_series_card_kicker">%1$s · %2$s</string>
+    <string name="tally_series_no_episodes">No episodes</string>
+    <plurals name="tally_series_episodes">
+        <item quantity="one">%1$d episode</item>
+        <item quantity="other">%1$d episodes</item>
+    </plurals>
+</resources>

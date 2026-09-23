@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.playback
 
@@ -64,12 +64,12 @@ enum class PlaybackDialogType {
     VIDEO_SCALE,
     SUBTITLE_DELAY,
 
-    // JELLYTV: begin
-    JELLYTV_SLEEP_TIMER,
-    JELLYTV_SEND_TO,
-    JELLYTV_TOGETHER,
-    JELLYTV_QUALITY,
-    // JELLYTV: end
+    // TALLY: begin
+    TALLY_SLEEP_TIMER,
+    TALLY_SEND_TO,
+    TALLY_TOGETHER,
+    TALLY_QUALITY,
+    // TALLY: end
 }
 
 data class PlaybackSettings(
@@ -179,52 +179,52 @@ fun PlaybackDialog(
                             supporting = null,
                         ),
                     )
-                    // JELLYTV: begin
+                    // TALLY: begin
                     add(
                         BottomDialogItem(
-                            PlaybackDialogType.JELLYTV_SLEEP_TIMER,
-                            stringResource(com.github.damontecres.wholphin.R.string.jtv_sleep_timer),
+                            PlaybackDialogType.TALLY_SLEEP_TIMER,
+                            stringResource(com.github.damontecres.wholphin.R.string.tally_sleep_timer),
                             null,
                         ),
                     )
                     add(
                         BottomDialogItem(
-                            PlaybackDialogType.JELLYTV_SEND_TO,
-                            stringResource(com.github.damontecres.wholphin.R.string.jtv_send_to),
+                            PlaybackDialogType.TALLY_SEND_TO,
+                            stringResource(com.github.damontecres.wholphin.R.string.tally_send_to),
                             null,
                         ),
                     )
                     add(
                         BottomDialogItem(
-                            PlaybackDialogType.JELLYTV_QUALITY,
-                            stringResource(com.github.damontecres.wholphin.R.string.jtv_quality),
+                            PlaybackDialogType.TALLY_QUALITY,
+                            stringResource(com.github.damontecres.wholphin.R.string.tally_quality),
                             null,
                         ),
                     )
                     add(
                         BottomDialogItem(
-                            PlaybackDialogType.JELLYTV_TOGETHER,
-                            stringResource(com.github.damontecres.wholphin.R.string.jtv_together),
+                            PlaybackDialogType.TALLY_TOGETHER,
+                            stringResource(com.github.damontecres.wholphin.R.string.tally_together),
                             null,
                         ),
                     )
-                    // JELLYTV: end
+                    // TALLY: end
                 }
             BottomDialog(
                 choices = options,
                 currentChoice = null,
                 onDismissRequest = onDismissRequest,
                 onSelectChoice = { _, choice ->
-                    // JELLYTV: begin
-                    val jellyTvRequest =
-                        com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu
+                    // TALLY: begin
+                    val tallyRequest =
+                        io.github.scdouglas1999.tally.ui.player.TallyPlayerMenu
                             .requestFor(choice.data)
-                    // JELLYTV: end
-                    if (jellyTvRequest != null) {
-                        // JELLYTV: begin
-                        com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu.request.value = jellyTvRequest
+                    // TALLY: end
+                    if (tallyRequest != null) {
+                        // TALLY: begin
+                        io.github.scdouglas1999.tally.ui.player.TallyPlayerMenu.request.value = tallyRequest
                         onDismissRequest.invoke()
-                        // JELLYTV: end
+                        // TALLY: end
                     } else if (choice.data == PlaybackDialogType.DEBUG) {
                         onPlaybackActionClick.invoke(PlaybackAction.ShowDebug)
                     } else {
@@ -296,16 +296,16 @@ fun PlaybackDialog(
             )
         }
 
-        // JELLYTV: begin
-        PlaybackDialogType.JELLYTV_SLEEP_TIMER,
-        PlaybackDialogType.JELLYTV_SEND_TO,
-        PlaybackDialogType.JELLYTV_TOGETHER,
-        PlaybackDialogType.JELLYTV_QUALITY,
+        // TALLY: begin
+        PlaybackDialogType.TALLY_SLEEP_TIMER,
+        PlaybackDialogType.TALLY_SEND_TO,
+        PlaybackDialogType.TALLY_TOGETHER,
+        PlaybackDialogType.TALLY_QUALITY,
         -> {
-            // handled by JellyTvGlobalOverlays
+            // handled by TallyGlobalOverlays
         }
 
-        // JELLYTV: end
+        // TALLY: end
 
         PlaybackDialogType.SUBTITLE_DELAY -> {
             Dialog(

@@ -1,5 +1,5 @@
 // Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
-// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked JELLYTV: begin/end;
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
 // each change and its date is in the git history. See NOTICE.md.
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.ProductFlavor
@@ -75,19 +75,19 @@ configure<ApplicationExtension> {
     compileSdk = libs.versions.compileSdk.getInt()
 
     defaultConfig {
-        // JELLYTV: begin
+        // TALLY: begin
         applicationId = "io.github.scoduglas1999.jellytv"
-        // JELLYTV: end
+        // TALLY: end
         minSdk = libs.versions.minSdk.getInt()
         targetSdk = libs.versions.targetSdk.getInt()
-        // JELLYTV: begin
+        // TALLY: begin
         // Upstream counts release tags, which never changes between this fork's releases; Play (and a sane
         // update order) needs every release to be higher. tags * 1000 + commits since the upstream tag:
         // 59 tags, v1.0.8-26-g… -> 59026; rebasing onto upstream's next tag jumps to 60xxx.
         versionCode =
             gitTags.trim().lines().size * 1000 +
             (Regex("-(\\d+)-g[0-9a-f]+$").find(gitDescribe.trim())?.groupValues?.get(1)?.toIntOrNull() ?: 0).coerceAtMost(999)
-        // JELLYTV: end
+        // TALLY: end
         versionName = gitDescribe.trim().removePrefix("v").ifBlank { "0.0.0" }
         testInstrumentationRunner = "com.github.damontecres.wholphin.test.WholphinTestRunner"
 
@@ -159,10 +159,10 @@ configure<ApplicationExtension> {
             dimension = "version"
             isDefault = true
             manifestPlaceholders += mapOf(featureLeanback to false)
-            // JELLYTV: begin
+            // TALLY: begin
             // Self-updating stays on: the update URL default points at this fork's releases (AppPreference.UpdateUrl).
             setFeatureFlag(featureUpdate, true)
-            // JELLYTV: end
+            // TALLY: end
             setFeatureFlag(featureDiscover, true)
         }
         create("appstore") {
@@ -236,7 +236,9 @@ androidComponents {
                         .getFilter(FilterConfiguration.FilterType.ABI)
                         .let { if (it != null) "-${it.identifier}" else "" }
                 val outputFileName =
-                    "Wholphin-${variant.flavorName}-${variant.buildType}-${output.versionName.get()}-${output.versionCode.get()}$abi.apk"
+                    // TALLY: begin
+                    "Tally-${variant.flavorName}-${variant.buildType}-${output.versionName.get()}-${output.versionCode.get()}$abi.apk"
+                // TALLY: end
                 output.outputFileName = outputFileName
             }
     }

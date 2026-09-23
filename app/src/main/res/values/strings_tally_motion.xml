@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lower third after Send to another screen; drawn uppercase over the device name. -->
+    <string name="tally_motion_sent">Sent</string>
+    <string name="tally_motion_not_sent">Not sent</string>
+</resources>
