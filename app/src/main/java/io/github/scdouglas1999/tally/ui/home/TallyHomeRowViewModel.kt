@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.serializer.toUUIDOrNull
@@ -117,6 +118,12 @@ class TallyHomeRowViewModel
                 SharingStarted.WhileSubscribed(5_000),
                 TallyHomeRowState(),
             )
+
+        /** Tally channels whose game has not started: the home page keeps them out of "Watch live" (see [withoutPregameChannels]). */
+        val pregameChannels: StateFlow<Set<String>> =
+            repository.board
+                .map { pregameChannelIds(it) }
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptySet())
 
         /** One-shot string resource ids surfaced as toasts. */
         private val _messages = MutableSharedFlow<Int>(extraBufferCapacity = 8)

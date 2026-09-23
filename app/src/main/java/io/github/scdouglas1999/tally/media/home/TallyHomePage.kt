@@ -83,6 +83,8 @@ import io.github.scdouglas1999.tally.ui.home.TallyGameHeader
 import io.github.scdouglas1999.tally.ui.home.TallyHomeFocus
 import io.github.scdouglas1999.tally.ui.home.TallyHomeHeaderState
 import io.github.scdouglas1999.tally.ui.home.TallyHomeRow
+import io.github.scdouglas1999.tally.ui.home.TallyHomeRowViewModel
+import io.github.scdouglas1999.tally.ui.home.withoutPregameChannels
 import io.github.scdouglas1999.tally.ui.household.HouseholdRow
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
@@ -109,6 +111,9 @@ fun TallyHomePage(
         onStopOrDispose { }
     }
     val state by viewModel.state.collectAsState()
+    // "Watch live" waits for games to start (the Tally row above already lists what is coming up)
+    val tallyRow: TallyHomeRowViewModel = hiltViewModel()
+    val pregame by tallyRow.pregameChannels.collectAsState()
     val dialogs = remember { ItemDialogsState() }
     val unscaled = LocalDensity.current
 
@@ -140,7 +145,7 @@ fun TallyHomePage(
                         LoadingState.Success -> {
                             HomeLoaded(
                                 preferences = preferences,
-                                homeRows = state.homeRows,
+                                homeRows = remember(state.homeRows, pregame) { state.homeRows.withoutPregameChannels(pregame) },
                                 rowOptions = state.settings.rows.map { it.config },
                                 refreshing = state.refreshState,
                                 dialogs = dialogs,
