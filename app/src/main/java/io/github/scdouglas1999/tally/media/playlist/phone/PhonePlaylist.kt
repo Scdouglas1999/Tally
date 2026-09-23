@@ -214,7 +214,8 @@ private fun PlaylistHeader(
                 onClick = { onPlayAll(true) },
                 modifier = Modifier.weight(1f),
             )
-            PhoneIconButton(
+            // As tall as the buttons beside it (the album page's MORE).
+            io.github.scdouglas1999.tally.media.music.phone.PhoneIconSquare(
                 glyph = stringResource(R.string.fa_ellipsis),
                 label = stringResource(R.string.tally_media_more),
                 onClick = onMore,

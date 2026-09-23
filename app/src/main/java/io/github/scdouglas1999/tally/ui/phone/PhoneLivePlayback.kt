@@ -9,7 +9,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -209,22 +208,6 @@ fun PhoneLivePlayback(
                             .align(Alignment.TopEnd)
                             .padding(end = OverlayMargin, top = overlayTop),
                 )
-            }
-
-            // Until the shared phone controls draw GAMES and BOX SCORE in their top bar, draw them there ourselves
-            // (left of its subtitles and settings buttons) while the controls show.
-            if (controlsVisible && !topBar.drawnByControls && topBar.actions.isNotEmpty()) {
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier =
-                        Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 8.dp, end = 8.dp + PhoneDimens.touchTarget * 2),
-                ) {
-                    topBar.actions.forEach { action ->
-                        PhoneTopBarAction(glyph = action.glyph, label = action.label, onClick = action.onClick)
-                    }
-                }
             }
         }
 

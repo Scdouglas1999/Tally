@@ -296,12 +296,22 @@ private fun PhoneHomeTopBar(
                             drawer?.updateSelectedIndex()
                         },
             ) {
-                Text(
-                    text = stringResource(R.string.tally_pages_fa_search),
-                    fontFamily = com.github.damontecres.wholphin.ui.FontAwesome,
-                    fontSize = 19.sp,
-                    color = TallyColors.text,
-                )
+                // Over the hero the glyph sits on a square as dark as the user's, so it reads on any picture (a team
+                // logo in the hero's corner is often right under it).
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier =
+                        Modifier
+                            .size(32.dp)
+                            .then(if (solid) Modifier else Modifier.background(TallyColors.groundRaised)),
+                ) {
+                    Text(
+                        text = stringResource(R.string.tally_pages_fa_search),
+                        fontFamily = com.github.damontecres.wholphin.ui.FontAwesome,
+                        fontSize = 19.sp,
+                        color = TallyColors.text,
+                    )
+                }
             }
             if (user != null && server != null) {
                 val name = user.name ?: user.id.toString()

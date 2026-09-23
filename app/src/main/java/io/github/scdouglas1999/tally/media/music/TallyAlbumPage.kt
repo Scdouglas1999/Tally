@@ -230,9 +230,10 @@ private fun AlbumLoaded(
         }
     val arrival = arrivalFocus(arrivalTarget, "tally-album")
     LaunchedEffect(Unit) { viewModel.updateBackDrop() }
-    // As upstream: BACK from further down the list goes back to the first track before it leaves the page.
+    // As upstream: BACK from further down the list goes back to the first track before it leaves the page (a TV
+    // habit: on a phone Back just goes back).
     val backToTop by remember { derivedStateOf { listState.firstVisibleItemIndex > ITEMS_BEFORE_TRACKS } }
-    BackHandler(backToTop) {
+    BackHandler(backToTop && !isPhone()) {
         scope.launch(ExceptionHandler()) {
             listState.animateScrollToItem(ITEMS_BEFORE_TRACKS)
             firstTrackFocus.tryRequestFocus("tally-album-back")

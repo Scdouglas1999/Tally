@@ -2,7 +2,6 @@ package io.github.scdouglas1999.tally.ui.player.phone
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -18,15 +17,10 @@ data class LiveTopBarAction(
 
 /**
  * The live player's buttons for the phone controls' top bar, provided by the live player on a phone around upstream's
- * player ([LocalLiveTopBarActions]). The shared phone controls draw them with [LiveTopBarButtons]; until they do (they
- * are another screen's), the live player draws the same buttons itself at the top bar's end while the controls show.
- * Once the controls have drawn them, [drawnByControls] stays true and the live player's own copy is not drawn.
+ * player ([LocalLiveTopBarActions]). The shared phone controls draw them with [LiveTopBarButtons].
  */
 class LiveTopBarActions {
     var actions by mutableStateOf<List<LiveTopBarAction>>(emptyList())
-
-    var drawnByControls by mutableStateOf(false)
-        internal set
 }
 
 /** Null everywhere except inside the live player on a phone. */
@@ -39,10 +33,6 @@ val LocalLiveTopBarActions = staticCompositionLocalOf<LiveTopBarActions?> { null
 @Composable
 fun LiveTopBarButtons() {
     val holder = LocalLiveTopBarActions.current ?: return
-    DisposableEffect(holder) {
-        holder.drawnByControls = true
-        onDispose { }
-    }
     holder.actions.forEach { action ->
         PhoneTopBarAction(glyph = action.glyph, label = action.label, onClick = action.onClick)
     }

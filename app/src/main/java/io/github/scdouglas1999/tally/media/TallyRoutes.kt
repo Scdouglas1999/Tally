@@ -11,6 +11,7 @@ import io.github.scdouglas1999.tally.media.collection.TallyCollectionPage
 import io.github.scdouglas1999.tally.media.episode.TallyEpisodePage
 import io.github.scdouglas1999.tally.media.favorites.TallyFavoritesPage
 import io.github.scdouglas1999.tally.media.home.TallyHomePage
+import io.github.scdouglas1999.tally.media.home.phone.PhoneItemGridPage
 import io.github.scdouglas1999.tally.media.home.phone.PhoneViewAllPage
 import io.github.scdouglas1999.tally.media.library.TallyFilteredCollection
 import io.github.scdouglas1999.tally.media.library.TallyLibraryPage
@@ -208,6 +209,17 @@ object TallyRoutes {
                 if (phone) {
                     LaunchedEffect(Unit) { onClearBackdrop() }
                     PhoneViewAllPage(preferences = preferences, destination = destination, modifier = modifier)
+                    true
+                } else {
+                    false
+                }
+            }
+
+            // A grid of arbitrary items (a library's Recommended ALL, extras) gets the same phone page.
+            is Destination.ItemGrid<*> -> {
+                if (phone) {
+                    LaunchedEffect(Unit) { onClearBackdrop() }
+                    PhoneItemGridPage(preferences = preferences, destination = destination, modifier = modifier)
                     true
                 } else {
                     false

@@ -21,13 +21,16 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.data.model.HomeRowConfig
-import com.github.damontecres.wholphin.data.model.HomeRowViewOptions
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
+import com.github.damontecres.wholphin.ui.components.ItemGridViewModel
+import com.github.damontecres.wholphin.ui.components.ViewOptionImageType
 import com.github.damontecres.wholphin.ui.components.rememberContextMenu
 import com.github.damontecres.wholphin.ui.detail.HomeRowGridViewModel
 import com.github.damontecres.wholphin.ui.nav.Destination
+import com.github.damontecres.wholphin.util.DataLoadingState
 import com.github.damontecres.wholphin.util.HomeRowLoadingState
+import io.github.scdouglas1999.tally.media.home.homeCardKicker
 import io.github.scdouglas1999.tally.media.kit.CardDetailStyle
 import io.github.scdouglas1999.tally.media.kit.CardFrame
 import io.github.scdouglas1999.tally.media.kit.CardTitleStyle
@@ -123,7 +126,8 @@ fun PhoneViewAllPage(
                             ) { item, index, width ->
                                 ViewAllCard(
                                     item = item,
-                                    viewOptions = viewOptions,
+                                    imageType = viewOptions.imageType,
+                                    aspectRatio = viewOptions.aspectRatio.ratio,
                                     width = width,
                                     onClick = { item?.let { viewModel.navigateTo(it.destination(index)) } },
                                     onLongClick = { item?.let { contextMenu.showContextMenu(index, it) } },
@@ -138,26 +142,97 @@ fun PhoneViewAllPage(
     contextMenu.Compose()
 }
 
+/**
+ * A grid of arbitrary items on a phone (`Destination.ItemGrid`, upstream's `ItemGrid` on the TV: a library's
+ * Recommended rows' ALL, a film's extras): the same [ItemGridViewModel] (paged, loads as the grid scrolls) and item
+ * menu, laid out as [PhoneViewAllPage]: a top bar with the title and a back arrow over the grid of titled cards.
+ */
+@Composable
+fun PhoneItemGridPage(
+    preferences: UserPreferences,
+    destination: Destination.ItemGrid<*>,
+    modifier: Modifier = Modifier,
+    pageViewModel: LibraryPageViewModel = hiltViewModel(),
+    viewModel: ItemGridViewModel =
+        hiltViewModel<ItemGridViewModel, ItemGridViewModel.Factory>(
+            creationCallback = { it.create(destination) },
+        ),
+) {
+    val state by viewModel.state.collectAsState()
+    val contextMenu = rememberContextMenu(preferences, viewModel)
+    val viewOptions = destination.viewOptions
+    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = destination.initialPosition.coerceAtLeast(0))
+    val bottom = LocalPhoneContentPadding.current.calculateBottomPadding()
+    Column(modifier = modifier.fillMaxSize().background(TallyColors.ground)) {
+        PhoneTopBar(
+            title = destination.title.getString(),
+            onBack = { pageViewModel.navigationManager.goBack() },
+            scrolled = gridState.phoneScrolled,
+        )
+        when (val st = state.items) {
+            is DataLoadingState.Error -> {
+                PhoneEmptyState(
+                    title = stringResource(R.string.tally_media_error_title),
+                    subtitle = st.localizedMessage,
+                )
+            }
+
+            DataLoadingState.Loading, DataLoadingState.Pending -> {
+                PhoneLoading(Modifier.fillMaxSize())
+            }
+
+            is DataLoadingState.Success -> {
+                val items = st.data
+                androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxSize()) {
+                    PhoneMediaGrid(
+                        items = items,
+                        columns = phoneGridColumns(viewOptions.aspectRatio.ratio, maxWidth),
+                        state = gridState,
+                        topPadding = 8.dp,
+                        bottomPadding = bottom + PhoneDimens.rowGap,
+                        key = { index, item -> "$index-${item?.id}" },
+                        modifier = Modifier.fillMaxSize(),
+                    ) { item, index, width ->
+                        ViewAllCard(
+                            item = item,
+                            imageType = viewOptions.imageType,
+                            aspectRatio = viewOptions.aspectRatio.ratio,
+                            width = width,
+                            onClick = { item?.let { viewModel.navigateTo(it.destination(index)) } },
+                            onLongClick = { item?.let { contextMenu.showContextMenu(index, it) } },
+                        )
+                    }
+                }
+            }
+        }
+    }
+    contextMenu.Compose()
+}
+
 /** A card of the grid: the row's picture type and ratio, with the title (and the year or seasons) under it, as upstream's grid always titles its cards. */
 @Composable
 private fun ViewAllCard(
     item: BaseItem?,
-    viewOptions: HomeRowViewOptions,
+    imageType: ViewOptionImageType,
+    aspectRatio: Float,
     width: Dp,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
     val imageService = LocalImageUrlService.current
     val fillWidth = with(LocalDensity.current) { width.roundToPx() }
-    val imageType = viewOptions.imageType.imageType
-    val url = remember(item, imageType, fillWidth) { imageService.getItemImageUrl(item, imageType, fillWidth = fillWidth) }
+    val url =
+        remember(item, imageType, fillWidth) {
+            imageService.getItemImageUrl(item, imageType.imageType, fillWidth = fillWidth)
+        }
     val percent = resumePercent(item?.data?.userData?.playbackPositionTicks ?: 0L, item?.data?.runTimeTicks ?: 0L)
     val title = (item?.title ?: item?.name).orEmpty()
-    val detail = item?.let { posterDetail(it) }
+    // An episode shows its code (S2 E3) under the show's name, as the home cards do; the rest the year or seasons.
+    val detail = item?.let { homeCardKicker(it, watchingRow = false) ?: posterDetail(it) }
     CardFrame(
         imageUrl = url,
         width = width,
-        height = width / viewOptions.aspectRatio.ratio,
+        height = width / aspectRatio,
         contentDescription = title,
         onClick = onClick,
         onLongClick = onLongClick,

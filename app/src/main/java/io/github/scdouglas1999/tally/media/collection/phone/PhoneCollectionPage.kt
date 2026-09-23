@@ -52,11 +52,9 @@ import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.util.HomeRowLoadingState
 import com.github.damontecres.wholphin.util.LoadingState
 import io.github.scdouglas1999.tally.media.collection.collectionMeta
-import io.github.scdouglas1999.tally.media.home.HomeMetaPart
 import io.github.scdouglas1999.tally.media.home.phone.PhoneHeroFrame
 import io.github.scdouglas1999.tally.media.home.phone.PhoneHeroKicker
 import io.github.scdouglas1999.tally.media.home.phone.PhoneHeroTitle
-import io.github.scdouglas1999.tally.media.home.phone.PhoneMetaLine
 import io.github.scdouglas1999.tally.media.kit.DetailMetaPart
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
@@ -75,6 +73,7 @@ import io.github.scdouglas1999.tally.media.library.LibraryPageViewModel
 import io.github.scdouglas1999.tally.media.library.SortDialog
 import io.github.scdouglas1999.tally.media.library.directionArrow
 import io.github.scdouglas1999.tally.media.library.sortLabel
+import io.github.scdouglas1999.tally.media.movie.phone.PhoneMetaLine
 import io.github.scdouglas1999.tally.media.search.typeTitle
 import io.github.scdouglas1999.tally.ui.phone.LocalPhoneContentPadding
 import io.github.scdouglas1999.tally.ui.phone.phoneClickable
@@ -435,14 +434,8 @@ private fun CollectionHeader(
         } else {
             PhoneHeroTitle(title)
         }
-        PhoneMetaLine(
-            meta.map {
-                when (it) {
-                    is DetailMetaPart.Plain -> HomeMetaPart(it.text)
-                    is DetailMetaPart.Boxed -> HomeMetaPart(it.text, boxed = true)
-                }
-            },
-        )
+        // The detail pages' meta line (film, show): mono uppercase, units in their own case.
+        PhoneMetaLine(meta)
         val genres = collection.data.genres.orEmpty()
         if (genres.isNotEmpty()) {
             Text(

@@ -395,7 +395,7 @@ private fun rememberSeekTaps(
     return remember(controller) { SeekTaps(scope, { playerNow }, { back }, { forward }, controller) }
 }
 
-/** Back, the title block, subtitles and settings. */
+/** Back, the title block, the live player's buttons (a live channel only), subtitles and settings. */
 @Composable
 private fun TopRow(
     item: BaseItem?,
@@ -460,6 +460,9 @@ private fun TopRow(
                 )
             }
         }
+        // The live player's GAMES and BOX SCORE (nothing outside a live channel).
+        io.github.scdouglas1999.tally.ui.player.phone
+            .LiveTopBarButtons()
         PhoneTopBarAction(
             glyph = R.string.tally_player_glyph_subtitles,
             label = stringResource(R.string.tally_player_subtitles),

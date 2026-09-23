@@ -69,9 +69,7 @@ import com.github.damontecres.wholphin.ui.discover.DiscoverRowData
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.search.SearchResult
 import com.github.damontecres.wholphin.ui.search.SearchState
-import com.github.damontecres.wholphin.ui.search.SearchTypeOptionsDialog
 import com.github.damontecres.wholphin.ui.search.SearchViewModel
-import com.github.damontecres.wholphin.ui.search.SearchViewOptionsDialog
 import com.github.damontecres.wholphin.ui.util.ResStringProvider
 import com.github.damontecres.wholphin.util.DataLoadingState
 import com.github.damontecres.wholphin.util.DiscoverRequestType
@@ -315,17 +313,21 @@ fun PhoneSearchPage(
         playlistViewModel = playlistViewModel,
     )
     if (showViewOptions) {
-        SearchViewOptionsDialog(
+        PhoneSearchViewOptionsSheet(
             combinedResults = combinedMode,
             onCombinedResultsChange = viewModel::setCombinedResults,
             voiceSearchButtonVisible = voiceSearchButtonVisible,
             onVoiceSearchButtonVisibleChange = viewModel::setVoiceSearchButtonVisible,
-            onClickFilterTypes = { showFilterTypeDialog = true },
+            // One sheet at a time on a phone: the types replace the view options.
+            onClickFilterTypes = {
+                showViewOptions = false
+                showFilterTypeDialog = true
+            },
             onDismissRequest = { showViewOptions = false },
         )
     }
     if (showFilterTypeDialog) {
-        SearchTypeOptionsDialog(
+        PhoneSearchTypesSheet(
             onDismissRequest = { showFilterTypeDialog = false },
             searchableTypes = state.possibleSearchableTypes,
             excludedSearchableTypes = state.excludedSearchableTypes,

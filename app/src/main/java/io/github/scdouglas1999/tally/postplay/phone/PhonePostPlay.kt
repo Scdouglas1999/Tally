@@ -50,7 +50,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.ImageType
 
-private val SimilarWidth = 80.dp
+private val SimilarWidth = 96.dp
 
 /**
  * The post-play page on a phone, in landscape like the player it follows: the film's backdrop dimmed behind, its
@@ -210,7 +210,7 @@ private fun PostPlayButton(
     }
 }
 
-/** A small poster with its title in a black label bar. */
+/** A small poster with its title (Sans, as the kit cards) in a black label bar. */
 @Composable
 private fun SimilarPoster(
     item: BaseItemDto,
@@ -236,17 +236,23 @@ private fun SimilarPoster(
                     .aspectRatio(2f / 3f)
                     .background(TallyColors.screen),
         )
+        // The kit cards' title (Sans, not the mono label: a mono title was cut after a few letters).
         Text(
             text = item.name.orEmpty(),
-            style = PhoneType.label,
+            style =
+                io.github.scdouglas1999.tally.media.kit.CardTitleStyle.copy(
+                    hyphens = androidx.compose.ui.text.style.Hyphens.Auto,
+                ),
             color = TallyColors.text,
-            maxLines = 1,
+            // Two lines: at this width one line keeps only a few letters of most titles.
+            minLines = 2,
+            maxLines = 2,
             overflow = TextOverflow.Ellipsis,
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .background(TallyColors.labelBar)
-                    .padding(horizontal = 6.dp, vertical = 5.dp),
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
         )
     }
 }
