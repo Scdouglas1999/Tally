@@ -41,10 +41,12 @@ import androidx.tv.material3.Glow
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.ui.playback.isPlayKeyUp
+import io.github.scdouglas1999.tally.media.music.phone.PhoneTrackRow
 import io.github.scdouglas1999.tally.media.series.wholePx
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -72,6 +74,20 @@ fun TrackRow(
     queued: Boolean = false,
     onFocused: () -> Unit = {},
 ) {
+    if (isPhone()) {
+        PhoneTrackRow(
+            number = number,
+            title = title,
+            artist = artist,
+            duration = duration,
+            playing = playing,
+            queued = queued,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            modifier = modifier,
+        )
+        return
+    }
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     LaunchedEffect(focused) {

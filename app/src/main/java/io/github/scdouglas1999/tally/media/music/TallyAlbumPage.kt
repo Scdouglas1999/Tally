@@ -92,6 +92,13 @@ import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.rememberWideImageUrl
 import io.github.scdouglas1999.tally.media.library.LoadingMark
+import io.github.scdouglas1999.tally.media.music.phone.PhoneAlbumRow
+import io.github.scdouglas1999.tally.media.music.phone.PhoneMusicActions
+import io.github.scdouglas1999.tally.media.music.phone.PhoneMusicHeader
+import io.github.scdouglas1999.tally.media.music.phone.PhoneMusicPageFrame
+import io.github.scdouglas1999.tally.media.music.phone.PhoneRundownHeader
+import io.github.scdouglas1999.tally.media.music.phone.ReportMusicScroll
+import io.github.scdouglas1999.tally.media.music.phone.musicListBottom
 import io.github.scdouglas1999.tally.media.series.ExtraCard
 import io.github.scdouglas1999.tally.media.series.MinScrollBringIntoViewSpec
 import io.github.scdouglas1999.tally.media.series.RowGround
@@ -100,6 +107,7 @@ import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -148,7 +156,7 @@ fun TallyAlbumPage(
                 onDeleteItem = viewModel::deleteItem,
             )
         }
-    MusicPageFrame(modifier) {
+    MusicPageFrame(modifier, phoneKicker = stringResource(R.string.tally_music_album)) {
         when (val loading = state.loading) {
             is LoadingState.Error -> {
                 MusicError(loading.localizedMessage)
@@ -276,7 +284,7 @@ private fun AlbumLoaded(
         CompositionLocalProvider(LocalBringIntoViewSpec provides MinScrollBringIntoViewSpec) {
             LazyColumn(
                 state = listState,
-                contentPadding = PaddingValues(bottom = TallyDimens.marginVertical),
+                contentPadding = PaddingValues(bottom = musicListBottom()),
                 modifier = Modifier.fillMaxSize(),
             ) {
                 item(key = "header") {
@@ -334,11 +342,15 @@ private fun AlbumLoaded(
                         val multiDisc = entries.any { it is MusicFormat.TrackListEntry.Disc }
                         Box(modifier = Modifier.fillMaxWidth().background(TallyColors.ground)) {
                             if (!multiDisc) {
-                                RowHeader(
-                                    title = stringResource(R.string.tally_music_tracks),
-                                    count = songs.size,
-                                    modifier = RundownModifier.padding(bottom = 8.dp),
-                                )
+                                if (isPhone()) {
+                                    PhoneRundownHeader(title = stringResource(R.string.tally_music_tracks), count = songs.size)
+                                } else {
+                                    RowHeader(
+                                        title = stringResource(R.string.tally_music_tracks),
+                                        count = songs.size,
+                                        modifier = RundownModifier.padding(bottom = 8.dp),
+                                    )
+                                }
                             }
                         }
                     }
@@ -456,7 +468,7 @@ private fun AlbumLoaded(
                 }
             }
         }
-        TopScrim(listState)
+        if (isPhone()) ReportMusicScroll(listState) else TopScrim(listState)
     }
 }
 
@@ -489,7 +501,7 @@ fun TallySongPage(
                 onDeleteItem = viewModel::deleteItem,
             )
         }
-    MusicPageFrame(modifier) {
+    MusicPageFrame(modifier, phoneKicker = stringResource(R.string.tally_music_song)) {
         when (val loading = state.loading) {
             is LoadingState.Error -> {
                 MusicError(loading.localizedMessage)
@@ -587,8 +599,13 @@ internal suspend fun requestFocusSoon(
 @Composable
 internal fun MusicPageFrame(
     modifier: Modifier,
+    phoneKicker: String? = null,
     content: @Composable () -> Unit,
 ) {
+    if (isPhone()) {
+        PhoneMusicPageFrame(kicker = phoneKicker.orEmpty(), modifier = modifier, content = content)
+        return
+    }
     TallyScale {
         CompositionLocalProvider(LocalContentColor provides TallyColors.text) {
             ProvideTextStyle(TallyType.body) {
@@ -635,7 +652,7 @@ internal fun LazyListScope.rundown(
             is MusicFormat.TrackListEntry.Track -> {
                 item(key = "track-${entry.index}") {
                     Box(modifier = Modifier.fillMaxWidth().background(TallyColors.ground)) {
-                        Box(modifier = RundownModifier) { track(entry.index) }
+                        Box(modifier = if (isPhone()) Modifier else RundownModifier) { track(entry.index) }
                     }
                 }
             }
@@ -645,6 +662,10 @@ internal fun LazyListScope.rundown(
 
 @Composable
 private fun DiscHeader(number: Int) {
+    if (isPhone()) {
+        PhoneRundownHeader(title = stringResource(R.string.tally_music_disc, number))
+        return
+    }
     RowHeader(
         title = stringResource(R.string.tally_music_disc, number),
         modifier = RundownModifier.padding(top = 16.dp, bottom = 8.dp),
@@ -672,6 +693,20 @@ internal fun MusicHeader(
     actions: @Composable (onFocused: () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (isPhone()) {
+        PhoneMusicHeader(
+            title = title,
+            imageUrl = imageUrl,
+            link = link,
+            onLink = onLink,
+            meta = meta,
+            genres = genres,
+            overview = overview,
+            actions = { actions {} },
+            modifier = modifier,
+        )
+        return
+    }
     Box(
         modifier =
             modifier.drawBehind {
@@ -875,6 +910,17 @@ internal fun MusicActions(
     onFavorite: () -> Unit,
     onMore: () -> Unit,
 ) {
+    if (isPhone()) {
+        PhoneMusicActions(
+            favorite = favorite,
+            onPlay = onPlay,
+            onShuffle = onShuffle,
+            onInstantMix = onInstantMix,
+            onFavorite = onFavorite,
+            onMore = onMore,
+        )
+        return
+    }
     CompositionLocalProvider(LocalBringIntoViewSpec provides rememberFocusEdgeSpec()) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -993,6 +1039,10 @@ internal fun AlbumRow(
     modifier: Modifier = Modifier,
     up: FocusRequester? = null,
 ) {
+    if (isPhone()) {
+        PhoneAlbumRow(title = title, items = items, onClick = onClick, onLongClick = onLongClick)
+        return
+    }
     RowGround { reveal ->
         MediaRow(
             title = title,
@@ -1028,6 +1078,16 @@ internal fun MusicVideosRow(
     modifier: Modifier = Modifier,
     up: FocusRequester? = null,
 ) {
+    if (isPhone()) {
+        PhoneAlbumRow(
+            title = title,
+            items = items,
+            onClick = onClick,
+            onLongClick = { _, item -> onLongClick(item) },
+            wide = true,
+        )
+        return
+    }
     RowGround { reveal ->
         MediaRow(
             title = title,

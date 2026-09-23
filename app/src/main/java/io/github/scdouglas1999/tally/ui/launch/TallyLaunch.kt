@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -54,6 +55,8 @@ import com.github.damontecres.wholphin.ui.findActivity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -146,12 +149,15 @@ fun TallyLaunch(modifier: Modifier = Modifier) {
 
     SwallowKeys()
     BackHandler { }
+    val phone = LocalTallyFormFactor.current == TallyFormFactor.PHONE
 
     Box(
         modifier
             .fillMaxSize()
             .graphicsLayer { this.alpha = alpha.value }
-            .background(TallyColors.ground),
+            .background(TallyColors.ground)
+            // A phone: touches are swallowed too, as keys are, while the card is up.
+            .then(if (phone) Modifier.pointerInput(Unit) { swallowTouches() } else Modifier),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -189,6 +195,15 @@ fun TallyLaunch(modifier: Modifier = Modifier) {
                     maxLines = 1,
                 )
             }
+        }
+    }
+}
+
+/** Consumes every touch that reaches the card, so the page under it never sees one. */
+private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.swallowTouches() {
+    awaitPointerEventScope {
+        while (true) {
+            awaitPointerEvent().changes.forEach { it.consume() }
         }
     }
 }

@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.main.settings
 
 import androidx.annotation.StringRes
@@ -93,6 +96,12 @@ fun HomeSettingsPage(
         Box(
             modifier =
                 Modifier
+                    // TALLY: begin
+                    .then(
+                        io.github.scdouglas1999.tally.ui.settings.phone
+                            .phoneHomeSettingsPane(),
+                    )
+                    // TALLY: end
                     .width(settingsWidth)
                     .fillMaxHeight()
                     .background(color = MaterialTheme.colorScheme.surface),
@@ -324,26 +333,35 @@ fun HomeSettingsPage(
                 },
             )
         }
-        HomePageContent(
-            loadingState = state.loading,
-            homeRows = state.rowData,
-            position = position,
-            onFocusPosition = { position = it },
-            onClickItem = { _, _ -> },
-            onLongClickItem = { _, _ -> },
-            onClickPlay = { _, _ -> },
-            showClock = false,
-            onUpdateBackdrop = viewModel::updateBackdrop,
-            listState = listState,
-            takeFocus = false,
-            showEmptyRows = true,
-            showLogo = preferences.appPreferences.interfacePreferences.showLogos,
-            showViewMore = false,
-            modifier =
-                Modifier
-                    .fillMaxHeight()
-                    .weight(1f),
-        )
+        // TALLY: begin
+        // A phone has no room for the preview of the home page: the list is the whole page.
+        if (!io.github.scdouglas1999.tally.ui.settings.phone
+                .isPhone()
+        ) {
+            // TALLY: end
+            HomePageContent(
+                loadingState = state.loading,
+                homeRows = state.rowData,
+                position = position,
+                onFocusPosition = { position = it },
+                onClickItem = { _, _ -> },
+                onLongClickItem = { _, _ -> },
+                onClickPlay = { _, _ -> },
+                showClock = false,
+                onUpdateBackdrop = viewModel::updateBackdrop,
+                listState = listState,
+                takeFocus = false,
+                showEmptyRows = true,
+                showLogo = preferences.appPreferences.interfacePreferences.showLogos,
+                showViewMore = false,
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .weight(1f),
+            )
+            // TALLY: begin
+        }
+        // TALLY: end
     }
     showConfirmDialog?.let { (body, onConfirm) ->
         ConfirmDialog(

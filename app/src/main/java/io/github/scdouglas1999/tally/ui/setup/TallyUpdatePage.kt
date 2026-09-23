@@ -57,6 +57,11 @@ import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneButton
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneButtonKind
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
+import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
+import io.github.scdouglas1999.tally.ui.theme.PhoneType
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -115,6 +120,19 @@ fun TallyUpdatePage(
 
     TallySetupFrame(kicker = stringResource(R.string.tally_signin_kicker_update), modifier = modifier) {
         val release = state.release
+        if (isPhone()) {
+            PhoneUpdateBody(
+                viewModel = viewModel,
+                onDownload = {
+                    if (!permissions) {
+                        launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    } else {
+                        release?.let { viewModel.installRelease(it) }
+                    }
+                },
+            )
+            return@TallySetupFrame
+        }
         Row(
             horizontalArrangement = Arrangement.spacedBy(40.dp),
             modifier =
@@ -332,6 +350,101 @@ private fun ReleaseNotes(
                         inlineCode = notesText.copy(fontFamily = TallyType.Mono),
                     ),
             )
+        }
+    }
+}
+
+/**
+ * The update page on a phone: installed → offered in mono under the title, the release notes scrolling in the middle,
+ * then DOWNLOAD & UPDATE (accent) and LATER full width at the bottom; while it downloads, the progress and CANCEL.
+ */
+@Composable
+private fun PhoneUpdateBody(
+    viewModel: UpdateViewModel,
+    onDownload: () -> Unit,
+) {
+    val state by viewModel.state.collectAsState()
+    val release = state.release
+    Column(
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = PhoneDimens.margin)
+                .padding(bottom = 16.dp),
+    ) {
+        when (val loading = state.loading) {
+            LoadingState.Pending, LoadingState.Loading -> {
+                Text(
+                    text = stringResource(R.string.tally_signin_update_checking).tallyUppercase(),
+                    style = PhoneType.label,
+                    color = TallyColors.muted,
+                )
+            }
+
+            is LoadingState.Error -> {
+                Text(
+                    text = stringResource(R.string.tally_signin_update_failed),
+                    style = PhoneType.title,
+                    color = TallyColors.text,
+                )
+                SetupError(loading)
+                Spacer(Modifier.weight(1f))
+                PhoneButton(
+                    label = stringResource(R.string.tally_signin_back),
+                    onClick = { viewModel.navigationManager.goBack() },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            LoadingState.Success -> {
+                if (release == null) {
+                    Text(
+                        text = stringResource(R.string.tally_signin_update_none),
+                        style = PhoneType.body,
+                        color = TallyColors.liveText,
+                    )
+                    return@Column
+                }
+                Text(
+                    text = stringResource(R.string.tally_signin_update_available, shortVersion(release.version)),
+                    style = PhoneType.title,
+                    color = TallyColors.text,
+                )
+                Text(
+                    text =
+                        stringResource(
+                            R.string.tally_signin_update_versions,
+                            shortVersion(viewModel.currentVersion),
+                            shortVersion(release.version),
+                        ),
+                    style = PhoneType.meta,
+                    color = TallyColors.textSecondary,
+                    maxLines = 1,
+                )
+                ReleaseNotes(release, Modifier.weight(1f).fillMaxWidth())
+                if (state.downloading) {
+                    val bytes by viewModel.bytesDownloaded.collectAsState(0L)
+                    DownloadProgress(state.contentLength, bytes)
+                    PhoneButton(
+                        label = stringResource(R.string.tally_signin_cancel),
+                        onClick = { viewModel.cancelDownload() },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                } else {
+                    PhoneButton(
+                        label = stringResource(R.string.tally_signin_update_download),
+                        onClick = onDownload,
+                        kind = PhoneButtonKind.PRIMARY,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    PhoneButton(
+                        label = stringResource(R.string.tally_phone_system_later),
+                        onClick = { viewModel.navigationManager.goBack() },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
         }
     }
 }

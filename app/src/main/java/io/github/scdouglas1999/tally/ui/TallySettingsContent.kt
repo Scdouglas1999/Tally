@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -22,6 +24,13 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.api.TallyInfo
 import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.phone.LocalPhoneContentPadding
+import io.github.scdouglas1999.tally.ui.settings.TallySquareSwitch
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneSettingsRow
+import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
+import io.github.scdouglas1999.tally.ui.theme.PhoneType
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -41,6 +50,34 @@ fun TallySettingsContent(
     onHideScoresChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // A phone: the settings rows of the phone's settings pages, then the server block.
+        Column(
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = PhoneDimens.margin)
+                    .padding(top = 8.dp, bottom = LocalPhoneContentPadding.current.calculateBottomPadding()),
+        ) {
+            PhoneSettingsRow(
+                title = stringResource(R.string.tally_settings_my_channels),
+                summary = stringResource(R.string.tally_settings_my_channels_desc),
+                onClick = onToggleOnlyWatchable,
+                onLongClick = null,
+                interactionSource = null,
+            ) { TallySquareSwitch(checked = onlyWatchable) }
+            PhoneSettingsRow(
+                title = stringResource(R.string.tally_settings_hide_scores),
+                summary = stringResource(R.string.tally_settings_hide_scores_desc),
+                onClick = { onHideScoresChange(!hideScores) },
+                onLongClick = null,
+                interactionSource = null,
+            ) { TallySquareSwitch(checked = hideScores) }
+            ServerBlock(info = info, modifier = Modifier.padding(top = 24.dp))
+        }
+        return
+    }
     val firstRowFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         firstRowFocus.tryRequestFocus("jellytv-settings")
@@ -105,20 +142,21 @@ private fun ServerBlock(
     info: TallyInfo?,
     modifier: Modifier = Modifier,
 ) {
+    val phone = LocalTallyFormFactor.current == TallyFormFactor.PHONE
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = modifier,
     ) {
         Text(
             text = stringResource(R.string.tally_settings_plugin).uppercase(),
-            style = TallyType.label,
+            style = if (phone) PhoneType.label else TallyType.label,
             color = TallyColors.muted,
             maxLines = 1,
         )
         if (info == null) {
             Text(
                 text = stringResource(R.string.tally_server_unavailable),
-                style = TallyType.hint,
+                style = if (phone) PhoneType.bodySmall else TallyType.hint,
                 color = TallyColors.muted,
             )
         } else {
@@ -129,7 +167,7 @@ private fun ServerBlock(
                         info.pluginBuild ?: "\u2014",
                         info.apiVersion,
                     ),
-                style = TallyType.hint,
+                style = if (phone) PhoneType.bodySmall else TallyType.hint,
                 color = TallyColors.muted,
             )
             Text(
@@ -138,7 +176,7 @@ private fun ServerBlock(
                         R.string.tally_server_features,
                         info.features.joinToString(", ").ifBlank { "\u2014" },
                     ),
-                style = TallyType.hint,
+                style = if (phone) PhoneType.bodySmall else TallyType.hint,
                 color = TallyColors.muted,
             )
         }

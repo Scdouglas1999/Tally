@@ -17,6 +17,9 @@ import com.github.damontecres.wholphin.preferences.AppThemeColors
 import com.github.damontecres.wholphin.ui.theme.LocalTheme
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneSettingsGroupHeader
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneSettingsTopBar
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -39,6 +42,10 @@ fun TallySettingsTitle(
     modifier: Modifier = Modifier,
     horizontalPadding: Dp = 20.dp,
 ) {
+    if (isPhone()) {
+        PhoneSettingsTopBar(title = title, modifier = modifier)
+        return
+    }
     TallyScale {
         Text(
             text = title.tallyUppercase(),
@@ -65,6 +72,10 @@ fun TallySettingsGroupHeader(
     modifier: Modifier = Modifier,
     count: Int? = null,
 ) {
+    if (isPhone()) {
+        PhoneSettingsGroupHeader(title = title, modifier = modifier, count = count)
+        return
+    }
     TallyScale {
         Column(modifier = modifier.fillMaxWidth().padding(top = 14.dp, bottom = 8.dp)) {
             Box(

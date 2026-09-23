@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -52,6 +56,11 @@ import com.github.damontecres.wholphin.ui.toServerString
 import com.github.damontecres.wholphin.util.LoadingState
 import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.ui.components.LampState
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneButton
+import io.github.scdouglas1999.tally.ui.setup.phone.PhoneUserSquare
+import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import kotlinx.coroutines.launch
@@ -197,6 +206,33 @@ fun TallyUserPicker(
                     state.switchUserState is LoadingState.Error -> LampState.Off
                     else -> LampState.Sputtering
                 }
+            if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+                // A phone: one sign-in page, the username and password with Quick Connect's code under them.
+                TallySetupFrame(
+                    kicker = stringResource(R.string.tally_signin_kicker_sign_in),
+                    subtitle = current.user?.name,
+                    modifier = modifier,
+                ) {
+                    TallyCredentials(
+                        serverName = serverName,
+                        initialUsername = current.user?.name ?: "",
+                        switchUserState = state.switchUserState,
+                        onPasswordChanged = { viewModel.clearSwitchUserState() },
+                        onSubmit = { username, password -> viewModel.login(server, current.user, username, password) },
+                        trouble = {
+                            TallyQuickConnect(
+                                serverName = serverName,
+                                status = status,
+                                switchUserState = state.switchUserState,
+                                onUsePassword = {},
+                                lamp = lamp,
+                            )
+                            trouble()
+                        },
+                    )
+                }
+                return
+            }
             TallySetupFrame(
                 kicker = stringResource(R.string.tally_signin_kicker_quick_connect),
                 kickerLamp = lamp,
@@ -276,55 +312,67 @@ private fun UserList(
     val firstFocus = remember { FocusRequester() }
     var hasFocus by remember { mutableStateOf(false) }
     val target = focusIndex.coerceIn(0, users.size)
+    val phone = LocalTallyFormFactor.current == TallyFormFactor.PHONE
     LaunchedEffect(users.isEmpty()) {
-        requestUntilFocused(firstFocus, { hasFocus }, focusManager, "tally-user-first")
+        if (!phone) requestUntilFocused(firstFocus, { hasFocus }, focusManager, "tally-user-first")
     }
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            modifier = Modifier.fillMaxWidth().onFocusChanged { hasFocus = it.hasFocus },
-        ) {
-            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(TileGap),
-                    contentPadding = PaddingValues(horizontal = TallyDimens.marginHorizontal, vertical = RowPad),
-                    modifier = Modifier.wrapContentWidth(),
-                ) {
-                    itemsIndexed(users, key = { _, it -> it.user.id }) { index, user ->
-                        val isCurrent = user.user.id == currentUser?.id
-                        SetupTile(
-                            name = user.user.name ?: user.user.id.toString(),
-                            onClick = { onSwitchUser(user.user) },
-                            onLongClick = { showDeleteDialog = user },
-                            detail = if (isCurrent) stringResource(R.string.tally_signin_current_user) else null,
-                            onFocused = { onFocusIndex(index) },
-                            tileModifier = if (index == target) Modifier.focusRequester(firstFocus) else Modifier,
-                        ) {
-                            TileFace(
-                                initialOf = user.user.name ?: user.user.id.toString(),
-                                imageUrl = user.imageUrl?.takeIf { it.isNotNullOrBlank() },
-                            )
+    if (phone) {
+        PhoneUserGrid(
+            users = users,
+            currentUser = currentUser,
+            onSwitchUser = onSwitchUser,
+            onMenu = { showDeleteDialog = it },
+            onAddUser = onAddUser,
+            onSwitchServer = onSwitchServer,
+        )
+    } else {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                modifier = Modifier.fillMaxWidth().onFocusChanged { hasFocus = it.hasFocus },
+            ) {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(TileGap),
+                        contentPadding = PaddingValues(horizontal = TallyDimens.marginHorizontal, vertical = RowPad),
+                        modifier = Modifier.wrapContentWidth(),
+                    ) {
+                        itemsIndexed(users, key = { _, it -> it.user.id }) { index, user ->
+                            val isCurrent = user.user.id == currentUser?.id
+                            SetupTile(
+                                name = user.user.name ?: user.user.id.toString(),
+                                onClick = { onSwitchUser(user.user) },
+                                onLongClick = { showDeleteDialog = user },
+                                detail = if (isCurrent) stringResource(R.string.tally_signin_current_user) else null,
+                                onFocused = { onFocusIndex(index) },
+                                tileModifier = if (index == target) Modifier.focusRequester(firstFocus) else Modifier,
+                            ) {
+                                TileFace(
+                                    initialOf = user.user.name ?: user.user.id.toString(),
+                                    imageUrl = user.imageUrl?.takeIf { it.isNotNullOrBlank() },
+                                )
+                            }
                         }
-                    }
-                    item(key = "add") {
-                        SetupTile(
-                            name = stringResource(R.string.tally_signin_add_user),
-                            muted = true,
-                            onClick = onAddUser,
-                            onFocused = { onFocusIndex(users.size) },
-                            tileModifier = if (target == users.size) Modifier.focusRequester(firstFocus) else Modifier,
-                        ) {
-                            PlusFace()
+                        item(key = "add") {
+                            SetupTile(
+                                name = stringResource(R.string.tally_signin_add_user),
+                                muted = true,
+                                onClick = onAddUser,
+                                onFocused = { onFocusIndex(users.size) },
+                                tileModifier = if (target == users.size) Modifier.focusRequester(firstFocus) else Modifier,
+                            ) {
+                                PlusFace()
+                            }
                         }
                     }
                 }
+                TallyButton(
+                    label = stringResource(R.string.tally_signin_switch_server),
+                    glyph = stringResource(R.string.fa_arrow_left_arrow_right),
+                    onClick = onSwitchServer,
+                )
             }
-            TallyButton(
-                label = stringResource(R.string.tally_signin_switch_server),
-                glyph = stringResource(R.string.fa_arrow_left_arrow_right),
-                onClick = onSwitchServer,
-            )
         }
     }
     showDeleteDialog?.let { user ->
@@ -374,4 +422,49 @@ private fun VersionWarning(
                 .fillMaxWidth()
                 .padding(horizontal = TallyDimens.marginHorizontal, vertical = TallyDimens.marginVertical),
     )
+}
+
+/** The phone's user picker: a 3-column grid of user squares and Add User, then SWITCH SERVER full width. */
+@Composable
+private fun PhoneUserGrid(
+    users: List<JellyfinUserAndImage>,
+    currentUser: JellyfinUser?,
+    onSwitchUser: (JellyfinUser) -> Unit,
+    onMenu: (JellyfinUserAndImage) -> Unit,
+    onAddUser: () -> Unit,
+    onSwitchServer: () -> Unit,
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(3),
+        horizontalArrangement = Arrangement.spacedBy(PhoneDimens.gutter),
+        verticalArrangement = Arrangement.spacedBy(PhoneDimens.gutter),
+        contentPadding = PaddingValues(start = PhoneDimens.margin, end = PhoneDimens.margin, top = 8.dp, bottom = 96.dp),
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        items(users, key = { it.user.id }) { user ->
+            PhoneUserSquare(
+                name = user.user.name ?: user.user.id.toString(),
+                detail = if (user.user.id == currentUser?.id) stringResource(R.string.tally_signin_current_user) else null,
+                onClick = { onSwitchUser(user.user) },
+                onLongClick = { onMenu(user) },
+            ) {
+                TileFace(
+                    initialOf = user.user.name ?: user.user.id.toString(),
+                    imageUrl = user.imageUrl?.takeIf { it.isNotNullOrBlank() },
+                )
+            }
+        }
+        item(key = "add") {
+            PhoneUserSquare(name = stringResource(R.string.tally_signin_add_user), muted = true, onClick = onAddUser) {
+                PlusFace()
+            }
+        }
+        item(key = "switch-server", span = { GridItemSpan(maxLineSpan) }) {
+            PhoneButton(
+                label = stringResource(R.string.tally_signin_switch_server),
+                onClick = onSwitchServer,
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            )
+        }
+    }
 }

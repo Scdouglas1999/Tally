@@ -40,6 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
+import io.github.scdouglas1999.tally.ui.theme.PhoneType
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -143,21 +146,34 @@ private fun LyricText(
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
     LaunchedEffect(focused) { onFocused(focused) }
+    val showFocus = tallyFocusVisible()
     val color =
         when {
-            !synced || current || focused -> TallyColors.text
+            !synced || current || (focused && showFocus) -> TallyColors.text
             else -> TallyColors.muted
         }
+    val phone = isPhone()
     Text(
         // An empty line (an instrumental break) keeps its height.
         text = line.text.ifBlank { " " },
-        style = if (synced) SyncedStyle else PlainStyle,
+        style =
+            when {
+                // A phone: the lines in PhoneType.title, the current one in `text` (the size never changes, so
+                // nothing reflows as the song moves on).
+                phone && synced -> PhoneType.title
+
+                phone -> PhoneType.body
+
+                synced -> SyncedStyle
+
+                else -> PlainStyle
+            },
         color = color,
         modifier =
             modifier
                 .fillMaxWidth()
                 .drawBehind {
-                    if (focused) {
+                    if (focused && showFocus) {
                         val stroke = kotlin.math.floor(TallyDimens.focusBorder.toPx())
                         drawRect(
                             color = TallyColors.accent,

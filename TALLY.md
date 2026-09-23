@@ -74,6 +74,10 @@ file is a future merge conflict.** Therefore:
 | W44 | `ui/theme/Theme.kt` (top of `WholphinTheme`) | provides `LocalTallyFormFactor` to every screen; in the app window on a phone the theme in effect is TALLY whatever the preference (`tallyThemeInEffect`, `TallyPhoneWindow`) |
 | W45 | `ui/preferences/PreferencesContent.kt` (preference loop) | `hiddenOnPhone`: the Application theme row is not shown on a phone |
 | W46 | `services/ScreensaverService.kt` (`init`, `start`) | on a phone the in-app screensaver, the live-scores screensaver and idle dimming stay off, and the screen sleeps as the OS says |
+| W47 | `services/MusicService.kt` (`start`, `stop`), `AndroidManifest.xml` (FOREGROUND_SERVICE / FOREGROUND_SERVICE_MEDIA_PLAYBACK, the service entry) | on a phone the music session runs in `TallyMusicPlaybackService` (Media3 `MediaSessionService`, `playback/`): background playback, media notification, lock-screen controls. Nothing on a TV |
+| W48 | `ui/preferences/subtitle/SubtitleStylePage.kt` (before the page's `Row`) | on a phone `PhoneSubtitleStylePage` (`ui/settings/phone/`): top bar, the live preview pinned under it, upstream's list below |
+| W49 | `ui/main/settings/HomeSettingsPage.kt` (settings pane modifier; home preview in the `if` of a Tally check, re-indented) | on a phone the row list takes the whole width and the home preview is left out |
+| W50 | `ui/preferences/user/UserProfilePreferencesPage.kt` (top of `UserProfilePreferencesPage`) | on a phone upstream's list takes the whole screen (`phoneFullPage`) |
 | (resource) | `res/values-v31/themes_tally.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 
 ## Releases and self-update

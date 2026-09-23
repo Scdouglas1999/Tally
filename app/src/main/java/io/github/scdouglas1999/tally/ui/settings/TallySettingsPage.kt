@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -73,6 +74,7 @@ import com.github.damontecres.wholphin.ui.tryRequestFocus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.scdouglas1999.tally.media.drawer.TallyNavDrawer
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -175,6 +177,25 @@ fun TallyPreferencesPage(
         arrival.lastTheme = theme
     }
     if (!tally) return false
+    if (isPhone()) {
+        // A phone: the list full width under its top bar, no drawer and no description panel.
+        Box(
+            modifier =
+                modifier
+                    .fillMaxSize()
+                    .background(TallyColors.ground)
+                    // a full-screen destination: no bottom bar, only the gesture bar under it
+                    .navigationBarsPadding(),
+        ) {
+            PreferencesContent(
+                initialPreferences = initialPreferences,
+                preferenceScreenOption = screen,
+                modifier = Modifier.fillMaxSize(),
+                onFocus = { _, _ -> },
+            )
+        }
+        return true
+    }
 
     val viewModel: TallySettingsPageViewModel = hiltViewModel()
     val current by viewModel.current.collectAsState()

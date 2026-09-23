@@ -4,6 +4,7 @@ import android.os.SystemClock
 import android.view.Gravity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -68,7 +69,13 @@ import com.github.damontecres.wholphin.util.LoadingState
 import com.github.damontecres.wholphin.util.WholphinDispatchers
 import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneButton
+import io.github.scdouglas1999.tally.ui.settings.phone.PhoneButtonKind
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
+import io.github.scdouglas1999.tally.ui.settings.phone.phoneSheetListMaxHeight
+import io.github.scdouglas1999.tally.ui.settings.phone.phoneTouch
 import io.github.scdouglas1999.tally.ui.setup.TallyField
+import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -132,6 +139,8 @@ internal fun filterLanguages(
  */
 @Composable
 private fun PanelScrim(top: Boolean = false) {
+    // A phone draws these panels in a bottom sheet, which has its own scrim and place.
+    if (isPhone()) return
     val view = LocalView.current
     // 64dp at the Tally scale, as the text input panel sits; this runs at the real density.
     val topOffset = with(LocalDensity.current) { (TOP_OFFSET * TALLY_SCALE).roundToPx() }
@@ -157,6 +166,20 @@ internal fun TallyGlyphButton(
     modifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
+    if (isPhone()) {
+        // A 48dp touch target with the TV button's frame.
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier =
+                modifier
+                    .size(PhoneDimens.touchTarget)
+                    .border(PhoneDimens.hairline, TallyColors.ruleStrong)
+                    .phoneTouch(onClick = onClick, interactionSource = interactionSource),
+        ) {
+            Text(text = glyph, fontFamily = FontAwesome, fontSize = 18.sp, color = TallyColors.text)
+        }
+        return
+    }
     Surface(
         onClick = onClick,
         interactionSource = interactionSource,
@@ -263,7 +286,7 @@ private fun GlyphSlot(
     if (allowed) {
         TallyGlyphButton(glyph = glyph, onClick = onClick, interactionSource = interactionSource)
     } else {
-        Box(Modifier.size(GLYPH_BUTTON))
+        Box(Modifier.size(if (isPhone()) PhoneDimens.touchTarget else GLYPH_BUTTON))
     }
 }
 
@@ -361,13 +384,14 @@ fun TallyNavDrawerPinsDialog(
             width = 600.dp,
             trapHorizontal = false,
         ) {
+            val phone = isPhone()
             Column(
                 modifier =
                     Modifier
-                        .padding(horizontal = 20.dp - FOCUS_ROOM)
-                        .heightIn(max = 416.dp)
+                        .padding(horizontal = if (phone) 0.dp else 20.dp - FOCUS_ROOM)
+                        .heightIn(max = if (phone) phoneSheetListMaxHeight() else 416.dp)
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = FOCUS_ROOM),
+                        .padding(horizontal = if (phone) 0.dp else FOCUS_ROOM),
             ) {
                 items.forEachIndexed { index, pin ->
                     key(pin.id) {
@@ -443,6 +467,7 @@ private fun PinRow(
             moveDownAllowed = !last,
             onMove = onMove,
             onFocused = { focusedButton = it },
+            modifier = if (isPhone()) Modifier.padding(end = PhoneDimens.margin) else Modifier,
         )
     }
 }
@@ -516,7 +541,7 @@ fun TallyFilterableLanguagePreference(
                 keyboardActions = KeyboardActions(onSearch = { focusManager.moveFocus(FocusDirection.Down) }),
                 modifier =
                     Modifier
-                        .padding(horizontal = 20.dp)
+                        .padding(horizontal = if (isPhone()) PhoneDimens.margin else 20.dp)
                         .padding(top = FOCUS_ROOM, bottom = 12.dp - FOCUS_ROOM)
                         .focusRequester(fieldFocus),
             )
@@ -571,7 +596,7 @@ fun TallyQuickConnectDialog(
         ) {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(horizontal = 20.dp).padding(top = FOCUS_ROOM),
+                modifier = Modifier.padding(horizontal = if (isPhone()) PhoneDimens.margin else 20.dp).padding(top = FOCUS_ROOM),
             ) {
                 TallyField(
                     value = code,
@@ -590,8 +615,21 @@ fun TallyQuickConnectDialog(
                     )
                 }
             }
-            Row(modifier = Modifier.padding(horizontal = 20.dp).padding(top = 18.dp, bottom = 20.dp)) {
-                TallyButton(label = stringResource(R.string.submit), onClick = onSubmit, primary = true)
+            if (isPhone()) {
+                PhoneButton(
+                    label = stringResource(R.string.submit),
+                    onClick = onSubmit,
+                    kind = PhoneButtonKind.PRIMARY,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = PhoneDimens.margin)
+                            .padding(top = 18.dp, bottom = 8.dp),
+                )
+            } else {
+                Row(modifier = Modifier.padding(horizontal = 20.dp).padding(top = 18.dp, bottom = 20.dp)) {
+                    TallyButton(label = stringResource(R.string.submit), onClick = onSubmit, primary = true)
+                }
             }
         }
     }

@@ -45,9 +45,13 @@ import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.kit.arrivalFocus
 import io.github.scdouglas1999.tally.media.library.LoadingMark
+import io.github.scdouglas1999.tally.media.music.phone.PhoneRundownHeader
+import io.github.scdouglas1999.tally.media.music.phone.ReportMusicScroll
+import io.github.scdouglas1999.tally.media.music.phone.musicListBottom
 import io.github.scdouglas1999.tally.media.series.MinScrollBringIntoViewSpec
 import io.github.scdouglas1999.tally.media.series.TopScrim
 import io.github.scdouglas1999.tally.ui.components.RowHeader
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import kotlinx.coroutines.launch
@@ -90,7 +94,7 @@ fun TallyArtistPage(
                 onDeleteItem = viewModel::deleteItem,
             )
         }
-    MusicPageFrame(modifier) {
+    MusicPageFrame(modifier, phoneKicker = stringResource(R.string.tally_music_artist)) {
         when (val loading = state.loading) {
             is LoadingState.Error -> {
                 MusicError(loading.localizedMessage)
@@ -196,7 +200,7 @@ private fun ArtistLoaded(
         CompositionLocalProvider(LocalBringIntoViewSpec provides MinScrollBringIntoViewSpec) {
             LazyColumn(
                 state = listState,
-                contentPadding = PaddingValues(bottom = TallyDimens.marginVertical),
+                contentPadding = PaddingValues(bottom = musicListBottom()),
                 modifier = Modifier.fillMaxSize(),
             ) {
                 item(key = "header") {
@@ -272,16 +276,23 @@ private fun ArtistLoaded(
                 if (state.topSongs.isNotEmpty()) {
                     item(key = "top-songs-heading") {
                         Box(modifier = Modifier.fillMaxWidth().background(TallyColors.ground)) {
-                            RowHeader(
-                                title = stringResource(R.string.tally_music_top_songs),
-                                count = state.topSongs.size,
-                                modifier = RundownModifier.padding(bottom = 8.dp),
-                            )
+                            if (isPhone()) {
+                                PhoneRundownHeader(
+                                    title = stringResource(R.string.tally_music_top_songs),
+                                    count = state.topSongs.size,
+                                )
+                            } else {
+                                RowHeader(
+                                    title = stringResource(R.string.tally_music_top_songs),
+                                    count = state.topSongs.size,
+                                    modifier = RundownModifier.padding(bottom = 8.dp),
+                                )
+                            }
                         }
                     }
                     itemsIndexed(state.topSongs, key = { index, song -> "song-$index-${song?.id}" }) { index, song ->
                         Box(modifier = Modifier.fillMaxWidth().background(TallyColors.ground)) {
-                            Box(modifier = RundownModifier) {
+                            Box(modifier = if (isPhone()) Modifier else RundownModifier) {
                                 TrackRow(
                                     number = MusicFormat.trackNumber(index + 1),
                                     title = song?.title ?: song?.name ?: "",
@@ -380,6 +391,6 @@ private fun ArtistLoaded(
                 }
             }
         }
-        TopScrim(listState)
+        if (isPhone()) ReportMusicScroll(listState) else TopScrim(listState)
     }
 }

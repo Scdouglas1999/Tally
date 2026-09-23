@@ -29,6 +29,7 @@ import com.github.damontecres.wholphin.ui.playback.SimpleMediaStream
 import com.github.damontecres.wholphin.ui.roundMinutes
 import com.github.damontecres.wholphin.util.supportedPlayableTypes
 import com.github.damontecres.wholphin.util.supportedShufflableTypes
+import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
 import kotlinx.coroutines.delay
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -214,9 +215,10 @@ private fun MenuPanel(
     fromLongClick: Boolean,
     onDismissRequest: () -> Unit,
 ) {
-    var waiting by remember { mutableStateOf(fromLongClick) }
+    val phone = isPhone()
+    var waiting by remember { mutableStateOf(fromLongClick && !phone) }
     LaunchedEffect(fromLongClick) {
-        if (fromLongClick) delay(LONG_PRESS_WAIT_MS)
+        if (fromLongClick && !phone) delay(LONG_PRESS_WAIT_MS)
         waiting = false
     }
     TallyPanelWindow(onDismissRequest = onDismissRequest) {
@@ -384,12 +386,15 @@ private fun ItemMenu(
                 },
             )
         }
-    MenuPanel(
-        title = item.title ?: "",
-        entries = entries,
-        fromLongClick = menu.fromLongClick,
-        onDismissRequest = onDismissRequest,
-    )
+    // A phone shows one sheet at a time: the menu steps aside while its chooser or confirmation is open.
+    if (!isPhone() || subMenu == null) {
+        MenuPanel(
+            title = item.title ?: "",
+            entries = entries,
+            fromLongClick = menu.fromLongClick,
+            onDismissRequest = onDismissRequest,
+        )
+    }
 
     when (val sub = subMenu) {
         is SubMenu.Streams -> {
@@ -732,12 +737,14 @@ private fun MusicMenu(
                 add(panelItem(stringResource(R.string.go_to_artist), then { actions.onClickGoToArtist(artistId) }))
             }
         }
-    MenuPanel(
-        title = item.title ?: "",
-        entries = entries,
-        fromLongClick = menu.fromLongClick,
-        onDismissRequest = onDismissRequest,
-    )
+    if (!isPhone() || !confirmDelete) {
+        MenuPanel(
+            title = item.title ?: "",
+            entries = entries,
+            fromLongClick = menu.fromLongClick,
+            onDismissRequest = onDismissRequest,
+        )
+    }
     if (confirmDelete) {
         TallyConfirmDeleteDialog(
             itemTitle = item.title ?: "",

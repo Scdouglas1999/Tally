@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.preferences.subtitle
 
 import android.content.pm.ActivityInfo
@@ -85,6 +88,43 @@ fun SubtitleStylePage(
     var focusedOnMargin by remember { mutableStateOf(false) }
     var focusedOnImageOpacity by remember { mutableStateOf(false) }
 
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor.current ==
+        io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor.PHONE
+    ) {
+        val phoneDisplay = LocalView.current.display
+        io.github.scdouglas1999.tally.ui.settings.phone.PhoneSubtitleStylePage(
+            title =
+                if (isPageForHdrSettings) {
+                    stringResource(R.string.hdr_subtitle_style)
+                } else {
+                    stringResource(R.string.subtitle_style)
+                },
+            preferences = prefs,
+            prefList =
+                remember(isPageForHdrSettings, phoneDisplay) {
+                    if (!isPageForHdrSettings && SubtitleSettings.shouldShowHdr(phoneDisplay)) {
+                        SubtitleSettings.preferences + SubtitleSettings.hdrPreferenceGroup
+                    } else {
+                        SubtitleSettings.preferences
+                    }
+                },
+            onPreferenceChange = { newSubtitlePrefs ->
+                viewModel.preferenceDataStore.updateData {
+                    it.updateInterfacePreferences {
+                        if (isPageForHdrSettings) {
+                            hdrSubtitlesPreferences = newSubtitlePrefs
+                        } else {
+                            subtitlesPreferences = newSubtitlePrefs
+                        }
+                    }
+                }
+            },
+            modifier = modifier,
+        )
+        return
+    }
+    // TALLY: end
     Row(
         modifier = modifier,
     ) {
