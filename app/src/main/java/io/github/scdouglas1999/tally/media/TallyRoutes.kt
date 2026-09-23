@@ -11,6 +11,7 @@ import io.github.scdouglas1999.tally.media.collection.TallyCollectionPage
 import io.github.scdouglas1999.tally.media.episode.TallyEpisodePage
 import io.github.scdouglas1999.tally.media.favorites.TallyFavoritesPage
 import io.github.scdouglas1999.tally.media.home.TallyHomePage
+import io.github.scdouglas1999.tally.media.library.TallyFilteredCollection
 import io.github.scdouglas1999.tally.media.library.TallyLibraryPage
 import io.github.scdouglas1999.tally.media.movie.TallyMoviePage
 import io.github.scdouglas1999.tally.media.music.TallyAlbumPage
@@ -146,6 +147,17 @@ object TallyRoutes {
                     modifier = modifier,
                 )
                 true
+            }
+
+            // A genre or a studio of a library (upstream's CollectionFolderGeneric); other parents stay upstream's.
+            is Destination.FilteredCollection -> {
+                if (destination.parentType == BaseItemKind.GENRE || destination.parentType == BaseItemKind.STUDIO) {
+                    LaunchedEffect(Unit) { onClearBackdrop() }
+                    TallyFilteredCollection(destination, preferences, modifier)
+                    true
+                } else {
+                    false
+                }
             }
 
             Destination.Favorites -> {

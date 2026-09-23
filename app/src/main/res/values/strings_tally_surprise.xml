@@ -21,9 +21,6 @@
         <item quantity="one">%1$d season</item>
         <item quantity="other">%1$d seasons</item>
     </plurals>
-    <string name="tally_surprise_runtime_hm">%1$dH %2$dM</string>
-    <string name="tally_surprise_runtime_h">%1$dH</string>
-    <string name="tally_surprise_runtime_m">%1$dM</string>
     <string name="tally_surprise_rating">★ %1$.1f</string>
     <string name="tally_surprise_empty_title">Nothing matches</string>
     <string name="tally_surprise_empty_subtitle">Loosen a filter and try again.</string>

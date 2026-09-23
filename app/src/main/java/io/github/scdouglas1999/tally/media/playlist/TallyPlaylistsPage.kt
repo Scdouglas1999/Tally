@@ -62,6 +62,7 @@ import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.rememberWideImageUrl
 import io.github.scdouglas1999.tally.media.library.FilterDialog
+import io.github.scdouglas1999.tally.media.library.HeaderCount
 import io.github.scdouglas1999.tally.media.library.LibraryControlButton
 import io.github.scdouglas1999.tally.media.library.SortDialog
 import io.github.scdouglas1999.tally.media.library.directionArrow
@@ -276,21 +277,15 @@ private fun PlaylistsHeader(
                 .padding(horizontal = TallyDimens.marginHorizontal)
                 .padding(top = TallyDimens.marginVertical),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        // `PLAYLISTS · 3 PLAYLISTS`, as the library pages put their count on the kicker line.
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = title.tallyUppercase(),
                 style = TallyType.label,
                 color = TallyColors.accent,
                 maxLines = 1,
             )
-            if (count != null) {
-                Text(
-                    text = count.toString(),
-                    style = TallyType.label,
-                    color = TallyColors.muted,
-                    maxLines = 1,
-                )
-            }
+            if (count != null) HeaderCount(pluralStringResource(R.plurals.tally_qa_count_playlists, count, count))
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,

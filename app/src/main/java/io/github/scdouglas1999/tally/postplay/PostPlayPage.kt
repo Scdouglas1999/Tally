@@ -27,14 +27,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -100,6 +103,10 @@ fun PostPlayPage(
     val watchAgainFocus = remember { FocusRequester() }
     val doneFocus = remember { FocusRequester() }
     val firstPosterFocus = remember { FocusRequester() }
+
+    // The poster that had focus last: coming back from its details page returns to it, not to the first one.
+    val lastPosterFocus = remember { FocusRequester() }
+    var posterIndex by rememberSaveable(destination.itemId) { mutableIntStateOf(0) }
     var initialFocusPlaced by remember(destination.itemId) { mutableStateOf(false) }
     val similar = state.similar
     val hasPosters = !similar.isNullOrEmpty()
@@ -116,7 +123,7 @@ fun PostPlayPage(
             return@LaunchedEffect
         }
         repeat(5) {
-            if (firstPosterFocus.tryRequestFocus("postplay-poster")) {
+            if (lastPosterFocus.tryRequestFocus("postplay-poster")) {
                 initialFocusPlaced = true
                 return@LaunchedEffect
             }
@@ -207,6 +214,9 @@ fun PostPlayPage(
             SimilarRow(
                 items = similar.orEmpty(),
                 firstPosterFocus = firstPosterFocus,
+                lastPosterFocus = lastPosterFocus,
+                focusIndex = posterIndex,
+                onFocusIndex = { posterIndex = it },
                 upTarget = watchAgainFocus,
                 onOpen = viewModel::open,
                 modifier =
@@ -330,10 +340,15 @@ private fun metaLine(film: BaseItemDto): String =
 private fun SimilarRow(
     items: List<BaseItemDto>,
     firstPosterFocus: FocusRequester,
+    lastPosterFocus: FocusRequester,
+    focusIndex: Int,
+    onFocusIndex: (Int) -> Unit,
     upTarget: FocusRequester,
     onOpen: (BaseItemDto) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // [lastPosterFocus] sits on the poster that had focus last (the first one to begin with).
+    val target = focusIndex.coerceIn(0, (items.size - 1).coerceAtLeast(0))
     val images = LocalImageUrlService.current
     val listState = rememberLazyListState()
     Column(
@@ -376,6 +391,8 @@ private fun SimilarRow(
                     modifier =
                         Modifier
                             .then(if (index == 0) Modifier.focusRequester(firstPosterFocus) else Modifier)
+                            .then(if (index == target) Modifier.focusRequester(lastPosterFocus) else Modifier)
+                            .onFocusChanged { if (it.isFocused) onFocusIndex(index) }
                             .focusProperties {
                                 up = upTarget
                                 if (index == 0) {

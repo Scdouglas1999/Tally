@@ -58,6 +58,8 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.data.filter.DefaultFilterOptions
+import com.github.damontecres.wholphin.data.filter.DefaultForGenresFilterOptions
+import com.github.damontecres.wholphin.data.filter.DefaultForStudiosFilterOptions
 import com.github.damontecres.wholphin.data.filter.DefaultTvFilterOptions
 import com.github.damontecres.wholphin.data.filter.ItemFilterBy
 import com.github.damontecres.wholphin.data.model.BaseItem
@@ -80,6 +82,7 @@ import com.github.damontecres.wholphin.ui.data.ItemDetailsDialogInfo
 import com.github.damontecres.wholphin.ui.data.MovieSortOptions
 import com.github.damontecres.wholphin.ui.data.SeriesSortOptions
 import com.github.damontecres.wholphin.ui.data.VideoSortOptions
+import com.github.damontecres.wholphin.ui.data.rememberSortOptions
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.nav.ServerNavDrawerItem
 import com.github.damontecres.wholphin.ui.toServerString
@@ -147,6 +150,95 @@ fun TallyLibraryPage(
     val itemId = destination.itemId
     val drawerName by remember(itemId) { pageViewModel.libraryName(itemId) }.collectAsState(null)
     val nav = pageViewModel.navigationManager
+    LibraryFrame(modifier) {
+        when (destination.collectionType) {
+            CollectionType.MOVIES -> {
+                TabbedLibrary(
+                    itemId = itemId,
+                    preferences = preferences,
+                    drawerName = drawerName,
+                    tabs = MovieTabs,
+                    collectionType = CollectionType.MOVIES,
+                    nav = nav,
+                )
+            }
+
+            CollectionType.TVSHOWS -> {
+                TabbedLibrary(
+                    itemId = itemId,
+                    preferences = preferences,
+                    drawerName = drawerName,
+                    tabs = TvTabs,
+                    collectionType = CollectionType.TVSHOWS,
+                    nav = nav,
+                )
+            }
+
+            else -> {
+                SingleLibrary(
+                    spec = singleSpec(itemId, destination.collectionType),
+                    preferences = preferences,
+                    drawerName = drawerName,
+                    nav = nav,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * A genre or a studio of a library (`Destination.FilteredCollection`, opened from the Genres and Studios tabs and
+ * from genre home rows) in the Tally look: upstream's `CollectionFolderGeneric` with the arguments
+ * `DestinationContent` gives it (posters, play enabled, the genre or studio filter options, the library type's sort
+ * options, `item.destination(index)` on click). One grid under the name (`CRIME MOVIES`) as the kicker.
+ */
+@Composable
+fun TallyFilteredCollection(
+    destination: Destination.FilteredCollection,
+    preferences: UserPreferences,
+    modifier: Modifier = Modifier,
+    pageViewModel: LibraryPageViewModel = hiltViewModel(),
+) {
+    val sortOptions = rememberSortOptions(destination.collectionType)
+    val spec =
+        remember(destination, sortOptions) {
+            FolderSpec(
+                itemId = destination.itemId.toServerString(),
+                // CollectionFolderView's default key, as upstream creates it for this destination.
+                viewModelKey = destination.itemId.toServerString(),
+                initialFilter = destination.filter,
+                recursive = destination.recursive,
+                sortOptions = sortOptions,
+                filterOptions =
+                    if (destination.parentType == BaseItemKind.STUDIO) {
+                        DefaultForStudiosFilterOptions
+                    } else {
+                        DefaultForGenresFilterOptions
+                    },
+                playEnabled = true,
+                defaultViewOptions = ViewOptionsPoster,
+                useSeriesForPrimary = true,
+                click = ClickKind.INDEXED,
+                jumpBar = true,
+                collectionType = destination.collectionType,
+            )
+        }
+    LibraryFrame(modifier) {
+        SingleLibrary(
+            spec = spec,
+            preferences = preferences,
+            drawerName = null,
+            nav = pageViewModel.navigationManager,
+        )
+    }
+}
+
+/** The Tally scale, text color and body style over the home page's scrim, for every library page. */
+@Composable
+private fun LibraryFrame(
+    modifier: Modifier,
+    content: @Composable () -> Unit,
+) {
     TallyScale {
         CompositionLocalProvider(LocalContentColor provides TallyColors.text) {
             ProvideTextStyle(TallyType.body) {
@@ -172,38 +264,7 @@ fun TallyLibraryPage(
                                 )
                             },
                 ) {
-                    when (destination.collectionType) {
-                        CollectionType.MOVIES -> {
-                            TabbedLibrary(
-                                itemId = itemId,
-                                preferences = preferences,
-                                drawerName = drawerName,
-                                tabs = MovieTabs,
-                                collectionType = CollectionType.MOVIES,
-                                nav = nav,
-                            )
-                        }
-
-                        CollectionType.TVSHOWS -> {
-                            TabbedLibrary(
-                                itemId = itemId,
-                                preferences = preferences,
-                                drawerName = drawerName,
-                                tabs = TvTabs,
-                                collectionType = CollectionType.TVSHOWS,
-                                nav = nav,
-                            )
-                        }
-
-                        else -> {
-                            SingleLibrary(
-                                spec = singleSpec(itemId, destination.collectionType),
-                                preferences = preferences,
-                                drawerName = drawerName,
-                                nav = nav,
-                            )
-                        }
-                    }
+                    content()
                 }
             }
         }

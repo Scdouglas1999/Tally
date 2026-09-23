@@ -75,9 +75,9 @@ import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.media.pages.joinMeta
 import io.github.scdouglas1999.tally.media.pages.personLifeLine
 import io.github.scdouglas1999.tally.media.pages.primaryRole
-import io.github.scdouglas1999.tally.media.search.PageScrollSpec
 import io.github.scdouglas1999.tally.media.search.PagesItemRow
 import io.github.scdouglas1999.tally.media.search.PagesLoading
+import io.github.scdouglas1999.tally.media.search.rememberPageScrollSpec
 import io.github.scdouglas1999.tally.media.series.episodeCode
 import io.github.scdouglas1999.tally.media.series.serverDate
 import io.github.scdouglas1999.tally.ui.components.EmptyState
@@ -273,7 +273,7 @@ private fun PersonLoaded(
     }
     val bringHeader = remember { BringIntoViewRequester() }
     val scope = rememberCoroutineScope()
-    CompositionLocalProvider(LocalBringIntoViewSpec provides PageScrollSpec) {
+    CompositionLocalProvider(LocalBringIntoViewSpec provides rememberPageScrollSpec()) {
         LazyColumn(
             contentPadding = PaddingValues(bottom = TallyDimens.marginVertical),
             verticalArrangement = Arrangement.spacedBy(24.dp),

@@ -198,12 +198,12 @@ private fun NameGrid(
         EmptyState(
             title = stringResource(R.string.tally_library_empty_title),
             subtitle = stringResource(R.string.tally_library_empty_body),
+            // Where an empty library grid puts it: under the header strip, clear of the jump bar's column.
             modifier =
                 modifier
                     .fillMaxSize()
-                    .padding(
-                        horizontal = TallyDimens.marginHorizontal,
-                    ).padding(bottom = TallyDimens.marginVertical),
+                    .padding(start = TallyDimens.marginHorizontal, end = GridEndPadding)
+                    .padding(top = BodyTopGap, bottom = TallyDimens.marginVertical),
         )
         return
     }

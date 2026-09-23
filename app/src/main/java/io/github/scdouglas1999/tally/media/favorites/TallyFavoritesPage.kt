@@ -52,10 +52,10 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
-import io.github.scdouglas1999.tally.media.search.PageScrollSpec
 import io.github.scdouglas1999.tally.media.search.PagesItemRow
 import io.github.scdouglas1999.tally.media.search.PagesLoading
 import io.github.scdouglas1999.tally.media.search.providerContextMenu
+import io.github.scdouglas1999.tally.media.search.rememberPageScrollSpec
 import io.github.scdouglas1999.tally.media.search.typeTitle
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.RowHeader
@@ -153,7 +153,7 @@ fun TallyFavoritesPage(
                                     refocus = null
                                 }
                             }
-                            CompositionLocalProvider(LocalBringIntoViewSpec provides PageScrollSpec) {
+                            CompositionLocalProvider(LocalBringIntoViewSpec provides rememberPageScrollSpec()) {
                                 LazyColumn(
                                     contentPadding = PaddingValues(bottom = TallyDimens.marginVertical),
                                     verticalArrangement = Arrangement.spacedBy(24.dp),

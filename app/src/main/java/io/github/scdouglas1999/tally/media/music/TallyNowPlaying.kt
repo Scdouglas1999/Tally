@@ -30,11 +30,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,7 +82,6 @@ import com.github.damontecres.wholphin.ui.main.settings.MoveDirection
 import com.github.damontecres.wholphin.ui.playback.PlaybackKeyHandler
 import com.github.damontecres.wholphin.ui.playback.isMedia
 import com.github.damontecres.wholphin.ui.tryRequestFocus
-import com.github.damontecres.wholphin.util.ExceptionHandler
 import com.github.damontecres.wholphin.util.LoadingState
 import io.github.scdouglas1999.tally.media.kit.FocusEdge
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
@@ -97,7 +97,6 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
 import io.github.scdouglas1999.tally.ui.theme.TallyType
-import kotlinx.coroutines.launch
 import org.jellyfin.sdk.model.extensions.ticks
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
@@ -165,6 +164,7 @@ fun TallyNowPlaying(
         }
 
     var queueRequested by remember { mutableStateOf(false) }
+
     val lyricsOn = musicPrefs.showLyrics
     val panel =
         if (lyricsOn && !queueRequested && current?.hasLyrics == true) NowPlayingPanel.LYRICS else NowPlayingPanel.QUEUE
@@ -172,7 +172,13 @@ fun TallyNowPlaying(
     val controlsFocus = remember { FocusRequester() }
     val panelFocus = remember { FocusRequester() }
     var panelHasFocus by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+
+    // QUEUE moves focus into the queue once the queue is on screen: requested any earlier, it lands on the lyrics
+    // that are being replaced and falls back to the first control.
+    var queueFocusRequests by remember { mutableIntStateOf(0) }
+    LaunchedEffect(queueFocusRequests) {
+        if (queueFocusRequests > 0) requestFocusSoon(panelFocus, "tally-now-playing-queue")
+    }
 
     val arrival = arrivalFocus(playFocus, "tally-now-playing")
     // BACK from the queue or the lyrics comes back to the controls first, as upstream's queue goes back to its top.
@@ -274,7 +280,7 @@ fun TallyNowPlaying(
                         },
                         onQueue = {
                             queueRequested = true
-                            scope.launch(ExceptionHandler()) { requestFocusSoon(panelFocus, "tally-now-playing-queue") }
+                            queueFocusRequests++
                         },
                         onStop = { viewModel.stop() },
                         modifier = Modifier.padding(top = 12.dp).focusRequester(controlsFocus),
