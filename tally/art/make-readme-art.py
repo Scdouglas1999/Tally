@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Renders the README header (1600x440) and the GitHub social preview (1280x640) in the Tally brand system:
-near-black ground, an amber rule along the top, the amber tally square, the name in IBM Plex Sans Bold (tracked),
-and (social preview only) a mono tagline. Run from the repository root: python3 tally/art/make-readme-art.py
+near-black ground, an amber rule along the top, the amber tally square and the name in IBM Plex Sans Bold (tracked).
+No tagline on either. Run from the repository root: python3 tally/art/make-readme-art.py
 
 The header is an animated PNG: the tally light is off, flickers on like a lamp warming up and settles with a soft
 glow, then the top rule sweeps across ("on air"); it stays lit for about nine seconds and repeats. It loops because
@@ -95,6 +95,6 @@ def header_animation(out):
 
 
 header_animation(OUT + "header.png")
-art(1280, 640, 150, "LIVE SPORTS  ·  YOUR LIBRARY  ·  WATCH TOGETHER", "A JELLYFIN CLIENT FOR ANDROID TV",
-    OUT + "social-preview.png", tag_scale=0.155, tag_track=0.035)
+# the social preview is the banner's lit frame at GitHub's 2:1 card size: the light and the name, nothing else
+art(1280, 640, 150, None, None, OUT + "social-preview.png")
 print("ok")

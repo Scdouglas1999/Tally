@@ -16,6 +16,11 @@ Each modified Wholphin file also carries a "Modified for Tally" notice at its to
 new seam in a file that has no notice yet must add one. `app/src/main/res/values/strings.xml` cannot carry one
 (Weblate rewrites it) and is listed in NOTICE.md instead. Locally, `upstream-main` tracks Wholphin's `main`.
 
+Wholphin's project documents are Tally's own here: `README.md`, `CONTRIBUTING.md` and the `.github/` issue and pull
+request templates are rewritten, and Wholphin's `DEVELOPMENT.md` and `Intents.md` live in `docs/` (as
+`WHOLPHIN-DEVELOPMENT.md` and `INTENTS.md`). An upstream merge that touches those files conflicts; keep Tally's
+version, and carry any real change to Wholphin's two guides over to their copies in `docs/`.
+
 The UI is redrawn screen by screen while the `TALLY` theme is selected: `io/github/scdouglas1999/tally/media/TallyRoutes.kt` decides
 which destinations Tally draws, reusing Wholphin's view models. Design rules are in [`UI.md`](UI.md).
 

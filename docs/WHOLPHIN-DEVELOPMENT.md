@@ -1,6 +1,11 @@
 # Wholphin developer's guide
 
-See also the [Contributing](CONTRIBUTING.md) guide for general information on contributing to the project.
+> This is Wholphin's developer guide, kept because it still describes the code Tally shares with Wholphin: the
+> player, the library, settings and the data layer under `com/github/damontecres/wholphin/`. Tally's own code and
+> the rules for changing Wholphin's files are in [TALLY.md](../TALLY.md) and [tally/README.md](../tally/README.md).
+> Moved here from the repository root by Tally on 2026-09-23; otherwise unchanged.
+
+See also the [Contributing](../CONTRIBUTING.md) guide for general information on contributing to the project.
 
 ##  Overview
 
@@ -28,7 +33,7 @@ After forking and cloning your fork, you can import the project into Android Stu
 
 It is recommended to use a recent version of [Android Studio](https://developer.android.com/studio). Make sure the [version is compatible](https://developer.android.com/build/releases/gradle-plugin#android_gradle_plugin_and_android_studio_compatibility) with Wholphin's AGP version.
 
-Code formatting should follow [ktlint's](https://github.com/pinterest/ktlint) rules. Find the `ktlint` version in [`.pre-commit-config.yaml`](./.pre-commit-config.yaml). Optionally, install the [ktlint plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) in Android Studio to run automatically. Configure the version in `Settings->Tools->KtLint->Ruleset Version`.
+Code formatting should follow [ktlint's](https://github.com/pinterest/ktlint) rules. Find the `ktlint` version in [`.pre-commit-config.yaml`](../.pre-commit-config.yaml). Optionally, install the [ktlint plugin](https://plugins.jetbrains.com/plugin/15057-ktlint) in Android Studio to run automatically. Configure the version in `Settings->Tools->KtLint->Ruleset Version`.
 
 Also, it's recommend to add an extra ruleset jar for Compose-specific KtLint: https://mrmans0n.github.io/compose-rules/ktlint/#using-with-ktlint-cli-or-the-ktlint-intellij-plugin
 

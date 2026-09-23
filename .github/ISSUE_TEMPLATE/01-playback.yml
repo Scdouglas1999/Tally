@@ -1,76 +1,60 @@
-name: "Playback Problem"
-description: Report an issue with playback
-labels: [
-  "bug", "playback"
-]
+name: "Playback problem"
+description: A video won't start, stutters, has no sound, or the subtitles are wrong
+labels: ["bug", "playback"]
 body:
   - type: textarea
     id: description
     attributes:
-      label: "Description"
-      description: Please enter a description of the playback issue
-    validations:
-      required: true
-  - type: dropdown
-    id: experimental
-    attributes:
-      label: Experimental settings
-      description: Do you have experiment settings turn on?
-      options:
-        - "Yes"
-        - "No"
+      label: What happened
+      description: What you were playing (a film, a show, a live channel) and what went wrong.
     validations:
       required: true
   - type: dropdown
     id: player
     attributes:
-      label: Player backend
-      description: Which player(s) cause the issue?
+      label: Player
+      description: Shown as Playback Backend in Settings.
       multiple: true
       options:
-        - ExoPlayer (default)
+        - ExoPlayer (the default)
         - MPV
-        - External App (please specify)
+        - An external app
     validations:
       required: true
   - type: textarea
     id: mediainfo
     attributes:
-      label: "Media info"
-      description: Please enter details about what media you are trying to play (video or audio codecs, container, etc)
-      placeholder: Use mediainfo or "Send media info to server" in the app to gather this
+      label: About the file
+      description: Container, video and audio codecs, and whether Jellyfin was transcoding. Hold OK on the film or episode and choose "Send media info log to server" to collect this.
     validations:
-      required: true
+      required: false
   - type: input
     id: app-version
     attributes:
-      label: "App Version"
-      description: What version of the app?
-      placeholder: "v0.5.1"
+      label: Tally version
+      description: At the bottom of Settings.
+      placeholder: "v1.0.8-156-gd202ea17"
     validations:
       required: true
   - type: input
     id: server
     attributes:
-      label: "Server Version"
-      description: What version of the server?
-      placeholder: "10.11.6"
+      label: Jellyfin server version
+      placeholder: "10.10.7"
     validations:
-      required: true
+      required: false
   - type: input
     id: device
     attributes:
-      label: "Device"
-      description: What device are you using?
-      placeholder: "NVIDIA Shield TV Pro 2019"
+      label: TV or streaming box
+      placeholder: "Chromecast with Google TV, Fire TV Stick 4K, Nvidia Shield..."
     validations:
       required: false
   - type: textarea
     id: logs
     attributes:
-      label: "Logs"
-      description: Please [gather any logs or crash reports](https://github.com/damontecres/Wholphin/wiki/Gathering-app-logs) and include them here.
-      placeholder: Review logs for personal information before sharing them here publicly!
-      render: bash
+      label: Logs
+      description: In Tally, Settings → Advanced Settings → Send app logs to current server. Whoever runs the server finds them in the Jellyfin dashboard under Logs. Check them for anything private before pasting.
+      render: text
     validations:
       required: false

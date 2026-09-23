@@ -1,0 +1,11 @@
+name: "An idea"
+description: Something Tally could do, or do better
+labels: ["idea"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What you'd like to be able to do, and when it would come up. The situation matters more than the solution.
+    validations:
+      required: true

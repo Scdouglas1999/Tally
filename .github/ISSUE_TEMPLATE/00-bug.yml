@@ -1,67 +1,61 @@
-name: "Bug Report"
-description: Report a bug
-labels: [
-  "bug"
-]
+name: "Something's wrong"
+description: A screen looks off, a button does the wrong thing, the app crashed
+labels: ["bug"]
 body:
   - type: textarea
     id: description
     attributes:
-      label: "Description"
-      description: Please enter a description of the bug
+      label: What happened
+      description: What you did, what you expected, and what you got instead. A photo of the TV is often the fastest way to show it.
     validations:
       required: true
   - type: textarea
-    id: reprod
+    id: steps
     attributes:
-      label: "Reproduction steps"
-      description: Please enter the steps to reproduce
+      label: How to make it happen again
       placeholder: |
-        1. Click on '...'
-        2. Scroll to '....'
-        3. See error
+        1. Open Sports
+        2. Press right twice on the first row
+        3. ...
     validations:
       required: false
-  - type: dropdown
-    id: experimental
-    attributes:
-      label: Experimental settings
-      description: Do you have experiment settings turn on?
-      options:
-        - "Yes"
-        - "No"
-    validations:
-      required: true
   - type: input
     id: app-version
     attributes:
-      label: "App Version"
-      description: What version of the app?
-      placeholder: "v0.5.1"
+      label: Tally version
+      description: At the bottom of Settings.
+      placeholder: "v1.0.8-156-gd202ea17"
     validations:
       required: true
   - type: input
     id: server
     attributes:
-      label: "Server Version"
-      description: What version of the server?
-      placeholder: "10.11.6"
+      label: Jellyfin server version
+      placeholder: "10.10.7"
+    validations:
+      required: false
+  - type: dropdown
+    id: plugin
+    attributes:
+      label: Is the Tally server plugin installed?
+      options:
+        - "Yes"
+        - "No"
+        - "I don't know"
     validations:
       required: true
   - type: input
     id: device
     attributes:
-      label: "Device"
-      description: What device are you using?
-      placeholder: "NVIDIA Shield TV Pro 2019"
+      label: TV or streaming box
+      placeholder: "Chromecast with Google TV, Fire TV Stick 4K, Nvidia Shield..."
     validations:
       required: false
   - type: textarea
     id: logs
     attributes:
-      label: "Logs"
-      description: Please [gather any logs or crash reports](https://github.com/damontecres/Wholphin/wiki/Gathering-app-logs) and include them here.
-      placeholder: Review logs for personal information before sharing them here publicly!
-      render: bash
+      label: Logs
+      description: In Tally, Settings → Advanced Settings → Send app logs to current server. Whoever runs the server finds them in the Jellyfin dashboard under Logs. Check them for anything private before pasting.
+      render: text
     validations:
       required: false

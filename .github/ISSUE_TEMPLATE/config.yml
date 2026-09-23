@@ -1,8 +1,5 @@
-blank_issues_enabled: false
+blank_issues_enabled: true
 contact_links:
-  - name: New feature / UI suggestion
-    url: https://github.com/damontecres/Wholphin/discussions/new?category=ideas
-    about: Please request new features here
-  - name: Questions
-    url: https://github.com/damontecres/Wholphin/discussions/new?category=q-a
-    about: Please ask questions here
+  - name: A problem that also happens in Wholphin
+    url: https://github.com/damontecres/Wholphin/issues
+    about: If you can reproduce it in Wholphin with one of its own themes, it probably belongs there. Please say so here too, so Tally can pick up the fix.

@@ -29,6 +29,10 @@ repository's git history; the fork starts after Wholphin's `v1.0.8` release.
   - `app/src/main/res/values/strings.xml`: only the app name (`app_name`, `app_name_long`) is changed; the file
     is otherwise Wholphin's and is maintained by Wholphin's translation workflow;
   - `.gitignore`: Tally build outputs added.
+- **Project documents.** `README.md` and `CONTRIBUTING.md` are rewritten for Tally, and the GitHub issue and pull
+  request templates in `.github/` are Tally's. Wholphin's developer guide and intents guide moved to
+  [`docs/WHOLPHIN-DEVELOPMENT.md`](docs/WHOLPHIN-DEVELOPMENT.md) and [`docs/INTENTS.md`](docs/INTENTS.md), each with a
+  note at the top; their text is otherwise Wholphin's.
 - **Identity.** Tally has its own name, icon and application id (`io.github.scoduglas1999.jellytv`), so it
   installs alongside Wholphin and cannot be mistaken for it.
 

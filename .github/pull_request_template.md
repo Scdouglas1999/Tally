@@ -1,17 +1,9 @@
-<!-- By submitting this pull request, you acknowledge that you have read the [contributing guide](https://github.com/damontecres/Wholphin/blob/main/CONTRIBUTING.md, including the AI/LLM policy, and [developer's guide](https://github.com/damontecres/Wholphin/blob/main/DEVELOPMENT.md) -->
+<!-- Thanks for sending a change. The contributing notes are in CONTRIBUTING.md and the engineering rules in TALLY.md. -->
 
-## Description
-<!-- Describe the changes in detail -->
+## What this changes
 
-### Related issues
-<!-- If this is a new feature or a change, there must be a discussion in an issue first, reference the issue here -->
-<!-- If fixing a bug, reference the bug issue here, or describe the bug, including steps to reproduce -->
+## How you tested it
+<!-- The device or emulator, and what you did on it. For anything visible, a screenshot before and after. -->
 
-### Testing
-<!-- Describe how this change was tested and on what device(s) -->
-
-## Screenshots
-<!-- Please include screenshots if the PR alters any UI elements -->
-
-## AI or LLM usage
-<!-- If you used any AI or LLM assistance, please list where in the code and how you tested it -->
+## Wholphin's code
+<!-- If this touches files under com/github/damontecres/wholphin/, say which seam markers you added or changed. -->

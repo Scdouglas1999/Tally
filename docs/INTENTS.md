@@ -1,5 +1,10 @@
 # Intents
 
+> Inherited from Wholphin, and it works the same in Tally: other apps can open or play media in Tally with the
+> intents below. The URI scheme is still `wholphin://`. In the `adb` examples, name Tally's activity instead of
+> Wholphin's: `-n 'io.github.scoduglas1999.jellytv/com.github.damontecres.wholphin.MainActivity'`.
+> Moved here from the repository root by Tally on 2026-09-23; otherwise unchanged.
+
 > [!IMPORTANT]
 > This feature is experimental and the exact behaviors and/or parameters may change at any time
 
