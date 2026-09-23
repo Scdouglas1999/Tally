@@ -483,14 +483,6 @@ fun DestinationContent(
             )
         }
 
-        is Destination.TallyYear -> {
-            LaunchedEffect(Unit) { onClearBackdrop.invoke() }
-            io.github.scdouglas1999.tally.year.YearPage(
-                destination = destination,
-                modifier = modifier,
-            )
-        }
-
         is Destination.TallyPostPlay -> {
             LaunchedEffect(Unit) { onClearBackdrop.invoke() }
             io.github.scdouglas1999.tally.postplay.PostPlayPage(

@@ -154,11 +154,6 @@ class NavDrawerViewModel
                     navigationManager.navigateToFromDrawer(Destination.TallySurprise)
                 }
 
-                NavDrawerItem.TallyYear -> {
-                    setIndex(index)
-                    navigationManager.navigateToFromDrawer(Destination.TallyYear())
-                }
-
                 // TALLY: end
 
                 is ServerNavDrawerItem -> {
@@ -289,19 +284,6 @@ sealed interface NavDrawerItem {
             get() = "a_jellytv_surprise"
 
         override fun name(context: Context): String = context.getString(R.string.tally_surprise_name)
-    }
-
-    object TallyYear : NavDrawerItem {
-        override val id: String
-            get() = "a_jellytv_year"
-
-        override fun name(context: Context): String =
-            context.getString(
-                R.string.tally_year_name,
-                java.time.Year
-                    .now()
-                    .value,
-            )
     }
     // TALLY: end
 }
@@ -742,10 +724,6 @@ fun NavigationDrawerScope.NavItem(
 
                 NavDrawerItem.TallySurprise -> {
                     R.string.fa_dice
-                }
-
-                NavDrawerItem.TallyYear -> {
-                    R.string.tally_fa_calendar
                 }
 
                 // TALLY: end

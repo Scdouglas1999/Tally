@@ -52,8 +52,8 @@ file is a future merge conflict.** Therefore:
 | W21 | `ui/playback/PlaybackViewModel.kt` (item set) | publishes the now-playing item id for Send |
 | W22 | `MainContent.kt` | `TallyGlobalOverlays` (sleep chip, menu dialogs) above every screen |
 | W23 | `ui/main/HomePage.kt` | `HouseholdRow` item after the Tally row |
-| W24 | `ui/nav/Destination.kt`, `ui/nav/DestinationContent.kt` | `TallySurprise`, `TallyYear`, `TallyPostPlay` and their pages |
-| W25 | `ui/nav/NavDrawer.kt`, `services/NavDrawerService.kt` | drawer entries "Surprise me" and "Your <year>" |
+| W24 | `ui/nav/Destination.kt`, `ui/nav/DestinationContent.kt` | `TallySurprise`, `TallyPostPlay` and their pages ("Your <year>" was removed 2026-09-23) |
+| W25 | `ui/nav/NavDrawer.kt`, `services/NavDrawerService.kt` | drawer entry "Surprise me" |
 | W26 | `services/PlaylistCreator.kt` (movie branch) | append the next film of the movie's collection (`CollectionNext`) so upstream's Up Next works for movies |
 | W27 | `ui/playback/PlaybackViewModel.kt` (`STATE_ENDED`, nothing next) | a finished movie opens the post-play page (`TallyPostPlay`) instead of going back |
 | W28 | `services/ServerEventListener.kt` | advertise `TallyRemoteCommands.SUPPORTED`; start/stop `TallyRemoteCommands.listen` with the socket |

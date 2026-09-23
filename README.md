@@ -25,8 +25,6 @@ follows the same idea: a calm, dark control room with one accent color for what 
   being redrawn in one style. Wholphin's own themes are still in Settings if you prefer them.
 - **Surprise me.** One press picks tonight's film or show from your library, with quick filters (under two
   hours, kid-friendly, unwatched, genre).
-- **Your year.** A look back at your year in watching: hours, films and episodes, most-watched shows, top
-  genres, your busiest month, and which year your taste lives in.
 - **Watch together.** Start or join a watch party (Jellyfin SyncPlay): everyone plays, pauses and skips
   together, each on their own TV.
 - **Up next for films.** When a film in a collection ends, Tally offers the next one; otherwise "More like this".

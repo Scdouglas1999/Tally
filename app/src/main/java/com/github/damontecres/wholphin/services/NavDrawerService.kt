@@ -202,7 +202,6 @@ class NavDrawerService
                     // TALLY: begin
                     if (tallyAvailability.check()) add(NavDrawerItem.Sports)
                     add(NavDrawerItem.TallySurprise)
-                    add(NavDrawerItem.TallyYear)
                     // TALLY: end
                     add(NavDrawerItem.Favorites)
                     if (discoverActive) add(NavDrawerItem.Discover)

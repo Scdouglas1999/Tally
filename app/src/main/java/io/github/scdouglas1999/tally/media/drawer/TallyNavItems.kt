@@ -96,7 +96,6 @@ internal fun NavDrawerItem.isTallyAppSection(): Boolean =
         NavDrawerItem.Favorites,
         NavDrawerItem.Sports,
         NavDrawerItem.TallySurprise,
-        NavDrawerItem.TallyYear,
         -> true
 
         NavDrawerItem.More,
@@ -125,10 +124,6 @@ internal fun tallyGlyph(item: NavDrawerItem): TallyGlyph =
 
         NavDrawerItem.TallySurprise -> {
             TallyGlyph.Font(R.string.fa_dice)
-        }
-
-        NavDrawerItem.TallyYear -> {
-            TallyGlyph.Font(R.string.tally_fa_calendar)
         }
 
         is ServerNavDrawerItem -> {

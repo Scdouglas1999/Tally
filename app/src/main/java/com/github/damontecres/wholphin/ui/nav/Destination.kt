@@ -198,11 +198,6 @@ sealed class Destination(
     data object TallySurprise : Destination()
 
     @Serializable
-    data class TallyYear(
-        val year: Int? = null,
-    ) : Destination(true)
-
-    @Serializable
     data class TallyPostPlay(
         val itemId: UUID,
     ) : Destination(true)
