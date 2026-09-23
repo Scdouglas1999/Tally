@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import io.github.scdouglas1999.tally.ui.components.LowerThird
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.household.phone.PhoneSentNotice
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 import kotlinx.coroutines.delay
@@ -69,6 +72,11 @@ private val deviceNameStyle =
 @Composable
 fun SentNoticeHost(modifier: Modifier = Modifier) {
     val notice = SentNotices.current ?: return
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // A full-width bar above the bottom bar; its place is its own, not the TV's lower-third corner in [modifier].
+        PhoneSentNotice(notice = notice, onGone = { SentNotices.clear(notice) })
+        return
+    }
     key(notice.id) {
         var visible by remember { mutableStateOf(true) }
         LaunchedEffect(Unit) {

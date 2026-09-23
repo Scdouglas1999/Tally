@@ -406,13 +406,37 @@ private fun PhoneHomeLoaded(
         item(key = "hero") {
             when {
                 heroGame != null -> {
+                    // TALLY phone-sports: GAME opens the game sheet (the Sports section's), WATCH stays a direct watch.
+                    var gameSheet by remember { mutableStateOf(false) }
                     GameHero(
                         game = heroGame,
                         hideScores = hideScores,
                         artUrl = remember(heroGame.id, heroGame.backdropPath) { tallyRow.artUrl(heroGame) },
                         onWatch = { tallyRow.watch(heroGame) },
+                        onGame = { gameSheet = true },
                         modifier = Modifier.padding(bottom = PhoneDimens.rowGap),
                     )
+                    if (gameSheet) {
+                        val favoriteTeams =
+                            tallyRow.uiState
+                                .collectAsStateWithLifecycle()
+                                .value.favoriteTeams
+                        io.github.scdouglas1999.tally.ui.components.GameActionsDialog(
+                            game = heroGame,
+                            actions =
+                                io.github.scdouglas1999.tally.ui.components.gameActions(
+                                    game = heroGame,
+                                    favoriteTeams = favoriteTeams,
+                                    hideScores = hideScores,
+                                    onWatch = tallyRow::watch,
+                                    onAddToMultiview = { game -> game.watch?.channelId?.let(tallyRow::addToMultiview) },
+                                    onWatchInCorner = null,
+                                    onToggleFollow = tallyRow::toggleFollow,
+                                    onToggleHideScores = tallyRow::toggleHideScores,
+                                ),
+                            onDismiss = { gameSheet = false },
+                        )
+                    }
                 }
 
                 heroItem != null && heroRow != null -> {
@@ -681,7 +705,7 @@ private fun ItemHero(
 
 /**
  * Hero for a game: kicker `MLB · BOT 7TH`, the matchup, the TV game header's mono line (the score, or the broadcasts
- * before the start), then WATCH. The game sheet's GAME button joins it once the sports task provides the sheet.
+ * before the start), then WATCH (a direct watch) and GAME (the game sheet, as a tap on a game card opens).
  */
 @Composable
 private fun GameHero(
@@ -689,6 +713,7 @@ private fun GameHero(
     hideScores: Boolean,
     artUrl: String?,
     onWatch: () -> Unit,
+    onGame: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val title = stringResource(R.string.tally_actions_at, game.away.heroName(), game.home.heroName())
@@ -712,19 +737,28 @@ private fun GameHero(
             )
         }
         Spacer(Modifier.height(4.dp))
-        PhoneButton(
-            label =
-                if (game.watch != null) {
-                    stringResource(R.string.tally_phone_browse_watch)
-                } else {
-                    stringResource(R.string.tally_phone_browse_not_on_channels)
-                },
-            glyph = if (game.watch != null) stringResource(R.string.fa_play) else null,
-            primary = game.watch != null,
-            enabled = game.watch != null,
-            onClick = onWatch,
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(PhoneDimens.cardGap),
             modifier = Modifier.fillMaxWidth(),
-        )
+        ) {
+            PhoneButton(
+                label =
+                    if (game.watch != null) {
+                        stringResource(R.string.tally_phone_browse_watch)
+                    } else {
+                        stringResource(R.string.tally_phone_browse_not_on_channels)
+                    },
+                glyph = if (game.watch != null) stringResource(R.string.fa_play) else null,
+                primary = game.watch != null,
+                enabled = game.watch != null,
+                onClick = onWatch,
+                modifier = Modifier.weight(1f),
+            )
+            PhoneButton(
+                label = stringResource(R.string.tally_phone_sports_game),
+                onClick = onGame,
+            )
+        }
     }
 }
 

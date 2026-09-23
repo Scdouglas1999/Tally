@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,7 +38,11 @@ import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
 import io.github.scdouglas1999.tally.media.kit.tallyClickable
+import io.github.scdouglas1999.tally.ui.components.phone.PhoneGameCard
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
+import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -69,6 +74,20 @@ fun GameCard(
     followed: Boolean = false,
     onFocused: () -> Unit = {},
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // On a phone a tap opens the game sheet (what a long OK opens on the TV), as long-press does: the sheet
+        // carries WATCH. The home row places these cards at the phone card width.
+        PhoneGameCard(
+            game = game,
+            hideScores = hideScores,
+            isFavorite = isFavorite,
+            followed = followed,
+            onClick = onLongClick,
+            onLongClick = onLongClick,
+            modifier = modifier.width(PhoneDimens.gameCardWidth),
+        )
+        return
+    }
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     LaunchedEffect(focused) {
@@ -322,7 +341,7 @@ private fun cardStatus(
 }
 
 @Composable
-private fun rememberCardNow(active: Boolean): Instant {
+internal fun rememberCardNow(active: Boolean): Instant {
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(active) {
         if (!active) return@LaunchedEffect
@@ -334,7 +353,7 @@ private fun rememberCardNow(active: Boolean): Instant {
     return now
 }
 
-private fun parseGameStart(start: String): Instant? =
+internal fun parseGameStart(start: String): Instant? =
     try {
         OffsetDateTime.parse(start).toInstant()
     } catch (_: DateTimeException) {

@@ -18,11 +18,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +42,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,6 +58,10 @@ import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.LowerThird
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
+import io.github.scdouglas1999.tally.ui.theme.PhoneType
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -155,9 +164,18 @@ fun TogetherOverlay(modifier: Modifier = Modifier) {
             modifier =
                 Modifier
                     .align(Alignment.TopEnd)
-                    .padding(
-                        end = TallyDimens.marginHorizontal,
-                        top = TallyDimens.marginVertical + if (showClock) CLOCK_OFFSET else 0.dp,
+                    .then(
+                        if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+                            // Under a page's top bar (and the player controls' top bar), clear of the system bars.
+                            Modifier
+                                .windowInsetsPadding(WindowInsets.safeDrawing)
+                                .padding(end = PhoneDimens.margin, top = PHONE_TOP)
+                        } else {
+                            Modifier.padding(
+                                end = TallyDimens.marginHorizontal,
+                                top = TallyDimens.marginVertical + if (showClock) CLOCK_OFFSET else 0.dp,
+                            )
+                        },
                     ),
         ) {
             ChipSlot(
@@ -190,7 +208,7 @@ private fun ChipSlot(
     alpha: Float,
     firstPlayOver: Boolean,
 ) {
-    Box(Modifier.height(BAR_HEIGHT), contentAlignment = Alignment.CenterEnd) {
+    Box(Modifier.height(barHeight()), contentAlignment = Alignment.CenterEnd) {
         AnimatedVisibility(
             visibleState = visible,
             enter = fadeIn(tween(FADE_MS)),
@@ -226,7 +244,7 @@ private fun PartyChip(
         }
         Text(
             text = stringResource(R.string.tally_together_ui_chip),
-            style = TallyType.label,
+            style = overlayLabel(),
             color = TallyColors.text,
             maxLines = 1,
             modifier = Modifier.offset(y = CAP_NUDGE),
@@ -244,7 +262,7 @@ private fun PartyChip(
                 } else {
                     stringResource(R.string.tally_together_ui_watching, group.participants.size)
                 },
-            style = TallyType.label,
+            style = overlayLabel(),
             color = if (waiting) TallyColors.liveText else TallyColors.muted,
             maxLines = 1,
             modifier = Modifier.offset(y = CAP_NUDGE),
@@ -266,7 +284,7 @@ private fun NoticeLine(
         BlackBar {
             Text(
                 text = text,
-                style = TallyType.label,
+                style = overlayLabel(),
                 color = color,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -299,7 +317,7 @@ private fun BlackBar(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier =
             modifier
-                .height(BAR_HEIGHT)
+                .height(barHeight())
                 .background(TallyColors.labelBar)
                 .padding(horizontal = 10.dp),
     ) {
@@ -360,6 +378,18 @@ private class KeyTap(
 }
 
 private val BAR_HEIGHT = 32.dp
+
+/** The bars' height on a phone. */
+private val PHONE_BAR_HEIGHT = 28.dp
+
+/** On a phone the chip sits under a page's top bar and under the player controls' top bar. */
+private val PHONE_TOP = 64.dp
+
+@Composable
+private fun barHeight(): Dp = if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) PHONE_BAR_HEIGHT else BAR_HEIGHT
+
+@Composable
+private fun overlayLabel(): TextStyle = if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) PhoneType.label else TallyType.label
 
 /** IndicatorSquare's default size; the lamp that stands in for it matches. */
 private val CHIP_SQUARE = 8.dp

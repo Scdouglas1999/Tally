@@ -52,6 +52,9 @@ import io.github.scdouglas1999.tally.household.HouseholdRepository
 import io.github.scdouglas1999.tally.household.HouseholdSession
 import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.household.phone.PhoneSendToSheet
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -149,6 +152,18 @@ fun SendToDialog(
                 }
             }
         }
+    }
+
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneSendToSheet(
+            targets = targets,
+            hasFetched = hasFetched,
+            failure = SentNotices.current,
+            label = { sessionLabel(it) },
+            onSend = { viewModel.send(it, itemId, positionMs) },
+            onDismiss = onDismiss,
+        )
+        return
     }
 
     Dialog(

@@ -27,6 +27,8 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -127,7 +129,12 @@ fun LineScore(
     val played = maxOf(game.away.periods.size, game.home.periods.size)
     if (hideScores || played == 0) return
     val labels = periodLabels(game.sport, periodColumnCount(game.sport, played))
-    val metrics = if (compact) LineScoreMetrics.Compact else LineScoreMetrics.Full
+    val metrics =
+        when {
+            LocalTallyFormFactor.current == TallyFormFactor.PHONE -> LineScoreMetrics.Phone
+            compact -> LineScoreMetrics.Compact
+            else -> LineScoreMetrics.Full
+        }
     val unplayed = stringResource(R.string.tally_line_unplayed)
     val totalHeader = stringResource(R.string.tally_line_total)
     BoxWithConstraints(modifier = modifier) {
@@ -292,6 +299,36 @@ private class LineScoreMetrics(
                     TallyType.clock.copy(
                         fontSize = 14.sp,
                         lineHeight = 16.sp,
+                        letterSpacing = 1.sp,
+                    ),
+            )
+
+        /** Phone size (the game sheet and the live player's box score), in phone dp. */
+        val Phone =
+            LineScoreMetrics(
+                mark = 20.dp,
+                gap = 6.dp,
+                abbrWidth = 36.dp,
+                columnWidth = 26.dp,
+                totalGap = 8.dp,
+                rowGap = 4.dp,
+                ruleGap = 3.dp,
+                number =
+                    TallyType.clock.copy(
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
+                    ),
+                total =
+                    TallyType.clock.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
+                    ),
+                header =
+                    TallyType.clock.copy(
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
                         letterSpacing = 1.sp,
                     ),
             )

@@ -59,6 +59,8 @@ import io.github.scdouglas1999.tally.ui.components.GameActions
 import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewBenchEntry
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewLayout
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewTile
@@ -67,6 +69,7 @@ import io.github.scdouglas1999.tally.ui.multiview.MultiviewTileView
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewViewModel
 import io.github.scdouglas1999.tally.ui.multiview.defaultMultiviewLayout
 import io.github.scdouglas1999.tally.ui.multiview.rememberMultiviewPlayers
+import io.github.scdouglas1999.tally.ui.phone.PhoneMultiviewPage
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -83,6 +86,10 @@ fun TallyMultiviewPage(
     modifier: Modifier,
     viewModel: MultiviewViewModel = hiltViewModel(),
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneMultiviewPage(viewModel = viewModel, modifier = modifier)
+        return
+    }
     val tiles by viewModel.tiles.collectAsState()
     val bench by viewModel.bench.collectAsState()
     val hideScores by viewModel.hideScores.collectAsState()

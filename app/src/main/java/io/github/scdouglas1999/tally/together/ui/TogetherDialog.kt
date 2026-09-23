@@ -50,8 +50,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.scdouglas1999.tally.together.TogetherGroupSummary
 import io.github.scdouglas1999.tally.together.TogetherService
 import io.github.scdouglas1999.tally.together.TogetherState
+import io.github.scdouglas1999.tally.together.ui.phone.PhoneTogetherSheet
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -147,6 +150,29 @@ fun TogetherDialog(
     val partyFallback = stringResource(R.string.tally_together_party_fallback)
     LaunchedEffect(inGroup == null) {
         if (inGroup == null) viewModel.reload()
+    }
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneTogetherSheet(
+            together = together,
+            groups = groups,
+            canStart = itemId != null,
+            onStart = {
+                if (itemId != null) {
+                    viewModel.start(itemId, positionMs, partyNamePattern, partyFallback)
+                }
+                onDismiss()
+            },
+            onJoin = { id ->
+                viewModel.join(id)
+                onDismiss()
+            },
+            onLeave = {
+                viewModel.leave()
+                onDismiss()
+            },
+            onDismiss = onDismiss,
+        )
+        return
     }
     val firstRow = remember { FocusRequester() }
     var acceptClicks by remember { mutableStateOf(false) }

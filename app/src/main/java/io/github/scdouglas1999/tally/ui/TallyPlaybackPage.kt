@@ -75,6 +75,9 @@ import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
 import io.github.scdouglas1999.tally.ui.components.gameActions
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.phone.PhoneLivePlayback
 import io.github.scdouglas1999.tally.ui.player.BoxScoreOverlay
 import io.github.scdouglas1999.tally.ui.player.CornerRequests
 import io.github.scdouglas1999.tally.ui.player.CornerView
@@ -116,6 +119,10 @@ fun TallyPlaybackPage(
     destination: Destination.TallyPlayback,
     modifier: Modifier,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneLivePlayback(preferences = preferences, destination = destination, modifier = modifier)
+        return
+    }
     val viewModel = hiltViewModel<TallyPlayerViewModel>()
     LaunchedEffect(destination.channelId) { viewModel.bind(destination.channelId) }
 
@@ -552,7 +559,7 @@ private fun adoptCornerRequest(
  * error shows as it always has.
  */
 @Composable
-private fun TuneIn(
+internal fun TuneIn(
     viewModel: PlaybackViewModel,
     title: String?,
 ) {

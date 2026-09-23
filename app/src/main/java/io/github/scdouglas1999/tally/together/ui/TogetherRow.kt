@@ -49,7 +49,10 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.cards.ItemRowTitle
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.media.home.HomeRowTitle
+import io.github.scdouglas1999.tally.together.ui.phone.PhoneTogetherRow
 import io.github.scdouglas1999.tally.ui.components.KeyHint
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -71,6 +74,10 @@ fun TogetherRow(modifier: Modifier = Modifier) {
     val parties by viewModel.parties.collectAsStateWithLifecycle()
     val mine = parties.firstOrNull { it.isMine }?.id
     LaunchedEffect(viewModel, mine) { viewModel.poll() }
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        if (parties.isNotEmpty()) PhoneTogetherRow(parties = parties, onOpen = viewModel::open, modifier = modifier)
+        return
+    }
 
     // A party can end while its card has focus. Move focus off that card BEFORE it leaves the row (to its
     // neighbor, or out of the row when it was the last one); otherwise Compose drops focus on the drawer.

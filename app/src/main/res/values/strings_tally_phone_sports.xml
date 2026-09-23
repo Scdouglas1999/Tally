@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Sports section on a phone (ui/phone/PhoneSportsPage.kt); shown uppercase -->
+    <string name="tally_phone_sports_kicker">Sports</string>
+    <!-- A game card's status line while the game is on -->
+    <string name="tally_phone_sports_live">Live</string>
+    <!-- The game sheet (ui/components/phone/PhoneGameSheet.kt) -->
+    <string name="tally_phone_sports_game">Game</string>
+    <string name="tally_phone_sports_starts">Starts</string>
+    <string name="tally_phone_sports_last_play">Last play</string>
+    <string name="tally_phone_sports_on">On %1$s</string>
+    <!-- Channels tab: the programme on now and next (mono, uppercase) -->
+    <string name="tally_phone_sports_now">Now</string>
+    <string name="tally_phone_sports_next">Next</string>
+    <!-- Multiview tab: removes a queued channel -->
+    <string name="tally_phone_sports_remove">Remove</string>
+    <string name="tally_phone_sports_multiview_empty_sub">Add a game from its sheet, or press and hold a channel.</string>
+    <!-- Live player: the buttons in the controls' top bar (accessibility names) and their panels -->
+    <string name="tally_phone_sports_games">Games</string>
+    <string name="tally_phone_sports_box_score">Box score</string>
+    <string name="tally_phone_sports_close">Close</string>
+    <string name="tally_phone_sports_banner_hint">Tap the picture, then GAMES</string>
+    <!-- Multiview on a phone -->
+    <string name="tally_phone_sports_multiview">Multiview</string>
+    <string name="tally_phone_sports_mv_edit">Games</string>
+    <string name="tally_phone_sports_mv_on_screen">On screen</string>
+    <string name="tally_phone_sports_mv_live">Live games</string>
+    <string name="tally_phone_sports_mv_channels">Channels</string>
+    <string name="tally_phone_sports_mv_add">Add</string>
+    <string name="tally_phone_sports_mv_full">Multiview is full: remove a game first</string>
+    <string name="tally_phone_sports_mv_hint">Tap for sound · double tap for full screen</string>
+    <string name="tally_phone_sports_mv_empty_sub">Add a live game from GAMES.</string>
+    <!-- Live TV library on a phone: the Channels grid -->
+    <string name="tally_phone_sports_live_tv">Live TV</string>
+    <!-- Watch together and the household -->
+    <string name="tally_phone_sports_join">Join</string>
+    <string name="tally_phone_sports_yours">You\'re in this one</string>
+    <!-- Font Awesome glyphs -->
+    <string name="tally_phone_sports_fa_trophy" translatable="false">&#xf091;</string>
+    <string name="tally_phone_sports_fa_box_score" translatable="false">&#xf0cb;</string>
+    <string name="tally_phone_sports_fa_xmark" translatable="false">&#xf00d;</string>
+    <string name="tally_phone_sports_fa_plus" translatable="false">&#x2b;</string>
+    <string name="tally_phone_sports_fa_check" translatable="false">&#xf00c;</string>
+</resources>

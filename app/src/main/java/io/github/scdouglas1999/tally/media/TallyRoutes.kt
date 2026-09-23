@@ -98,6 +98,20 @@ object TallyRoutes {
                                 true
                             }
 
+                            // TALLY phone-sports: begin — on a phone the Live TV library is the Sports Channels grid
+                            // (Wholphin's guide is a TV layout).
+                            phone && destination.collectionType == CollectionType.LIVETV -> {
+                                LaunchedEffect(Unit) { onClearBackdrop() }
+                                io.github.scdouglas1999.tally.ui.phone.PhoneLiveTvPage(
+                                    preferences = preferences,
+                                    destination = destination,
+                                    modifier = modifier,
+                                )
+                                true
+                            }
+
+                            // TALLY phone-sports: end
+
                             // Live TV, photos, books... stay upstream's for now.
                             else -> {
                                 false

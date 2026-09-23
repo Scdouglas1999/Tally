@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -46,6 +47,8 @@ fun EmptyState(
     // with nowhere to go falls out to the navigation drawer. Focused = solid accent frame; idle = dashed hairline.
     val requester = remember { FocusRequester() }
     var focused by remember { mutableStateOf(false) }
+    // On a phone the frame is drawn only while a keyboard or D-pad is in use, not for the programmatic focus below.
+    val showFocus = tallyFocusVisible()
     if (takeFocus) LaunchedEffect(Unit) { requester.tryRequestFocus("jellytv-empty") }
     Box(
         contentAlignment = Alignment.Center,
@@ -57,7 +60,7 @@ fun EmptyState(
                 .drawBehind {
                     // Strokes are inset by half their width so the whole frame lies inside the bounds (a stroke
                     // on the edge puts half of it outside, where a screen edge or a parent clips it).
-                    if (focused) {
+                    if (focused && showFocus) {
                         val w = TallyDimens.focusBorder.toPx()
                         drawRect(
                             color = TallyColors.accent,

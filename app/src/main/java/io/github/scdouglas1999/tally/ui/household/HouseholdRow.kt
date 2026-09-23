@@ -39,6 +39,9 @@ import com.github.damontecres.wholphin.ui.cards.ItemRowTitle
 import com.github.damontecres.wholphin.ui.handleDPadKeyEvents
 import io.github.scdouglas1999.tally.household.HouseholdSession
 import io.github.scdouglas1999.tally.media.home.HomeRowTitle
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.household.phone.PhoneHouseholdRow
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -63,6 +66,10 @@ fun HouseholdRow(
 ) {
     val sessions by viewModel.sessions.collectAsStateWithLifecycle()
     if (sessions.isEmpty()) return
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneHouseholdRow(sessions = sessions, onJoin = viewModel::join, modifier = modifier)
+        return
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),

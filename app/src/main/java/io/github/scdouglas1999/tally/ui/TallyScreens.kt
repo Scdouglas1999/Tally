@@ -34,6 +34,9 @@ import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
 import io.github.scdouglas1999.tally.ui.components.TallyTab
 import io.github.scdouglas1999.tally.ui.components.TallyTopBar
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
+import io.github.scdouglas1999.tally.ui.phone.PhoneSportsPage
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
 
@@ -47,6 +50,10 @@ fun TallyPage(
     modifier: Modifier,
     viewModel: TallyViewModel = hiltViewModel(),
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        PhoneSportsPage(viewModel = viewModel, modifier = modifier)
+        return
+    }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val clock by viewModel.clock.collectAsStateWithLifecycle()
     val context = LocalContext.current

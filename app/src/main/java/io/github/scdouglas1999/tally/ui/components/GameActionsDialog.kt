@@ -42,6 +42,9 @@ import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
+import io.github.scdouglas1999.tally.ui.components.phone.PhoneGameSheet
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -117,6 +120,11 @@ fun GameActionsDialog(
     onDismiss: () -> Unit,
     channelName: String = "",
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        // The game sheet: the game's panel, WATCH, then these actions (no corner view on a phone).
+        PhoneGameSheet(game = game, actions = actions.copy(watchInCorner = null), onDismiss = onDismiss, channelName = channelName)
+        return
+    }
     val away = game?.away?.menuName().orEmpty()
     val home = game?.home?.menuName().orEmpty()
     val lines =
