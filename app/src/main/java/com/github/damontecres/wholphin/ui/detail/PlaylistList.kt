@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.detail
 
 import android.view.Gravity
@@ -216,6 +219,22 @@ fun PlaylistDialog(
     onCreatePlaylist: (String) -> Unit,
     elevation: Dp = 3.dp,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.phone
+            .isPhone()
+    ) {
+        io.github.scdouglas1999.tally.media.kit.phone.PhonePlaylistSheet(
+            title = title,
+            state = state,
+            onDismissRequest = onDismissRequest,
+            onClick = onClick,
+            onSearch = onSearch,
+            createEnabled = createEnabled,
+            onCreatePlaylist = onCreatePlaylist,
+        )
+        return
+    }
+    // TALLY: end
     val elevatedContainerColor =
         MaterialTheme.colorScheme.surfaceColorAtElevation(elevation)
 

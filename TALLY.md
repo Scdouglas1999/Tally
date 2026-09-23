@@ -79,6 +79,7 @@ file is a future merge conflict.** Therefore:
 | W49 | `ui/main/settings/HomeSettingsPage.kt` (settings pane modifier; home preview in the `if` of a Tally check, re-indented) | on a phone the row list takes the whole width and the home preview is left out |
 | W50 | `ui/preferences/user/UserProfilePreferencesPage.kt` (top of `UserProfilePreferencesPage`) | on a phone upstream's list takes the whole screen (`phoneFullPage`) |
 | W51 | `ui/playback/PlaybackPage.kt` (top of `PlaybackPage`; after `controllerViewState` in `PlaybackPageContent`) | `PhonePlayerWindow`: on a phone the player is landscape and full screen (bars hidden) while shown; `TallyPlayerBack`: in the Tally look on a TV BACK hides visible controls first, and BACK in a player that is the only page goes Home instead of leaving the app (`ui/player/controls/`) |
+| W52 | `ui/detail/PlaylistList.kt` (top of `PlaylistDialog`) | on a phone the add-to-playlist dialog is `PhonePlaylistSheet` (`media/kit/phone/`), for every caller |
 | (resource) | `res/values-v31/themes_tally.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 
 ## Releases and self-update

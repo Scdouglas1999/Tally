@@ -148,7 +148,7 @@ fun PhonePlaybackOverlay(
     }
     val keepAlive = { controllerViewState.pulseControls(if (showPlay) Long.MAX_VALUE else PHONE_CONTROLS_MS) }
 
-    val seekTaps = rememberSeekTaps(player, seekBack, seekForward, controllerViewState)
+    val seekTaps = rememberSeekTaps(player, seekBack, seekForward, controllerViewState, isLive)
 
     Box(modifier = modifier.fillMaxSize()) {
         // The tap layer under everything: show / hide, double taps on the sides.
@@ -205,6 +205,7 @@ fun PhonePlaybackOverlay(
                     Transport(
                         player = player,
                         showPlay = showPlay,
+                        isLive = isLive,
                         previousEnabled = previousEnabled,
                         nextEnabled = nextEnabled,
                         seekBack = seekBack,
@@ -310,6 +311,7 @@ private class SeekTaps(
     private val seekBack: () -> Duration,
     private val seekForward: () -> Duration,
     private val controller: ControllerViewState,
+    private val isLive: () -> Boolean,
 ) {
     var indicator by mutableStateOf<Long?>(null)
         private set
@@ -325,8 +327,10 @@ private class SeekTaps(
         width: Float,
     ) {
         val now = SystemClock.uptimeMillis()
+        // A live channel cannot be skipped through (as on the TV): every tap only shows or hides the controls.
         val side =
             when {
+                isLive() -> 0
                 width <= 0f -> 0
                 x < width / 3f -> -1
                 x > width * 2f / 3f -> 1
@@ -387,12 +391,14 @@ private fun rememberSeekTaps(
     seekBack: Duration,
     seekForward: Duration,
     controller: ControllerViewState,
+    isLive: Boolean,
 ): SeekTaps {
     val scope = rememberCoroutineScope()
     val playerNow by rememberUpdatedState(player)
+    val live by rememberUpdatedState(isLive)
     val back by rememberUpdatedState(seekBack)
     val forward by rememberUpdatedState(seekForward)
-    return remember(controller) { SeekTaps(scope, { playerNow }, { back }, { forward }, controller) }
+    return remember(controller) { SeekTaps(scope, { playerNow }, { back }, { forward }, controller, { live }) }
 }
 
 /** Back, the title block, the live player's buttons (a live channel only), subtitles and settings. */
@@ -454,7 +460,7 @@ private fun TopRow(
                 Text(
                     text = sub,
                     style = PhoneType.meta,
-                    color = if (isLive) TallyColors.accent else TallyColors.textSecondary,
+                    color = if (isLive) TallyColors.liveText else TallyColors.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -476,11 +482,15 @@ private fun TopRow(
     }
 }
 
-/** Previous, back by the skip length, play/pause (64dp, accent frame), forward, next. */
+/**
+ * Previous, back by the skip length, play/pause (64dp, accent frame), forward, next. A live channel has only
+ * play/pause, as on the TV: there is nothing to skip through.
+ */
 @Composable
 private fun Transport(
     player: Player,
     showPlay: Boolean,
+    isLive: Boolean,
     previousEnabled: Boolean,
     nextEnabled: Boolean,
     seekBack: Duration,
@@ -495,7 +505,7 @@ private fun Transport(
         horizontalArrangement = Arrangement.spacedBy(28.dp),
         modifier = modifier,
     ) {
-        if (previousEnabled) {
+        if (previousEnabled && !isLive) {
             TransportButton(
                 glyph = stringResource(R.string.tally_player_glyph_previous),
                 label = stringResource(R.string.tally_player_previous),
@@ -505,15 +515,17 @@ private fun Transport(
                 },
             )
         }
-        TransportButton(
-            glyph = stringResource(R.string.fa_rotate_left),
-            label = stringResource(R.string.tally_player_rewind),
-            caption = "${seekBack.inWholeSeconds}s",
-            onClick = {
-                onInteraction()
-                player.seekBack(seekBack)
-            },
-        )
+        if (!isLive) {
+            TransportButton(
+                glyph = stringResource(R.string.fa_rotate_left),
+                label = stringResource(R.string.tally_player_rewind),
+                caption = "${seekBack.inWholeSeconds}s",
+                onClick = {
+                    onInteraction()
+                    player.seekBack(seekBack)
+                },
+            )
+        }
         val playLabel = stringResource(if (showPlay) R.string.tally_player_play else R.string.tally_player_pause)
         Box(
             contentAlignment = Alignment.Center,
@@ -544,16 +556,18 @@ private fun Transport(
                 maxLines = 1,
             )
         }
-        TransportButton(
-            glyph = stringResource(R.string.fa_rotate_right),
-            label = stringResource(R.string.tally_player_fast_forward),
-            caption = "${seekForward.inWholeSeconds}s",
-            onClick = {
-                onInteraction()
-                player.seekForward(seekForward)
-            },
-        )
-        if (nextEnabled) {
+        if (!isLive) {
+            TransportButton(
+                glyph = stringResource(R.string.fa_rotate_right),
+                label = stringResource(R.string.tally_player_fast_forward),
+                caption = "${seekForward.inWholeSeconds}s",
+                onClick = {
+                    onInteraction()
+                    player.seekForward(seekForward)
+                },
+            )
+        }
+        if (nextEnabled && !isLive) {
             TransportButton(
                 glyph = stringResource(R.string.tally_player_glyph_next),
                 label = stringResource(R.string.tally_player_next),

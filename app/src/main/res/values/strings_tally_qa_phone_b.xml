@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- qa-phone half B: the phone PIN pad -->
+    <string name="tally_qa_b_fa_delete_left" translatable="false">&#xf55a;</string>
+    <string name="tally_qa_b_pin_delete">Delete</string>
+    <string name="tally_qa_b_pin_confirm">Confirm</string>
+    <string name="tally_qa_b_pin_left">Left</string>
+    <string name="tally_qa_b_pin_up">Up</string>
+    <string name="tally_qa_b_pin_right">Right</string>
+    <string name="tally_qa_b_pin_down">Down</string>
+</resources>

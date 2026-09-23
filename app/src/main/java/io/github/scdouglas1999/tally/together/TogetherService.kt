@@ -18,6 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
@@ -32,6 +34,7 @@ import okio.ByteString
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.api.client.extensions.syncPlayApi
 import org.jellyfin.sdk.api.client.extensions.timeSyncApi
+import org.jellyfin.sdk.api.sockets.SocketApiState
 import org.jellyfin.sdk.api.sockets.SocketConnection
 import org.jellyfin.sdk.api.sockets.subscribe
 import org.jellyfin.sdk.model.api.GroupStateType
@@ -87,6 +90,7 @@ class TogetherService
         private val incoming = Channel<String>(Channel.UNLIMITED)
         private var incomingJob: Job? = null
         private var tapWatch: Job? = null
+        private var socketWatch: Job? = null
         private var groupJob: Job? = null
         private var commandJob: Job? = null
         private var clockJob: Job? = null
@@ -126,10 +130,15 @@ class TogetherService
             queueOnJoin = itemId to positionMs
             _state.value = TogetherState.Joining
             try {
-                arm()
+                if (!arm()) {
+                    queueOnJoin = null
+                    apply(TogetherUpdate.Denied(NOT_CONNECTED))
+                    return
+                }
                 withContext(Dispatchers.IO) {
                     api.syncPlayApi.syncPlayCreateGroup(NewGroupRequestDto(groupName = groupName))
                 }
+                scope.launch { confirmJoined("Could not start a watch party") }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -147,10 +156,14 @@ class TogetherService
             queueOnJoin = null
             _state.value = TogetherState.Joining
             try {
-                arm()
+                if (!arm()) {
+                    apply(TogetherUpdate.Denied(NOT_CONNECTED))
+                    return
+                }
                 withContext(Dispatchers.IO) {
                     api.syncPlayApi.syncPlayJoinGroup(JoinGroupRequestDto(groupId = groupId))
                 }
+                scope.launch { confirmJoined("Could not join that watch party") }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -173,12 +186,101 @@ class TogetherService
             if (_state.value !is TogetherState.Idle) apply(TogetherUpdate.Left)
         }
 
-        private suspend fun arm() {
+        /** Ready to hear the server's answer. False when the socket is down: the request must not be made. */
+        private suspend fun arm(): Boolean {
             listening = true
             startIncoming()
             startTapWatch()
+            startSocketWatch()
+            // Subscribing is what keeps the SDK's socket open; then wait for it before the request goes out.
             ensureSubscriptions()
+            if (!awaitSocket()) return false
             awaitTap()
+            return true
+        }
+
+        /**
+         * The server answers a create or join ONLY over the websocket (GroupJoined, then the queue). A request made
+         * while the socket is down (the app just came back from the background, the network or the server restarted)
+         * is carried out but its answer is lost: this device then waits in Joining forever, and a party it created
+         * stays empty, so a screen that joins it gets nothing to play (found on a phone after the server restarted:
+         * the TV joined, showed WAITING and never played). So the request waits for the socket, which the SDK brings
+         * back on its own schedule. It is not forced: a reconnect the SDK has already scheduled would still run later
+         * and drop this device from the party again. Returns false when the socket did not come back in time: then no
+         * request is made at all.
+         */
+        private suspend fun awaitSocket(): Boolean {
+            val socket = api.webSocket
+            if (socket.state.value is SocketApiState.Connected) return true
+            Timber.tag(TOGETHER_SYNC_LOG).i("socket %s, waiting for it before the request", socket.state.value)
+            val connected = withTimeoutOrNull(SOCKET_WAIT_MS) { socket.state.first { it is SocketApiState.Connected } } != null
+            if (!connected) Timber.tag(TOGETHER_SYNC_LOG).w("socket still %s", socket.state.value)
+            return connected
+        }
+
+        /**
+         * After the create/join request succeeded: GroupJoined must follow. If it does not (the answer was lost),
+         * leave again, so no empty party is left on the server, and say so instead of waiting forever.
+         */
+        private suspend fun confirmJoined(failure: String) {
+            val joined = withTimeoutOrNull(JOIN_CONFIRM_MS) { _state.first { it !is TogetherState.Joining } }
+            if (joined != null) return
+            Timber.tag(TOGETHER_SYNC_LOG).e("no GroupJoined after the request, leaving")
+            try {
+                withContext(Dispatchers.IO) { api.syncPlayApi.syncPlayLeaveGroup() }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.tag(TOGETHER_SYNC_LOG).w(e, "leave after a lost join failed")
+            }
+            if (_state.value is TogetherState.Joining) apply(TogetherUpdate.Denied(failure))
+        }
+
+        /**
+         * Jellyfin drops a session from its party when the session's websocket closes, so after the socket comes back
+         * (the network dropped, the app was in the background, the server restarted) this device is no longer in the
+         * party it still shows. Ask the server: a party that is still there is joined again (the server then sends
+         * the group and its queue, and playback lines up as on any join); a party that is gone ends here too, instead
+         * of this device waiting in a party that no longer exists.
+         */
+        private fun startSocketWatch() {
+            if (socketWatch?.isActive == true) return
+            socketWatch =
+                scope.launch {
+                    api.webSocket.state
+                        .drop(1)
+                        .collect { socketState ->
+                            if (socketState !is SocketApiState.Connected || !listening) return@collect
+                            val mine = (_state.value as? TogetherState.InGroup)?.group?.id ?: return@collect
+                            val listed =
+                                try {
+                                    withContext(Dispatchers.IO) { api.syncPlayApi.syncPlayGetGroups().content }
+                                } catch (e: CancellationException) {
+                                    throw e
+                                } catch (e: Exception) {
+                                    Timber.tag(TOGETHER_SYNC_LOG).w(e, "group check after reconnect failed")
+                                    return@collect
+                                }
+                            if ((_state.value as? TogetherState.InGroup)?.group?.id != mine) return@collect
+                            if (listed.none { it.groupId == mine }) {
+                                Timber.tag(TOGETHER_SYNC_LOG).i("party %s is gone after a reconnect", mine)
+                                apply(TogetherUpdate.NotInGroup)
+                                return@collect
+                            }
+                            Timber.tag(TOGETHER_SYNC_LOG).i("rejoining party %s after a reconnect", mine)
+                            try {
+                                awaitTap()
+                                withContext(Dispatchers.IO) {
+                                    api.syncPlayApi.syncPlayJoinGroup(JoinGroupRequestDto(groupId = mine))
+                                }
+                            } catch (e: CancellationException) {
+                                throw e
+                            } catch (e: Exception) {
+                                Timber.tag(TOGETHER_SYNC_LOG).w(e, "rejoin after reconnect failed")
+                                apply(TogetherUpdate.NotInGroup)
+                            }
+                        }
+                }
         }
 
         private fun startIncoming() {
@@ -393,6 +495,8 @@ class TogetherService
 
         private fun endTransport() {
             listening = false
+            socketWatch?.cancel()
+            socketWatch = null
             queueOnJoin = null
             waitingJob?.cancel()
             waitingJob = null
@@ -447,6 +551,9 @@ class TogetherService
             const val TAP_WAIT_MS = 2_000L
             const val TAP_WATCH_MS = 1_000L
             const val SUBSCRIBE_TIMEOUT_MS = 3_000L
+            const val SOCKET_WAIT_MS = 30_000L
+            const val NOT_CONNECTED = "Not connected to the server. Try again in a moment."
+            const val JOIN_CONFIRM_MS = 8_000L
             const val SEEN_LIMIT = 200
         }
     }

@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
@@ -294,15 +295,36 @@ internal fun PhoneButtonSlot() {
 
 /**
  * The home settings list on a phone (seam in upstream's `HomeSettingsPage`): the whole width, above the gesture bar
- * (the page is full screen; the preview of the home page beside it is left out). Nothing on a TV.
+ * (the page is full screen; the preview of the home page beside it is left out). Upstream pads each of its pages by
+ * [HomeSettingsInset] inside this pane; the pane gives that room back, so the top bar and the rows sit on the same
+ * 16dp margins as every other settings page. Nothing on a TV.
  */
 @Composable
 fun phoneHomeSettingsPane(): Modifier =
     if (isPhone()) {
-        Modifier.fillMaxWidth().navigationBarsPadding()
+        Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .layout { measurable, constraints ->
+                val inset = HomeSettingsInset.roundToPx()
+                val grown =
+                    constraints.copy(
+                        minWidth = constraints.minWidth + 2 * inset,
+                        maxWidth = if (constraints.hasBoundedWidth) constraints.maxWidth + 2 * inset else constraints.maxWidth,
+                        minHeight = constraints.minHeight + 2 * inset,
+                        maxHeight = if (constraints.hasBoundedHeight) constraints.maxHeight + 2 * inset else constraints.maxHeight,
+                    )
+                val placeable = measurable.measure(grown)
+                val width = (placeable.width - 2 * inset).coerceIn(constraints.minWidth, constraints.maxWidth)
+                val height = (placeable.height - 2 * inset).coerceIn(constraints.minHeight, constraints.maxHeight)
+                layout(width, height) { placeable.place(-inset, -inset) }
+            }
     } else {
         Modifier
     }
+
+/** The padding upstream's `HomeSettingsPage` puts around each of its pages (`destModifier`). */
+private val HomeSettingsInset = 8.dp
 
 /** A full-screen settings page on a phone (seam in upstream's `UserProfilePreferencesPage`): the whole screen. */
 fun phoneFullPage(modifier: Modifier): Modifier =

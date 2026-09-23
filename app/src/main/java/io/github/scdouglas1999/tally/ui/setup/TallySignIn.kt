@@ -799,6 +799,11 @@ internal fun TallyPinEntry(
     onClickServerAuth: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        io.github.scdouglas1999.tally.ui.setup.phone
+            .PhonePinEntry(onTextChange = onTextChange, onClickServerAuth = onClickServerAuth, modifier = modifier)
+        return
+    }
     var input by remember { mutableStateOf("") }
     Column(
         modifier = modifier,
@@ -841,6 +846,11 @@ fun TallyPinEntryCreate(
     onConfirm: ((String) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        io.github.scdouglas1999.tally.ui.setup.phone
+            .PhonePinEntryCreate(title = title, onTextChange = onTextChange, onConfirm = onConfirm)
+        return
+    }
     var input by remember { mutableStateOf("") }
     val interactionSource = remember { MutableInteractionSource() }
     // [modifier] (upstream passes padding for its own dialog) goes inside the panel, so the panel fills the dialog.
@@ -888,6 +898,11 @@ fun TallyPinDialog(
     onTextChange: (String) -> Unit,
     onClickServerAuth: () -> Unit,
 ) {
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        io.github.scdouglas1999.tally.ui.setup.phone
+            .PhonePinSheet(onDismissRequest, onTextChange, onClickServerAuth)
+        return
+    }
     Dialog(onDismissRequest = onDismissRequest, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         TallyPanel {
             Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(20.dp)) {
