@@ -50,19 +50,19 @@ class HomeRowSelectionTest {
     // --- the real payload ---
 
     @Test
-    fun `sample board shows the live game it can play and nothing else`() {
+    fun `sample board shows the live game it can play first, then the live game on no channel`() {
         val selected = HomeRowSelection.select(sample, emptySet(), sampleNow)
         // 401817017 (MLB) is live but on no channel; 401872950 (NFL) is on ESPN but ~24h away.
-        assertEquals(listOf("401872945"), selected.map { it.id })
-        assertEquals("Indianapolis Colts Kansas City Chiefs", selected.single().watch?.channelName)
-        assertTrue(selected.single().isLive)
+        assertEquals(listOf("401872945", "401817017"), selected.map { it.id })
+        assertEquals("Indianapolis Colts Kansas City Chiefs", selected.first().watch?.channelName)
+        assertTrue(selected.all { it.isLive })
     }
 
     @Test
     fun `sample board adds the upcoming game once it is inside the window`() {
         // Six hours before the 2026-09-22T00:15Z kickoff.
         val selected = HomeRowSelection.select(sample, emptySet(), Instant.parse("2026-09-21T18:15:00Z"))
-        assertEquals(listOf("401872945", "401872950"), selected.map { it.id })
+        assertEquals(listOf("401872945", "401817017", "401872950"), selected.map { it.id })
     }
 
     @Test
@@ -70,7 +70,7 @@ class HomeRowSelectionTest {
         val favorites = setOf("aa11bb22cc33dd44")
         val selected = HomeRowSelection.select(sample, favorites, Instant.parse("2026-09-21T18:15:00Z"))
         // Favorites never jump the live group: the ESPN game is still only upcoming.
-        assertEquals(listOf("401872945", "401872950"), selected.map { it.id })
+        assertEquals(listOf("401872945", "401817017", "401872950"), selected.map { it.id })
     }
 
     // --- edges ---
@@ -81,9 +81,9 @@ class HomeRowSelectionTest {
     }
 
     @Test
-    fun `nothing watchable is no row`() {
+    fun `nothing on a channel still shows the live games, and an empty board is no row`() {
         val dark = sample.copy(games = sample.games.map { it.copy(watch = null) })
-        assertTrue(HomeRowSelection.select(dark, emptySet(), sampleNow).isEmpty())
+        assertEquals(listOf("401817017", "401872945"), HomeRowSelection.select(dark, emptySet(), sampleNow).map { it.id })
         assertTrue(HomeRowSelection.select(TallyBoard(), emptySet(), sampleNow).isEmpty())
     }
 
@@ -191,7 +191,7 @@ class HomeRowSelectionTest {
     }
 
     @Test
-    fun `games with no channel are dropped even when live`() {
+    fun `games with no channel come after the ones you can watch`() {
         val selected =
             select(
                 listOf(
@@ -199,6 +199,16 @@ class HomeRowSelectionTest {
                     game("watchable"),
                 ),
             )
-        assertEquals(listOf("watchable"), selected.map { it.id })
+        assertEquals(listOf("watchable", "dark"), selected.map { it.id })
+    }
+
+    @Test
+    fun `a game you can watch is never cut for one on no channel`() {
+        val dark = (1..12).map { game("dark$it", channelId = null) }
+        val soon = game("soon", state = "pre", start = "2026-09-21T02:00:00+00:00")
+        val selected = select(dark + soon)
+        assertEquals(10, selected.size)
+        // live games still come first, so the upcoming game you can watch is last, but it is there
+        assertEquals("soon", selected.last().id)
     }
 }
