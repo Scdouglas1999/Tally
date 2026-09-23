@@ -3,14 +3,13 @@ package com.github.damontecres.wholphin.jellytv.surprise
 import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -34,12 +33,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.MotionDurationScale
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
@@ -64,7 +63,9 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Glow
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import coil3.ImageLoader
 import coil3.imageLoader
+import coil3.memory.MemoryCache
 import coil3.request.ImageRequest
 import coil3.size.Size
 import com.github.damontecres.wholphin.R
@@ -113,7 +114,6 @@ fun SurprisePage(
     var heldChip by remember { mutableStateOf(firstChip) }
     var spinning by remember { mutableStateOf(false) }
     var slide by remember { mutableStateOf(false) }
-    var frameMillis by remember { mutableIntStateOf(BACKDROP_FADE_MS) }
     var shownPick by remember { mutableStateOf<BaseItem?>(null) }
     var poster by remember { mutableStateOf<BaseItem?>(null) }
     val textAlpha = remember { Animatable(1f) }
@@ -132,7 +132,6 @@ fun SurprisePage(
         if (reel.size == 1) {
             spinning = false
             slide = false
-            frameMillis = BACKDROP_FADE_MS
             shownPick = pick
             poster = pick
             textAlpha.snapTo(1f)
@@ -146,15 +145,31 @@ fun SurprisePage(
             textAlpha.snapTo(0f)
         }
         shownPick = pick
-        preloadPosters(context, reel.mapNotNull { imageUrls.getItemImageUrl(it, ImageType.PRIMARY) })
-        val durations = reelFrameMillis(reel.size)
-        for (index in reel.indices) {
-            frameMillis = durations[index]
-            poster = reel[index]
-            delay(durations[index].toLong())
+        // A channel scan: hard cuts through candidates whose posters are already in memory, slowing
+        // down, then the pick lands. Never waits for a poster; nothing to scan with animations off.
+        val scanning = (coroutineContext[MotionDurationScale]?.scaleFactor ?: 1f) > 0f
+        val candidates = reel.filter { it.id != pick.id }
+        if (scanning && candidates.size >= 2) {
+            val loader = context.imageLoader
+            var next = 0
+            for (hold in SCAN_FRAME_MS) {
+                val found =
+                    nextScanCandidate(candidates, next) { item ->
+                        imageUrls.getItemImageUrl(item, ImageType.PRIMARY)?.let { posterInMemory(loader, it) } == true
+                    } ?: break
+                poster = candidates[found]
+                next = found + 1
+                delay(hold.toLong())
+            }
         }
+        poster = pick
         spinning = false
         textAlpha.animateTo(1f, tween(TEXT_FADE_IN_MS))
+    }
+
+    // Preload the candidates' posters as soon as the result set arrives, for the channel scan.
+    LaunchedEffect(state.reel) {
+        preloadPosters(context, state.reel.mapNotNull { imageUrls.getItemImageUrl(it, ImageType.PRIMARY) })
     }
 
     LaunchedEffect(state.shuffleId) {
@@ -272,7 +287,6 @@ fun SurprisePage(
                                 shownPick = shownPick,
                                 poster = poster,
                                 slide = slide,
-                                frameMillis = frameMillis,
                                 textAlpha = textAlpha.value,
                                 playFocus = playFocus,
                                 upTarget = firstChip,
@@ -485,7 +499,6 @@ private fun PickBlock(
     shownPick: BaseItem?,
     poster: BaseItem?,
     slide: Boolean,
-    frameMillis: Int,
     textAlpha: Float,
     playFocus: FocusRequester,
     upTarget: FocusRequester,
@@ -497,7 +510,6 @@ private fun PickBlock(
         PosterSlot(
             poster = poster,
             slide = slide,
-            frameMillis = frameMillis,
         )
         Spacer(Modifier.width(24.dp))
         Column {
@@ -542,7 +554,6 @@ private fun PickBlock(
 private fun PosterSlot(
     poster: BaseItem?,
     slide: Boolean,
-    frameMillis: Int,
 ) {
     Box(
         Modifier
@@ -555,20 +566,11 @@ private fun PosterSlot(
             targetState = poster,
             contentKey = { it?.id },
             transitionSpec = {
-                val ms = if (slide) frameMillis.coerceAtLeast(1) else BACKDROP_FADE_MS
+                // The channel scan and its landing are hard cuts; a single result fades in.
                 if (slide) {
-                    (
-                        slideInVertically(
-                            animationSpec = tween(ms, easing = LinearOutSlowInEasing),
-                            initialOffsetY = { -it },
-                        ) togetherWith
-                            slideOutVertically(
-                                animationSpec = tween(ms, easing = LinearOutSlowInEasing),
-                                targetOffsetY = { it },
-                            )
-                    ).using(SizeTransform(clip = true))
+                    EnterTransition.None togetherWith ExitTransition.None
                 } else {
-                    (fadeIn(tween(ms)) togetherWith fadeOut(tween(ms)))
+                    (fadeIn(tween(BACKDROP_FADE_MS)) togetherWith fadeOut(tween(BACKDROP_FADE_MS)))
                         .using(SizeTransform(clip = true))
                 }
             },
@@ -606,6 +608,7 @@ private fun AsyncPoster(
             ImageRequest
                 .Builder(context)
                 .data(url)
+                .memoryCacheKey(url)
                 .size(Size.ORIGINAL)
                 .build(),
         contentDescription = description,
@@ -1005,6 +1008,7 @@ private suspend fun preloadPosters(
                                     ImageRequest
                                         .Builder(context)
                                         .data(url)
+                                        .memoryCacheKey(url)
                                         .size(Size.ORIGINAL)
                                         .build(),
                                 )
@@ -1024,14 +1028,29 @@ private suspend fun preloadPosters(
     }
 }
 
-/** Frame hold times grow from 70ms to 260ms. A full reel of nine is about 1.5s. */
-private fun reelFrameMillis(count: Int): List<Int> {
-    if (count <= 1) return List(count.coerceAtLeast(0)) { BACKDROP_FADE_MS }
-    return List(count) { index ->
-        val t = index / (count - 1).toFloat()
-        (FRAME_MS_START + (FRAME_MS_END - FRAME_MS_START) * t).toInt()
+/** Hold times of the channel scan's frames, slowing down; at most this many candidates are shown. */
+internal val SCAN_FRAME_MS = listOf(60, 70, 90, 120, 160)
+
+/**
+ * Index of the first candidate at or after [from] whose poster is ready ([ready]), or null when
+ * none is: a candidate that is not ready is skipped, never waited for.
+ */
+internal fun <T> nextScanCandidate(
+    candidates: List<T>,
+    from: Int,
+    ready: (T) -> Boolean,
+): Int? {
+    for (index in from.coerceAtLeast(0) until candidates.size) {
+        if (ready(candidates[index])) return index
     }
+    return null
 }
+
+/** True when [url]'s poster is decoded in memory (requests here key the memory cache by URL). */
+private fun posterInMemory(
+    loader: ImageLoader,
+    url: String,
+): Boolean = loader.memoryCache?.get(MemoryCache.Key(url)) != null
 
 private fun resumePercent(item: BaseItem): Int? {
     if (item.type != BaseItemKind.MOVIE || item.resumeMs <= 0L) return null
@@ -1054,8 +1073,6 @@ private const val BACKDROP_FADE_MS = 400
 private const val TEXT_FADE_OUT_MS = 120
 private const val TEXT_FADE_IN_MS = 300
 private const val PRELOAD_MS = 800L
-private const val FRAME_MS_START = 70
-private const val FRAME_MS_END = 260
 private const val TICKS_PER_SECOND = 10_000_000L
 private const val POSTER_W = 168
 private const val POSTER_H = 252

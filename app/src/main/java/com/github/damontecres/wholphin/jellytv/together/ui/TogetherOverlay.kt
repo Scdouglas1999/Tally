@@ -49,6 +49,7 @@ import com.github.damontecres.wholphin.jellytv.together.TogetherGroup
 import com.github.damontecres.wholphin.jellytv.together.TogetherNotice
 import com.github.damontecres.wholphin.jellytv.together.TogetherState
 import com.github.damontecres.wholphin.jellytv.ui.components.IndicatorSquare
+import com.github.damontecres.wholphin.jellytv.ui.components.LowerThird
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
@@ -146,7 +147,7 @@ private class ShownNotice(
     val id: Long,
     val notice: TogetherNotice,
 ) {
-    val visible = MutableTransitionState(false).apply { targetState = true }
+    var visible by mutableStateOf(true)
 }
 
 /** Always [BAR_HEIGHT] high, so the notices under it do not move while the chip fades. */
@@ -216,17 +217,10 @@ private fun NoticeLine(
 ) {
     LaunchedEffect(shown.id) {
         delay(NOTICE_MS)
-        shown.visible.targetState = false
-    }
-    if (shown.visible.isIdle && !shown.visible.currentState && !shown.visible.targetState) {
-        LaunchedEffect(shown.id) { onGone() }
+        shown.visible = false
     }
     val (text, color) = noticeText(shown.notice)
-    AnimatedVisibility(
-        visibleState = shown.visible,
-        enter = fadeIn(tween(FADE_MS)),
-        exit = fadeOut(tween(NOTICE_FADE_MS)),
-    ) {
+    LowerThird(visible = shown.visible, onExited = onGone) {
         BlackBar {
             Text(
                 text = text,
@@ -336,7 +330,6 @@ private val CLOCK_OFFSET = 40.dp
 private val NOTICE_MAX_TEXT_WIDTH = 480.dp
 private const val MAX_NOTICES = 3
 private const val NOTICE_MS = 4_000L
-private const val NOTICE_FADE_MS = 300
 private const val FADE_MS = 200
 private const val BRIGHT_MS = 10_000L
 private const val DIM_ALPHA = 0.4f

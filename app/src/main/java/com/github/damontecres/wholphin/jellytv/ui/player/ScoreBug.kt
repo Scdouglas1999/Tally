@@ -7,22 +7,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.api.JtvGame
 import com.github.damontecres.wholphin.jellytv.ui.components.IndicatorSquare
 import com.github.damontecres.wholphin.jellytv.ui.components.JtvSamples
+import com.github.damontecres.wholphin.jellytv.ui.components.RollingText
+import com.github.damontecres.wholphin.jellytv.ui.components.rememberScoreColor
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvSurface
@@ -56,12 +56,7 @@ fun ScoreBug(
             if (game.away.possession) {
                 IndicatorSquare(color = JtvColors.accent)
             }
-            Text(
-                text = scoreLine(game),
-                style = JtvType.situation,
-                color = JtvColors.text,
-                maxLines = 1,
-            )
+            ScoreLine(game)
         }
         val situation = situationLine(game)
         if (situation.isNotBlank()) {
@@ -77,21 +72,41 @@ fun ScoreBug(
     }
 }
 
-/** "IND 7 · KC 0" — away first, scores semibold. */
-private fun scoreLine(game: JtvGame) =
-    buildAnnotatedString {
-        append(game.away.abbr.ifBlank { game.away.shortName })
-        append(" ")
-        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-            append(game.away.score?.toString() ?: "–")
-        }
-        append(" · ")
-        append(game.home.abbr.ifBlank { game.home.shortName })
-        append(" ")
-        withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
-            append(game.home.score?.toString() ?: "–")
+/**
+ * "IND 7 · KC 0" — away first, scores semibold. The scores are scoreboard digits: a score that
+ * goes up rolls and shows in the accent color for a moment. Keyed by game, so switching games
+ * is not a score change.
+ */
+@Composable
+private fun ScoreLine(game: JtvGame) {
+    key(game.id) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = game.away.abbr.ifBlank { game.away.shortName } + " ",
+                style = JtvType.situation,
+                color = JtvColors.text,
+                maxLines = 1,
+            )
+            BugScore(game.away.score)
+            Text(
+                text = " · " + game.home.abbr.ifBlank { game.home.shortName } + " ",
+                style = JtvType.situation,
+                color = JtvColors.text,
+                maxLines = 1,
+            )
+            BugScore(game.home.score)
         }
     }
+}
+
+@Composable
+private fun BugScore(score: Int?) {
+    RollingText(
+        text = score?.toString() ?: "–",
+        style = JtvType.situation.copy(fontWeight = FontWeight.SemiBold),
+        color = rememberScoreColor(score, JtvColors.text),
+    )
+}
 
 /**
  * The small line under the score: the status detail plus the sport-specific situation —

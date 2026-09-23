@@ -15,9 +15,11 @@ import com.github.damontecres.wholphin.jellytv.SleepTimerService
 import com.github.damontecres.wholphin.jellytv.together.ui.TogetherDialog
 import com.github.damontecres.wholphin.jellytv.together.ui.TogetherOverlay
 import com.github.damontecres.wholphin.jellytv.ui.household.SendToDialog
+import com.github.damontecres.wholphin.jellytv.ui.household.SentNoticeHost
 import com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu
 import com.github.damontecres.wholphin.jellytv.ui.player.SleepTimerChip
 import com.github.damontecres.wholphin.jellytv.ui.player.SleepTimerDialog
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvScale
 import com.github.damontecres.wholphin.services.PlayerFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +33,10 @@ class JellyTvGlobalOverlaysViewModel
         val playerFactory: PlayerFactory,
     ) : ViewModel()
 
-/** Overlays that must work above any screen: the sleep timer chip, Watch Together, and the players' JellyTV menu dialogs. */
+/**
+ * Overlays that must work above any screen: the sleep timer chip, Watch Together, the players' JellyTV menu
+ * dialogs, and the SENT / NOT SENT lower third after Send to another screen.
+ */
 @Composable
 fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
     val viewModel: JellyTvGlobalOverlaysViewModel = hiltViewModel()
@@ -83,6 +88,14 @@ fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
                 null -> {}
             }
             TogetherOverlay(Modifier.fillMaxSize())
+            // The Send dialog draws the notice itself while it is open (above its scrim).
+            if (request != JellyTvPlayerMenu.Request.SEND_TO) {
+                SentNoticeHost(
+                    Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(horizontal = JtvDimens.marginHorizontal, vertical = JtvDimens.marginVertical),
+                )
+            }
         }
     }
 }

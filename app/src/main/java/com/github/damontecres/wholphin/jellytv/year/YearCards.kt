@@ -1,6 +1,9 @@
 package com.github.damontecres.wholphin.jellytv.year
 
+import android.provider.Settings
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -28,6 +33,7 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
@@ -43,12 +49,17 @@ import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.R
+import com.github.damontecres.wholphin.jellytv.ui.components.COUNT_UP_MS
+import com.github.damontecres.wholphin.jellytv.ui.components.EaseOutCubic
 import com.github.damontecres.wholphin.jellytv.ui.components.LabelBar
+import com.github.damontecres.wholphin.jellytv.ui.components.RollingText
+import com.github.damontecres.wholphin.jellytv.ui.components.countUpValue
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
 import org.jellyfin.sdk.model.api.ImageType
+import java.lang.ref.WeakReference
 import java.time.Instant
 import java.time.ZoneId
 import java.util.UUID
@@ -169,11 +180,12 @@ internal fun YearCover(
             overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(16.dp))
-        Text(
-            text = duration.amount,
+        CountUpNumber(
+            stats = stats,
+            slot = YearCard.COVER,
+            value = duration.amount.toLongOrNull() ?: 0L,
             style = heroNumber,
             color = JtvColors.accent,
-            maxLines = 1,
         )
         Text(
             text = stringResource(duration.unitRes).uppercase(),
@@ -202,7 +214,7 @@ internal fun YearFilms(
 ) {
     val word = if (stats.movies == 1) R.string.jtv_year_film else R.string.jtv_year_films
     Column(modifier.fillMaxSize()) {
-        CountLine(amount = stats.movies.toString(), unit = stringResource(word))
+        CountLine(stats = stats, slot = YearCard.FILMS, amount = stats.movies.toLong(), unit = stringResource(word))
         Spacer(Modifier.height(20.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             stats.topMovies.forEach { movie ->
@@ -246,7 +258,7 @@ internal fun YearShows(
                     .padding(start = JtvDimens.marginHorizontal, end = 20.dp, bottom = aboveHints),
         ) {
             val word = if (stats.episodes == 1) R.string.jtv_year_episode else R.string.jtv_year_episodes
-            CountLine(amount = stats.episodes.toString(), unit = stringResource(word))
+            CountLine(stats = stats, slot = YearCard.SHOWS, amount = stats.episodes.toLong(), unit = stringResource(word))
             Spacer(Modifier.height(8.dp))
             Text(
                 text = pluralStringResource(R.plurals.jtv_year_across, stats.series, stats.series).uppercase(),
@@ -486,15 +498,18 @@ internal fun YearChip(
 
 @Composable
 private fun CountLine(
-    amount: String,
+    stats: YearStats,
+    slot: YearCard,
+    amount: Long,
     unit: String,
 ) {
     Row(verticalAlignment = Alignment.Bottom) {
-        Text(
-            text = amount,
+        CountUpNumber(
+            stats = stats,
+            slot = slot,
+            value = amount,
             style = countNumber,
             color = JtvColors.text,
-            maxLines = 1,
         )
         Spacer(Modifier.width(14.dp))
         Text(
@@ -504,6 +519,65 @@ private fun CountLine(
             modifier = Modifier.padding(bottom = 10.dp),
             maxLines = 1,
         )
+    }
+}
+
+/**
+ * A big stat number that counts up from 0 the first time its card is shown during a visit to the
+ * page ([stats] is one visit's result): the value eases out (cubic) over [COUNT_UP_MS] and runs
+ * through [RollingText] like a scoreboard counter. The number holds its final width from the
+ * start (right-aligned), so nothing next to it moves.
+ */
+@Composable
+private fun CountUpNumber(
+    stats: YearStats,
+    slot: YearCard,
+    value: Long,
+    style: TextStyle,
+    color: Color,
+) {
+    val context = LocalContext.current
+    val countUp =
+        remember(stats, slot) {
+            // With animations off the number is simply there (no frame of 0 first).
+            YearCountUps.claim(stats, slot) &&
+                Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+        }
+    val shown = remember(stats, slot) { Animatable(if (countUp) 0f else 1f) }
+    LaunchedEffect(stats, slot) {
+        if (shown.value < 1f) {
+            shown.animateTo(1f, tween(durationMillis = COUNT_UP_MS, easing = EaseOutCubic))
+        }
+    }
+    Box(contentAlignment = Alignment.TopEnd) {
+        Text(
+            text = value.toString(),
+            style = style,
+            color = Color.Transparent,
+            maxLines = 1,
+        )
+        RollingText(
+            text = countUpValue(value, shown.value).toString(),
+            style = style,
+            color = color,
+        )
+    }
+}
+
+/** Which cards have counted up during the current visit; a new [YearStats] instance is a new visit. */
+private object YearCountUps {
+    private var visit = WeakReference<YearStats>(null)
+    private val counted = mutableSetOf<YearCard>()
+
+    fun claim(
+        stats: YearStats,
+        card: YearCard,
+    ): Boolean {
+        if (visit.get() !== stats) {
+            visit = WeakReference(stats)
+            counted.clear()
+        }
+        return counted.add(card)
     }
 }
 
