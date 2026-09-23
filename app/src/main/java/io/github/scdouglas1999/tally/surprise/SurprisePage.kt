@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -73,11 +74,14 @@ import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.media.kit.CapsLift
 import io.github.scdouglas1999.tally.media.kit.TallyButton
+import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -362,12 +366,12 @@ private fun FilterBar(
         ) {
             val name = filters.genre ?: stringResource(R.string.tally_surprise_genre_any)
             Text(
-                text = stringResource(R.string.tally_surprise_genre, name).uppercase(),
+                text = stringResource(R.string.tally_surprise_genre, name).tallyUppercase(),
                 style = TallyType.label,
                 color = TallyColors.text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.widthIn(max = GENRE_MAX.dp),
+                modifier = Modifier.widthIn(max = GENRE_MAX.dp).offset(y = CapsLift),
             )
         }
         if (filters.kind == SurpriseKind.MOVIES) {
@@ -414,7 +418,7 @@ private fun FilterBar(
             Text(
                 text =
                     pluralStringResource(R.plurals.tally_surprise_matches, matches, matches)
-                        .uppercase(),
+                        .tallyUppercase(),
                 style = TallyType.label,
                 color = TallyColors.muted,
                 maxLines = 1,
@@ -431,10 +435,11 @@ private fun FilterBar(
 private fun KindLabel(kind: SurpriseKind) {
     val movies = kind == SurpriseKind.MOVIES
     Text(
-        text = stringResource(R.string.tally_surprise_movies).uppercase(),
+        text = stringResource(R.string.tally_surprise_movies).tallyUppercase(),
         style = TallyType.label,
         color = if (movies) TallyColors.accent else TallyColors.muted,
         maxLines = 1,
+        modifier = Modifier.offset(y = CapsLift),
     )
     Box(
         Modifier
@@ -444,10 +449,11 @@ private fun KindLabel(kind: SurpriseKind) {
             .background(TallyColors.ruleStrong),
     )
     Text(
-        text = stringResource(R.string.tally_surprise_shows).uppercase(),
+        text = stringResource(R.string.tally_surprise_shows).tallyUppercase(),
         style = TallyType.label,
         color = if (movies) TallyColors.muted else TallyColors.accent,
         maxLines = 1,
+        modifier = Modifier.offset(y = CapsLift),
     )
 }
 
@@ -461,10 +467,12 @@ private fun ToggleLabel(
         size = 8.dp,
     )
     Text(
-        text = text.uppercase(),
+        text = text.tallyUppercase(),
         style = TallyType.label,
         color = TallyColors.text,
         maxLines = 1,
+        // Plex Mono capitals sit low in their line box: lift them so the chip's label is centered.
+        modifier = Modifier.offset(y = CapsLift),
     )
 }
 
@@ -625,7 +633,7 @@ private fun PickText(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            text = stringResource(R.string.tally_surprise_kicker).uppercase(),
+            text = stringResource(R.string.tally_surprise_kicker).tallyUppercase(),
             style = TallyType.label,
             color = TallyColors.accent,
             maxLines = 1,
@@ -688,7 +696,7 @@ private fun PickText(
                     )
                 }
                 Text(
-                    text = stringResource(R.string.tally_surprise_resume_percent, percent).uppercase(),
+                    text = stringResource(R.string.tally_surprise_resume_percent, percent).tallyUppercase(),
                     style = TallyType.label,
                     color = TallyColors.textSecondary,
                     maxLines = 1,
@@ -757,29 +765,17 @@ private fun metaLine(
         ?.let { parts += it }
     if (kind == SurpriseKind.SHOWS) {
         item.data.childCount?.takeIf { it > 0 }?.let { count ->
-            parts += pluralStringResource(R.plurals.tally_surprise_seasons, count, count).uppercase()
+            parts += pluralStringResource(R.plurals.tally_surprise_seasons, count, count).tallyUppercase()
         }
     } else {
         item.data.runTimeTicks?.takeIf { it > 0L }?.let { ticks ->
-            parts += runtimeLabel(ticks)
+            parts += formatRuntime(ticks)
         }
     }
     item.data.communityRating?.let { rating ->
         parts += stringResource(R.string.tally_surprise_rating, rating)
     }
     return parts.joinToString(" · ")
-}
-
-@Composable
-private fun runtimeLabel(ticks: Long): String {
-    val minutesTotal = (ticks / TICKS_PER_SECOND / 60L).toInt()
-    val hours = minutesTotal / 60
-    val minutes = minutesTotal % 60
-    return when {
-        hours > 0 && minutes > 0 -> stringResource(R.string.tally_surprise_runtime_hm, hours, minutes)
-        hours > 0 -> stringResource(R.string.tally_surprise_runtime_h, hours)
-        else -> stringResource(R.string.tally_surprise_runtime_m, minutes)
-    }
 }
 
 @Composable
@@ -836,7 +832,7 @@ private fun ErrorBlock(
                     .height(EMPTY_HEIGHT.dp),
         )
         TallyRow(
-            label = stringResource(R.string.tally_surprise_try_again).uppercase(),
+            label = stringResource(R.string.tally_surprise_try_again).tallyUppercase(),
             onClick = onRetry,
             primary = true,
             modifier =
@@ -1037,7 +1033,6 @@ private const val BACKDROP_FADE_MS = 400
 private const val TEXT_FADE_OUT_MS = 120
 private const val TEXT_FADE_IN_MS = 300
 private const val PRELOAD_MS = 800L
-private const val TICKS_PER_SECOND = 10_000_000L
 private const val POSTER_W = 168
 private const val POSTER_H = 252
 private const val TEXT_MAX = 420

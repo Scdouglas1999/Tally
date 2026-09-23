@@ -35,6 +35,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -50,8 +51,6 @@ import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.components.ContextMenu
 import com.github.damontecres.wholphin.ui.components.ContextMenuActions
-import com.github.damontecres.wholphin.ui.components.FilterByButton
-import com.github.damontecres.wholphin.ui.components.SortByButton
 import com.github.damontecres.wholphin.ui.data.AddPlaylistViewModel
 import com.github.damontecres.wholphin.ui.data.ItemDetailsDialogInfo
 import com.github.damontecres.wholphin.ui.data.MovieSortOptions
@@ -73,6 +72,12 @@ import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.media.kit.bleedHorizontal
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
+import io.github.scdouglas1999.tally.media.kit.revealWhenResized
+import io.github.scdouglas1999.tally.media.library.FilterDialog
+import io.github.scdouglas1999.tally.media.library.LibraryControlButton
+import io.github.scdouglas1999.tally.media.library.SortDialog
+import io.github.scdouglas1999.tally.media.library.directionArrow
+import io.github.scdouglas1999.tally.media.library.sortLabel
 import io.github.scdouglas1999.tally.media.pages.CountNoun
 import io.github.scdouglas1999.tally.media.pages.countNoun
 import io.github.scdouglas1999.tally.media.pages.totalRuntimeTicks
@@ -471,7 +476,7 @@ private fun collectionMeta(
 
 /**
  * PLAY (the whole collection, as upstream), SHUFFLE, WATCHED, FAVORITE, DELETE (when allowed), VIEW,
- * MORE, then upstream's sort and filter controls.
+ * MORE, then SORT and FILTER (the library page's controls and panels).
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -489,6 +494,9 @@ private fun CollectionActions(
     onMore: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    var sortOpen by remember { mutableStateOf(false) }
+    var filterOpen by remember { mutableStateOf(false) }
+    val filterButton = remember { FocusRequester() }
     CompositionLocalProvider(LocalBringIntoViewSpec provides rememberFocusEdgeSpec()) {
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -575,23 +583,58 @@ private fun CollectionActions(
                     onFocused = onFocused,
                 )
             }
-            // Upstream's sort and filter controls, as they are (their menus live in them).
+            // The library page's sort and filter controls, with upstream's view-model calls.
             item(key = "sort") {
-                SortByButton(
-                    sortOptions = MovieSortOptions,
-                    current = state.sortAndDirection,
-                    onSortChange = viewModel::changeSort,
+                LibraryControlButton(
+                    label = sortLabel(state.sortAndDirection),
+                    suffix = directionArrow(state.sortAndDirection.direction),
+                    onClick = { sortOpen = true },
+                    // As upstream's sort button: a long press reverses the order.
+                    onLongClick = { viewModel.changeSort(state.sortAndDirection.flip()) },
+                    modifier =
+                        Modifier
+                            .revealWhenResized()
+                            .onFocusChanged { if (it.isFocused) onFocused() },
                 )
             }
             item(key = "filter") {
-                FilterByButton(
-                    filterOptions = DefaultFilterOptions,
-                    current = state.itemFilter,
-                    onFilterChange = viewModel::changeFilter,
-                    getPossibleValues = viewModel::getPossibleFilterValues,
+                val count = state.itemFilter.countFilters(DefaultFilterOptions)
+                LibraryControlButton(
+                    label =
+                        if (count > 0) {
+                            stringResource(R.string.tally_library_filter_count, count)
+                        } else {
+                            stringResource(R.string.tally_library_filter)
+                        },
+                    onClick = { filterOpen = true },
+                    modifier =
+                        Modifier
+                            .revealWhenResized()
+                            .focusRequester(filterButton)
+                            .onFocusChanged { if (it.isFocused) onFocused() },
                 )
             }
         }
+    }
+    if (sortOpen) {
+        SortDialog(
+            sortOptions = MovieSortOptions,
+            current = state.sortAndDirection,
+            onSortChange = viewModel::changeSort,
+            onDismiss = { sortOpen = false },
+        )
+    }
+    if (filterOpen) {
+        FilterDialog(
+            filterOptions = DefaultFilterOptions,
+            current = state.itemFilter,
+            onFilterChange = viewModel::changeFilter,
+            getPossibleValues = viewModel::getPossibleFilterValues,
+            onDismiss = {
+                filterOpen = false
+                filterButton.tryRequestFocus("tally-collection-filter")
+            },
+        )
     }
 }
 

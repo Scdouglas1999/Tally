@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -38,7 +40,9 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -48,12 +52,14 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
@@ -84,12 +90,17 @@ import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.resumePercent
 import io.github.scdouglas1999.tally.media.series.wholePx
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
+import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.BaseItemKind
+import org.jellyfin.sdk.model.api.ImageType
 import timber.log.Timber
+import java.util.UUID
 
 /**
  * The library grid: [MediaGrid] of the library's items drawn as the view options ask (image type, aspect ratio,
@@ -111,6 +122,7 @@ internal fun LibraryGrid(
     letterPosition: suspend (Char) -> Int,
     onFocusIndex: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    topPadding: Dp = 0.dp,
 ) {
     val scope = rememberCoroutineScope()
     val columns = viewOptions.columns.coerceAtLeast(1)
@@ -203,6 +215,7 @@ internal fun LibraryGrid(
             columns = columns,
             state = gridState,
             gap = viewOptions.spacing.dp,
+            topPadding = topPadding,
             bottomPadding = TallyDimens.marginVertical,
             key = { index, item -> "$index-${item?.id}" },
             onFocusIndex = { index ->
@@ -212,7 +225,27 @@ internal fun LibraryGrid(
                 }
                 onFocusIndex(index)
             },
-            modifier = Modifier.weight(1f),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .drawWithContent {
+                        drawContent()
+                        // Rows scrolled up fade out under the header strip instead of being cut, as on the
+                        // season rundown. Wide enough to cover a focus border in the grid's side bleed.
+                        if (topPadding > 0.dp && gridState.lazyState.canScrollBackward) {
+                            val bleed = FocusEdge.toPx()
+                            drawRect(
+                                brush =
+                                    Brush.verticalGradient(
+                                        0f to TallyColors.ground,
+                                        1f to Color.Transparent,
+                                        endY = topPadding.toPx(),
+                                    ),
+                                topLeft = Offset(-bleed, 0f),
+                                size = Size(size.width + bleed * 2, topPadding.toPx()),
+                            )
+                        }
+                    },
             card = { item, index, cardModifier, width ->
                 LibraryItemCard(
                     item = item,
@@ -220,7 +253,7 @@ internal fun LibraryGrid(
                     width = width,
                     onClick = { if (item != null) onClickItem(index, item) },
                     onLongClick = { if (item != null) onLongClickItem(index, item) },
-                    modifier = cardModifier,
+                    modifier = cardModifier.then(if (topPadding > 0.dp) Modifier.revealBelow(topPadding) else Modifier),
                 )
             },
         )
@@ -230,13 +263,36 @@ internal fun LibraryGrid(
                 currentLetter = letter,
                 onLetter = ::jumpToLetter,
                 gridRequester = gridState.gridRequester,
-                modifier = Modifier.padding(start = JumpBarGap - FocusEdge),
+                modifier = Modifier.padding(start = JumpBarGap - FocusEdge, top = topPadding),
             )
         } else {
             // Same room as the bar, so cards keep their size when the sort changes.
             Spacer(Modifier.width(JumpBarGap - FocusEdge + JumpBarWidth))
         }
     }
+}
+
+/**
+ * When this card takes focus, scroll it into view with [headroom] above it as well, so a focused card never sits
+ * under the fade at the top of the grid.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun Modifier.revealBelow(headroom: Dp): Modifier {
+    val requester = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
+    val headroomPx = with(LocalDensity.current) { headroom.toPx() }
+    var size by remember { mutableStateOf(IntSize.Zero) }
+    return this
+        .onSizeChanged { size = it }
+        .bringIntoViewRequester(requester)
+        .onFocusChanged { state ->
+            if (state.isFocused) {
+                scope.launch(ExceptionHandler()) {
+                    requester.bringIntoView(Rect(0f, -headroomPx, size.width.toFloat(), size.height.toFloat()))
+                }
+            }
+        }
 }
 
 /** Width of the jump bar including the room for a focused letter's border. */
@@ -397,7 +453,20 @@ internal fun LibraryItemCard(
     val imageType = viewOptions.imageType.imageType
     val imageUrl =
         remember(item, imageType, fillWidth) {
-            item?.let { imageService.getItemImageUrl(it, imageType, fillWidth = fillWidth) }
+            item?.let {
+                // A song has no picture of its own: its album's cover stands in.
+                val album = albumCoverFallback(it.data, imageType)
+                if (album != null) {
+                    imageService.getItemImageUrl(
+                        itemId = album.first,
+                        imageType = ImageType.PRIMARY,
+                        fillWidth = fillWidth,
+                        tag = album.second,
+                    )
+                } else {
+                    imageService.getItemImageUrl(it, imageType, fillWidth = fillWidth)
+                }
+            }
         }
     val played = item?.played == true
     val unplayed = item?.data?.userData?.unplayedItemCount ?: 0
@@ -440,7 +509,7 @@ internal fun LibraryItemCard(
                     )
                     if (detail != null) {
                         Text(
-                            text = detail.uppercase(),
+                            text = detail.tallyUppercase(),
                             style = CardDetailStyle,
                             color = TallyColors.muted,
                             maxLines = 1,
@@ -452,4 +521,20 @@ internal fun LibraryItemCard(
                 null
             },
     )
+}
+
+/**
+ * The album whose cover stands in for [item]'s [imageType] picture: a song (or other audio) with no picture of that
+ * type of its own, when the server names the album's primary image. Null otherwise. Returns the album id and the
+ * image tag.
+ */
+internal fun albumCoverFallback(
+    item: BaseItemDto,
+    imageType: ImageType,
+): Pair<UUID, String>? {
+    if (item.type != BaseItemKind.AUDIO) return null
+    if (item.imageTags.orEmpty()[imageType] != null) return null
+    val albumId = item.albumId ?: return null
+    val tag = item.albumPrimaryImageTag ?: return null
+    return albumId to tag
 }

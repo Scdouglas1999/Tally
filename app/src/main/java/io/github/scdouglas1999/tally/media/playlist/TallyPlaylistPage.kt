@@ -82,9 +82,7 @@ import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
 import com.github.damontecres.wholphin.ui.components.ContextMenu
 import com.github.damontecres.wholphin.ui.components.ContextMenuActions
-import com.github.damontecres.wholphin.ui.components.FilterByButton
 import com.github.damontecres.wholphin.ui.components.MusicContextActions
-import com.github.damontecres.wholphin.ui.components.SortByButton
 import com.github.damontecres.wholphin.ui.data.AddPlaylistViewModel
 import com.github.damontecres.wholphin.ui.data.BoxSetSortOptions
 import com.github.damontecres.wholphin.ui.detail.ConfirmMediaTypeDialog
@@ -106,6 +104,12 @@ import io.github.scdouglas1999.tally.media.kit.bleedHorizontal
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.resumePercent
+import io.github.scdouglas1999.tally.media.kit.revealWhenResized
+import io.github.scdouglas1999.tally.media.library.FilterDialog
+import io.github.scdouglas1999.tally.media.library.LibraryControlButton
+import io.github.scdouglas1999.tally.media.library.SortDialog
+import io.github.scdouglas1999.tally.media.library.directionArrow
+import io.github.scdouglas1999.tally.media.library.sortLabel
 import io.github.scdouglas1999.tally.media.pages.joinMeta
 import io.github.scdouglas1999.tally.media.pages.rundownMeta
 import io.github.scdouglas1999.tally.media.pages.rundownNumber
@@ -133,7 +137,8 @@ private const val META_SAMPLE = 200
 
 /**
  * The Tally playlist page: upstream's [PlaylistViewModel] (play from an index as video or music,
- * shuffle, sort, filter, move up/down, remove, item menus) drawn as a header and a numbered rundown.
+ * shuffle, sort, filter, move up/down, remove, item menus) drawn as a header and a numbered rundown. Sort and
+ * filter are the library page's controls and panels, with the same view-model calls as upstream's buttons.
  */
 @Composable
 fun TallyPlaylistPage(
@@ -150,6 +155,9 @@ fun TallyPlaylistPage(
     val musicState by viewModel.musicState.collectAsState()
     val dialogs = remember { ItemDialogsState() }
     var confirmType by remember { mutableStateOf<Triple<Int, BaseItem, Boolean>?>(null) }
+    var sortOpen by remember { mutableStateOf(false) }
+    var filterOpen by remember { mutableStateOf(false) }
+    val filterButton = remember { FocusRequester() }
 
     fun play(
         index: Int,
@@ -294,19 +302,35 @@ fun TallyPlaylistPage(
                             onMenu = ::openMenu,
                             onMove = viewModel::onMoveItem,
                             onFocusItem = viewModel::updateBackdrop,
-                            sortControl = {
-                                SortByButton(
-                                    sortOptions = BoxSetSortOptions,
-                                    current = state.filterAndSort.sortAndDirection,
-                                    onSortChange = { viewModel.loadItems(state.filterAndSort.filter, it) },
+                            sortControl = { onFocused ->
+                                val sort = state.filterAndSort.sortAndDirection
+                                LibraryControlButton(
+                                    label = sortLabel(sort),
+                                    suffix = directionArrow(sort.direction),
+                                    onClick = { sortOpen = true },
+                                    // As upstream's sort button: a long press reverses the order.
+                                    onLongClick = { viewModel.loadItems(state.filterAndSort.filter, sort.flip()) },
+                                    modifier =
+                                        Modifier
+                                            .revealWhenResized()
+                                            .onFocusChanged { if (it.isFocused) onFocused() },
                                 )
                             },
-                            filterControl = {
-                                FilterByButton(
-                                    filterOptions = DefaultPlaylistItemsOptions,
-                                    current = state.filterAndSort.filter,
-                                    onFilterChange = { viewModel.loadItems(it, state.filterAndSort.sortAndDirection) },
-                                    getPossibleValues = viewModel::getFilterOptionValues,
+                            filterControl = { onFocused ->
+                                val count = state.filterAndSort.filter.countFilters(DefaultPlaylistItemsOptions)
+                                LibraryControlButton(
+                                    label =
+                                        if (count > 0) {
+                                            stringResource(R.string.tally_library_filter_count, count)
+                                        } else {
+                                            stringResource(R.string.tally_library_filter)
+                                        },
+                                    onClick = { filterOpen = true },
+                                    modifier =
+                                        Modifier
+                                            .revealWhenResized()
+                                            .focusRequester(filterButton)
+                                            .onFocusChanged { if (it.isFocused) onFocused() },
                                 )
                             },
                         )
@@ -323,6 +347,26 @@ fun TallyPlaylistPage(
         onConfirmDelete = viewModel::deleteItem,
         playlistViewModel = addToPlaylistViewModel,
     )
+    if (sortOpen) {
+        SortDialog(
+            sortOptions = BoxSetSortOptions,
+            current = state.filterAndSort.sortAndDirection,
+            onSortChange = { viewModel.loadItems(state.filterAndSort.filter, it) },
+            onDismiss = { sortOpen = false },
+        )
+    }
+    if (filterOpen) {
+        FilterDialog(
+            filterOptions = DefaultPlaylistItemsOptions,
+            current = state.filterAndSort.filter,
+            onFilterChange = { viewModel.loadItems(it, state.filterAndSort.sortAndDirection) },
+            getPossibleValues = viewModel::getFilterOptionValues,
+            onDismiss = {
+                filterOpen = false
+                filterButton.tryRequestFocus("tally-playlist-filter")
+            },
+        )
+    }
     confirmType?.let { (index, item, shuffle) ->
         ConfirmMediaTypeDialog(
             onConfirm = { mediaType ->
@@ -346,8 +390,8 @@ private fun PlaylistLoaded(
     onMenu: (Int, BaseItem, Boolean) -> Unit,
     onMove: (Int, java.util.UUID, MoveDirection) -> Unit,
     onFocusItem: (BaseItem) -> Unit,
-    sortControl: @Composable () -> Unit,
-    filterControl: @Composable () -> Unit,
+    sortControl: @Composable (onFocused: () -> Unit) -> Unit,
+    filterControl: @Composable (onFocused: () -> Unit) -> Unit,
 ) {
     val items = state.items
     val focusManager = LocalFocusManager.current
@@ -481,7 +525,7 @@ private fun PlaylistLoaded(
     }
 }
 
-/** Kicker `PLAYLIST`, the name, `3 ITEMS · 4m 30s`, then PLAY, SHUFFLE, MORE and upstream's sort and filter. */
+/** Kicker `PLAYLIST`, the name, `3 ITEMS · 4m 30s`, then PLAY, SHUFFLE, MORE, SORT and FILTER. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlaylistHeader(
@@ -493,8 +537,8 @@ private fun PlaylistHeader(
     onFocused: () -> Unit,
     onPlayAll: (Boolean) -> Unit,
     onMore: () -> Unit,
-    sortControl: @Composable () -> Unit,
-    filterControl: @Composable () -> Unit,
+    sortControl: @Composable (onFocused: () -> Unit) -> Unit,
+    filterControl: @Composable (onFocused: () -> Unit) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val count = items.size
@@ -579,8 +623,8 @@ private fun PlaylistHeader(
                         onFocused = onFocused,
                     )
                 }
-                item(key = "filter") { filterControl() }
-                item(key = "sort") { sortControl() }
+                item(key = "sort") { sortControl(onFocused) }
+                item(key = "filter") { filterControl(onFocused) }
             }
         }
     }
@@ -768,7 +812,7 @@ private fun PlaylistRow(
     }
 }
 
-/** Upstream disables the first row's "up" and the last row's "down"; here the slot stays, empty. */
+/** Upstream disables the first row's "up" and the last row's "down": shown disabled, and focus skips it. */
 @Composable
 private fun MoveButton(
     allowed: Boolean,
@@ -776,11 +820,7 @@ private fun MoveButton(
     label: String,
     onClick: () -> Unit,
 ) {
-    if (allowed) {
-        IconSlot { TallyIconButton(glyph = glyph, label = label, onClick = onClick, modifier = it) }
-    } else {
-        Box(modifier = Modifier.size(40.dp))
-    }
+    IconSlot { TallyIconButton(glyph = glyph, label = label, onClick = onClick, enabled = allowed, modifier = it) }
 }
 
 @Composable

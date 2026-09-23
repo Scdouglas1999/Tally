@@ -22,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -44,8 +45,6 @@ import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.data.model.CollectionFolderFilter
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.components.CollectionFolderViewModel
-import com.github.damontecres.wholphin.ui.components.FilterByButton
-import com.github.damontecres.wholphin.ui.components.SortByButton
 import com.github.damontecres.wholphin.ui.components.ViewOptionsSquare
 import com.github.damontecres.wholphin.ui.data.AddPlaylistViewModel
 import com.github.damontecres.wholphin.ui.data.PlaylistSortOptions
@@ -62,6 +61,11 @@ import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
 import io.github.scdouglas1999.tally.media.kit.rememberWideImageUrl
+import io.github.scdouglas1999.tally.media.library.FilterDialog
+import io.github.scdouglas1999.tally.media.library.LibraryControlButton
+import io.github.scdouglas1999.tally.media.library.SortDialog
+import io.github.scdouglas1999.tally.media.library.directionArrow
+import io.github.scdouglas1999.tally.media.library.sortLabel
 import io.github.scdouglas1999.tally.media.pages.joinMeta
 import io.github.scdouglas1999.tally.media.search.PagesLoading
 import io.github.scdouglas1999.tally.media.search.providerContextMenu
@@ -75,7 +79,8 @@ import java.util.UUID
 
 /**
  * The Tally playlists library: upstream's `CollectionFolderPlaylist` view model (same key and
- * arguments), its sort, filter, random and item menus, drawn as a grid of 16:9 playlist cards.
+ * arguments), its sort, filter, random and item menus, drawn as a grid of 16:9 playlist cards. Sort and filter
+ * are the library page's controls and panels.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -101,6 +106,9 @@ fun TallyPlaylistsPage(
     val state by viewModel.state.collectAsState()
     val dialogs = remember { ItemDialogsState() }
     var menuIndex by remember { mutableIntStateOf(0) }
+    var sortOpen by remember { mutableStateOf(false) }
+    var filterOpen by remember { mutableStateOf(false) }
+    val filterButton = remember { FocusRequester() }
     LifecycleResumeEffect(itemId) {
         viewModel.onResumePage()
         onPauseOrDispose { viewModel.release() }
@@ -134,18 +142,27 @@ fun TallyPlaylistsPage(
                                 onRandom = { viewModel.onClickRandom() },
                                 randomEnabled = items?.isNotEmpty() == true,
                                 sortControl = {
-                                    SortByButton(
-                                        sortOptions = PlaylistSortOptions,
-                                        current = state.sortAndDirection,
-                                        onSortChange = { viewModel.onSortChange(it, true, state.filter) },
+                                    LibraryControlButton(
+                                        label = sortLabel(state.sortAndDirection),
+                                        suffix = directionArrow(state.sortAndDirection.direction),
+                                        onClick = { sortOpen = true },
+                                        // As upstream's sort button: a long press reverses the order.
+                                        onLongClick = {
+                                            viewModel.onSortChange(state.sortAndDirection.flip(), true, state.filter)
+                                        },
                                     )
                                 },
                                 filterControl = {
-                                    FilterByButton(
-                                        filterOptions = DefaultFilterOptions,
-                                        current = state.filter,
-                                        onFilterChange = { viewModel.onFilterChange(it, true) },
-                                        getPossibleValues = { viewModel.getFilterOptionValues(it) },
+                                    val filters = state.filter.countFilters(DefaultFilterOptions)
+                                    LibraryControlButton(
+                                        label =
+                                            if (filters > 0) {
+                                                stringResource(R.string.tally_library_filter_count, filters)
+                                            } else {
+                                                stringResource(R.string.tally_library_filter)
+                                            },
+                                        onClick = { filterOpen = true },
+                                        modifier = Modifier.focusRequester(filterButton),
                                     )
                                 },
                                 modifier = Modifier.focusRequester(headerFocus),
@@ -219,9 +236,29 @@ fun TallyPlaylistsPage(
         onConfirmDelete = { viewModel.deleteItem(menuIndex, it) },
         playlistViewModel = playlistViewModel,
     )
+    if (sortOpen) {
+        SortDialog(
+            sortOptions = PlaylistSortOptions,
+            current = state.sortAndDirection,
+            onSortChange = { viewModel.onSortChange(it, true, state.filter) },
+            onDismiss = { sortOpen = false },
+        )
+    }
+    if (filterOpen) {
+        FilterDialog(
+            filterOptions = DefaultFilterOptions,
+            current = state.filter,
+            onFilterChange = { viewModel.onFilterChange(it, true) },
+            getPossibleValues = { viewModel.getFilterOptionValues(it) },
+            onDismiss = {
+                filterOpen = false
+                filterButton.tryRequestFocus("tally-playlists-filter")
+            },
+        )
+    }
 }
 
-/** Kicker (the library's name) with a muted count, and at the right upstream's sort and filter plus RANDOM. */
+/** Kicker (the library's name) with a muted count, then SORT and FILTER, and RANDOM at the right. */
 @Composable
 private fun PlaylistsHeader(
     title: String,
@@ -327,6 +364,7 @@ private fun PlaylistGrid(
                         onClick = { item?.let(onClick) },
                         onLongClick = { item?.let { onLongClick(index, it) } },
                         onPlay = { item?.let(onPlay) },
+                        favorite = item?.favorite == true,
                         onFocused = {
                             focused = index
                             onFocus(index, item)

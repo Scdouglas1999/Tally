@@ -1,0 +1,630 @@
+{
+    "Items": [
+        {
+            "Name": "One More Time",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "a86cc0dc90b95edbad791c0ca1536f13",
+            "HasLyrics": true,
+            "Container": "mp3",
+            "PremiereDate": "2001-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 2001,
+            "IndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropImageTags": [
+                "70eb92b62dcaa061b2d00449f63d4ccc"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T04:13:49.1733252Z",
+                "Played": true,
+                "Key": "Daft Punk-Discovery-0001One More Time",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Daft Punk"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "Album": "Discovery",
+            "AlbumId": "d8fbc15942abb20a4be9ff74193bc3be",
+            "AlbumPrimaryImageTag": "af6b877e529855565220eb0eb2fb17bc",
+            "AlbumArtist": "Daft Punk",
+            "AlbumArtists": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "88713dd430549823d1f6948b1a22f4fb",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "88713dd430549823d1f6948b1a22f4fb": "O,O43iof~qayxuj[IUt7WBWBofofj[j[WBayofofayfQay"
+                },
+                "Backdrop": {
+                    "70eb92b62dcaa061b2d00449f63d4ccc": "WU8hkIu6pKxutSogk@X9jFV?WXoLj]oIWBWBt7ofbws;bIbcofjY"
+                },
+                "Primary": {
+                    "af6b877e529855565220eb0eb2fb17bc": "eB6[5Rxu9FR*M{xuayM{ayay00M|-;t6xuIAa|%Mt7j[%Nt6V@ayRj"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "So What",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "b071992ebded3aaa1c83309406010720",
+            "HasLyrics": true,
+            "Container": "mp3",
+            "PremiereDate": "1959-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 1959,
+            "IndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropImageTags": [
+                "96c1b9cb258bb416489fe9bfbc34bd55"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-22T22:08:19.5850534Z",
+                "Played": true,
+                "Key": "Miles Davis-Kind of Blue-0001So What",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Miles Davis"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "Album": "Kind of Blue",
+            "AlbumId": "835a8098fdf37701c910a67f456013a8",
+            "AlbumPrimaryImageTag": "4603391cf693613f075b651528c472b9",
+            "AlbumArtist": "Miles Davis",
+            "AlbumArtists": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "ac9e62a43dbcc1f4d194984ba21d742a",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "ac9e62a43dbcc1f4d194984ba21d742a": "O89Gj=tl0cnj9rsDW-S#ban$V[jZt7oMR%oft7R*Rjj]j]"
+                },
+                "Backdrop": {
+                    "96c1b9cb258bb416489fe9bfbc34bd55": "WFCsjj00xu_3M{-;%M?bRj%Mt7t7t7t7%Mt7Rjt7%MM{xuWBxuIU"
+                },
+                "Primary": {
+                    "4603391cf693613f075b651528c472b9": "e45}X6_3NLI[?a?H?GozS5s:~q^+WZt7?axukX-:%2kC%M%LR*s:%L"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "Aerodynamic",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "008c9113e8e2c78441fb511e8b4bd9d1",
+            "HasLyrics": false,
+            "Container": "mp3",
+            "PremiereDate": "2001-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 2001,
+            "IndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropImageTags": [
+                "70eb92b62dcaa061b2d00449f63d4ccc"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T04:05:50.4469892Z",
+                "Played": true,
+                "Key": "Daft Punk-Discovery-0002Aerodynamic",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Daft Punk"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "Album": "Discovery",
+            "AlbumId": "d8fbc15942abb20a4be9ff74193bc3be",
+            "AlbumPrimaryImageTag": "af6b877e529855565220eb0eb2fb17bc",
+            "AlbumArtist": "Daft Punk",
+            "AlbumArtists": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "88713dd430549823d1f6948b1a22f4fb",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "88713dd430549823d1f6948b1a22f4fb": "O,O43iof~qayxuj[IUt7WBWBofofj[j[WBayofofayfQay"
+                },
+                "Backdrop": {
+                    "70eb92b62dcaa061b2d00449f63d4ccc": "WU8hkIu6pKxutSogk@X9jFV?WXoLj]oIWBWBt7ofbws;bIbcofjY"
+                },
+                "Primary": {
+                    "af6b877e529855565220eb0eb2fb17bc": "eB6[5Rxu9FR*M{xuayM{ayay00M|-;t6xuIAa|%Mt7j[%Nt6V@ayRj"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "Freddie Freeloader",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "07faa73fb06e7c7f4ce9ba2610684920",
+            "HasLyrics": false,
+            "Container": "mp3",
+            "PremiereDate": "1959-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 1959,
+            "IndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropImageTags": [
+                "96c1b9cb258bb416489fe9bfbc34bd55"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": true,
+                "Key": "Miles Davis-Kind of Blue-0002Freddie Freeloader",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Miles Davis"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "Album": "Kind of Blue",
+            "AlbumId": "835a8098fdf37701c910a67f456013a8",
+            "AlbumPrimaryImageTag": "4603391cf693613f075b651528c472b9",
+            "AlbumArtist": "Miles Davis",
+            "AlbumArtists": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "ac9e62a43dbcc1f4d194984ba21d742a",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "ac9e62a43dbcc1f4d194984ba21d742a": "O89Gj=tl0cnj9rsDW-S#ban$V[jZt7oMR%oft7R*Rjj]j]"
+                },
+                "Backdrop": {
+                    "96c1b9cb258bb416489fe9bfbc34bd55": "WFCsjj00xu_3M{-;%M?bRj%Mt7t7t7t7%Mt7Rjt7%MM{xuWBxuIU"
+                },
+                "Primary": {
+                    "4603391cf693613f075b651528c472b9": "e45}X6_3NLI[?a?H?GozS5s:~q^+WZt7?axukX-:%2kC%M%LR*s:%L"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "Blue in Green",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "26ea0dbb4acfac119acfeabcd5f8f3ac",
+            "HasLyrics": false,
+            "Container": "mp3",
+            "PremiereDate": "1959-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 1959,
+            "IndexNumber": 3,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropImageTags": [
+                "96c1b9cb258bb416489fe9bfbc34bd55"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "Miles Davis-Kind of Blue-0003Blue in Green",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Miles Davis"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "Album": "Kind of Blue",
+            "AlbumId": "835a8098fdf37701c910a67f456013a8",
+            "AlbumPrimaryImageTag": "4603391cf693613f075b651528c472b9",
+            "AlbumArtist": "Miles Davis",
+            "AlbumArtists": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "ac9e62a43dbcc1f4d194984ba21d742a",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "ac9e62a43dbcc1f4d194984ba21d742a": "O89Gj=tl0cnj9rsDW-S#ban$V[jZt7oMR%oft7R*Rjj]j]"
+                },
+                "Backdrop": {
+                    "96c1b9cb258bb416489fe9bfbc34bd55": "WFCsjj00xu_3M{-;%M?bRj%Mt7t7t7t7%Mt7Rjt7%MM{xuWBxuIU"
+                },
+                "Primary": {
+                    "4603391cf693613f075b651528c472b9": "e45}X6_3NLI[?a?H?GozS5s:~q^+WZt7?axukX-:%2kC%M%LR*s:%L"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "Digital Love",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "61efe8705190014b79b423efcfe40d2c",
+            "HasLyrics": false,
+            "Container": "mp3",
+            "PremiereDate": "2001-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 2001,
+            "IndexNumber": 3,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropImageTags": [
+                "70eb92b62dcaa061b2d00449f63d4ccc"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": true,
+                "Key": "Daft Punk-Discovery-0003Digital Love",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Daft Punk"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "Album": "Discovery",
+            "AlbumId": "d8fbc15942abb20a4be9ff74193bc3be",
+            "AlbumPrimaryImageTag": "af6b877e529855565220eb0eb2fb17bc",
+            "AlbumArtist": "Daft Punk",
+            "AlbumArtists": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "88713dd430549823d1f6948b1a22f4fb",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "88713dd430549823d1f6948b1a22f4fb": "O,O43iof~qayxuj[IUt7WBWBofofj[j[WBayofofayfQay"
+                },
+                "Backdrop": {
+                    "70eb92b62dcaa061b2d00449f63d4ccc": "WU8hkIu6pKxutSogk@X9jFV?WXoLj]oIWBWBt7ofbws;bIbcofjY"
+                },
+                "Primary": {
+                    "af6b877e529855565220eb0eb2fb17bc": "eB6[5Rxu9FR*M{xuayM{ayay00M|-;t6xuIAa|%Mt7j[%Nt6V@ayRj"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "All Blues",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "de2230329f162142db4da72d4fd994df",
+            "HasLyrics": false,
+            "Container": "mp3",
+            "PremiereDate": "1959-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 1959,
+            "IndexNumber": 4,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropImageTags": [
+                "96c1b9cb258bb416489fe9bfbc34bd55"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-22T20:03:15.4609333Z",
+                "Played": true,
+                "Key": "Miles Davis-Kind of Blue-0004All Blues",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Miles Davis"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "Album": "Kind of Blue",
+            "AlbumId": "835a8098fdf37701c910a67f456013a8",
+            "AlbumPrimaryImageTag": "4603391cf693613f075b651528c472b9",
+            "AlbumArtist": "Miles Davis",
+            "AlbumArtists": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "ac9e62a43dbcc1f4d194984ba21d742a",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "ac9e62a43dbcc1f4d194984ba21d742a": "O89Gj=tl0cnj9rsDW-S#ban$V[jZt7oMR%oft7R*Rjj]j]"
+                },
+                "Backdrop": {
+                    "96c1b9cb258bb416489fe9bfbc34bd55": "WFCsjj00xu_3M{-;%M?bRj%Mt7t7t7t7%Mt7Rjt7%MM{xuWBxuIU"
+                },
+                "Primary": {
+                    "4603391cf693613f075b651528c472b9": "e45}X6_3NLI[?a?H?GozS5s:~q^+WZt7?axukX-:%2kC%M%LR*s:%L"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "Harder, Better, Faster, Stronger",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "84aa58b61599bd5738c3de8f2295e25e",
+            "HasLyrics": false,
+            "Container": "mp3",
+            "PremiereDate": "2001-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 2001,
+            "IndexNumber": 4,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropImageTags": [
+                "70eb92b62dcaa061b2d00449f63d4ccc"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": true,
+                "Key": "Daft Punk-Discovery-0004Harder, Better, Faster, Stronger",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Daft Punk"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "Album": "Discovery",
+            "AlbumId": "d8fbc15942abb20a4be9ff74193bc3be",
+            "AlbumPrimaryImageTag": "af6b877e529855565220eb0eb2fb17bc",
+            "AlbumArtist": "Daft Punk",
+            "AlbumArtists": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "88713dd430549823d1f6948b1a22f4fb",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "88713dd430549823d1f6948b1a22f4fb": "O,O43iof~qayxuj[IUt7WBWBofofj[j[WBayofofayfQay"
+                },
+                "Backdrop": {
+                    "70eb92b62dcaa061b2d00449f63d4ccc": "WU8hkIu6pKxutSogk@X9jFV?WXoLj]oIWBWBt7ofbws;bIbcofjY"
+                },
+                "Primary": {
+                    "af6b877e529855565220eb0eb2fb17bc": "eB6[5Rxu9FR*M{xuayM{ayay00M|-;t6xuIAa|%Mt7j[%Nt6V@ayRj"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "Crescendolls",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "2d0476c45bcdba257e57458153a5d8e7",
+            "HasLyrics": false,
+            "Container": "mp3",
+            "PremiereDate": "2001-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 2001,
+            "IndexNumber": 5,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropItemId": "b60967488dba8c475a87ec40e2105e88",
+            "ParentBackdropImageTags": [
+                "70eb92b62dcaa061b2d00449f63d4ccc"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "Daft Punk-Discovery-0005Crescendolls",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Daft Punk"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "Album": "Discovery",
+            "AlbumId": "d8fbc15942abb20a4be9ff74193bc3be",
+            "AlbumPrimaryImageTag": "af6b877e529855565220eb0eb2fb17bc",
+            "AlbumArtist": "Daft Punk",
+            "AlbumArtists": [
+                {
+                    "Name": "Daft Punk",
+                    "Id": "b60967488dba8c475a87ec40e2105e88"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "88713dd430549823d1f6948b1a22f4fb",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "88713dd430549823d1f6948b1a22f4fb": "O,O43iof~qayxuj[IUt7WBWBofofj[j[WBayofofayfQay"
+                },
+                "Backdrop": {
+                    "70eb92b62dcaa061b2d00449f63d4ccc": "WU8hkIu6pKxutSogk@X9jFV?WXoLj]oIWBWBt7ofbws;bIbcofjY"
+                },
+                "Primary": {
+                    "af6b877e529855565220eb0eb2fb17bc": "eB6[5Rxu9FR*M{xuayM{ayay00M|-;t6xuIAa|%Mt7j[%Nt6V@ayRj"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        },
+        {
+            "Name": "Flamenco Sketches",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "f7a775f763a80f5bd79bfb4e6ab2ca6e",
+            "HasLyrics": false,
+            "Container": "mp3",
+            "PremiereDate": "1959-01-01T00:00:00.0000000Z",
+            "ChannelId": null,
+            "RunTimeTicks": 450351020,
+            "ProductionYear": 1959,
+            "IndexNumber": 5,
+            "IsFolder": false,
+            "Type": "Audio",
+            "ParentLogoItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropItemId": "485dac0856ed76e6ac8e8942139044f3",
+            "ParentBackdropImageTags": [
+                "96c1b9cb258bb416489fe9bfbc34bd55"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 0,
+                "IsFavorite": false,
+                "Played": false,
+                "Key": "Miles Davis-Kind of Blue-0005Flamenco Sketches",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "Artists": [
+                "Miles Davis"
+            ],
+            "ArtistItems": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "Album": "Kind of Blue",
+            "AlbumId": "835a8098fdf37701c910a67f456013a8",
+            "AlbumPrimaryImageTag": "4603391cf693613f075b651528c472b9",
+            "AlbumArtist": "Miles Davis",
+            "AlbumArtists": [
+                {
+                    "Name": "Miles Davis",
+                    "Id": "485dac0856ed76e6ac8e8942139044f3"
+                }
+            ],
+            "ImageTags": {},
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "ac9e62a43dbcc1f4d194984ba21d742a",
+            "ImageBlurHashes": {
+                "Logo": {
+                    "ac9e62a43dbcc1f4d194984ba21d742a": "O89Gj=tl0cnj9rsDW-S#ban$V[jZt7oMR%oft7R*Rjj]j]"
+                },
+                "Backdrop": {
+                    "96c1b9cb258bb416489fe9bfbc34bd55": "WFCsjj00xu_3M{-;%M?bRj%Mt7t7t7t7%Mt7Rjt7%MM{xuWBxuIU"
+                },
+                "Primary": {
+                    "4603391cf693613f075b651528c472b9": "e45}X6_3NLI[?a?H?GozS5s:~q^+WZt7?axukX-:%2kC%M%LR*s:%L"
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Audio"
+        }
+    ],
+    "TotalRecordCount": 10,
+    "StartIndex": 0
+}

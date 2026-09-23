@@ -1,6 +1,7 @@
 package io.github.scdouglas1999.tally.media.kit
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -14,14 +15,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,10 +45,12 @@ import androidx.tv.material3.Glow
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.ui.FontAwesome
+import com.github.damontecres.wholphin.util.ExceptionHandler
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
+import kotlinx.coroutines.launch
 
 /**
  * Square text button. [primary] is accent fill with [TallyColors.onAccent] text; focused primary
@@ -146,6 +160,9 @@ fun TallyButton(
 /** Upward nudge for an uppercase mono label centered in a fixed-height box. */
 internal val CapsLift = (-1).dp
 
+/** A disabled icon button: visible, so the row keeps its shape, but clearly out of play. */
+private const val DISABLED_ALPHA = 0.4f
+
 private val iconCaption =
     TextStyle(
         fontFamily = TallyType.Mono,
@@ -156,6 +173,7 @@ private val iconCaption =
 
 /**
  * 40dp square glyph button. While focused, [label] is shown under the button as a muted caption.
+ * Not [enabled]: drawn at 40% opacity and skipped by focus.
  */
 @Composable
 fun TallyIconButton(
@@ -164,6 +182,7 @@ fun TallyIconButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     onFocused: () -> Unit = {},
+    enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
@@ -172,10 +191,12 @@ fun TallyIconButton(
     }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
+        modifier = modifier.alpha(if (enabled) 1f else DISABLED_ALPHA),
     ) {
+        // Disabled is the whole button at 40% and out of the focus order. The Surface itself stays enabled: a
+        // disabled tv Surface dims its content once more, which would put the glyph far below 40%.
         Surface(
-            onClick = onClick,
+            onClick = { if (enabled) onClick() },
             shape = ClickableSurfaceDefaults.shape(RectangleShape),
             scale = ClickableSurfaceDefaults.scale(1f, 1f, 1f),
             colors =
@@ -207,7 +228,11 @@ fun TallyIconButton(
                 ),
             glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
             interactionSource = interactionSource,
-            modifier = Modifier.size(40.dp),
+            modifier =
+                Modifier
+                    .size(40.dp)
+                    .semantics { if (!enabled) disabled() }
+                    .focusProperties { canFocus = enabled },
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Text(
@@ -226,4 +251,22 @@ fun TallyIconButton(
             modifier = Modifier.padding(top = 4.dp).height(16.dp),
         )
     }
+}
+
+/**
+ * Keeps this control fully in view in a scrolling row when it changes size while focused (a label that grows,
+ * `FILTER` to `FILTER · 1`): the row only scrolls when focus moves, so a grown control could end up cut off.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun Modifier.revealWhenResized(): Modifier {
+    val requester = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
+    var focused by remember { mutableStateOf(false) }
+    return this
+        .bringIntoViewRequester(requester)
+        .onFocusChanged { focused = it.hasFocus }
+        .onSizeChanged {
+            if (focused) scope.launch(ExceptionHandler()) { requester.bringIntoView() }
+        }
 }
