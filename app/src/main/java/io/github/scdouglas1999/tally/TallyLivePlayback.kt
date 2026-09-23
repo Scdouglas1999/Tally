@@ -23,6 +23,10 @@ object TallyLivePlayback {
             .setLiveTargetOffsetMs(LIVE_TARGET_OFFSET_MS)
             // do not race to the edge after a stall: catching up at 1.03x steals from the cushion just rebuilt
             .setLiveMaxSpeed(1.0f)
+            // and do not slow down to rebuild the offset either: at 0.97x a 30 fps stream on a 60 Hz screen holds some
+            // frames for three refreshes instead of two, which shows as judder in fast pans. The offset may drift
+            // after a stall; falling out of the window is handled by recover().
+            .setLiveMinSpeed(1.0f)
 
     /**
      * Upstream's buffering, plus a little history so a switch back does not refetch. An earlier build held the
