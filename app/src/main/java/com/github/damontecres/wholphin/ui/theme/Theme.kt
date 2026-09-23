@@ -42,6 +42,21 @@ fun WholphinTheme(
     appThemeColors: AppThemeColors = AppThemeColors.PURPLE,
     content: @Composable () -> Unit,
 ) {
+    // TALLY: begin
+    val tallyFormFactor =
+        io.github.scdouglas1999.tally.ui.formfactor
+            .rememberTallyFormFactor()
+
+    @Suppress("NAME_SHADOWING")
+    val appThemeColors =
+        io.github.scdouglas1999.tally.ui.formfactor
+            .tallyThemeInEffect(tallyFormFactor, appThemeColors)
+
+    @Suppress("NAME_SHADOWING")
+    val content =
+        io.github.scdouglas1999.tally.ui.formfactor
+            .withTallyFormFactor(tallyFormFactor, content)
+    // TALLY: end
     val themeColors = getThemeColors(appThemeColors)
 
     val colorScheme =

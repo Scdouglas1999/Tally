@@ -36,6 +36,8 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
+import io.github.scdouglas1999.tally.media.kit.tallyClickable
+import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -73,6 +75,21 @@ fun GameCard(
         if (focused) onFocused()
     }
     val watchable = game.watch != null
+    val showFocus = tallyFocusVisible()
+    val idleBorder =
+        Border(
+            border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
+            shape = RectangleShape,
+        )
+    val focusBorder =
+        if (showFocus) {
+            Border(
+                border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
+                shape = RectangleShape,
+            )
+        } else {
+            idleBorder
+        }
     Surface(
         onClick = {
             if (watchable) onClick()
@@ -84,7 +101,7 @@ fun GameCard(
             ClickableSurfaceDefaults.colors(
                 containerColor = TallyColors.ground,
                 contentColor = TallyColors.text,
-                focusedContainerColor = TallyColors.groundRaised,
+                focusedContainerColor = if (showFocus) TallyColors.groundRaised else TallyColors.ground,
                 focusedContentColor = TallyColors.text,
                 pressedContainerColor = TallyColors.groundRaised,
                 pressedContentColor = TallyColors.text,
@@ -93,16 +110,8 @@ fun GameCard(
             ),
         border =
             ClickableSurfaceDefaults.border(
-                border =
-                    Border(
-                        border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
-                        shape = RectangleShape,
-                    ),
-                focusedBorder =
-                    Border(
-                        border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
-                        shape = RectangleShape,
-                    ),
+                border = idleBorder,
+                focusedBorder = focusBorder,
                 pressedBorder =
                     Border(
                         border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
@@ -113,15 +122,14 @@ fun GameCard(
                         border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
                         shape = RectangleShape,
                     ),
-                focusedDisabledBorder =
-                    Border(
-                        border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
-                        shape = RectangleShape,
-                    ),
+                focusedDisabledBorder = focusBorder,
             ),
         glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
         interactionSource = interactionSource,
-        modifier = modifier.size(TallyDimens.cardWidth, TallyDimens.cardHeight),
+        modifier =
+            modifier
+                .size(TallyDimens.cardWidth, TallyDimens.cardHeight)
+                .tallyClickable(onClick = { if (watchable) onClick() }, onLongClick = onLongClick),
     ) {
         Column(
             modifier =

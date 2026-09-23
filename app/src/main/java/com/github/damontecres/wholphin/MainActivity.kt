@@ -175,6 +175,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         instance = this
+        // TALLY: begin
+        io.github.scdouglas1999.tally.ui.formfactor.TallyPhoneWindow
+            .setUp(this)
+        // TALLY: end
         Timber.i("MainActivity.onCreate: savedInstanceState is null=${savedInstanceState == null}")
         lifecycle.addObserver(playbackLifecycleObserver)
 

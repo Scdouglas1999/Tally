@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
 import android.content.Context
@@ -62,9 +65,23 @@ class ScreensaverService
         private var waitJob: Job? = null
         private var dimJob: Job? = null
 
+        // TALLY: begin
+        private val tallyPhone =
+            io.github.scdouglas1999.tally.ui.formfactor
+                .isTallyPhone(context)
+        // TALLY: end
+
         init {
             userPreferencesService.flow
                 .onEach { prefs ->
+                    // TALLY: begin
+                    if (tallyPhone) {
+                        // A phone has no in-app screensaver or idle dimming (TV only), and sleeps as the OS says.
+                        _state.update { ScreensaverState(false, false, false, false) }
+                        keepScreenOnInternal(false)
+                        return@onEach
+                    }
+                    // TALLY: end
                     _state.update {
                         val enabled =
                             prefs.appPreferences.interfacePreferences.screensaverPreference.enabled
@@ -142,6 +159,9 @@ class ScreensaverService
          * Immediately start the in-app screensaver
          */
         fun start() {
+            // TALLY: begin
+            if (tallyPhone) return
+            // TALLY: end
             _state.update {
                 it.copy(
                     enabledTemp = true,

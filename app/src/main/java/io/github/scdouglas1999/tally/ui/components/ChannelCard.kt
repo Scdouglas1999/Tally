@@ -24,6 +24,8 @@ import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import io.github.scdouglas1999.tally.api.TallyChannel
 import io.github.scdouglas1999.tally.api.TallyGame
+import io.github.scdouglas1999.tally.media.kit.tallyClickable
+import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -54,6 +56,12 @@ fun ChannelCard(
     LaunchedEffect(focused) {
         if (focused) onFocused()
     }
+    val showFocus = tallyFocusVisible()
+    val idleBorder =
+        Border(
+            border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
+            shape = RectangleShape,
+        )
     Surface(
         onClick = onClick,
         onLongClick = onLongClick,
@@ -63,23 +71,23 @@ fun ChannelCard(
             ClickableSurfaceDefaults.colors(
                 containerColor = TallyColors.ground,
                 contentColor = TallyColors.text,
-                focusedContainerColor = TallyColors.groundRaised,
+                focusedContainerColor = if (showFocus) TallyColors.groundRaised else TallyColors.ground,
                 focusedContentColor = TallyColors.text,
                 pressedContainerColor = TallyColors.groundRaised,
                 pressedContentColor = TallyColors.text,
             ),
         border =
             ClickableSurfaceDefaults.border(
-                border =
-                    Border(
-                        border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
-                        shape = RectangleShape,
-                    ),
+                border = idleBorder,
                 focusedBorder =
-                    Border(
-                        border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
-                        shape = RectangleShape,
-                    ),
+                    if (showFocus) {
+                        Border(
+                            border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
+                            shape = RectangleShape,
+                        )
+                    } else {
+                        idleBorder
+                    },
                 pressedBorder =
                     Border(
                         border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
@@ -88,7 +96,10 @@ fun ChannelCard(
             ),
         glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
         interactionSource = interactionSource,
-        modifier = modifier.height(TallyDimens.cardHeight),
+        modifier =
+            modifier
+                .height(TallyDimens.cardHeight)
+                .tallyClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
         Column(Modifier.fillMaxSize()) {
             Box(

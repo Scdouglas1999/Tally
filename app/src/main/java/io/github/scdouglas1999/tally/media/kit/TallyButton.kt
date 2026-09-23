@@ -47,6 +47,7 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.ui.FontAwesome
 import com.github.damontecres.wholphin.util.ExceptionHandler
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -74,6 +75,16 @@ fun TallyButton(
     }
     val contentColor = if (primary) TallyColors.onAccent else TallyColors.text
     val fill = if (primary) TallyColors.accent else Color.Transparent
+    val showFocus = tallyFocusVisible()
+    val idleBorder =
+        Border(
+            border =
+                BorderStroke(
+                    if (primary) 0.dp else TallyDimens.hairline,
+                    if (primary) Color.Transparent else TallyColors.ruleStrong,
+                ),
+            shape = RectangleShape,
+        )
     Surface(
         onClick = onClick,
         enabled = enabled,
@@ -92,24 +103,20 @@ fun TallyButton(
             ),
         border =
             ClickableSurfaceDefaults.border(
-                border =
-                    Border(
-                        border =
-                            BorderStroke(
-                                if (primary) 0.dp else TallyDimens.hairline,
-                                if (primary) Color.Transparent else TallyColors.ruleStrong,
-                            ),
-                        shape = RectangleShape,
-                    ),
+                border = idleBorder,
                 focusedBorder =
-                    Border(
-                        border =
-                            BorderStroke(
-                                TallyDimens.focusBorder,
-                                if (primary) TallyColors.text else TallyColors.accent,
-                            ),
-                        shape = RectangleShape,
-                    ),
+                    if (showFocus) {
+                        Border(
+                            border =
+                                BorderStroke(
+                                    TallyDimens.focusBorder,
+                                    if (primary) TallyColors.text else TallyColors.accent,
+                                ),
+                            shape = RectangleShape,
+                        )
+                    } else {
+                        idleBorder
+                    },
                 pressedBorder =
                     Border(
                         border =
@@ -122,7 +129,7 @@ fun TallyButton(
             ),
         glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
         interactionSource = interactionSource,
-        modifier = modifier.height(40.dp),
+        modifier = modifier.height(40.dp).tallyClickable(onClick = onClick, enabled = enabled),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -189,6 +196,12 @@ fun TallyIconButton(
     LaunchedEffect(focused) {
         if (focused) onFocused()
     }
+    val showFocus = tallyFocusVisible()
+    val idleBorder =
+        Border(
+            border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
+            shape = RectangleShape,
+        )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.alpha(if (enabled) 1f else DISABLED_ALPHA),
@@ -210,16 +223,16 @@ fun TallyIconButton(
                 ),
             border =
                 ClickableSurfaceDefaults.border(
-                    border =
-                        Border(
-                            border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
-                            shape = RectangleShape,
-                        ),
+                    border = idleBorder,
                     focusedBorder =
-                        Border(
-                            border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
-                            shape = RectangleShape,
-                        ),
+                        if (showFocus) {
+                            Border(
+                                border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
+                                shape = RectangleShape,
+                            )
+                        } else {
+                            idleBorder
+                        },
                     pressedBorder =
                         Border(
                             border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
@@ -231,6 +244,8 @@ fun TallyIconButton(
             modifier =
                 Modifier
                     .size(40.dp)
+                    // before the focus properties below, which must reach the Surface's own focus target
+                    .tallyClickable(onClick = onClick, enabled = enabled)
                     .semantics { if (!enabled) disabled() }
                     .focusProperties { canFocus = enabled },
         ) {
@@ -244,7 +259,7 @@ fun TallyIconButton(
             }
         }
         Text(
-            text = if (focused) label.tallyUppercase() else "",
+            text = if (focused && showFocus) label.tallyUppercase() else "",
             style = iconCaption,
             color = TallyColors.muted,
             maxLines = 1,

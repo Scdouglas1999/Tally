@@ -69,6 +69,11 @@ file is a future merge conflict.** Therefore:
 | W39 | `ui/setup/SwitchServerContent.kt`, `SwitchUserContent.kt`, `InstallUpdatePage.kt`, `PinEntry.kt` | Tally sign-in, pickers, PIN and update screens (`ui/setup/`) |
 | W40 | `ui/setup/SwitchUserViewModel.kt` (`initiateQuickConnect`, before navigating) | `TallyQuickConnectHold.holdForCatch()`: the approved lamp is seen before home appears (Tally step on screen only) |
 | W41 | `app/build.gradle.kts`, `services/AppUpgradeHandler.kt`, `services/UpdateChecker.kt` | Tally's own version line from 2.0.0 (`tally-v*` tags → versionName/versionCode); Wholphin's upgrade steps keep the upstream base (`BuildConfig.TALLY_UPSTREAM_VERSION`); release notes come from Tally's releases |
+| W42 | `MainActivity.kt` (`onCreate`, after `instance = this`) | `TallyPhoneWindow.setUp`: on a phone only, edge to edge with light bar icons, keyboard insets to the app (adjust resize), portrait below 600dp smallest width |
+| W43 | `ui/nav/ApplicationContent.kt` (W34 region, before the Tally drawer) | `PhoneShell` (page + bottom bar, `ui/phone/`) replaces the drawer on a phone |
+| W44 | `ui/theme/Theme.kt` (top of `WholphinTheme`) | provides `LocalTallyFormFactor` to every screen; in the app window on a phone the theme in effect is TALLY whatever the preference (`tallyThemeInEffect`, `TallyPhoneWindow`) |
+| W45 | `ui/preferences/PreferencesContent.kt` (preference loop) | `hiddenOnPhone`: the Application theme row is not shown on a phone |
+| W46 | `services/ScreensaverService.kt` (`init`, `start`) | on a phone the in-app screensaver, the live-scores screensaver and idle dimming stay off, and the screen sleeps as the OS says |
 | (resource) | `res/values-v31/themes_tally.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 
 ## Releases and self-update

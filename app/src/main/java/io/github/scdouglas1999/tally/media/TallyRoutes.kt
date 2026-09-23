@@ -25,13 +25,15 @@ import io.github.scdouglas1999.tally.media.playlist.TallyPlaylistsPage
 import io.github.scdouglas1999.tally.media.search.TallySearchPage
 import io.github.scdouglas1999.tally.media.series.TallySeasonRundown
 import io.github.scdouglas1999.tally.media.series.TallySeriesPage
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.CollectionType
 
 /**
  * Which destinations Tally draws itself (see `tally/UI.md`). Called first by `DestinationContent` (seam W31):
  * returns true when it rendered [destination], false to let upstream render it. Only while the TALLY theme is
- * selected: a Wholphin theme gets Wholphin's screens back, whole.
+ * selected (always on a phone): a Wholphin theme gets Wholphin's screens back, whole.
  *
  * Screens are added here one at a time as their Tally versions land; each reuses the upstream ViewModel.
  */
@@ -43,7 +45,9 @@ object TallyRoutes {
         onClearBackdrop: () -> Unit,
         modifier: Modifier,
     ): Boolean {
-        if (LocalTheme.current != AppThemeColors.TALLY) return false
+        // On a phone the Tally look is always on (Wholphin's screens are TV layouts), whatever the theme preference.
+        val phone = LocalTallyFormFactor.current == TallyFormFactor.PHONE
+        if (LocalTheme.current != AppThemeColors.TALLY && !phone) return false
         return when (destination) {
             is Destination.Home -> {
                 TallyHomePage(preferences, modifier)

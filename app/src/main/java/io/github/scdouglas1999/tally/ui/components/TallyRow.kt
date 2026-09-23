@@ -25,6 +25,8 @@ import androidx.tv.material3.Glow
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
+import io.github.scdouglas1999.tally.media.kit.tallyClickable
+import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -59,6 +61,12 @@ fun TallyRow(
             primary -> TallyColors.accent
             else -> TallyColors.text
         }
+    val showFocus = tallyFocusVisible()
+    val idleBorder =
+        Border(
+            border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
+            shape = RectangleShape,
+        )
     Surface(
         onClick = onClick,
         enabled = enabled,
@@ -68,7 +76,7 @@ fun TallyRow(
             ClickableSurfaceDefaults.colors(
                 containerColor = TallyColors.ground,
                 contentColor = labelColor,
-                focusedContainerColor = TallyColors.groundRaised,
+                focusedContainerColor = if (showFocus) TallyColors.groundRaised else TallyColors.ground,
                 focusedContentColor = labelColor,
                 pressedContainerColor = TallyColors.groundRaised,
                 pressedContentColor = labelColor,
@@ -77,16 +85,16 @@ fun TallyRow(
             ),
         border =
             ClickableSurfaceDefaults.border(
-                border =
-                    Border(
-                        border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
-                        shape = RectangleShape,
-                    ),
+                border = idleBorder,
                 focusedBorder =
-                    Border(
-                        border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
-                        shape = RectangleShape,
-                    ),
+                    if (showFocus) {
+                        Border(
+                            border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
+                            shape = RectangleShape,
+                        )
+                    } else {
+                        idleBorder
+                    },
                 pressedBorder =
                     Border(
                         border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
@@ -105,7 +113,7 @@ fun TallyRow(
             ),
         glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
         interactionSource = interactionSource,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().tallyClickable(onClick = onClick, enabled = enabled),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

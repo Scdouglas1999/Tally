@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The phone's bottom bar (ui/phone/PhoneBottomBar.kt), shown uppercase -->
+    <string name="tally_phone_tab_home">Home</string>
+    <string name="tally_phone_tab_movies">Movies</string>
+    <string name="tally_phone_tab_shows">Shows</string>
+    <string name="tally_phone_tab_sports">Sports</string>
+    <string name="tally_phone_tab_more">More</string>
+    <!-- The top bar's back arrow (accessibility name) -->
+    <string name="tally_phone_back">Back</string>
+    <string name="tally_phone_fa_arrow_left" translatable="false">&#xf060;</string>
+</resources>
