@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.preferences.AppThemeColors
@@ -36,6 +37,7 @@ object TallySettings {
 fun TallySettingsTitle(
     title: String,
     modifier: Modifier = Modifier,
+    horizontalPadding: Dp = 20.dp,
 ) {
     TallyScale {
         Text(
@@ -47,17 +49,21 @@ fun TallySettingsTitle(
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = horizontalPadding)
                     .padding(top = 24.dp, bottom = 4.dp),
         )
     }
 }
 
-/** A group of settings: a 1dp rule, then the group's name as a mono row header. */
+/**
+ * A group of settings: a 1dp rule, then the group's name as a mono row header, with a muted [count] after it when
+ * the group is a list of things (home rows).
+ */
 @Composable
 fun TallySettingsGroupHeader(
     title: String,
     modifier: Modifier = Modifier,
+    count: Int? = null,
 ) {
     TallyScale {
         Column(modifier = modifier.fillMaxWidth().padding(top = 14.dp, bottom = 8.dp)) {
@@ -67,7 +73,7 @@ fun TallySettingsGroupHeader(
                     .height(TallyDimens.hairline)
                     .background(TallyColors.rule),
             )
-            RowHeader(title = title, modifier = Modifier.padding(top = 14.dp))
+            RowHeader(title = title, count = count, modifier = Modifier.padding(top = 14.dp))
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -29,6 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -81,6 +89,16 @@ internal val prefValueStyle =
         fontFamily = TallyType.Mono,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
+    )
+
+/** The leading glyph column of a row that has one (home settings: add, settings, presets). */
+private val LEADING_WIDTH = 20.dp
+
+private val leadingStyle =
+    TextStyle(
+        fontFamily = TallyType.Sans,
+        fontWeight = FontWeight.Normal,
+        fontSize = 18.sp,
     )
 
 private const val CHEVRON = "›"
@@ -154,25 +172,99 @@ private fun PreferenceRow(
     onLongClick: (() -> Unit)?,
     interactionSource: MutableInteractionSource,
     modifier: Modifier,
+    enabled: Boolean = true,
+    leading: (@Composable BoxScope.() -> Unit)? = null,
+    extra: (@Composable ColumnScope.() -> Unit)? = null,
     trailing: @Composable RowScope.() -> Unit,
 ) {
     TallyScale {
-        Box(Modifier.padding(vertical = ROW_GAP)) {
-            Surface(
-                onClick = onClick,
-                onLongClick = onLongClick,
-                shape = ClickableSurfaceDefaults.shape(RectangleShape),
-                scale = ClickableSurfaceDefaults.scale(1f, 1f, 1f),
-                colors = rowColors(),
-                border = rowBorder(),
-                glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
-                interactionSource = interactionSource,
-                modifier = modifier.fillMaxWidth(),
-            ) {
-                RowBody(title = title, summary = summary, trailing = trailing)
-            }
+        PreferenceRowContent(
+            title = title,
+            summary = summary,
+            onClick = onClick,
+            onLongClick = onLongClick,
+            interactionSource = interactionSource,
+            modifier = modifier,
+            enabled = enabled,
+            leading = leading,
+            extra = extra,
+            trailing = trailing,
+        )
+    }
+}
+
+/**
+ * [PreferenceRow] without its own [TallyScale], for callers already at the Tally scale that put controls beside the
+ * row. [moving]: the row is being reordered (one of its move buttons has focus): an accent bar at its left edge.
+ */
+@Composable
+internal fun PreferenceRowContent(
+    title: String,
+    summary: String?,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)?,
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier,
+    enabled: Boolean = true,
+    moving: Boolean = false,
+    leading: (@Composable BoxScope.() -> Unit)? = null,
+    extra: (@Composable ColumnScope.() -> Unit)? = null,
+    trailing: @Composable RowScope.() -> Unit,
+) {
+    val arrival = rowFocusModifier(title)
+    Box(modifier.padding(vertical = ROW_GAP)) {
+        Surface(
+            onClick = onClick,
+            onLongClick = onLongClick,
+            enabled = enabled,
+            shape = ClickableSurfaceDefaults.shape(RectangleShape),
+            scale = ClickableSurfaceDefaults.scale(1f, 1f, 1f),
+            colors = rowColors(),
+            border = rowBorder(),
+            glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
+            interactionSource = interactionSource,
+            modifier =
+                Modifier
+                    .then(arrival)
+                    .fillMaxWidth()
+                    .alpha(if (enabled) 1f else 0.4f)
+                    .moveBar(moving),
+        ) {
+            RowBody(title = title, summary = summary, leading = leading, extra = extra, trailing = trailing)
         }
     }
+}
+
+/** The reorder cue of the playlist rundown: a 4dp accent bar over the row's left edge while [moving]. */
+internal fun Modifier.moveBar(moving: Boolean): Modifier =
+    drawWithContent {
+        drawContent()
+        if (moving) {
+            drawRect(color = TallyColors.accent, size = Size(MOVE_BAR_WIDTH.toPx(), size.height))
+        }
+    }
+
+private val MOVE_BAR_WIDTH = 4.dp
+
+/**
+ * A row that should take focus when its page arrives (after a theme switch, the Application Theme row), found by
+ * its title. The page provides it through [LocalTallyRowFocus]; rows with another title ignore it.
+ */
+class TallyRowFocus(
+    val title: String,
+) {
+    val requester = FocusRequester()
+    var focused by mutableStateOf(false)
+}
+
+val LocalTallyRowFocus = compositionLocalOf<TallyRowFocus?> { null }
+
+@Composable
+private fun rowFocusModifier(title: String): Modifier {
+    val target = LocalTallyRowFocus.current?.takeIf { it.title == title } ?: return Modifier
+    return Modifier
+        .focusRequester(target.requester)
+        .onFocusChanged { target.focused = it.isFocused }
 }
 
 /** Title, summary and trailing value, vertically centered in the 48dp row. */
@@ -180,6 +272,7 @@ private fun PreferenceRow(
 private fun RowBody(
     title: String,
     summary: String?,
+    leading: (@Composable BoxScope.() -> Unit)? = null,
     extra: (@Composable ColumnScope.() -> Unit)? = null,
     trailing: @Composable RowScope.() -> Unit,
 ) {
@@ -193,6 +286,13 @@ private fun RowBody(
                 .heightIn(min = ROW_HEIGHT)
                 .padding(horizontal = 16.dp, vertical = 6.dp),
     ) {
+        if (leading != null) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.width(LEADING_WIDTH)) {
+                CompositionLocalProvider(LocalContentColor provides TallyColors.muted) {
+                    ProvideTextStyle(leadingStyle) { leading() }
+                }
+            }
+        }
         Column(Modifier.weight(1f)) {
             // Two lines before an ellipsis: the title says what the row is, so it wins over a long value.
             Text(
@@ -274,6 +374,16 @@ internal fun TallySquareSwitch(checked: Boolean) {
     }
 }
 
+/** Upstream's switch summaries that only restate ON or OFF. */
+@Composable
+internal fun switchRestatements(): Set<String> =
+    setOf(
+        stringResource(R.string.enabled),
+        stringResource(R.string.disabled),
+        stringResource(R.string.show),
+        stringResource(R.string.hide),
+    )
+
 /** Tally [com.github.damontecres.wholphin.ui.preferences.SwitchPreference]. */
 @Composable
 fun TallySwitchPreference(
@@ -285,13 +395,7 @@ fun TallySwitchPreference(
     onLongClick: (() -> Unit)? = null,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
-    val restatements =
-        setOf(
-            stringResource(R.string.enabled),
-            stringResource(R.string.disabled),
-            stringResource(R.string.show),
-            stringResource(R.string.hide),
-        )
+    val restatements = switchRestatements()
     PreferenceRow(
         title = title,
         summary = switchSummary(summary, restatements),
@@ -466,6 +570,7 @@ fun TallySliderPreference(
                 interactionSource = interactionSource,
                 modifier =
                     modifier
+                        .then(rowFocusModifier(title))
                         .fillMaxWidth()
                         .handleDPadKeyEvents(
                             triggerOnAction = KeyEvent.ACTION_DOWN,
@@ -483,6 +588,41 @@ fun TallySliderPreference(
                         Chevron()
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * A plain Tally row for upstream's list items (home settings): [title], optional muted [supporting] lines under it,
+ * an optional muted [leading] glyph and a [trailing] slot; no value, no chevron unless the caller passes one.
+ */
+@Composable
+fun TallyPreferenceItem(
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    onLongClick: (() -> Unit)? = null,
+    interactionSource: MutableInteractionSource? = null,
+    supporting: (@Composable () -> Unit)? = null,
+    leading: (@Composable BoxScope.() -> Unit)? = null,
+    trailing: (@Composable () -> Unit)? = null,
+) {
+    PreferenceRow(
+        title = title,
+        summary = null,
+        onClick = onClick,
+        onLongClick = onLongClick,
+        interactionSource = interactionSource ?: remember { MutableInteractionSource() },
+        modifier = modifier,
+        enabled = enabled,
+        leading = leading,
+        extra = supporting?.let { content -> { content() } },
+    ) {
+        if (trailing != null) {
+            CompositionLocalProvider(LocalContentColor provides TallyColors.textSecondary) {
+                ProvideTextStyle(prefValueStyle) { trailing() }
             }
         }
     }

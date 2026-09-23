@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.main.settings
 
 import androidx.compose.foundation.layout.Arrangement
@@ -139,6 +142,13 @@ fun HomeSettingsRowList(
                 )
             }
             item {
+                // TALLY: begin
+                if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+                    io.github.scdouglas1999.tally.ui.settings
+                        .TallySettingsGroupHeader(stringResource(R.string.home_rows), count = state.rows.size)
+                    return@item
+                }
+                // TALLY: end
                 TitleText(stringResource(R.string.home_rows) + " (${state.rows.size})")
                 HorizontalDivider()
             }
@@ -194,6 +204,21 @@ fun HomeRowConfigContent(
     onClickDelete: () -> Unit,
     modifier: Modifier,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings.TallyHomeRowConfigItem(
+            title = config.title.getString(),
+            moveUpAllowed = moveUpAllowed,
+            moveDownAllowed = moveDownAllowed,
+            deleteAllowed = deleteAllowed,
+            onClick = onClick,
+            onClickMove = onClickMove,
+            onClickDelete = onClickDelete,
+            modifier = modifier,
+        )
+        return
+    }
+    // TALLY: end
     Box(
         modifier = modifier,
     ) {
@@ -254,6 +279,13 @@ fun TitleText(
     title: String,
     modifier: Modifier = Modifier,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings
+            .TallySettingsTitle(title, modifier)
+        return
+    }
+    // TALLY: end
     Text(
         text = title,
         style = MaterialTheme.typography.titleLarge,
@@ -272,6 +304,13 @@ fun SubTitleText(
     title: String,
     modifier: Modifier = Modifier,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings
+            .TallySettingsGroupHeader(title, modifier)
+        return
+    }
+    // TALLY: end
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,

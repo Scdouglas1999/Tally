@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.main.settings
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -42,27 +45,45 @@ fun HomeSettingsListItem(
     border: ListItemBorder = ListItemDefaults.border(),
     glow: ListItemGlow = ListItemDefaults.glow(),
     interactionSource: MutableInteractionSource? = null,
-) = ListItem(
-    selected = selected,
-    onClick = onClick,
-    headlineContent = {
-        PreferenceTitle(headlineText)
-    },
-    modifier = modifier,
-    enabled = enabled,
-    onLongClick = onLongClick,
-    overlineContent = overlineContent,
-    supportingContent = supportingContent,
-    leadingContent = leadingContent,
-    trailingContent = trailingContent,
-    tonalElevation = tonalElevation,
-    shape = shape,
-    colors = colors,
-    scale = scale,
-    border = border,
-    glow = glow,
-    interactionSource = interactionSource,
-)
+) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+        io.github.scdouglas1999.tally.ui.settings.TallyPreferenceItem(
+            title = headlineText,
+            onClick = onClick,
+            modifier = modifier,
+            enabled = enabled,
+            onLongClick = onLongClick,
+            interactionSource = interactionSource,
+            supporting = supportingContent,
+            leading = leadingContent,
+            trailing = trailingContent,
+        )
+        return
+    }
+    // TALLY: end
+    ListItem(
+        selected = selected,
+        onClick = onClick,
+        headlineContent = {
+            PreferenceTitle(headlineText)
+        },
+        modifier = modifier,
+        enabled = enabled,
+        onLongClick = onLongClick,
+        overlineContent = overlineContent,
+        supportingContent = supportingContent,
+        leadingContent = leadingContent,
+        trailingContent = trailingContent,
+        tonalElevation = tonalElevation,
+        shape = shape,
+        colors = colors,
+        scale = scale,
+        border = border,
+        glow = glow,
+        interactionSource = interactionSource,
+    )
+}
 
 @Composable
 @NonRestartableComposable
