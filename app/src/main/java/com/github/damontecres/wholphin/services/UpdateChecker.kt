@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
 import android.Manifest
@@ -129,7 +132,10 @@ class UpdateChecker
 
         suspend fun getRelease(version: Version): Release? {
             val url =
-                "https://api.github.com/repos/damontecres/Wholphin/releases/tags/v${version.major}.${version.minor}.${version.patch}"
+                // TALLY: begin
+                // the notes for this version are Tally's release, tagged tally-vMAJOR.MINOR.PATCH
+                "https://api.github.com/repos/Scdouglas1999/Tally/releases/tags/tally-v${version.major}.${version.minor}.${version.patch}"
+            // TALLY: end
             return withContext(WholphinDispatchers.IO) {
                 val request =
                     Request

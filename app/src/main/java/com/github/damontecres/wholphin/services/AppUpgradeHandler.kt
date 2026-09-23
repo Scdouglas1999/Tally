@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
 import android.content.Context
@@ -65,7 +68,11 @@ class AppUpgradeHandler
             val previousVersion = prefs.getString(VERSION_NAME_CURRENT_KEY, null)
             val previousVersionCode = prefs.getLong(VERSION_CODE_CURRENT_KEY, -1)
 
-            val newVersion = pkgInfo.versionName!!
+            // TALLY: begin
+            // Tally's own version (2.0.0 on) replaces the version name, but Wholphin's upgrade steps below are keyed to
+            // Wholphin's numbering, so they are given the upstream base this build is on.
+            val newVersion = com.github.damontecres.wholphin.BuildConfig.TALLY_UPSTREAM_VERSION
+            // TALLY: end
             val newVersionCode =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     pkgInfo.longVersionCode
@@ -84,7 +91,11 @@ class AppUpgradeHandler
             val previousVersion = prefs.getString(VERSION_NAME_CURRENT_KEY, null)
             val previousVersionCode = prefs.getLong(VERSION_CODE_CURRENT_KEY, -1)
 
-            val newVersion = pkgInfo.versionName!!
+            // TALLY: begin
+            // Tally's own version (2.0.0 on) replaces the version name, but Wholphin's upgrade steps below are keyed to
+            // Wholphin's numbering, so they are given the upstream base this build is on.
+            val newVersion = com.github.damontecres.wholphin.BuildConfig.TALLY_UPSTREAM_VERSION
+            // TALLY: end
             val newVersionCode =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     pkgInfo.longVersionCode

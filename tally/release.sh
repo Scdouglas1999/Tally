@@ -16,7 +16,17 @@ export SIGNING_KEY="$(base64 -w0 "$KEYDIR/release.jks")"
 export JAVA_HOME="${JAVA_HOME:-/usr/lib/jvm/java-17-openjdk}"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
 
-VERSION="$(git describe --tags --long --match='v*')"          # v1.0.8-25-gabc1234  (what the app calls itself)
+# Tally's version line: a release is tagged tally-vMAJOR.MINOR.PATCH before it is built (git tag tally-v2.0.1), and
+# the release is named vMAJOR.MINOR.PATCH, which is what installed apps compare against their own version.
+# Without a tally-v tag this falls back to the old upstream numbering (v1.0.8-25-gabc1234).
+TALLY_DESCRIBE="$(git describe --tags --long --match='tally-v*' 2>/dev/null || true)"
+if [[ "$TALLY_DESCRIBE" =~ ^tally-(v[0-9]+\.[0-9]+\.[0-9]+)-([0-9]+)-g([0-9a-f]+)$ ]]; then
+  if [ "${BASH_REMATCH[2]}" = 0 ]; then VERSION="${BASH_REMATCH[1]}"; TAG="tally-${BASH_REMATCH[1]}"
+  else VERSION="${BASH_REMATCH[1]}-${BASH_REMATCH[2]}-g${BASH_REMATCH[3]}"; TAG=""; fi
+else
+  VERSION="$(git describe --tags --long --match='v*')"; TAG="tally-${VERSION#v}"
+fi
+if [ $PUBLISH = 1 ] && [ -z "$TAG" ]; then echo "tag the release first (git tag tally-vX.Y.Z): HEAD is $VERSION" >&2; exit 1; fi
 # R8 on the release build no longer fits in the 2 GB upstream's gradle.properties gives the daemon
 GRADLE_MEM="-Dorg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8"
 ./gradlew "$GRADLE_MEM" :app:assembleDefaultRelease
@@ -46,7 +56,6 @@ if [ "${1:-}" = "--stores" ] || [ "${2:-}" = "--stores" ]; then
 fi
 
 if [ $PUBLISH = 1 ]; then
-  TAG="tally-${VERSION#v}"
   git tag -f "$TAG" && git push -f origin "refs/tags/$TAG" && git push origin main
   NOTES="${TALLY_NOTES:-Tally for Android TV $VERSION}"
   gh release create "$TAG" "$OUT"/Tally.apk "$OUT"/JellyTV.apk "$OUT"/Wholphin-release*.apk --repo Scdouglas1999/Tally --title "$VERSION" --notes "$NOTES" --latest

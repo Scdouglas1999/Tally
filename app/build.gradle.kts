@@ -57,6 +57,21 @@ val gitDescribe =
         .standardOutput.asText
         .getOrElse("v0.0.0")
 
+// TALLY: begin
+// Tally's own version line: releases are tagged tally-vMAJOR.MINOR.PATCH (tally-v2.0.0 was the first). Wholphin's
+// v* tags above still give the upstream base, which Wholphin's one-time upgrade steps are keyed to (BuildConfig
+// TALLY_UPSTREAM_VERSION); without a tally-v tag the build falls back to the upstream numbering.
+val tallyDescribe =
+    providers
+        .exec {
+            commandLine("git", "describe", "--tags", "--long", "--match=tally-v*")
+            isIgnoreExitValue = true
+        }.standardOutput.asText
+        .getOrElse("")
+        .trim()
+val tallyVersion = Regex("^tally-v(\\d+)\\.(\\d+)\\.(\\d+)-(\\d+)-g([0-9a-f]+)$").find(tallyDescribe)
+// TALLY: end
+
 kotlin {
     compilerOptions {
         languageVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_3
@@ -84,11 +99,25 @@ configure<ApplicationExtension> {
         // Upstream counts release tags, which never changes between this fork's releases; Play (and a sane
         // update order) needs every release to be higher. tags * 1000 + commits since the upstream tag:
         // 59 tags, v1.0.8-26-g… -> 59026; rebasing onto upstream's next tag jumps to 60xxx.
+        // From 2.0.0 on: MAJOR*1_000_000 + MINOR*10_000 + PATCH*100 + commits since the tag (development builds),
+        // above every upstream-numbered build (the last was 59156). The name is "2.0.0" on a release tag and
+        // "2.0.0-3-gabc1234" between releases; the in-app updater compares these names.
         versionCode =
-            gitTags.trim().lines().size * 1000 +
-            (Regex("-(\\d+)-g[0-9a-f]+$").find(gitDescribe.trim())?.groupValues?.get(1)?.toIntOrNull() ?: 0).coerceAtMost(999)
+            tallyVersion?.destructured?.let { (major, minor, patch, commits) ->
+                major.toInt() * 1_000_000 + minor.toInt() * 10_000 + patch.toInt() * 100 + commits.toInt().coerceAtMost(99)
+            } ?: (
+                gitTags.trim().lines().size * 1000 +
+                    (Regex("-(\\d+)-g[0-9a-f]+$").find(gitDescribe.trim())?.groupValues?.get(1)?.toIntOrNull() ?: 0).coerceAtMost(999)
+            )
+        buildConfigField("String", "TALLY_UPSTREAM_VERSION", "\"${gitDescribe.trim().removePrefix("v").ifBlank { "0.0.0" }}\"")
         // TALLY: end
-        versionName = gitDescribe.trim().removePrefix("v").ifBlank { "0.0.0" }
+        versionName =
+            // TALLY: begin
+            tallyVersion?.destructured?.let { (major, minor, patch, commits, hash) ->
+                if (commits == "0") "$major.$minor.$patch" else "$major.$minor.$patch-$commits-g$hash"
+            } ?:
+            // TALLY: end
+            gitDescribe.trim().removePrefix("v").ifBlank { "0.0.0" }
         testInstrumentationRunner = "com.github.damontecres.wholphin.test.WholphinTestRunner"
 
         buildConfigField("long", "BUILD_TIME", System.currentTimeMillis().toString())
