@@ -17,7 +17,9 @@ export JAVA_HOME="${JAVA_HOME:-/usr/lib/jvm/java-17-openjdk}"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
 
 VERSION="$(git describe --tags --long --match='v*')"          # v1.0.8-25-gabc1234  (what the app calls itself)
-./gradlew :app:assembleDefaultRelease
+# R8 on the release build no longer fits in the 2 GB upstream's gradle.properties gives the daemon
+GRADLE_MEM="-Dorg.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8"
+./gradlew "$GRADLE_MEM" :app:assembleDefaultRelease
 rm -f app/ci.keystore
 
 OUT=tally/out; rm -rf "$OUT"; mkdir -p "$OUT"
@@ -35,8 +37,8 @@ ls -lh "$OUT"
 # Same signing key as the sideloaded build, so the three can update over one another.
 if [ "${1:-}" = "--stores" ] || [ "${2:-}" = "--stores" ]; then
   # one variant at a time: compiling two at once exhausts the 2 GB Kotlin daemon upstream configures
-  ./gradlew :app:bundleAppstoreRelease
-  ./gradlew :app:assembleFiretvRelease
+  ./gradlew "$GRADLE_MEM" :app:bundleAppstoreRelease
+  ./gradlew "$GRADLE_MEM" :app:assembleFiretvRelease
   rm -f app/ci.keystore
   cp app/build/outputs/bundle/appstoreRelease/*.aab "$OUT/Tally-play.aab"
   cp "$(ls app/build/outputs/apk/firetv/release/*.apk | grep -v -E -- '-(arm64-v8a|armeabi-v7a|x86_64)\.apk$')" "$OUT/Tally-amazon.apk"
@@ -44,7 +46,7 @@ if [ "${1:-}" = "--stores" ] || [ "${2:-}" = "--stores" ]; then
 fi
 
 if [ $PUBLISH = 1 ]; then
-  TAG="jtv-${VERSION#v}"
+  TAG="tally-${VERSION#v}"
   git tag -f "$TAG" && git push -f origin "refs/tags/$TAG" && git push origin main
   NOTES="${TALLY_NOTES:-Tally for Android TV $VERSION}"
   gh release create "$TAG" "$OUT"/Tally.apk "$OUT"/JellyTV.apk "$OUT"/Wholphin-release*.apk --repo Scdouglas1999/Tally --title "$VERSION" --notes "$NOTES" --latest
