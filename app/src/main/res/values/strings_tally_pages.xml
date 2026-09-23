@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Search, person, collection, favorites and playlist pages in the Tally look. -->
+    <string name="tally_pages_fa_search" translatable="false">&#xf002;</string>
+    <string name="tally_pages_fa_arrow_up" translatable="false">&#xf062;</string>
+    <string name="tally_pages_fa_arrow_down" translatable="false">&#xf063;</string>
+    <string name="tally_pages_fa_trash" translatable="false">&#xf1f8;</string>
+
+    <!-- Search -->
+    <string name="tally_pages_search">Search</string>
+    <string name="tally_pages_search_placeholder">Search movies, shows, people…</string>
+    <string name="tally_pages_search_hint">Press OK to type. Results appear as you type.</string>
+    <string name="tally_pages_searching">Searching…</string>
+    <string name="tally_pages_search_nothing">Nothing for “%1$s”</string>
+    <string name="tally_pages_search_nothing_body">Try another spelling or a shorter word</string>
+    <string name="tally_pages_search_error">Search failed</string>
+    <string name="tally_pages_view_options">View options</string>
+    <string name="tally_pages_results">Results</string>
+    <string name="tally_pages_library">Library</string>
+    <string name="tally_pages_discover">Discover</string>
+
+    <!-- Row titles by type -->
+    <string name="tally_pages_type_movies">Movies</string>
+    <string name="tally_pages_type_shows">Shows</string>
+    <string name="tally_pages_type_episodes">Episodes</string>
+    <string name="tally_pages_type_people">People</string>
+    <string name="tally_pages_type_collections">Collections</string>
+    <string name="tally_pages_type_playlists">Playlists</string>
+    <string name="tally_pages_type_videos">Videos</string>
+    <string name="tally_pages_type_films">Films</string>
+
+    <!-- Person -->
+    <string name="tally_pages_person">Person</string>
+    <string name="tally_pages_role_actor">Actor</string>
+    <string name="tally_pages_role_director">Director</string>
+    <string name="tally_pages_role_writer">Writer</string>
+    <string name="tally_pages_role_producer">Producer</string>
+    <string name="tally_pages_role_composer">Composer</string>
+    <string name="tally_pages_role_guest_star">Guest star</string>
+    <string name="tally_pages_born">Born</string>
+
+    <!-- Collection -->
+    <string name="tally_pages_collection">Collection</string>
+    <string name="tally_pages_shuffle">Shuffle</string>
+    <string name="tally_pages_view">View</string>
+    <string name="tally_pages_delete">Delete</string>
+    <string name="tally_pages_random">Random</string>
+    <plurals name="tally_pages_count_films">
+        <item quantity="one">%d film</item>
+        <item quantity="other">%d films</item>
+    </plurals>
+    <plurals name="tally_pages_count_shows">
+        <item quantity="one">%d show</item>
+        <item quantity="other">%d shows</item>
+    </plurals>
+    <plurals name="tally_pages_count_episodes">
+        <item quantity="one">%d episode</item>
+        <item quantity="other">%d episodes</item>
+    </plurals>
+    <plurals name="tally_pages_count_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <string name="tally_pages_collection_empty">Nothing in this collection</string>
+    <string name="tally_pages_collection_empty_body">No items match the current filter</string>
+
+    <!-- Favorites -->
+    <string name="tally_pages_favorites">Favorites</string>
+    <string name="tally_pages_no_favorites">No favorites yet</string>
+    <string name="tally_pages_no_favorites_body">Mark a film, show or person as a favorite and it appears here</string>
+
+    <!-- Playlists -->
+    <string name="tally_pages_playlist">Playlist</string>
+    <string name="tally_pages_playlists_empty">No playlists yet</string>
+    <string name="tally_pages_playlists_empty_body">Add something to a playlist from its More menu</string>
+    <string name="tally_pages_playlist_empty">This playlist is empty</string>
+    <string name="tally_pages_playlist_empty_body">No items match the current filter</string>
+    <string name="tally_pages_move_up">Move up</string>
+    <string name="tally_pages_move_down">Move down</string>
+    <string name="tally_pages_move_hint">Move</string>
+    <string name="tally_pages_kind_episode">Episode</string>
+    <string name="tally_pages_kind_song">Song</string>
+    <string name="tally_pages_kind_series">Series</string>
+</resources>

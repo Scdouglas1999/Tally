@@ -1,17 +1,25 @@
 package io.github.scdouglas1999.tally.media
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.github.damontecres.wholphin.preferences.AppThemeColors
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.theme.LocalTheme
+import io.github.scdouglas1999.tally.media.collection.TallyCollectionPage
 import io.github.scdouglas1999.tally.media.episode.TallyEpisodePage
+import io.github.scdouglas1999.tally.media.favorites.TallyFavoritesPage
 import io.github.scdouglas1999.tally.media.home.TallyHomePage
 import io.github.scdouglas1999.tally.media.movie.TallyMoviePage
+import io.github.scdouglas1999.tally.media.person.TallyPersonPage
+import io.github.scdouglas1999.tally.media.playlist.TallyPlaylistPage
+import io.github.scdouglas1999.tally.media.playlist.TallyPlaylistsPage
+import io.github.scdouglas1999.tally.media.search.TallySearchPage
 import io.github.scdouglas1999.tally.media.series.TallySeasonRundown
 import io.github.scdouglas1999.tally.media.series.TallySeriesPage
 import org.jellyfin.sdk.model.api.BaseItemKind
+import org.jellyfin.sdk.model.api.CollectionType
 
 /**
  * Which destinations Tally draws itself (see `tally/UI.md`). Called first by `DestinationContent` (seam W31):
@@ -52,10 +60,56 @@ object TallyRoutes {
                         true
                     }
 
+                    BaseItemKind.BOX_SET -> {
+                        LaunchedEffect(Unit) { onClearBackdrop() }
+                        TallyCollectionPage(preferences = preferences, itemId = destination.itemId, modifier = modifier)
+                        true
+                    }
+
+                    BaseItemKind.PLAYLIST -> {
+                        LaunchedEffect(Unit) { onClearBackdrop() }
+                        TallyPlaylistPage(preferences, destination, modifier)
+                        true
+                    }
+
+                    // The playlists library, a user view on Jellyfin 10.10 (other collection types belong to
+                    // the library pages).
+                    BaseItemKind.COLLECTION_FOLDER, BaseItemKind.USER_VIEW -> {
+                        if (destination.collectionType == CollectionType.PLAYLISTS) {
+                            LaunchedEffect(Unit) { onClearBackdrop() }
+                            TallyPlaylistsPage(preferences, destination.itemId, modifier)
+                            true
+                        } else {
+                            false
+                        }
+                    }
+
+                    BaseItemKind.PERSON -> {
+                        LaunchedEffect(Unit) { onClearBackdrop() }
+                        TallyPersonPage(preferences, destination, modifier)
+                        true
+                    }
+
                     else -> {
                         false
                     }
                 }
+            }
+
+            is Destination.Search -> {
+                LaunchedEffect(Unit) { onClearBackdrop() }
+                TallySearchPage(
+                    initialQuery = destination.query,
+                    userPreferences = preferences,
+                    modifier = modifier,
+                )
+                true
+            }
+
+            Destination.Favorites -> {
+                LaunchedEffect(Unit) { onClearBackdrop() }
+                TallyFavoritesPage(preferences = preferences, modifier = modifier)
+                true
             }
 
             is Destination.SeriesOverview -> {
