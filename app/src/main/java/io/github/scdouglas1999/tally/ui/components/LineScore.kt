@@ -3,6 +3,7 @@ package io.github.scdouglas1999.tally.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -129,49 +130,58 @@ fun LineScore(
     val metrics = if (compact) LineScoreMetrics.Compact else LineScoreMetrics.Full
     val unplayed = stringResource(R.string.tally_line_unplayed)
     val totalHeader = stringResource(R.string.tally_line_total)
-    val tableWidth = metrics.gutter + metrics.columnWidth * labels.size + metrics.totalGap + metrics.columnWidth
-    Column(modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(Modifier.width(metrics.gutter))
-            labels.forEach { label ->
+    BoxWithConstraints(modifier = modifier) {
+        // Period and total columns narrow (never widen) so the whole table, total included, fits the space it is
+        // given: the hero's situation column is narrower than a nine-inning line at full column width, and extra
+        // innings add columns.
+        val fitted = (maxWidth - metrics.gutter - metrics.totalGap) / (labels.size + 1)
+        val columnWidth = if (maxWidth == Dp.Infinity) metrics.columnWidth else minOf(metrics.columnWidth, fitted)
+        val tableWidth = metrics.gutter + columnWidth * labels.size + metrics.totalGap + columnWidth
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(Modifier.width(metrics.gutter))
+                labels.forEach { label ->
+                    ScoreCell(
+                        text = label,
+                        width = columnWidth,
+                        style = metrics.header,
+                        color = TallyColors.muted,
+                    )
+                }
+                Spacer(Modifier.width(metrics.totalGap))
                 ScoreCell(
-                    text = label,
-                    width = metrics.columnWidth,
+                    text = totalHeader,
+                    width = columnWidth,
                     style = metrics.header,
                     color = TallyColors.muted,
                 )
             }
-            Spacer(Modifier.width(metrics.totalGap))
-            ScoreCell(
-                text = totalHeader,
-                width = metrics.columnWidth,
-                style = metrics.header,
-                color = TallyColors.muted,
+            Spacer(Modifier.height(metrics.ruleGap))
+            Box(
+                Modifier
+                    .width(tableWidth)
+                    .height(TallyDimens.hairline)
+                    .background(TallyColors.rule),
+            )
+            Spacer(Modifier.height(metrics.rowGap))
+            TeamScoreRow(
+                team = game.away,
+                other = game.home,
+                columnCount = labels.size,
+                columnWidth = columnWidth,
+                metrics = metrics,
+                unplayed = unplayed,
+            )
+            Spacer(Modifier.height(metrics.rowGap))
+            TeamScoreRow(
+                team = game.home,
+                other = game.away,
+                columnCount = labels.size,
+                columnWidth = columnWidth,
+                metrics = metrics,
+                unplayed = unplayed,
             )
         }
-        Spacer(Modifier.height(metrics.ruleGap))
-        Box(
-            Modifier
-                .width(tableWidth)
-                .height(TallyDimens.hairline)
-                .background(TallyColors.rule),
-        )
-        Spacer(Modifier.height(metrics.rowGap))
-        TeamScoreRow(
-            team = game.away,
-            other = game.home,
-            columnCount = labels.size,
-            metrics = metrics,
-            unplayed = unplayed,
-        )
-        Spacer(Modifier.height(metrics.rowGap))
-        TeamScoreRow(
-            team = game.home,
-            other = game.away,
-            columnCount = labels.size,
-            metrics = metrics,
-            unplayed = unplayed,
-        )
     }
 }
 
@@ -180,6 +190,7 @@ private fun TeamScoreRow(
     team: TallyTeam,
     other: TallyTeam,
     columnCount: Int,
+    columnWidth: Dp,
     metrics: LineScoreMetrics,
     unplayed: String,
 ) {
@@ -200,7 +211,7 @@ private fun TeamScoreRow(
             val played = index in team.periods.indices
             ScoreCell(
                 text = periodValue(team.periods, index, unplayed),
-                width = metrics.columnWidth,
+                width = columnWidth,
                 style = metrics.number,
                 color = if (played) TallyColors.textSecondary else TallyColors.muted,
             )
@@ -208,7 +219,7 @@ private fun TeamScoreRow(
         Spacer(Modifier.width(metrics.totalGap))
         ScoreCell(
             text = team.score?.toString() ?: unplayed,
-            width = metrics.columnWidth,
+            width = columnWidth,
             style = metrics.total,
             color = if (isLeading(team.score, other.score)) TallyColors.accent else TallyColors.text,
         )
@@ -239,8 +250,8 @@ private fun ScoreCell(
 }
 
 /**
- * Fixed column widths. Compact must fit a nine-inning line plus the total in the hero's
- * situation column (~420dp). Full is the box-score overlay, which has the whole picture.
+ * Column widths at most; [LineScore] narrows the columns when the table would not fit its space (the hero's
+ * situation column holds about 380dp). Full is the box-score overlay, which has the whole picture.
  */
 private class LineScoreMetrics(
     val mark: Dp,

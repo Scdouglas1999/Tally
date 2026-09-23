@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,6 +63,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 import org.jellyfin.sdk.model.api.CollectionType
+import kotlin.math.floor
 
 /**
  * Indexes in [NavDrawerItem] lists must stay the original positions. [selectedIndex] and
@@ -152,9 +155,50 @@ internal sealed interface TallyGlyph {
     ) : TallyGlyph
 }
 
-private val RowHeight = 40.dp
 private val NowPlayingHeight = 52.dp
-private val GlyphBox = 40.dp
+
+/** The rail's row pitch while few entries leave room, and the smallest it goes before the rail must scroll. */
+private val MaxRowHeight = 40.dp
+private val MinRowHeight = 30.dp
+
+/** The user row keeps the 40dp square: the 32dp user tile sits inside it. */
+private val ProfileRowHeight = 40.dp
+
+/** The Settings row's gap to the screen's bottom edge (TallyNavDrawer). */
+internal val SettingsBottomPad = 8.dp
+
+/**
+ * The row pitch of the drawer, provided by [TallyNavDrawer] from [drawerRowHeight]. Every entry row (and the collapsed
+ * focus square) uses it, so the rail and the open drawer keep the same rows.
+ */
+internal val LocalDrawerRowHeight = staticCompositionLocalOf { MaxRowHeight }
+
+/**
+ * The largest row pitch (40dp at most, 30dp at least) at which the collapsed rail shows every entry at once in
+ * [available] height: the header, Now Playing when it is up, [rows] entry rows (Settings included), the dividers and
+ * the list's focus-border padding. The count of libraries decides how many rows there are, so the pitch is computed,
+ * not fixed. Below 30dp the list scrolls instead.
+ */
+internal fun drawerRowHeight(
+    available: Dp,
+    rows: Int,
+    libraryDivider: Boolean,
+    sectionsDivider: Boolean,
+    nowPlaying: Boolean,
+): Dp {
+    if (rows <= 0) return MaxRowHeight
+    var fixed = HeaderInset + WordmarkHeight + HeaderGap + ProfileRowHeight + HeaderGap
+    if (nowPlaying) fixed += NowPlayingHeight
+    if (libraryDivider) fixed += DividerPad + TallyDimens.hairline + KickerBand
+    if (sectionsDivider) fixed += DividerPad * 2 + TallyDimens.hairline
+    // the rule above Settings and Settings' bottom gap
+    fixed += DividerPad * 2 + TallyDimens.hairline + SettingsBottomPad
+    // the list's content padding (room for the focus border of its first and last rows)
+    fixed += (TallyDimens.focusBorder + 1.dp) * 2
+    val pitch = floor(((available - fixed) / rows).value).dp
+    return pitch.coerceIn(MinRowHeight, MaxRowHeight)
+}
+
 private val GlyphSlot = 24.dp
 private val UserTile = 32.dp
 private val RowInset = 12.dp
@@ -165,7 +209,7 @@ private val UserRowInset = 20.dp
 private val WordmarkHeight = 16.dp
 private val HeaderGap = 8.dp
 private val KickerBand = 20.dp
-private val DividerPad = 8.dp
+private val DividerPad = 6.dp
 
 private val Kicker =
     TextStyle(
@@ -244,12 +288,12 @@ internal fun TallyDrawerHeader(
             }
         }
         Box(
-            modifier = Modifier.fillMaxWidth().height(RowHeight),
+            modifier = Modifier.fillMaxWidth().height(ProfileRowHeight),
             contentAlignment = Alignment.Center,
         ) {
             TallyFocusSurface(
                 onClick = onProfileClick,
-                modifier = if (drawerOpen) Modifier.fillMaxSize() else Modifier.size(GlyphBox),
+                modifier = if (drawerOpen) Modifier.fillMaxSize() else Modifier.size(ProfileRowHeight),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -338,8 +382,8 @@ internal fun TallyDrawerDivider(
 }
 
 /**
- * One drawer entry. Collapsed: the glyph centered in a 40x40 focus square, with the tally light (3x20dp accent bar
- * flush against the rail's left edge) beside the current page. Expanded: a full-width 40dp row, indicator slot,
+ * One drawer entry. Collapsed: the glyph centered in a square focus box as tall as the row, with the tally light (3x20dp accent bar
+ * flush against the rail's left edge) beside the current page. Expanded: a full-width row ([LocalDrawerRowHeight]), indicator slot,
  * glyph, label. With a [kicker] (Now Playing) the row is 52dp in both states and the label sits under the kicker.
  * [modifier] goes to the focusable square, [outerModifier] to the whole row (the tally light included).
  */
@@ -355,7 +399,8 @@ internal fun TallyDrawerRow(
     @StringRes trailingGlyph: Int? = null,
     outerModifier: Modifier = Modifier,
 ) {
-    val height = if (kicker != null) NowPlayingHeight else RowHeight
+    val rowHeight = LocalDrawerRowHeight.current
+    val height = if (kicker != null) NowPlayingHeight else rowHeight
     val glyphColor = if (selected) TallyColors.text else TallyColors.muted
     Box(
         modifier = outerModifier.fillMaxWidth().height(height),
@@ -376,7 +421,7 @@ internal fun TallyDrawerRow(
             modifier =
                 modifier
                     .align(Alignment.Center)
-                    .then(if (drawerOpen) Modifier.fillMaxSize() else Modifier.size(GlyphBox)),
+                    .then(if (drawerOpen) Modifier.fillMaxSize() else Modifier.size(rowHeight)),
         ) {
             if (!drawerOpen) {
                 TallyGlyphIcon(glyph = glyph, size = 20.sp, color = glyphColor)

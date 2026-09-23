@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
@@ -53,6 +54,7 @@ import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
+import io.github.scdouglas1999.tally.ui.theme.TallyScale
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -166,24 +168,28 @@ fun SendToDialog(
                 setDimAmount(0f)
             }
         }
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.72f)),
-        ) {
-            SendToPanel(
-                targets = targets,
-                hasFetched = hasFetched,
-                onSend = { viewModel.send(it, itemId, positionMs) },
-            )
-            // A failure keeps the dialog open: show its notice above the scrim.
-            SentNoticeHost(
-                Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(horizontal = TallyDimens.marginHorizontal, vertical = TallyDimens.marginVertical),
-            )
+        // A dialog window does not inherit the page's TallyScale: scale here, as the other Tally dialogs do,
+        // or the panel is laid out at the raw TV density (a size larger than every other dialog).
+        TallyScale {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.72f)),
+            ) {
+                SendToPanel(
+                    targets = targets,
+                    hasFetched = hasFetched,
+                    onSend = { viewModel.send(it, itemId, positionMs) },
+                )
+                // A failure keeps the dialog open: show its notice above the scrim.
+                SentNoticeHost(
+                    Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(horizontal = TallyDimens.marginHorizontal, vertical = TallyDimens.marginVertical),
+                )
+            }
         }
     }
 }
@@ -214,9 +220,10 @@ private fun SendToPanel(
                 .focusGroup()
                 .focusProperties { onExit = { cancelFocusChange() } },
     ) {
+        // The dialog title as on the other Tally dialogs (sleep timer, game actions): Sans SemiBold 28sp.
         Text(
-            text = stringResource(R.string.tally_household_send_title).uppercase(),
-            style = TallyType.labelLarge,
+            text = stringResource(R.string.tally_household_send_title),
+            style = TallyType.teamCard.copy(fontSize = 28.sp, lineHeight = 34.sp),
             color = TallyColors.text,
             maxLines = 1,
         )
@@ -254,7 +261,8 @@ private fun SendToPanel(
                 }
             }
         }
-        RowHints()
+        // With no screen to send to, OK does nothing: only BACK is offered.
+        RowHints(canSend = hasFetched && targets.isNotEmpty())
     }
 }
 
@@ -281,15 +289,17 @@ private fun EmptyScreens(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun RowHints() {
+private fun RowHints(canSend: Boolean) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(24.dp),
         modifier = Modifier.padding(top = 4.dp),
     ) {
-        KeyHint(
-            key = stringResource(R.string.tally_key_ok),
-            label = stringResource(R.string.tally_household_send_action),
-        )
+        if (canSend) {
+            KeyHint(
+                key = stringResource(R.string.tally_key_ok),
+                label = stringResource(R.string.tally_household_send_action),
+            )
+        }
         KeyHint(
             key = stringResource(R.string.tally_household_key_back),
             label = stringResource(R.string.tally_household_close),

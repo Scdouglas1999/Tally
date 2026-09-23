@@ -18,6 +18,8 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextAlign
@@ -53,12 +55,23 @@ fun EmptyState(
                 .onFocusChanged { focused = it.isFocused }
                 .focusable()
                 .drawBehind {
+                    // Strokes are inset by half their width so the whole frame lies inside the bounds (a stroke
+                    // on the edge puts half of it outside, where a screen edge or a parent clips it).
                     if (focused) {
-                        drawRect(color = TallyColors.accent, style = Stroke(width = TallyDimens.focusBorder.toPx()))
+                        val w = TallyDimens.focusBorder.toPx()
+                        drawRect(
+                            color = TallyColors.accent,
+                            topLeft = Offset(w / 2f, w / 2f),
+                            size = Size(size.width - w, size.height - w),
+                            style = Stroke(width = w),
+                        )
                     } else {
                         val dash = 6.dp.toPx()
+                        val w = TallyDimens.hairline.toPx()
                         drawRect(
                             color = TallyColors.ruleStrong,
+                            topLeft = Offset(w / 2f, w / 2f),
+                            size = Size(size.width - w, size.height - w),
                             style =
                                 Stroke(
                                     width = TallyDimens.hairline.toPx(),

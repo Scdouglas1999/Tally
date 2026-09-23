@@ -96,6 +96,7 @@ fun FocusedGamePanel(
                                 stringResource(
                                     when {
                                         game.isLive -> R.string.tally_situation
+                                        game.hasNoResult -> R.string.tally_hero_status
                                         game.isFinal -> R.string.tally_hero_final
                                         else -> R.string.tally_hero_starts
                                     },
@@ -187,7 +188,8 @@ private fun HeroTeamLine(
     hideScores: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val loser = game.isFinal && !team.winner
+    // Dimming the loser names the winner: not while scores are hidden.
+    val loser = game.isFinal && !team.winner && !hideScores
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Kicker over the status of a game that ended without a result (postponed, canceled): not "Final". -->
+    <string name="tally_hero_status">Status</string>
+</resources>

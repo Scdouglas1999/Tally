@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -164,19 +165,40 @@ fun GameCard(
                     maxLines = 1,
                 )
             }
-            Column(Modifier.fillMaxWidth().weight(1f)) {
-                GameCardTeamLine(
-                    team = game.away,
-                    game = game,
-                    hideScores = hideScores,
-                    modifier = Modifier.weight(1f),
-                )
-                GameCardTeamLine(
-                    team = game.home,
-                    game = game,
-                    hideScores = hideScores,
-                    modifier = Modifier.weight(1f),
-                )
+            if (game.away.isBlankTeam() && game.home.isBlankTeam()) {
+                // A channel with no game (the player's switcher lists them when nothing is live): its name in place
+                // of two empty team lines.
+                Box(
+                    contentAlignment = Alignment.CenterStart,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(horizontal = 10.dp),
+                ) {
+                    Text(
+                        text = game.watch?.channelName ?: game.name,
+                        style = TallyType.teamCard,
+                        color = TallyColors.text,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            } else {
+                Column(Modifier.fillMaxWidth().weight(1f)) {
+                    GameCardTeamLine(
+                        team = game.away,
+                        game = game,
+                        hideScores = hideScores,
+                        modifier = Modifier.weight(1f),
+                    )
+                    GameCardTeamLine(
+                        team = game.home,
+                        game = game,
+                        hideScores = hideScores,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
             LabelBar(
                 text = game.watch?.channelName ?: stringResource(R.string.tally_not_on_your_channels),
@@ -186,6 +208,8 @@ fun GameCard(
     }
 }
 
+private fun TallyTeam.isBlankTeam(): Boolean = abbr.isBlank() && shortName.isBlank() && name.isBlank()
+
 @Composable
 private fun GameCardTeamLine(
     team: TallyTeam,
@@ -193,7 +217,8 @@ private fun GameCardTeamLine(
     hideScores: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val loser = game.isFinal && !team.winner
+    // Dimming the loser names the winner: not while scores are hidden.
+    val loser = game.isFinal && !team.winner && !hideScores
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),

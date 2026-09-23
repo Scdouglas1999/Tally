@@ -151,7 +151,7 @@ private fun MultiviewQueue(
                 modifier
                     .fillMaxWidth()
                     .padding(horizontal = TallyDimens.marginHorizontal)
-                    .padding(top = 24.dp),
+                    .padding(top = 24.dp, bottom = TallyDimens.marginVertical),
         )
     } else {
         val firstRowFocus = remember { FocusRequester() }

@@ -154,6 +154,7 @@ fun TallyQueueRow(
                 title = item.name.orEmpty(),
                 imageUrl = rememberWideImageUrl(item),
                 kicker = PlayerFormat.queueKicker(index, item.data, nextWord),
+                favorite = item.favorite,
                 onClick = {
                     onClickPlaylist(item)
                     controllerViewState.hideControls()

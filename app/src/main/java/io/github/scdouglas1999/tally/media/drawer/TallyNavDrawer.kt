@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -25,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -90,6 +92,9 @@ private const val HOME_INDEX = -1
 private const val SEARCH_INDEX = -2
 private const val NOW_PLAYING_INDEX = -3
 
+/** No list row is the current page (a settings screen is open). Matches no index the view model writes. */
+private const val NO_INDEX = Int.MIN_VALUE
+
 /**
  * The Tally navigation drawer. Same [NavDrawerViewModel], items, actions and [ModalNavigationDrawer] as upstream,
  * drawn in the Tally language. Live TV is hidden while the Sports section is in the drawer; original indexes are kept.
@@ -123,7 +128,10 @@ fun TallyNavDrawer(
     val serviceState by viewModel.serviceState.collectAsState()
     val state by viewModel.state.collectAsState()
     val moreExpanded = state.moreExpanded
-    val selectedIndex = state.selectedIndex
+    // On a settings screen the pinned Settings row is the current page. The view model's index still names the page
+    // settings were opened from (Settings is not one of its items), so no list row is marked meanwhile.
+    val onSettings = destination is Destination.Settings
+    val selectedIndex = if (onSettings) NO_INDEX else state.selectedIndex
 
     BackHandler(enabled = moreExpanded && drawerState.currentValue == DrawerValue.Open) {
         viewModel.setShowMore(false)
@@ -223,7 +231,7 @@ fun TallyNavDrawer(
             val userImageUrl = remember(user) { viewModel.getUserImage(user) }
             val userName = user.name ?: user.id.toString()
 
-            Box(
+            BoxWithConstraints(
                 modifier =
                     Modifier
                         .width(drawerWidth)
@@ -232,256 +240,268 @@ fun TallyNavDrawer(
                         .background(TallyColors.ground)
                         .onFocusChanged { if (!it.hasFocus) entry.lastRegion = ListEntryTracker.NONE },
             ) {
-                // rows stop short of the 1dp right edge, so the edge never covers a focus border
-                Column(modifier = Modifier.fillMaxSize().padding(end = TallyDimens.hairline)) {
-                    TallyDrawerHeader(
-                        drawerOpen = isOpen,
-                        userName = userName,
-                        userId = user.id.toString(),
-                        serverName = server.name ?: server.url,
-                        imageUrl = userImageUrl,
-                        onProfileClick = {
-                            viewModel.navigateToSetup(SetupDestination.UserList(server))
-                        },
-                        modifier = Modifier.onFocusChanged { if (it.hasFocus) entry.lastRegion = ListEntryTracker.HEADER },
+                // The row pitch that fits every entry of the collapsed rail on the screen. Expanded More items are
+                // left out of the count: opening them may scroll the open drawer, but must not resize its rows.
+                val rowHeight =
+                    drawerRowHeight(
+                        available = maxHeight,
+                        rows = listKeys.count { it != "libraries" && it != "sections-rule" && !it.startsWith("more-") } + 1,
+                        libraryDivider = "libraries" in listKeys,
+                        sectionsDivider = "sections-rule" in listKeys,
+                        nowPlaying = serviceState.nowPlayingEnabled,
                     )
-                    AnimatedVisibility(
-                        visible = serviceState.nowPlayingEnabled,
-                        enter = expandVertically(expandFrom = Alignment.Top),
-                        exit = shrinkVertically(shrinkTowards = Alignment.Top),
-                        modifier = Modifier.onFocusChanged { if (it.hasFocus) entry.lastRegion = ListEntryTracker.HEADER },
-                    ) {
-                        TallyEntry(
-                            label = serviceState.nowPlayingTitle.orEmpty(),
-                            glyph = TallyGlyph.Font(R.string.fa_play),
-                            selected = selectedIndex == NOW_PLAYING_INDEX,
+                // rows stop short of the 1dp right edge, so the edge never covers a focus border
+                CompositionLocalProvider(LocalDrawerRowHeight provides rowHeight) {
+                    Column(modifier = Modifier.fillMaxSize().padding(end = TallyDimens.hairline)) {
+                        TallyDrawerHeader(
                             drawerOpen = isOpen,
-                            kicker = stringResource(R.string.now_playing),
-                            onClick = {
-                                viewModel.setIndex(NOW_PLAYING_INDEX)
-                                viewModel.navigationManager.navigateTo(Destination.NowPlaying)
+                            userName = userName,
+                            userId = user.id.toString(),
+                            serverName = server.name ?: server.url,
+                            imageUrl = userImageUrl,
+                            onProfileClick = {
+                                viewModel.navigateToSetup(SetupDestination.UserList(server))
                             },
-                            focusRequester = focusRequester,
+                            modifier = Modifier.onFocusChanged { if (it.hasFocus) entry.lastRegion = ListEntryTracker.HEADER },
                         )
-                    }
-                    // the list and Settings share one focus group, so entry goes to the selected item (upstream's rule)
-                    Column(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .onFocusChanged {
-                                    val entered = it.hasFocus && !entry.listHasFocus
-                                    entry.listHasFocus = it.hasFocus
-                                    if (entered) {
-                                        if (!entry.viaOnEnter) {
-                                            // Compose skipped onEnter (it does when the page being left has its own
-                                            // focus exit handling): apply upstream's entry rule here instead
-                                            val fromHeader = entry.lastRegion == ListEntryTracker.HEADER
-                                            scope.launch {
-                                                if (fromHeader) {
-                                                    searchFocusRequester.tryRequestFocus()
-                                                } else {
-                                                    focusRequester.tryRequestFocus()
-                                                }
-                                            }
-                                        }
-                                        entry.viaOnEnter = false
-                                        entry.lastRegion = ListEntryTracker.LIST
-                                    }
-                                }.focusGroup()
-                                .focusProperties {
-                                    onEnter = {
-                                        entry.viaOnEnter = true
-                                        if (entry.stepFromSettings) {
-                                            // UP from Settings: land on the row above it, no redirect
-                                        } else if (requestedFocusDirection == FocusDirection.Down) {
-                                            searchFocusRequester.tryRequestFocus()
-                                        } else {
-                                            focusRequester.tryRequestFocus()
-                                        }
-                                    }
+                        AnimatedVisibility(
+                            visible = serviceState.nowPlayingEnabled,
+                            enter = expandVertically(expandFrom = Alignment.Top),
+                            exit = shrinkVertically(shrinkTowards = Alignment.Top),
+                            modifier = Modifier.onFocusChanged { if (it.hasFocus) entry.lastRegion = ListEntryTracker.HEADER },
+                        ) {
+                            TallyEntry(
+                                label = serviceState.nowPlayingTitle.orEmpty(),
+                                glyph = TallyGlyph.Font(R.string.fa_play),
+                                selected = selectedIndex == NOW_PLAYING_INDEX,
+                                drawerOpen = isOpen,
+                                kicker = stringResource(R.string.now_playing),
+                                onClick = {
+                                    viewModel.setIndex(NOW_PLAYING_INDEX)
+                                    viewModel.navigationManager.navigateTo(Destination.NowPlaying)
                                 },
-                    ) {
-                        LazyColumn(
-                            state = navDrawerListState,
-                            // room for the focus border of the first and last rows (never clipped by the list)
-                            contentPadding = PaddingValues(vertical = TallyDimens.focusBorder + 1.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                                focusRequester = focusRequester,
+                            )
+                        }
+                        // the list and Settings share one focus group, so entry goes to the selected item (upstream's rule)
+                        Column(
                             modifier =
                                 Modifier
                                     .weight(1f)
                                     .fillMaxWidth()
-                                    .onPlaced { rail.coordinates = it },
-                        ) {
-                            item(key = "search") {
-                                TallyEntry(
-                                    label = stringResource(R.string.search),
-                                    glyph = TallyGlyph.Font(R.string.tally_drawer_fa_search),
-                                    selected = selectedIndex == SEARCH_INDEX,
-                                    drawerOpen = isOpen,
-                                    onClick = {
-                                        viewModel.setIndex(SEARCH_INDEX)
-                                        viewModel.navigationManager.navigateToFromDrawer(Destination.Search())
-                                    },
-                                    focusRequester = focusRequester,
-                                    modifier = Modifier.focusRequester(searchFocusRequester),
-                                    outerModifier = whole,
-                                )
-                            }
-                            item(key = "home") {
-                                TallyEntry(
-                                    label = stringResource(R.string.home),
-                                    glyph = TallyGlyph.Font(R.string.fa_house),
-                                    selected = selectedIndex == HOME_INDEX,
-                                    drawerOpen = isOpen,
-                                    modifier = if (lastRowId == "home") lastRow else Modifier,
-                                    outerModifier = whole,
-                                    onClick = {
-                                        viewModel.setIndex(HOME_INDEX)
-                                        if (destination is Destination.Home) {
-                                            viewModel.navigationManager.reloadHome()
-                                            onClearBackdrop.invoke()
-                                        } else {
-                                            viewModel.navigationManager.goToHome()
+                                    .onFocusChanged {
+                                        val entered = it.hasFocus && !entry.listHasFocus
+                                        entry.listHasFocus = it.hasFocus
+                                        if (entered) {
+                                            if (!entry.viaOnEnter) {
+                                                // Compose skipped onEnter (it does when the page being left has its own
+                                                // focus exit handling): apply upstream's entry rule here instead
+                                                val fromHeader = entry.lastRegion == ListEntryTracker.HEADER
+                                                scope.launch {
+                                                    if (fromHeader) {
+                                                        searchFocusRequester.tryRequestFocus()
+                                                    } else {
+                                                        focusRequester.tryRequestFocus()
+                                                    }
+                                                }
+                                            }
+                                            entry.viaOnEnter = false
+                                            entry.lastRegion = ListEntryTracker.LIST
+                                        }
+                                    }.focusGroup()
+                                    .focusProperties {
+                                        onEnter = {
+                                            entry.viaOnEnter = true
+                                            if (entry.stepFromSettings) {
+                                                // UP from Settings: land on the row above it, no redirect
+                                            } else if (requestedFocusDirection == FocusDirection.Down) {
+                                                searchFocusRequester.tryRequestFocus()
+                                            } else {
+                                                focusRequester.tryRequestFocus()
+                                            }
                                         }
                                     },
-                                    focusRequester = focusRequester,
-                                )
-                            }
-                            items(
-                                items = primary,
-                                key = { it.value.id },
-                            ) { indexed ->
-                                DrawerItemEntry(
-                                    index = indexed.index,
-                                    item = indexed.value,
-                                    selectedIndex = selectedIndex,
-                                    drawerOpen = isOpen,
-                                    context = context,
-                                    focusRequester = focusRequester,
-                                    onClick = viewModel::onClickDrawerItem,
-                                    modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
-                                    outerModifier = whole,
-                                )
-                            }
-                            if (libraries.isNotEmpty() || moreVisible.isNotEmpty()) {
-                                item(key = "libraries") {
-                                    TallyDrawerDivider(
-                                        title = stringResource(R.string.tally_drawer_libraries),
+                        ) {
+                            LazyColumn(
+                                state = navDrawerListState,
+                                // room for the focus border of the first and last rows (never clipped by the list)
+                                contentPadding = PaddingValues(vertical = TallyDimens.focusBorder + 1.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .fillMaxWidth()
+                                        .onPlaced { rail.coordinates = it },
+                            ) {
+                                item(key = "search") {
+                                    TallyEntry(
+                                        label = stringResource(R.string.search),
+                                        glyph = TallyGlyph.Font(R.string.tally_drawer_fa_search),
+                                        selected = selectedIndex == SEARCH_INDEX,
                                         drawerOpen = isOpen,
-                                        modifier = whole,
+                                        onClick = {
+                                            viewModel.setIndex(SEARCH_INDEX)
+                                            viewModel.navigationManager.navigateToFromDrawer(Destination.Search())
+                                        },
+                                        focusRequester = focusRequester,
+                                        modifier = Modifier.focusRequester(searchFocusRequester),
+                                        outerModifier = whole,
                                     )
                                 }
-                            }
-                            items(
-                                items = libraries,
-                                key = { it.value.id },
-                            ) { indexed ->
-                                DrawerItemEntry(
-                                    index = indexed.index,
-                                    item = indexed.value,
-                                    selectedIndex = selectedIndex,
-                                    drawerOpen = isOpen,
-                                    context = context,
-                                    focusRequester = focusRequester,
-                                    onClick = viewModel::onClickDrawerItem,
-                                    modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
-                                    outerModifier = whole,
-                                )
-                            }
-                            if (moreVisible.isNotEmpty()) {
-                                val moreIndex = serviceState.items.size
-                                item(key = "more") {
+                                item(key = "home") {
                                     TallyEntry(
-                                        label = NavDrawerItem.More.name(context),
-                                        glyph = tallyGlyph(NavDrawerItem.More),
-                                        // as upstream: More is never drawn as the current page, but it takes the
-                                        // focus-entry requester when the selected index equals its own
-                                        selected = false,
-                                        focusTarget = selectedIndex == moreIndex,
+                                        label = stringResource(R.string.home),
+                                        glyph = TallyGlyph.Font(R.string.fa_house),
+                                        selected = selectedIndex == HOME_INDEX,
                                         drawerOpen = isOpen,
-                                        trailingGlyph =
-                                            if (moreExpanded) {
-                                                R.string.fa_caret_down
-                                            } else {
-                                                R.string.fa_caret_right
-                                            },
-                                        onClick = {
-                                            viewModel.onClickDrawerItem(moreIndex, NavDrawerItem.More)
-                                        },
-                                        modifier = if (lastRowId == "more") lastRow else Modifier,
+                                        modifier = if (lastRowId == "home") lastRow else Modifier,
                                         outerModifier = whole,
+                                        onClick = {
+                                            viewModel.setIndex(HOME_INDEX)
+                                            if (destination is Destination.Home) {
+                                                viewModel.navigationManager.reloadHome()
+                                                onClearBackdrop.invoke()
+                                            } else {
+                                                viewModel.navigationManager.goToHome()
+                                            }
+                                        },
                                         focusRequester = focusRequester,
                                     )
                                 }
-                            }
-                            if (moreExpanded) {
                                 items(
-                                    items = moreVisible,
-                                    key = { "more-${it.value.id}" },
+                                    items = primary,
+                                    key = { it.value.id },
                                 ) { indexed ->
                                     DrawerItemEntry(
-                                        index = indexed.index + serviceState.items.size,
+                                        index = indexed.index,
                                         item = indexed.value,
                                         selectedIndex = selectedIndex,
                                         drawerOpen = isOpen,
                                         context = context,
                                         focusRequester = focusRequester,
                                         onClick = viewModel::onClickDrawerItem,
-                                        modifier = if (lastRowId == "more-" + indexed.value.id) lastRow else Modifier,
+                                        modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
+                                        outerModifier = whole,
+                                    )
+                                }
+                                if (libraries.isNotEmpty() || moreVisible.isNotEmpty()) {
+                                    item(key = "libraries") {
+                                        TallyDrawerDivider(
+                                            title = stringResource(R.string.tally_drawer_libraries),
+                                            drawerOpen = isOpen,
+                                            modifier = whole,
+                                        )
+                                    }
+                                }
+                                items(
+                                    items = libraries,
+                                    key = { it.value.id },
+                                ) { indexed ->
+                                    DrawerItemEntry(
+                                        index = indexed.index,
+                                        item = indexed.value,
+                                        selectedIndex = selectedIndex,
+                                        drawerOpen = isOpen,
+                                        context = context,
+                                        focusRequester = focusRequester,
+                                        onClick = viewModel::onClickDrawerItem,
+                                        modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
+                                        outerModifier = whole,
+                                    )
+                                }
+                                if (moreVisible.isNotEmpty()) {
+                                    val moreIndex = serviceState.items.size
+                                    item(key = "more") {
+                                        TallyEntry(
+                                            label = NavDrawerItem.More.name(context),
+                                            glyph = tallyGlyph(NavDrawerItem.More),
+                                            // as upstream: More is never drawn as the current page, but it takes the
+                                            // focus-entry requester when the selected index equals its own
+                                            selected = false,
+                                            focusTarget = selectedIndex == moreIndex,
+                                            drawerOpen = isOpen,
+                                            trailingGlyph =
+                                                if (moreExpanded) {
+                                                    R.string.fa_caret_down
+                                                } else {
+                                                    R.string.fa_caret_right
+                                                },
+                                            onClick = {
+                                                viewModel.onClickDrawerItem(moreIndex, NavDrawerItem.More)
+                                            },
+                                            modifier = if (lastRowId == "more") lastRow else Modifier,
+                                            outerModifier = whole,
+                                            focusRequester = focusRequester,
+                                        )
+                                    }
+                                }
+                                if (moreExpanded) {
+                                    items(
+                                        items = moreVisible,
+                                        key = { "more-${it.value.id}" },
+                                    ) { indexed ->
+                                        DrawerItemEntry(
+                                            index = indexed.index + serviceState.items.size,
+                                            item = indexed.value,
+                                            selectedIndex = selectedIndex,
+                                            drawerOpen = isOpen,
+                                            context = context,
+                                            focusRequester = focusRequester,
+                                            onClick = viewModel::onClickDrawerItem,
+                                            modifier = if (lastRowId == "more-" + indexed.value.id) lastRow else Modifier,
+                                            outerModifier = whole,
+                                        )
+                                    }
+                                }
+                                if (sections.isNotEmpty() && (primary.isNotEmpty() || libraries.isNotEmpty() || moreVisible.isNotEmpty())) {
+                                    item(key = "sections-rule") {
+                                        TallyDrawerDivider(title = null, drawerOpen = isOpen, modifier = whole)
+                                    }
+                                }
+                                items(
+                                    items = sections,
+                                    key = { it.value.id },
+                                ) { indexed ->
+                                    DrawerItemEntry(
+                                        index = indexed.index,
+                                        item = indexed.value,
+                                        selectedIndex = selectedIndex,
+                                        drawerOpen = isOpen,
+                                        context = context,
+                                        focusRequester = focusRequester,
+                                        onClick = viewModel::onClickDrawerItem,
+                                        modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
                                         outerModifier = whole,
                                     )
                                 }
                             }
-                            if (sections.isNotEmpty() && (primary.isNotEmpty() || libraries.isNotEmpty() || moreVisible.isNotEmpty())) {
-                                item(key = "sections-rule") {
-                                    TallyDrawerDivider(title = null, drawerOpen = isOpen, modifier = whole)
-                                }
-                            }
-                            items(
-                                items = sections,
-                                key = { it.value.id },
-                            ) { indexed ->
-                                DrawerItemEntry(
-                                    index = indexed.index,
-                                    item = indexed.value,
-                                    selectedIndex = selectedIndex,
+                            // Settings: upstream's footer, pinned to the bottom so it is always visible
+                            TallyDrawerDivider(title = null, drawerOpen = isOpen)
+                            Box(modifier = Modifier.fillMaxWidth().padding(bottom = SettingsBottomPad)) {
+                                TallyEntry(
+                                    label = stringResource(R.string.settings),
+                                    glyph = TallyGlyph.Font(R.string.tally_drawer_fa_settings),
+                                    selected = onSettings,
                                     drawerOpen = isOpen,
-                                    context = context,
+                                    onClick = {
+                                        viewModel.navigationManager.navigateTo(
+                                            Destination.Settings(PreferenceScreenOption.BASIC),
+                                        )
+                                    },
                                     focusRequester = focusRequester,
-                                    onClick = viewModel::onClickDrawerItem,
-                                    modifier = if (lastRowId == indexed.value.id) lastRow else Modifier,
-                                    outerModifier = whole,
+                                    modifier =
+                                        Modifier.onPreviewKeyEvent {
+                                            if (it.type == KeyEventType.KeyDown && it.key == Key.DirectionUp) {
+                                                entry.stepFromSettings = true
+                                                val moved = lastRowRequester.tryRequestFocus()
+                                                entry.stepFromSettings = false
+                                                moved
+                                            } else {
+                                                false
+                                            }
+                                        },
                                 )
                             }
-                        }
-                        // Settings: upstream's footer, pinned to the bottom so it is always visible
-                        TallyDrawerDivider(title = null, drawerOpen = isOpen)
-                        Box(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
-                            TallyEntry(
-                                label = stringResource(R.string.settings),
-                                glyph = TallyGlyph.Font(R.string.tally_drawer_fa_settings),
-                                selected = false,
-                                drawerOpen = isOpen,
-                                onClick = {
-                                    viewModel.navigationManager.navigateTo(
-                                        Destination.Settings(PreferenceScreenOption.BASIC),
-                                    )
-                                },
-                                focusRequester = focusRequester,
-                                modifier =
-                                    Modifier.onPreviewKeyEvent {
-                                        if (it.type == KeyEventType.KeyDown && it.key == Key.DirectionUp) {
-                                            entry.stepFromSettings = true
-                                            val moved = lastRowRequester.tryRequestFocus()
-                                            entry.stepFromSettings = false
-                                            moved
-                                        } else {
-                                            false
-                                        }
-                                    },
-                            )
                         }
                     }
                 }
