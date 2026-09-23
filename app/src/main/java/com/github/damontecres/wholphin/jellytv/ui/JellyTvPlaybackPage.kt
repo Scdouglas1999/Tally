@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -371,20 +372,24 @@ fun JellyTvPlaybackPage(
                     bugVisible = false
                 }
             }
-            AnimatedVisibility(
-                visible = bugVisible,
-                enter = fadeIn(tween(OVERLAY_ANIM_MS)),
-                exit = fadeOut(tween(OVERLAY_ANIM_MS * 3)),
+            // Always composed and faded with alpha, not AnimatedVisibility: a score change both brings the bug back
+            // and changes the score, and the digits can only roll if the bug was already composed to see the old one.
+            val bugAlpha by animateFloatAsState(
+                targetValue = if (bugVisible) 1f else 0f,
+                animationSpec = tween(if (bugVisible) OVERLAY_ANIM_MS else OVERLAY_ANIM_MS * 3),
+                label = "scoreBugAlpha",
+            )
+            ScoreBug(
+                game = game,
+                hideScores = hideScores,
                 modifier =
                     Modifier
                         .align(Alignment.TopEnd)
                         .padding(
                             top = JtvDimens.marginVertical + 64.dp,
                             end = JtvDimens.marginHorizontal,
-                        ),
-            ) {
-                ScoreBug(game = game, hideScores = hideScores)
-            }
+                        ).graphicsLayer { alpha = bugAlpha },
+            )
 
             AnimatedVisibility(
                 visible = boxScoreOpen,
@@ -395,25 +400,22 @@ fun JellyTvPlaybackPage(
                 BoxScoreOverlay(game = game, hideScores = hideScores, modifier = Modifier.fillMaxSize())
             }
 
-            // Keep the departing banner in composition so its fade-out can play.
+            // The banner enters and leaves as a lower third (EventBanner's own LowerThird); the departing event stays
+            // in composition so its close can play.
             var lastBanner by remember { mutableStateOf<JtvEvent?>(null) }
             LaunchedEffect(banner) { if (banner != null) lastBanner = banner }
-            AnimatedVisibility(
-                visible = banner != null,
-                enter = fadeIn(tween(OVERLAY_ANIM_MS)),
-                exit = fadeOut(tween(OVERLAY_ANIM_MS)),
-                modifier = Modifier.align(Alignment.TopStart),
-            ) {
-                lastBanner?.let {
-                    EventBanner(
-                        event = it,
-                        modifier =
-                            Modifier.padding(
+            lastBanner?.let {
+                EventBanner(
+                    event = it,
+                    visible = banner != null,
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopStart)
+                            .padding(
                                 start = JtvDimens.marginHorizontal,
                                 top = JtvDimens.marginVertical,
                             ),
-                    )
-                }
+                )
             }
 
             if (cornerChannel != null) {

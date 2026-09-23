@@ -15,10 +15,12 @@ import com.github.damontecres.wholphin.jellytv.SleepTimerService
 import com.github.damontecres.wholphin.jellytv.together.ui.TogetherDialog
 import com.github.damontecres.wholphin.jellytv.together.ui.TogetherOverlay
 import com.github.damontecres.wholphin.jellytv.ui.household.SendToDialog
+import com.github.damontecres.wholphin.jellytv.ui.household.SentNoticeHost
 import com.github.damontecres.wholphin.jellytv.ui.launch.TallyLaunch
 import com.github.damontecres.wholphin.jellytv.ui.player.JellyTvPlayerMenu
 import com.github.damontecres.wholphin.jellytv.ui.player.SleepTimerChip
 import com.github.damontecres.wholphin.jellytv.ui.player.SleepTimerDialog
+import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvScale
 import com.github.damontecres.wholphin.services.PlayerFactory
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,8 +35,9 @@ class JellyTvGlobalOverlaysViewModel
     ) : ViewModel()
 
 /**
- * Overlays that must work above any screen: the sleep timer chip, Watch Together, the players' JellyTV menu dialogs,
- * and on a cold start the launch card above all of them.
+ * Overlays that must work above any screen: the sleep timer chip, Watch Together, the players' JellyTV menu
+ * dialogs, the SENT / NOT SENT lower third after Send to another screen, and on a cold start the launch card
+ * above all of them.
  */
 @Composable
 fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
@@ -87,6 +90,14 @@ fun JellyTvGlobalOverlays(modifier: Modifier = Modifier) {
                 null -> {}
             }
             TogetherOverlay(Modifier.fillMaxSize())
+            // The Send dialog draws the notice itself while it is open (above its scrim).
+            if (request != JellyTvPlayerMenu.Request.SEND_TO) {
+                SentNoticeHost(
+                    Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(horizontal = JtvDimens.marginHorizontal, vertical = JtvDimens.marginVertical),
+                )
+            }
             // Topmost: the launch card covers everything until the app is ready.
             TallyLaunch(Modifier.fillMaxSize())
         }

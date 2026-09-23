@@ -20,6 +20,7 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.jellytv.api.JtvEvent
 import com.github.damontecres.wholphin.jellytv.api.JtvWatch
+import com.github.damontecres.wholphin.jellytv.ui.components.LowerThird
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvSurface
@@ -37,15 +38,26 @@ private val bannerText =
  * A transient, non-focusable banner for a notable event in another game — top-start of
  * the picture, black with a live-red hairline. Title in small red mono, the event text
  * in 20sp mono, and a muted hint pointing at the switcher.
+ *
+ * It enters and leaves as a [LowerThird]: composing it enters it, and [visible] = false
+ * closes it again.
  */
 @Composable
 fun EventBanner(
     event: JtvEvent,
     modifier: Modifier = Modifier,
+    visible: Boolean = true,
 ) {
+    LowerThird(visible = visible, modifier = modifier) {
+        EventBannerPanel(event)
+    }
+}
+
+@Composable
+private fun EventBannerPanel(event: JtvEvent) {
     Column(
         modifier =
-            modifier
+            Modifier
                 .widthIn(max = 560.dp)
                 .border(JtvDimens.hairline, JtvColors.live, RectangleShape)
                 .background(JtvColors.labelBar)

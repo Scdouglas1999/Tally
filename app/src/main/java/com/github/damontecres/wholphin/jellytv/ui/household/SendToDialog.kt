@@ -32,7 +32,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -53,7 +52,6 @@ import com.github.damontecres.wholphin.jellytv.ui.components.KeyHint
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvColors
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvDimens
 import com.github.damontecres.wholphin.jellytv.ui.theme.JtvType
-import com.github.damontecres.wholphin.ui.showToast
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -117,7 +115,7 @@ internal sealed interface SendToEvent {
 
 /**
  * JellyTV panel of other screens that support remote control. OK sends [itemId] there at
- * [positionMs], toasts the device name, and closes. BACK dismisses and focus returns to the
+ * [positionMs], shows a SENT lower third with the device name, and closes. BACK dismisses and focus returns to the
  * player (the dialog window takes it on open and the platform restores it on close).
  */
 @Composable
@@ -130,7 +128,6 @@ fun SendToDialog(
     val sessions by viewModel.sessions.collectAsStateWithLifecycle()
     val hasFetched by viewModel.hasFetched.collectAsStateWithLifecycle()
     val targets = sessions.filter { it.supportsRemoteControl }
-    val context = LocalContext.current
 
     DisposableEffect(viewModel) {
         viewModel.start()
@@ -141,12 +138,12 @@ fun SendToDialog(
         viewModel.results.collect { event ->
             when (event) {
                 is SendToEvent.Sent -> {
-                    showToast(context, context.getString(R.string.jtv_household_sent, event.deviceName))
+                    SentNotices.post(event.deviceName, sent = true)
                     onDismiss()
                 }
 
                 is SendToEvent.Failed -> {
-                    showToast(context, context.getString(R.string.jtv_household_send_failed, event.deviceName))
+                    SentNotices.post(event.deviceName, sent = false)
                 }
             }
         }
@@ -180,6 +177,12 @@ fun SendToDialog(
                 targets = targets,
                 hasFetched = hasFetched,
                 onSend = { viewModel.send(it, itemId, positionMs) },
+            )
+            // A failure keeps the dialog open: show its notice above the scrim.
+            SentNoticeHost(
+                Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(horizontal = JtvDimens.marginHorizontal, vertical = JtvDimens.marginVertical),
             )
         }
     }

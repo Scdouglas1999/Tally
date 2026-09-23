@@ -216,18 +216,14 @@ private fun HeroTeamLine(
         if (team.possession && game.isLive) {
             IndicatorSquare(color = JtvColors.accent, size = 10.dp)
         }
-        val score =
-            when {
-                game.isUpcoming -> null
-                hideScores -> "\u2013"
-                else -> team.score?.toString()
-            }
-        if (score != null) {
-            Text(
-                text = score,
+        val score = team.score
+        if (!game.isUpcoming && (score != null || hideScores)) {
+            ScoreDigits(
+                gameId = game.id,
+                score = score ?: 0,
+                hidden = hideScores,
                 style = JtvType.scoreHero,
                 color = if (loser) JtvColors.muted else JtvColors.text,
-                maxLines = 1,
             )
         }
     }
