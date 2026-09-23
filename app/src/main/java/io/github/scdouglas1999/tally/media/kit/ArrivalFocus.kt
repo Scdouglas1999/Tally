@@ -13,6 +13,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import kotlinx.coroutines.delay
 
 /**
@@ -20,6 +21,9 @@ import kotlinx.coroutines.delay
  * a request made before the target's own effects start is lost to its focus visuals (the interaction is emitted
  * before anything collects it, so the element is focused but draws unfocused), and the tiles of a LazyRow are not
  * attached on the first frame (the old "nothing focused on Select Server" bug).
+ *
+ * On a phone it does nothing, so no screen opens with a focus ring on it (and so [initialFocus] and [arrivalFocus]
+ * do nothing there either).
  */
 internal suspend fun requestUntilFocused(
     requester: FocusRequester,
@@ -27,6 +31,7 @@ internal suspend fun requestUntilFocused(
     focusManager: FocusManager,
     tag: String,
 ) {
+    if (TallyFormFactor.current == TallyFormFactor.PHONE) return
     delay(50)
     // Compose may already have moved focus here on the first frame (the element focused before was removed), before
     // this element collects focus interactions: it is then focused but draws unfocused. Take focus again.

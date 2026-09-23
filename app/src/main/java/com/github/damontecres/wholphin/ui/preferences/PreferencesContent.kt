@@ -288,6 +288,13 @@ fun PreferencesContent(
                                 .flatten()
                     groupPreferences.forEachIndexed { prefIndex, pref ->
                         pref as AppPreference<AppPreferences, Any>
+                        // TALLY: begin
+                        if (io.github.scdouglas1999.tally.ui.phone
+                                .hiddenOnPhone(context, pref)
+                        ) {
+                            return@forEachIndexed
+                        }
+                        // TALLY: end
                         val isFirst = groupIndex == 0 && prefIndex == 0 && !showUpdate
                         val isLast =
                             groupIndex == prefList.lastIndex && prefIndex == groupPreferences.lastIndex

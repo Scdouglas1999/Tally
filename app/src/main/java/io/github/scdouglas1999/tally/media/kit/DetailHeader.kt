@@ -46,6 +46,7 @@ import com.github.damontecres.wholphin.ui.isNotNullOrBlank
 import com.github.damontecres.wholphin.ui.logCoilError
 import com.github.damontecres.wholphin.ui.util.StreamFormatting.resolutionString
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -525,6 +526,7 @@ private fun OverviewBlock(
     var truncated by remember(overview) { mutableStateOf(false) }
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
+    val showFocus = tallyFocusVisible()
     Text(
         text = overview,
         style = TallyType.body,
@@ -535,7 +537,7 @@ private fun OverviewBlock(
         modifier =
             Modifier
                 .drawBehind {
-                    if (focused) {
+                    if (focused && showFocus) {
                         val stroke = TallyDimens.focusBorder.toPx()
                         val inset = stroke / 2f
                         drawRect(

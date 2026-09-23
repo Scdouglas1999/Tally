@@ -16,10 +16,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.LocalContentColor
 import androidx.tv.material3.ProvideTextStyle
 import com.github.damontecres.wholphin.R
+import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
+import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 
 /**
  * Tally design tokens: flat, near-black, hairline rules, square corners, one accent.
@@ -182,6 +185,130 @@ object TallyDimens {
 }
 
 /**
+ * Phone type: the same families as [TallyType], sized for a hand. Mono labels are used UPPERCASE
+ * (`tallyUppercase()`), as on the TV.
+ */
+object PhoneType {
+    /** Sans SemiBold 28/34sp. */
+    val display =
+        TextStyle(
+            fontFamily = TallyType.Sans,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 28.sp,
+            lineHeight = 34.sp,
+        )
+
+    /** Sans SemiBold 22/28sp. */
+    val title =
+        TextStyle(
+            fontFamily = TallyType.Sans,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 22.sp,
+            lineHeight = 28.sp,
+        )
+
+    /** Sans Medium 17/22sp. */
+    val headline =
+        TextStyle(
+            fontFamily = TallyType.Sans,
+            fontWeight = FontWeight.Medium,
+            fontSize = 17.sp,
+            lineHeight = 22.sp,
+        )
+
+    /** Sans 15/22sp. */
+    val body =
+        TextStyle(
+            fontFamily = TallyType.Sans,
+            fontWeight = FontWeight.Normal,
+            fontSize = 15.sp,
+            lineHeight = 22.sp,
+        )
+
+    /** Sans 13/18sp. */
+    val bodySmall =
+        TextStyle(
+            fontFamily = TallyType.Sans,
+            fontWeight = FontWeight.Normal,
+            fontSize = 13.sp,
+            lineHeight = 18.sp,
+        )
+
+    /** Mono Medium 11sp, 0.14em, used UPPERCASE. */
+    val label =
+        TextStyle(
+            fontFamily = TallyType.Mono,
+            fontWeight = FontWeight.Medium,
+            fontSize = 11.sp,
+            letterSpacing = 0.14.em,
+        )
+
+    /** Mono Medium 13sp, 0.12em, used UPPERCASE. */
+    val labelLarge =
+        TextStyle(
+            fontFamily = TallyType.Mono,
+            fontWeight = FontWeight.Medium,
+            fontSize = 13.sp,
+            letterSpacing = 0.12.em,
+        )
+
+    /** Mono 12sp: metadata lines, times. */
+    val meta =
+        TextStyle(
+            fontFamily = TallyType.Mono,
+            fontWeight = FontWeight.Normal,
+            fontSize = 12.sp,
+        )
+
+    /** Mono SemiBold 22sp. */
+    val score =
+        TextStyle(
+            fontFamily = TallyType.Mono,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 22.sp,
+        )
+
+    /** Mono SemiBold 40sp. */
+    val scoreHero =
+        TextStyle(
+            fontFamily = TallyType.Mono,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 40.sp,
+        )
+}
+
+/** Phone sizes. Phone layouts use these, never [TallyScale] (a no-op on phones). */
+object PhoneDimens {
+    /** Page side margin. */
+    val margin = 16.dp
+    val gutter = 12.dp
+
+    /** Between the rows of a page. */
+    val rowGap = 28.dp
+
+    /** Between the cards of a row. */
+    val cardGap = 10.dp
+
+    /** 2:3 poster. */
+    val posterWidth = 112.dp
+
+    /** 16:9 card. */
+    val landscapeCardWidth = 248.dp
+    val gameCardWidth = 280.dp
+    val topBarHeight = 56.dp
+
+    /** The bottom bar, without the gesture-bar inset under it. */
+    val bottomBarHeight = 64.dp
+
+    /** Minimum touch target. */
+    val touchTarget = 48.dp
+    val hairline = 1.dp
+
+    /** Focus border, drawn only while a keyboard or D-pad is in use. */
+    val focusBorder = 2.dp
+}
+
+/**
  * Full-size surface on [TallyColors.ground] that sets [TallyColors.text] as the content color and
  * [TallyType.body] as the default text style. Root of every Tally screen.
  */
@@ -209,10 +336,15 @@ fun TallySurface(
  * Every Tally dimension (dp and sp) is authored against a 1200 x 675 canvas: the 1920 x 1080 mockups at
  * 0.625, i.e. 20% larger than drawn, for reading from a sofa. A TV is 960 x 540 dp, so Tally UI is laid out
  * at 0.8 of the real density. Anything drawn outside a [TallySurface] (the overlays on top of the upstream
- * player) must be wrapped in this too.
+ * player) must be wrapped in this too. On a phone it does nothing.
  */
 @Composable
 fun TallyScale(content: @Composable () -> Unit) {
+    // Phone layouts are sized in phone dp (PhoneDimens): the TV canvas shrink does not apply.
+    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+        content()
+        return
+    }
     val density = LocalDensity.current
     val scaled = remember(density) { Density(density.density * JTV_SCALE, density.fontScale) }
     CompositionLocalProvider(LocalDensity provides scaled, content = content)

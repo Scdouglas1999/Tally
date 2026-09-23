@@ -42,6 +42,7 @@ import com.github.damontecres.wholphin.ui.logCoilError
 import com.github.damontecres.wholphin.ui.playback.isPlayKeyUp
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
@@ -93,6 +94,12 @@ fun CardFrame(
     LaunchedEffect(focused) {
         if (focused) onFocused()
     }
+    val showFocus = tallyFocusVisible()
+    val idleBorder =
+        Border(
+            border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
+            shape = RectangleShape,
+        )
     Surface(
         onClick = onClick,
         onLongClick = onLongClick,
@@ -102,23 +109,23 @@ fun CardFrame(
             ClickableSurfaceDefaults.colors(
                 containerColor = TallyColors.ground,
                 contentColor = TallyColors.text,
-                focusedContainerColor = TallyColors.groundRaised,
+                focusedContainerColor = if (showFocus) TallyColors.groundRaised else TallyColors.ground,
                 focusedContentColor = TallyColors.text,
                 pressedContainerColor = TallyColors.groundRaised,
                 pressedContentColor = TallyColors.text,
             ),
         border =
             ClickableSurfaceDefaults.border(
-                border =
-                    Border(
-                        border = BorderStroke(TallyDimens.hairline, TallyColors.ruleStrong),
-                        shape = RectangleShape,
-                    ),
+                border = idleBorder,
                 focusedBorder =
-                    Border(
-                        border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
-                        shape = RectangleShape,
-                    ),
+                    if (showFocus) {
+                        Border(
+                            border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
+                            shape = RectangleShape,
+                        )
+                    } else {
+                        idleBorder
+                    },
                 pressedBorder =
                     Border(
                         border = BorderStroke(TallyDimens.focusBorder, TallyColors.accent),
@@ -137,7 +144,7 @@ fun CardFrame(
                     } else {
                         false
                     }
-                },
+                }.tallyClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
         Column {
             Box(

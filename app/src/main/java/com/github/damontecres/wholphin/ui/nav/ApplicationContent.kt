@@ -90,6 +90,19 @@ fun ApplicationContent(
                         )
                     } else if (user != null && server != null) {
                         // TALLY: begin
+                        if (io.github.scdouglas1999.tally.ui.phone
+                                .phoneShellActive()
+                        ) {
+                            io.github.scdouglas1999.tally.ui.phone.PhoneShell(
+                                destination = key,
+                                preferences = preferences,
+                                user = user,
+                                server = server,
+                                onClearBackdrop = viewModel::clearBackdrop,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                            return@NavEntry
+                        }
                         if (io.github.scdouglas1999.tally.media.drawer
                                 .tallyDrawerActive()
                         ) {
