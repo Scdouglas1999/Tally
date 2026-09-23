@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.main.settings
 
 import android.view.Gravity
@@ -68,7 +71,17 @@ fun HomeRowSettings(
     val firstFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { firstFocus.tryRequestFocus() }
     Column(modifier = modifier) {
-        TitleText(title)
+        // TALLY: begin
+        if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+            // This page's list has no extra inset (the other home settings pages pad theirs twice)
+            io.github.scdouglas1999.tally.ui.settings
+                .TallySettingsTitle(title, horizontalPadding = 10.dp)
+        } else {
+            // TALLY: end
+            TitleText(title)
+            // TALLY: begin
+        }
+        // TALLY: end
         HomeSettingsLazyColumn {
             preferenceOptions.forEachIndexed { groupIndex, prefGroup ->
                 if (preferenceOptions.size > 1) {
@@ -168,18 +181,30 @@ private fun LazyListScope.addAdditionalConfig(
                         )
                     }
                 var showDialog by remember { mutableStateOf(false) }
-                ListItem(
-                    selected = false,
-                    onClick = { showDialog = true },
-                    headlineContent = {
-                        PreferenceTitle(stringResource(R.string.sort))
-                    },
-                    supportingContent = {
-                        Text(
-                            text = sortAndDirection.toAnnotatedString(),
-                        )
-                    },
-                )
+                // TALLY: begin
+                if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+                    io.github.scdouglas1999.tally.ui.settings.TallyPreferenceItem(
+                        title = stringResource(R.string.sort),
+                        onClick = { showDialog = true },
+                        supporting = { Text(text = sortAndDirection.toAnnotatedString()) },
+                    )
+                } else {
+                    // TALLY: end
+                    ListItem(
+                        selected = false,
+                        onClick = { showDialog = true },
+                        headlineContent = {
+                            PreferenceTitle(stringResource(R.string.sort))
+                        },
+                        supportingContent = {
+                            Text(
+                                text = sortAndDirection.toAnnotatedString(),
+                            )
+                        },
+                    )
+                    // TALLY: begin
+                }
+                // TALLY: end
                 if (showDialog) {
                     BasicDialog(
                         onDismissRequest = { showDialog = false },

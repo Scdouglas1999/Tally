@@ -832,6 +832,13 @@ fun PreferencesPage(
     preferenceScreenOption: PreferenceScreenOption,
     modifier: Modifier = Modifier,
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.settings
+            .TallyPreferencesPage(initialPreferences, preferenceScreenOption, modifier)
+    ) {
+        return
+    }
+    // TALLY: end
     Box(
         modifier = modifier.background(MaterialTheme.colorScheme.background),
     ) {

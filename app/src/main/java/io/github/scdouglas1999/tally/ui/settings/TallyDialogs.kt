@@ -298,8 +298,11 @@ internal fun TallyPanelFrame(
                             false
                         }
                     }
-                }.focusGroup()
-                .focusProperties { onExit = { cancelFocusChange() } },
+                }
+                // Before the group, so it applies to the panel itself: focus cannot leave the panel, but moves
+                // freely inside it (after the group it would also hold focus inside a scrolling list).
+                .focusProperties { onExit = { cancelFocusChange() } }
+                .focusGroup(),
     ) {
         Text(
             text = kicker.tallyUppercase(),
@@ -358,6 +361,8 @@ internal fun TallyPanelList(
     initialIndex: Int,
     canClick: () -> Boolean,
     focusKey: Any? = null,
+    onUpFromFirst: (() -> Unit)? = null,
+    refocusOnChange: Boolean = true,
 ) {
     val requesters = remember(focusKey, entries.size) { List(entries.size) { FocusRequester() } }
     val bringers = remember(focusKey, entries.size) { List(entries.size) { BringIntoViewRequester() } }
@@ -365,7 +370,8 @@ internal fun TallyPanelList(
     val focusable = entries.map { it is PanelEntry.Item && it.enabled }
     val first = focusable.indexOfFirst { it }
     val last = focusable.indexOfLast { it }
-    LaunchedEffect(focusKey, entries.size) {
+    // A filtered list (refocusOnChange = false) keeps focus where it is (in the filter field) as its rows change.
+    LaunchedEffect(focusKey, if (refocusOnChange) entries.size else Unit) {
         val start = initialIndex.takeIf { focusable.getOrElse(it) { false } } ?: first
         val target = requesters.getOrNull(start) ?: return@LaunchedEffect
         repeat(8) {
@@ -414,7 +420,19 @@ internal fun TallyPanelList(
                             modifier =
                                 Modifier
                                     .focusRequester(requesters[index])
-                                    .focusProperties {
+                                    .then(
+                                        if (index == first && onUpFromFirst != null) {
+                                            // UP from the first row goes to the control above the list (a filter
+                                            // field), taken before the row's own focus search.
+                                            Modifier.onPreviewKeyEvent { event ->
+                                                if (event.key != Key.DirectionUp) return@onPreviewKeyEvent false
+                                                if (event.type == KeyEventType.KeyDown) onUpFromFirst()
+                                                true
+                                            }
+                                        } else {
+                                            Modifier
+                                        },
+                                    ).focusProperties {
                                         left = FocusRequester.Cancel
                                         right = FocusRequester.Cancel
                                         if (index == first) up = FocusRequester.Cancel

@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.main.settings
 
 import androidx.annotation.StringRes
@@ -39,6 +42,19 @@ fun HomeLibraryRowTypeList(
                     .focusRestorer(firstFocus),
         ) {
             itemsIndexed(items) { index, rowType ->
+                // TALLY: begin
+                if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+                    io.github.scdouglas1999.tally.ui.settings.TallyPreferenceItem(
+                        title = stringResource(rowType.stringId),
+                        onClick = { onClick.invoke(rowType) },
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .ifElse(index == 0, Modifier.focusRequester(firstFocus)),
+                    )
+                    return@itemsIndexed
+                }
+                // TALLY: end
                 ListItem(
                     selected = false,
                     headlineContent = {

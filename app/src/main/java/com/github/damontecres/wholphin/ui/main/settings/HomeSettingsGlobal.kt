@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.main.settings
 
 import androidx.compose.foundation.layout.Column
@@ -41,13 +44,21 @@ fun HomeSettingsGlobal(
     val firstFocus: FocusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { firstFocus.tryRequestFocus() }
     Column(modifier = modifier) {
-        Text(
-            text = stringResource(R.string.settings),
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        HorizontalDivider()
+        // TALLY: begin
+        if (io.github.scdouglas1999.tally.ui.settings.TallySettings.active) {
+            TitleText(stringResource(R.string.settings))
+        } else {
+            // TALLY: end
+            Text(
+                text = stringResource(R.string.settings),
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            HorizontalDivider()
+            // TALLY: begin
+        }
+        // TALLY: end
         HomeSettingsLazyColumn(
             modifier =
                 modifier

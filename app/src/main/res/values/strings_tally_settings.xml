@@ -17,4 +17,14 @@
     <string name="tally_menu_mark_watched">Mark watched</string>
     <string name="tally_menu_mark_unwatched">Mark unwatched</string>
     <string name="tally_menu_media_information">Media information</string>
+
+    <!-- Reordering rows (home rows, drawer pins) -->
+    <string name="tally_settings_fa_arrow_up" translatable="false">&#xf062;</string>
+    <string name="tally_settings_fa_arrow_down" translatable="false">&#xf063;</string>
+    <string name="tally_settings_fa_trash" translatable="false">&#xf1f8;</string>
+    <string name="tally_settings_move_up">Move up</string>
+    <string name="tally_settings_move_down">Move down</string>
+
+    <!-- Seerr server form while it connects -->
+    <string name="tally_settings_connecting">Connecting…</string>
 </resources>
