@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Library pages (Movies, Shows, Collections, other video libraries) in the Tally look -->
+    <string name="tally_library_sort">Sort · %1$s</string>
+    <string name="tally_library_filter">Filter</string>
+    <string name="tally_library_filter_count">Filter · %1$d</string>
+    <string name="tally_library_view">View</string>
+    <string name="tally_library_random">Random</string>
+    <string name="tally_library_play">Play</string>
+    <string name="tally_library_shuffle">Shuffle</string>
+    <string name="tally_library_ascending" translatable="false">↑</string>
+    <string name="tally_library_descending" translatable="false">↓</string>
+
+    <plurals name="tally_library_films">
+        <item quantity="one">%1$d film</item>
+        <item quantity="other">%1$d films</item>
+    </plurals>
+    <plurals name="tally_library_shows">
+        <item quantity="one">%1$d show</item>
+        <item quantity="other">%1$d shows</item>
+    </plurals>
+    <plurals name="tally_library_collections">
+        <item quantity="one">%1$d collection</item>
+        <item quantity="other">%1$d collections</item>
+    </plurals>
+    <plurals name="tally_library_episodes">
+        <item quantity="one">%1$d episode</item>
+        <item quantity="other">%1$d episodes</item>
+    </plurals>
+    <plurals name="tally_library_videos">
+        <item quantity="one">%1$d video</item>
+        <item quantity="other">%1$d videos</item>
+    </plurals>
+    <plurals name="tally_library_items">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <plurals name="tally_library_genres">
+        <item quantity="one">%1$d genre</item>
+        <item quantity="other">%1$d genres</item>
+    </plurals>
+    <plurals name="tally_library_studios">
+        <item quantity="one">%1$d studio</item>
+        <item quantity="other">%1$d studios</item>
+    </plurals>
+
+    <string name="tally_library_sort_kicker">Sort by</string>
+    <string name="tally_library_filter_kicker">Filter</string>
+    <string name="tally_library_filter_kicker_option">Filter · %1$s</string>
+    <string name="tally_library_view_kicker">View</string>
+    <string name="tally_library_view_kicker_option">View · %1$s</string>
+    <string name="tally_library_clear_filters">Clear all filters</string>
+    <string name="tally_library_clear_filter">Clear this filter</string>
+    <string name="tally_library_yes">Yes</string>
+    <string name="tally_library_no">No</string>
+    <string name="tally_library_rating_min">%1$s and up</string>
+    <string name="tally_library_on">On</string>
+    <string name="tally_library_off">Off</string>
+    <string name="tally_library_no_values">Nothing to filter by</string>
+    <string name="tally_library_close">Close</string>
+    <string name="tally_library_back">Back</string>
+    <string name="tally_library_key_back" translatable="false">BACK</string>
+
+    <string name="tally_library_loading">Loading…</string>
+    <string name="tally_library_empty_title">No results</string>
+    <string name="tally_library_empty_filtered">Nothing matches these filters.</string>
+    <string name="tally_library_empty_body">There is nothing in here yet.</string>
+</resources>
