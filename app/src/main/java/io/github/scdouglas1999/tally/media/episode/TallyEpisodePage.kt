@@ -436,11 +436,6 @@ private fun EpisodeLoaded(
                                 },
                                 onWatch = { viewModel.setWatched(episode.id, !episode.played) },
                                 onFavorite = { viewModel.setFavorite(episode.id, !episode.favorite) },
-                                onSeries = {
-                                    episode.data.seriesId?.let {
-                                        viewModel.navigateTo(Destination.MediaItem(it, BaseItemKind.SERIES))
-                                    }
-                                },
                                 onSeason = {
                                     val seriesId = episode.data.seriesId
                                     val seasonId = episode.data.seasonId
@@ -621,7 +616,6 @@ private fun EpisodeActionRow(
     onPlay: (Duration) -> Unit,
     onWatch: () -> Unit,
     onFavorite: () -> Unit,
-    onSeries: () -> Unit,
     onSeason: () -> Unit,
     onMore: () -> Unit,
     onChooseVersion: (MediaSourceInfo) -> Unit,
@@ -722,20 +716,10 @@ private fun EpisodeActionRow(
                         },
                 )
             }
-            if (episode.data.seriesId != null) {
-                item(key = "series") {
-                    TallyButton(
-                        label = stringResource(R.string.tally_series_series),
-                        glyph = stringResource(R.string.fa_tv),
-                        onClick = onSeries,
-                        onFocused = clearRestart,
-                    )
-                }
-            }
             if (episode.data.seriesId != null && episode.data.seasonId != null) {
-                item(key = "season") {
+                item(key = "episodes") {
                     TallyButton(
-                        label = stringResource(R.string.tally_series_season),
+                        label = stringResource(R.string.tally_signin_episodes),
                         glyph = stringResource(R.string.fa_list_ul),
                         onClick = onSeason,
                         onFocused = clearRestart,

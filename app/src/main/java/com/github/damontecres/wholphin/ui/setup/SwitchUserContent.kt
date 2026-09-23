@@ -66,6 +66,15 @@ fun SwitchUserContent(
             creationCallback = { it.create(server) },
         ),
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.setup
+            .tallySetupActive()
+    ) {
+        io.github.scdouglas1999.tally.ui.setup
+            .TallyUserPicker(server, viewModel, modifier)
+        return
+    }
+    // TALLY: end
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {

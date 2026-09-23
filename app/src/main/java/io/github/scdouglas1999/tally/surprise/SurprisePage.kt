@@ -73,6 +73,7 @@ import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.media.kit.TallyButton
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.KeyHint
@@ -792,11 +793,8 @@ private fun ActionRow(
 ) {
     val resume = resumePercent(pick) != null
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        SurpriseButton(
-            label =
-                stringResource(
-                    if (resume) R.string.tally_surprise_resume else R.string.tally_surprise_play,
-                ).uppercase(),
+        TallyButton(
+            label = stringResource(if (resume) R.string.tally_surprise_resume else R.string.tally_surprise_play),
             onClick = onPlay,
             primary = true,
             modifier =
@@ -804,50 +802,16 @@ private fun ActionRow(
                     .focusRequester(playFocus)
                     .focusProperties { up = upTarget },
         )
-        SurpriseButton(
-            label = stringResource(R.string.tally_surprise_shuffle).uppercase(),
+        TallyButton(
+            label = stringResource(R.string.tally_surprise_shuffle),
             onClick = onShuffle,
             modifier = Modifier.focusProperties { up = upTarget },
         )
-        SurpriseButton(
-            label = stringResource(R.string.tally_surprise_details).uppercase(),
+        TallyButton(
+            label = stringResource(R.string.tally_surprise_details),
             onClick = onDetails,
             modifier = Modifier.focusProperties { up = upTarget },
         )
-    }
-}
-
-@Composable
-private fun SurpriseButton(
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    primary: Boolean = false,
-) {
-    Surface(
-        onClick = onClick,
-        shape = ClickableSurfaceDefaults.shape(RectangleShape),
-        scale = ClickableSurfaceDefaults.scale(1f, 1f, 1f),
-        colors = chipColors(primary),
-        border = chipBorder(primary),
-        glow = ClickableSurfaceDefaults.glow(Glow.None, Glow.None, Glow.None),
-        modifier = modifier,
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier =
-                Modifier
-                    .widthIn(min = BUTTON_MIN.dp)
-                    .height(BUTTON_HEIGHT.dp)
-                    .padding(horizontal = 16.dp),
-        ) {
-            Text(
-                text = label,
-                style = TallyType.body,
-                color = if (primary) TallyColors.onAccent else TallyColors.text,
-                maxLines = 1,
-            )
-        }
     }
 }
 
@@ -1081,8 +1045,6 @@ private const val LOGO_MAX_W = 360
 private const val LOGO_MAX_H = 96
 private const val PROGRESS_WIDTH = 200
 private const val CHIP_HEIGHT = 36
-private const val BUTTON_MIN = 160
-private const val BUTTON_HEIGHT = 52
 private const val GENRE_MAX = 280
 private const val EMPTY_WIDTH = 560
 private const val EMPTY_HEIGHT = 200

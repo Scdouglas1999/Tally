@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.setup
 
 import android.Manifest
@@ -78,6 +81,15 @@ fun SwitchServerContent(
     modifier: Modifier = Modifier,
     viewModel: SwitchServerViewModel = hiltViewModel(),
 ) {
+    // TALLY: begin
+    if (io.github.scdouglas1999.tally.ui.setup
+            .tallySetupActive()
+    ) {
+        io.github.scdouglas1999.tally.ui.setup
+            .TallyServerPicker(viewModel, modifier)
+        return
+    }
+    // TALLY: end
     val state by viewModel.state.collectAsState()
     LaunchedEffect(Unit) {
         viewModel.init()
