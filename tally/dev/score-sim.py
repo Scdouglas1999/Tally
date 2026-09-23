@@ -34,7 +34,7 @@ ESPN = "https://site.web.api.espn.com/apis/site/v2/sports/{league}/scoreboard"
 DEV_SERVER = os.environ.get("TALLY_DEV_SERVER", "http://127.0.0.1:18200")
 TOKEN_FILE = os.environ.get(
     "TALLY_DEV_TOKEN",
-    "/tmp/claude-1000/-home-scdouglas-Documents-JellyTV/cf6e86e0-f8fc-46b2-893a-05c6a53b7f24/scratchpad/dev-server.token",
+    "/home/scdouglas/Documents/Tally/devmedia/.tools/dev-server.token",
 )
 PLUGIN_ID = "JellyTV"  # the plugin's page key; its configuration is found by name below
 
