@@ -65,6 +65,8 @@ file is a future merge conflict.** Therefore:
 | W34 | `ui/nav/ApplicationContent.kt` (NavDrawer call) | `TallyNavDrawer` replaces upstream's drawer while the TALLY theme is selected |
 | W35 | `services/hilt/AppModule.kt` (`clientInfo`) | `TallyClientName`: JellyTV-era installs keep reporting "JellyTV" to the server, because their tokens are bound to that name |
 | W37 | `ui/playback/PlaybackPage.kt` (overlay, pause indicator, D-pad seek, skip segment, next-up calls), `ui/playback/PlaybackDialog.kt` (top of the dialog) | Tally player controls (`ui/player/controls/`): the overlay and pause indicator calls sit in the `else` of a Tally `if` (re-indented upstream lines), the others return early |
+| W38 | `ui/preferences/{Switch,Choice,Click,Slider,MultiChoice}Preference.kt`, `StringInputDialog.kt`, `LocaleChoiceDialog.kt`, `ui/components/Dialogs.kt`, `ui/components/ContextMenu.kt`, `PreferencesContent.kt` (page title re-indented into the `else` of a Tally `if`) | Tally settings rows, dialogs and context menu (`ui/settings/`) |
+| W39 | `ui/setup/SwitchServerContent.kt`, `SwitchUserContent.kt`, `InstallUpdatePage.kt`, `PinEntry.kt` | Tally sign-in, pickers, PIN and update screens (`ui/setup/`) |
 | (resource) | `res/values-v31/themes_tally.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 
 ## Releases and self-update
