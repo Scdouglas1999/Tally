@@ -10,6 +10,7 @@ the captured real data, so the change travels the normal path: plugin parser -> 
 Point the dev server's plugin at it (development only; the setting is not in the settings page):
   score-sim.py serve                          # serves on 0.0.0.0:8765, captures on first request
   score-sim.py point http://<sim address>:8765 # sets the plugin's ScoreboardSourceOverride on the dev server
+                                              # (TALLY_DEV_SERVER, default http://127.0.0.1:18200; TALLY_DEV_TOKEN)
 The dev server runs in Docker and this host's firewall blocks containers from reaching host ports, so run the
 simulator in a container on the same bridge (dev/score-sim-docker.sh does that and points the plugin at it).
 Then, from any shell:
@@ -32,10 +33,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ESPN = "https://site.web.api.espn.com/apis/site/v2/sports/{league}/scoreboard"
 DEV_SERVER = os.environ.get("TALLY_DEV_SERVER", "http://127.0.0.1:18200")
-TOKEN_FILE = os.environ.get(
-    "TALLY_DEV_TOKEN",
-    "/home/scdouglas/Documents/Tally/devmedia/.tools/dev-server.token",
-)
+# `point` needs an API key of the dev server: TALLY_DEV_TOKEN is the key itself, or the path of a file holding it
+# (Dashboard > API Keys on the dev server makes one).
+DEV_TOKEN = os.environ.get("TALLY_DEV_TOKEN", "")
 PLUGIN_ID = "JellyTV"  # the plugin's page key; its configuration is found by name below
 
 captured = {}  # league -> payload as ESPN sent it
@@ -162,7 +162,9 @@ def control(port, method, path):
 
 def point(base):
     """Sets (or clears, with "") the plugin's ScoreboardSourceOverride on the dev server."""
-    token = open(TOKEN_FILE).read().strip()
+    if not DEV_TOKEN:
+        sys.exit("set TALLY_DEV_TOKEN to an API key of the dev server (or the path of a file holding one)")
+    token = open(DEV_TOKEN).read().strip() if os.path.isfile(DEV_TOKEN) else DEV_TOKEN.strip()
     headers = {"Authorization": f'MediaBrowser Token="{token}"', "Content-Type": "application/json"}
 
     def call(method, path, body=None):

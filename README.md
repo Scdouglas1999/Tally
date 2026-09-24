@@ -117,9 +117,21 @@ Tally is a complete Jellyfin app on its own. The server plugin adds the parts th
 - the install page and the short Downloader code
 - **Play on TV**: start something on your TV from Jellyfin in your phone's browser
 
-It works with Jellyfin 10.10, and a build for Jellyfin 12 is ready for when you upgrade. Plugin downloads are coming
-to the [releases page](https://github.com/Scdouglas1999/Tally/releases). Without the plugin, Tally hides the Sports
-section and works like any other Jellyfin app.
+It works with Jellyfin 10.10, 10.11 and 12.1. Its source is in [`server/`](server/), in this repository, under the
+same license as the app. Without the plugin, Tally hides the Sports section and works like any other Jellyfin app.
+
+There are four ways to install it, all described in [server/install/README.md](server/install/README.md):
+
+- **Windows:** run `Tally-Server-Setup.exe` from the [latest release](https://github.com/Scdouglas1999/Tally/releases/latest).
+  It adds the plugin to your Jellyfin, or installs the official Jellyfin first if the computer has none.
+- **Jellyfin's plugin catalog:** add `https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/manifest.json`
+  under Dashboard → Plugins → Manage Repositories, then install Tally from the catalog.
+- **Docker:** `docker compose up -d` with the release's `docker-compose.yml` runs the official Jellyfin image with the
+  plugin in place.
+- **Debian and Ubuntu:** `curl -fsSL https://github.com/Scdouglas1999/Tally/releases/latest/download/install-linux.sh | sudo bash`
+
+Whichever you use, new versions of the plugin then come through Jellyfin's own plugin updates. None of these include
+Jellyfin itself; when it is needed, it comes from Jellyfin's own servers.
 
 ## Building it yourself
 
@@ -127,8 +139,10 @@ section and works like any other Jellyfin app.
 ./gradlew :app:assembleDefaultDebug
 ```
 
-Tally's code is in `app/src/main/java/io/github/scdouglas1999/tally/`. The rest is Wholphin's, and Tally changes it
-only at marked places so it can keep taking Wholphin's updates. [TALLY.md](TALLY.md) explains how that works,
+The server plugin builds with the .NET SDK: `server/build.sh` (see [server/README.md](server/README.md)).
+
+The app's own code is in `app/src/main/java/io/github/scdouglas1999/tally/`. The rest of the app is Wholphin's, and
+Tally changes it only at marked places so it can keep taking Wholphin's updates. [TALLY.md](TALLY.md) explains how that works,
 [tally/UI.md](tally/UI.md) describes the design, and [CONTRIBUTING.md](CONTRIBUTING.md) covers bug reports and pull
 requests.
 

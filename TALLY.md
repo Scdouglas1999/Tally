@@ -2,8 +2,8 @@
 
 This repository is a fork of **Wholphin** (GPL-2.0). It is Wholphin, unchanged, plus one native section
 called **Tally**: a live-sports front end backed by the `Jellyfin.Plugin.JellyTV` server plugin.
-Full design: `docs/native-apps-architecture.md` in the plugin repo. This file is the short version that
-every change must obey.
+The plugin's source is in [`server/`](server/). This file is the short set of rules every change to the app must
+obey.
 
 ## The one rule
 

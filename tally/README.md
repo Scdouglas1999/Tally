@@ -27,8 +27,10 @@ which destinations Tally draws, reusing Wholphin's view models. Design rules are
 ## Building
 
 - Debug: `./gradlew :app:assembleDefaultDebug`.
-- Release: `tally/release.sh` builds signed APKs into `tally/out/`; `--publish` also tags `jtv-<version>`, pushes
-  and creates the GitHub release; `--stores` adds the Play bundle and Amazon APK (see [`store/`](store/)).
+- Release: `tally/release.sh` builds the signed APKs and the server plugin release into `tally/out/` and prints what
+  `--publish` would run. `--publish` (only on a `tally-vX.Y.Z` tag) also pushes the tag, creates the GitHub release and
+  then commits the plugin repository entry to `main`; `--stores` adds the Play bundle and Amazon APK (see
+  [`store/`](store/)).
 - Signing key: `~/.config/tally/release.jks` + `release.env`, never in the repository. Keep a backup: without
   it nobody can update their installed app.
 
@@ -39,9 +41,37 @@ which destinations Tally draws, reusing Wholphin's view models. Design rules are
 | `Tally.apk` | the README's install link (`releases/latest/download/Tally.apk`) |
 | `JellyTV.apk` | the same file under its old name, for plugin installs and Downloader short codes made before the rename |
 | `Wholphin-release-<abi>.apk`, `Wholphin-release.apk` | the in-app updater, which Wholphin wrote to look for these names |
+| `Tally-server-<version>-jf10.10.zip`, `-jf10.11.zip`, `-jf12.zip` | the server plugin: Jellyfin's plugin catalog (through `server/manifest.json`), the Docker Compose file and the Linux script download these |
+| `Tally-Server-Setup.exe` | the Windows installer (the three zips are inside it) |
+| `docker-compose.yml`, `install-linux.sh` | the Docker and Linux installs, with this release as their default version |
 
-The updater reads the release *name* as the version; release tags are `jtv-*` so they never collide with the
-`v*` tags Gradle derives `versionName`/`versionCode` from.
+The updater reads the release *name* as the version; release tags are `tally-*` (earlier `jtv-*`) so they never collide
+with the `v*` tags Gradle derives `versionName`/`versionCode` from.
+
+## The server plugin
+
+The plugin's source is in [`server/`](../server/). It was a separate repository until Tally 2.0 and was brought in
+with `git subtree add --prefix=server`, so its history is part of this one. It is built with the .NET SDK, not Gradle:
+
+- `server/build.sh` runs the tests and builds one zip per Jellyfin line (10.10, 10.11, 12) into `server/dist/`.
+  Each zip is the plugin DLL, the libraries the server does not ship, and a `meta.json`.
+- The plugin is versioned with the app. `release.sh` takes the version from the `tally-vX.Y.Z` tag (plugin
+  `X.Y.Z.10`, `.11` and `.12`, one per Jellyfin line, so Jellyfin's updater moves a server to the right build after a
+  Jellyfin upgrade); local builds use `TallyVersion` in `server/Directory.Build.props`. The changelog Jellyfin shows is the
+  first line of `TALLY_NOTES`, or `TALLY_SERVER_CHANGELOG`.
+- `server/install/windows/` is `Tally-Server-Setup.exe`, a WinForms program cross-built from Linux
+  (`dotnet publish server/install/windows -c Release`, self-contained, win-x64). It embeds the three zips, so build
+  the plugin first.
+- `server/manifest.json` is the Jellyfin plugin repository, served from `main` through raw.githubusercontent.com.
+  Every published version has one entry per build, pointing at that release's zips with their MD5. `release.sh`
+  writes the new entries with `server/manifest.py` into `tally/out/manifest.json`; `--publish` copies it back and
+  commits it, together with the new default version in `server/install/docker-compose.yml` and `install-linux.sh`,
+  only after the GitHub release exists, so the catalog never points at a missing zip.
+- On its first start the plugin adds that repository to the server's list (once; an admin who removes it is not
+  overridden), so every install gets updates through Jellyfin.
+- Test a plugin change on a real Jellyfin before releasing: the `jellyfin/jellyfin` Docker images (10.10.x, 10.11.x,
+  12.1) with the zip unpacked into `config/plugins/Tally_<version>/`. `server/devtools/live-bed/` has local live
+  streams for testing the live ladder.
 
 ## Development helpers
 

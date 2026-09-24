@@ -1,0 +1,12 @@
+[
+  {
+    "guid": "91920c7b-e920-46ee-b4d3-421f05d3761b",
+    "name": "Tally",
+    "description": "Live channels from your own M3U, XMLTV, HLS and web page sources, with a guide; live scores matched to the channels showing each game; a live TV page in Jellyfin's web client; and the install page for the Tally TV app.",
+    "overview": "Live TV and live sports for Jellyfin and the Tally app",
+    "owner": "Tally",
+    "category": "Live TV",
+    "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
+    "versions": []
+  }
+]
