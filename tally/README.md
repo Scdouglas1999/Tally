@@ -50,8 +50,9 @@ with the `v*` tags Gradle derives `versionName`/`versionCode` from.
 
 ## The server plugin
 
-The plugin's source is in [`server/`](../server/). It was a separate repository until Tally 2.0 and was brought in
-with `git subtree add --prefix=server`, so its history is part of this one. It is built with the .NET SDK, not Gradle:
+The plugin's source is in [`server/`](../server/). It was a separate, unpublished repository until Tally 2.0 and was
+brought in as a single commit (its earlier history held private server details and was not carried over). It is built
+with the .NET SDK, not Gradle:
 
 - `server/build.sh` runs the tests and builds one zip per Jellyfin line (10.10, 10.11, 12) into `server/dist/`.
   Each zip is the plugin DLL, the libraries the server does not ship, and a `meta.json`.
