@@ -1,0 +1,204 @@
+/*
+ * The library player's controls (tally/ui/player/controls/*), Tally dp x 1.6 on the 1080p canvas. Everything here
+ * is prefixed pc- (player controls); the older .player rules in player.css still serve the live page.
+ */
+.player.pc .pc-video { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+/* next up: the picture shrinks to 60%, top center; the frame paints ground around it (no page background: AVPlay's
+   plane shows through the page, see player.css) */
+.player.pc.nextup .pc-video { left: 384px; top: 0; width: 1152px; height: 648px; }
+.player.pc .pc-frame { position: absolute; left: 0; top: 648px; width: 1920px; height: 432px; background: var(--ground); }
+.player.pc .pc-frame::before, .player.pc .pc-frame::after { content: ''; position: absolute; top: -648px; width: 384px; height: 648px; background: var(--ground); }
+.player.pc .pc-frame::before { left: 0; }
+.player.pc .pc-frame::after { right: 0; }
+.player.pc.osd-visible .subtitle-layer { bottom: 324px; }
+.player.pc.cards-visible .subtitle-layer { bottom: 430px; }
+
+/* ---- top block: kicker, title, meta; clock; a soft top-only scrim (170dp) ---- */
+.pc-top {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 272px;
+  background: linear-gradient(to bottom, rgba(14, 15, 14, 0.72) 0%, rgba(14, 15, 14, 0.35) 55%, rgba(14, 15, 14, 0) 100%);
+}
+.pc-top-text { position: absolute; left: var(--margin-x); top: var(--margin-y); width: 1024px; }
+.pc-top .kicker { color: var(--accent); }
+.pc-top .title { margin-top: 6px; font-family: var(--sans); font-weight: 500; font-size: 35px; line-height: 45px; color: var(--text); }
+.pc-top .meta { margin-top: 6px; color: var(--muted); }
+.pc-clock {
+  position: absolute; right: var(--margin-x); top: var(--margin-y);
+  font-family: var(--mono); font-weight: 500; font-size: 24px; line-height: 27px; letter-spacing: 1.6px; color: var(--text);
+}
+
+/* ---- bottom band: ground 85%, hairline top edge, 18dp / 16dp padding ---- */
+.pc-band {
+  position: absolute; left: 0; bottom: 0; width: 1920px; padding: 29px var(--margin-x) 26px;
+  background: rgba(14, 15, 14, 0.85); border-top: var(--hairline) solid var(--rule);
+}
+.pc-band.cards { padding-left: 0; padding-right: 0; }
+.pc-band .media-row { margin-bottom: 0; }
+
+/* ---- seek bar: 20dp area, 4dp track, 12dp scrubber (16dp focused), 10dp chapter ticks ---- */
+.pc-seekwrap { position: relative; }
+.pc-seek { position: relative; height: 32px; }
+.pc-track { position: relative; width: 100%; }
+.pc-track .line, .pc-track .buffered, .pc-track .played { position: absolute; left: 0; height: 6px; }
+.pc-track .line { right: 0; background: var(--rule); }
+.pc-track .buffered { background: var(--muted); }
+.pc-track .played { background: var(--text); }
+.pc-track .tick { position: absolute; width: 2px; height: 16px; background: var(--muted); }
+.pc-track .scrubber { position: absolute; background: var(--accent); }
+
+/* something riding above the track, centered on a position (PreviewAbove): takes no height */
+.pc-above { position: relative; height: 0; }
+.pc-above-content { position: absolute; }
+
+/* trickplay preview: thumbnail (126dp) in a hairline frame, black label bar (28dp) with the time and chapter */
+.pc-preview { display: inline-block; vertical-align: top; border: var(--hairline) solid var(--rule-strong); background: var(--label-bar); }
+.pc-preview .thumb { margin: var(--hairline); background-color: var(--screen); background-repeat: no-repeat; }
+.pc-preview .bar { display: flex; align-items: center; justify-content: center; height: 45px; padding: 0 16px; max-width: 576px; margin: 0 auto; background: var(--label-bar); }
+.pc-preview .time { flex: none; font-family: var(--mono); font-weight: 500; font-size: 22px; letter-spacing: 1.6px; color: var(--text); }
+.pc-preview .chapter { margin-left: 16px; min-width: 0; font-family: var(--sans); font-size: 22px; color: var(--muted); }
+
+/* ---- times: 15sp mono, elapsed left; time left and end time right ---- */
+.pc-times {
+  display: flex; justify-content: space-between; align-items: center; height: 32px; margin-top: 10px;
+  font-family: var(--mono); font-weight: 500; font-size: 24px; letter-spacing: 1.6px; color: var(--text);
+}
+.pc-times .right { color: var(--text-secondary); }
+
+/* ---- button row: 40dp squares 10dp apart, caption 12sp under the focused one ---- */
+.pc-row { position: relative; height: 98px; margin-top: 22px; }
+.pc-group { position: absolute; top: 0; display: flex; }
+.pc-group.left { left: 0; }
+.pc-group.center { left: 50%; transform: translateX(-50%); }
+.pc-group.right { right: 0; }
+.pc-btnwrap { position: relative; width: 64px; flex: none; }
+.pc-btnwrap + .pc-btnwrap { margin-left: 16px; }
+.pc-btn { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; color: var(--text); }
+.pc-btn::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.pc-btn[data-focused]::after { border: var(--focus) solid var(--accent); }
+.pc-btn .glyph { font-size: 27px; }
+.pc-btn.primary { background: var(--accent); color: var(--on-accent); }
+.pc-btn.primary::after { border: 0; }
+.pc-btn.primary[data-focused]::after { border: var(--focus) solid var(--text); }
+.pc-cap {
+  position: absolute; top: 72px; height: 26px; white-space: nowrap; visibility: hidden;
+  font-family: var(--mono); font-weight: 500; font-size: 19px; line-height: 26px; letter-spacing: 2.4px; color: var(--muted);
+}
+.pc-cap.center { left: 32px; transform: translateX(-50%); }
+.pc-cap.start { left: 0; }
+.pc-cap.end { right: 0; }
+.pc-btn[data-focused] + .pc-cap { visibility: visible; }
+.pc-group .pc-skipbtn { margin-right: 22px; }
+
+/* ---- chapter / queue rows (the kit's media row, bleeding to the screen edges) ---- */
+.pc-cards .row-track > * + * { margin-left: 14px; }
+.pc-card .pc-current { position: absolute; right: 16px; top: 16px; width: 16px; height: 16px; background: var(--accent); }
+
+/* ---- PAUSED: a small black label bar at the top center (30dp) ---- */
+.pc-paused {
+  position: absolute; left: 50%; top: var(--margin-y); transform: translateX(-50%);
+  display: flex; align-items: center; height: 48px; padding: 0 22px; background: var(--label-bar); color: var(--text);
+}
+.pc-paused span { margin-top: -2px; }
+
+/* ---- minimal D-pad seek bar: the track and the target time above the scrubber ---- */
+.pc-minimal { position: absolute; left: var(--margin-x); right: var(--margin-x); bottom: var(--margin-y); }
+.pc-minimal-time {
+  display: flex; align-items: center; height: 42px; padding: 0 16px; background: var(--label-bar);
+  font-family: var(--mono); font-weight: 500; font-size: 24px; letter-spacing: 1.6px; color: var(--text); white-space: nowrap;
+}
+
+/* ---- sleep chip ---- */
+.pc-sleep {
+  position: absolute; left: var(--margin-x); top: var(--margin-y); padding: 8px 19px;
+  border: var(--hairline) solid var(--rule-strong); background: var(--label-bar);
+  font-family: var(--mono); font-weight: 500; font-size: 26px; letter-spacing: 2.4px; color: var(--text); white-space: nowrap;
+}
+.pc-sleep.urgent { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+/* the chip sits where the title block's kicker is: step below the title block while the controls are up */
+.player.pc.osd-visible .pc-sleep { top: 200px; }
+
+/* ---- lower thirds: 3dp accent bar, then the panel revealed left to right ---- */
+.pc-lower { display: flex; }
+.pc-lower .bar { flex: none; width: 5px; background: var(--accent); }
+.pc-lower .reveal { animation: pc-reveal 200ms ease-out 60ms both; }
+@keyframes pc-reveal {
+  from { -webkit-clip-path: inset(0 100% 0 0); clip-path: inset(0 100% 0 0); }
+  to { -webkit-clip-path: inset(0 0 0 0); clip-path: inset(0 0 0 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pc-lower .reveal { animation: none; }
+}
+
+/* skip prompt: bottom right, 40dp in (unscaled on Android: 80px) */
+.pc-skipprompt { position: absolute; right: 80px; bottom: 80px; }
+.pc-skipprompt .box { padding: 16px; background: rgba(14, 15, 14, 0.85); }
+
+/* next up: 520dp card on ground at the bottom right, still 160x90dp, countdown bar 2dp */
+.pc-nextup { position: absolute; right: var(--margin-x); bottom: var(--margin-y); }
+.pc-nextup .nu-card { width: 832px; background: var(--ground); }
+.pc-nextup .body { display: flex; padding: 26px; }
+.pc-nextup .still { position: relative; flex: none; width: 256px; height: 144px; background: var(--screen); }
+.pc-nextup .still::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); }
+.pc-nextup .still img { position: absolute; left: 2px; top: 2px; width: 252px; height: 140px; object-fit: cover; }
+.pc-nextup .text { flex: 1; min-width: 0; height: 144px; margin-left: 26px; display: flex; flex-direction: column; justify-content: space-between; }
+.pc-nextup .text > * { flex: none; }
+.pc-nextup .kicker { color: var(--accent); }
+.pc-nextup .line { font-family: var(--sans); font-weight: 500; font-size: 29px; line-height: 35px; color: var(--text); }
+.pc-nextup .buttons { display: flex; }
+.pc-nextup .buttons .btn + .btn { margin-left: 16px; }
+.pc-nextup .countdown { height: 3px; background: var(--rule); }
+.pc-nextup .countdown .fill { height: 100%; background: var(--accent); transition: width 1s linear; }
+
+/* ---- settings side panel: 360dp at the right, scrim rising from the left edge to the panel ---- */
+.pc-sidepanel-scrim {
+  position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0) 0px, rgba(0, 0, 0, 0.4) 1344px);
+}
+.pc-sidepanel {
+  position: absolute; right: 0; top: 0; width: 576px; height: 1080px; padding-top: var(--margin-y);
+  background: var(--ground); border-left: var(--hairline) solid var(--rule-strong); display: flex; flex-direction: column;
+}
+.pc-sidepanel .head { display: flex; align-items: center; padding: 0 38px; flex: none; }
+.pc-sidepanel .head .kicker { flex: 1; color: var(--accent); }
+.pc-sidepanel .head .readout { color: var(--text); }
+.pc-rows { position: relative; overflow: hidden; }
+.pc-rows.side { flex: 1; margin-top: 19px; padding: 7px 38px 43px; }
+.pc-rows.side .pc-prow + .pc-prow { margin-top: 10px; }
+
+/* TallyRow: 56dp minimum, 16dp x 12dp padding, body 20sp; value mono muted; the current square */
+.pc-prow {
+  position: relative; display: flex; align-items: center; min-height: 90px; padding: 0 26px;
+  background: var(--ground); color: var(--text);
+}
+.pc-prow::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.pc-prow[data-focused] { background: var(--ground-raised); }
+.pc-prow[data-focused]::after { border: var(--focus) solid var(--accent); }
+.pc-prow.disabled { color: var(--muted); }
+.pc-prow.disabled::after { border-color: var(--rule); }
+.pc-prow .label { flex: 1; min-width: 0; font-family: var(--sans); font-size: 32px; line-height: 45px; }
+.pc-prow .trail { display: flex; align-items: center; margin-left: 26px; max-width: 60%; }
+.pc-prow .trail .value { color: var(--muted); }
+.pc-prow .trail .indicator { margin-left: 16px; }
+.pc-prow .trail.tagged .indicator { margin-left: 0; margin-right: 16px; }
+
+/* ---- centered dialogs (quality 640dp, sleep 600dp) over a dim ---- */
+.pc-dim { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: flex; align-items: center; justify-content: center; }
+.pc-dialog { background: var(--ground); border: var(--hairline) solid var(--rule-strong); }
+.pc-dhead { padding: 29px 32px 0; }
+.pc-dhead .kicker { color: var(--accent); }
+.pc-dhead .now { margin-top: 13px; color: var(--text-secondary); }
+.pc-dhead .reasons { margin-top: 10px; font-family: var(--sans); font-size: 24px; line-height: 32px; color: var(--muted); }
+.pc-dhead .rule { height: var(--hairline); margin-top: 19px; background: var(--rule); }
+.pc-dhead.sleep { padding-top: 35px; }
+.pc-dhead.sleep .title { font-family: var(--sans); font-weight: 600; font-size: 45px; line-height: 56px; color: var(--text); }
+.pc-dhead.sleep .rule { margin-top: 22px; }
+.pc-dhead .text { margin-top: 22px; font-family: var(--sans); font-size: 29px; line-height: 40px; color: var(--text-secondary); }
+.pc-rows.quality { max-height: 666px; margin-top: 12px; padding: 7px 32px 19px; }
+.pc-rows.quality .pc-prow + .pc-prow { margin-top: 13px; }
+.pc-rows.sleep { max-height: 700px; margin-top: 15px; padding: 7px 32px 26px; }
+.pc-rows.sleep .pc-prow + .pc-prow { margin-top: 16px; }
+
+/* the key bar: BACK Close on black, hairline top edge (40dp) */
+.pc-keybar { display: flex; align-items: center; height: 64px; padding: 0 22px; background: var(--label-bar); border-top: var(--hairline) solid var(--rule); }
+.pc-keybar .keycap { padding: 2px 13px; border: var(--hairline) solid var(--rule-strong); color: var(--text); }
+.pc-keybar .keylabel { margin-left: 13px; font-family: var(--sans); font-size: 24px; color: var(--text-secondary); }

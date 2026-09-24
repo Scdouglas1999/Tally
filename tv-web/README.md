@@ -41,7 +41,8 @@ npm run e2e         # Playwright, Chromium at 1920x1080, against TALLY_SERVER (d
 ```
 
 The tests sign in through Quick Connect and approve the code with an admin token (`TALLY_TOKEN_FILE`, default
-`~/Documents/Tally/devmedia/.tools/dev-server.token`). `CHROMIUM` picks the browser (default `/usr/bin/chromium`).
+`~/Documents/Tally/devmedia/.tools/dev-server.token`). `CHROMIUM` picks the browser (default `/usr/bin/chromium`),
+`TALLY_PREVIEW_PORT` the port of the `vite preview` the tests start (default 4173).
 Screenshots land in `test-results/shots/`, the report in `playwright-report/`.
 
 ## Package

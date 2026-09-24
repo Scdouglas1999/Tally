@@ -1,0 +1,916 @@
+{
+    "Items": [
+        {
+            "Name": "Pilot",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "08fab11822c54bb1196ad409f954eb5b",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-01-20T00:00:00.0000000Z",
+            "OfficialRating": "TV-MA",
+            "ChannelId": null,
+            "Overview": "When an unassuming high school chemistry teacher discovers he has a rare form of lung cancer, he decides to team up with a former student and create a top of the line crystal meth in a used RV, to provide for his family once he is gone.",
+            "CommunityRating": 8.493,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 1,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-21T18:57:00.0000000Z",
+                "Played": true,
+                "Key": "81189001001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "9917577812c9a2c8110a0b8b9b853395"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "9917577812c9a2c8110a0b8b9b853395": "WLFrP0=sM_xaxu%218ISRjNFofbcTNITf5kCWXX9^,s.RjoffkbI",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/08/08fab11822c54bb1196ad409f954eb5b/chapters/639256927870000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:01.9995403Z",
+                    "ImageTag": "a287ed91954d62b16f91feca9213cfc0"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/08/08fab11822c54bb1196ad409f954eb5b/chapters/639256927870000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:02.0595884Z",
+                    "ImageTag": "a287ed91954d62b16f91feca9213cfc0"
+                }
+            ],
+            "Trickplay": {
+                "08fab11822c54bb1196ad409f954eb5b": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 780
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Cat's in the Bag...",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "d76a86fe9498ae50055252a16715742c",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-01-27T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Walt and Jesse attempt to tie up loose ends. The desperate situation gets more complicated with the flip of a coin. Walt's wife, Skyler, becomes suspicious of Walt's strange behavior.",
+            "CommunityRating": 8.245,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 2,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-06-07T19:51:00.0000000Z",
+                "Played": true,
+                "Key": "81189001002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "cb5bb45435eba59c815d948c64ef0206"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "cb5bb45435eba59c815d948c64ef0206": "WWHBq~_Mx]N2tk%29ZIUt5WCn%WUI;nlt6X7jFR*?GkCM{RQbIt7",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/d7/d76a86fe9498ae50055252a16715742c/chapters/639256927880000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:03.464263Z",
+                    "ImageTag": "42f844ae74bb457d866d7233b5bb7703"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/d7/d76a86fe9498ae50055252a16715742c/chapters/639256927880000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:03.5186627Z",
+                    "ImageTag": "42f844ae74bb457d866d7233b5bb7703"
+                }
+            ],
+            "Trickplay": {
+                "d76a86fe9498ae50055252a16715742c": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 783
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "...And the Bag's in the River",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "eed62655e6a2b09220cf240a9bb8b2ba",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-02-10T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Walter fights with Jesse over his drug use, causing him to leave Walter alone with their captive, Krazy-8. Meanwhile, Hank has a scared straight moment with Walter Jr. after his aunt discovers he has been smoking pot. Also, Skylar is upset when Walter stays away from home.",
+            "CommunityRating": 8.424,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T04:15:38.0333132Z",
+                "Played": true,
+                "Key": "81189001003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "488e04c5d45ee1d04e4b1df972c09de2"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "488e04c5d45ee1d04e4b1df972c09de2": "WGB3G*~TOGt7-mxYfls.$~t5j[jt9cIqs+ayRnWY$~t5RnRmoKs,",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/ee/eed62655e6a2b09220cf240a9bb8b2ba/chapters/639256927880000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:04.6674454Z",
+                    "ImageTag": "275353c07a427243b741b7022f397f25"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/ee/eed62655e6a2b09220cf240a9bb8b2ba/chapters/639256927880000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:04.7335203Z",
+                    "ImageTag": "275353c07a427243b741b7022f397f25"
+                }
+            ],
+            "Trickplay": {
+                "eed62655e6a2b09220cf240a9bb8b2ba": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 782
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Cancer Man",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "56a1991f79a80af07e9837ad523ac0c2",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-02-17T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Walter finally tells his family that he has been stricken with cancer. Meanwhile, the DEA believes Albuquerque has a new, big time player to worry about. Meanwhile, a worthy recipient is the target of a depressed Walter's anger, and Jesse makes a surprise visit to his parents home.",
+            "CommunityRating": 7.927,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 4,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T04:17:43.7532107Z",
+                "Played": true,
+                "Key": "81189001004",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "decea4630de70446eaefe86727a719b7"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "decea4630de70446eaefe86727a719b7": "WAAJ{3^+_4xuWrkX%gxbE1WUt7R*pJW?R-V@smV?%hM{xuj?aKsm",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/56/56a1991f79a80af07e9837ad523ac0c2/chapters/639256927890000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:05.558026Z",
+                    "ImageTag": "690984746e2c4777533c12f128d6665b"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/56/56a1991f79a80af07e9837ad523ac0c2/chapters/639256927890000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:05.6085988Z",
+                    "ImageTag": "690984746e2c4777533c12f128d6665b"
+                }
+            ],
+            "Trickplay": {
+                "56a1991f79a80af07e9837ad523ac0c2": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 780
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Gray Matter",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "73cfee42b2a79e3f0d2a1f75a3c0137e",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-02-24T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Walter and Skyler attend a former colleague's party. Jesse tries to free himself from the drugs, while Skyler organizes an intervention.",
+            "CommunityRating": 8.158,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 5,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-05-18T20:51:00.0000000Z",
+                "Played": true,
+                "Key": "81189001005",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "309bb8a804c78dac72dcef1bc24fae9a"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "309bb8a804c78dac72dcef1bc24fae9a": "WAB:Kb}]D%56Nfx[-iIU9uNHV[xt9XIUkExuM{sm%h%Nr=V@W=xs",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/73/73cfee42b2a79e3f0d2a1f75a3c0137e/chapters/639256927900000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:06.1623959Z",
+                    "ImageTag": "d02d5431480b9dc0f35f6c1e7c12b96d"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/73/73cfee42b2a79e3f0d2a1f75a3c0137e/chapters/639256927900000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:06.2269232Z",
+                    "ImageTag": "d02d5431480b9dc0f35f6c1e7c12b96d"
+                }
+            ],
+            "Trickplay": {
+                "73cfee42b2a79e3f0d2a1f75a3c0137e": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 782
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Crazy Handful of Nothin'",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "c30cc6ac527e13339e54d5af5a52cbcc",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-03-02T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "The side effects of chemo begin to plague Walt. Meanwhile, the DEA rounds up suspected dealers.",
+            "CommunityRating": 8.909,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 6,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 8,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T03:20:37.6545076Z",
+                "Played": true,
+                "Key": "81189001006",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "2e3b9732806050d05c04627bebfef473"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "2e3b9732806050d05c04627bebfef473": "W[KK$js:owaKs:%L~qt7RjRjjas..8WWogbIR%of%Nj?oLogRja}",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/c3/c30cc6ac527e13339e54d5af5a52cbcc/chapters/639256927900000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:06.744989Z",
+                    "ImageTag": "76cf05bac4bfeeeed1a223cdef5b5e0d"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/c3/c30cc6ac527e13339e54d5af5a52cbcc/chapters/639256927900000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:06.810008Z",
+                    "ImageTag": "76cf05bac4bfeeeed1a223cdef5b5e0d"
+                }
+            ],
+            "Trickplay": {
+                "c30cc6ac527e13339e54d5af5a52cbcc": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 783
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "A No Rough Stuff Type Deal",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "6d96613ffb1a90cf2a8fb881978e91b1",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2008-03-09T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Walter accepts his new identity as a drug dealer after a PTA meeting. Elsewhere, Jesse decides to put his aunt's house on the market and Skyler is the recipient of a baby shower.",
+            "CommunityRating": 8.384,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2008,
+            "IndexNumber": 7,
+            "ParentIndexNumber": 1,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 4,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T03:21:49.9516697Z",
+                "Played": true,
+                "Key": "81189001007",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "635a47c4025b8934b06bfc54b908d8c1",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 1",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "740ccd38e00a58a371dc27d723cbabff"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "740ccd38e00a58a371dc27d723cbabff": "WACsdT00_3R*D%~q%M9FtSs.%Noc4:?G4nxu%MIUXo-:WCIU%MIV",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/6d/6d96613ffb1a90cf2a8fb881978e91b1/chapters/639256927900000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:07.0088328Z",
+                    "ImageTag": "32d52f3700d840c5eb88a7bb4d39069a"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/6d/6d96613ffb1a90cf2a8fb881978e91b1/chapters/639256927900000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:07.0694113Z",
+                    "ImageTag": "32d52f3700d840c5eb88a7bb4d39069a"
+                }
+            ],
+            "Trickplay": {
+                "6d96613ffb1a90cf2a8fb881978e91b1": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 781
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Seven Thirty-Seven",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "7dd2afd1a947217c9231b9d180aad55d",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2009-03-08T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Walt and Jesse are vividly reminded of Tuco\u2019s volatile nature, and try to figure a way out of their business partnership. Hank attempts to mend fences between the estranged Marie and Skyler.",
+            "CommunityRating": 8.326,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2009,
+            "IndexNumber": 1,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T03:23:05.9792378Z",
+                "Played": true,
+                "Key": "81189002001",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "58f865f4dd79557028d28e6af6075a1e",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "5a94cd2bd60216a85f890ac45ea19cc6"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "5a94cd2bd60216a85f890ac45ea19cc6": "W#NAPGni%g.8S1s:~qRjNZkWaes;s:xaR*Rjofae.8kCjZs:WBWB",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/7d/7dd2afd1a947217c9231b9d180aad55d/chapters/639256927910000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:07.4135965Z",
+                    "ImageTag": "663008401011bd1752e6821302a8ec5b"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/7d/7dd2afd1a947217c9231b9d180aad55d/chapters/639256927910000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:07.4789641Z",
+                    "ImageTag": "663008401011bd1752e6821302a8ec5b"
+                }
+            ],
+            "Trickplay": {
+                "7dd2afd1a947217c9231b9d180aad55d": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 780
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Grilled",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "69fdb06c544546109daaf1d767d38937",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2009-03-15T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Walt and Jesse find themselves in close quarters with an unhinged Tuco. Marie and Hank comfort Skyler, who is distraught over Walt\u2019s disappearance. Hank pays a visit to Mrs. Pinkman on some not-so-official business.",
+            "CommunityRating": 8.8,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2009,
+            "IndexNumber": 2,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 1,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T03:24:21.4740964Z",
+                "Played": true,
+                "Key": "81189002002",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "58f865f4dd79557028d28e6af6075a1e",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "a7ae4d8f56467f787330a5639d7f4967"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "a7ae4d8f56467f787330a5639d7f4967": "WE96]v-pJ.$*$%Nb~U?GofxaofbH^*?Gxat6s:js~U?Gt7t7xaf6",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/69/69fdb06c544546109daaf1d767d38937/chapters/639256927910000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:07.8146756Z",
+                    "ImageTag": "eb4ad5a51728d4d79b9f13fa6e4de5b4"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/69/69fdb06c544546109daaf1d767d38937/chapters/639256927910000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:07.8787801Z",
+                    "ImageTag": "eb4ad5a51728d4d79b9f13fa6e4de5b4"
+                }
+            ],
+            "Trickplay": {
+                "69fdb06c544546109daaf1d767d38937": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 783
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        },
+        {
+            "Name": "Bit by a Dead Bee",
+            "ServerId": "6cc26f6bbc534181a937364479f2910d",
+            "Id": "effd39fb50f5b9d695734a0d4a6143dc",
+            "HasSubtitles": true,
+            "Container": "mkv",
+            "PremiereDate": "2009-03-22T00:00:00.0000000Z",
+            "OfficialRating": "TV-14",
+            "ChannelId": null,
+            "Overview": "Walt and Jesse become short on cash when they try to cover their tracks. Meanwhile, the DEA has a lead that could them straight to Walt and Jesse.",
+            "CommunityRating": 8,
+            "RunTimeTicks": 600230000,
+            "ProductionYear": 2009,
+            "IndexNumber": 3,
+            "ParentIndexNumber": 2,
+            "IsFolder": false,
+            "Type": "Episode",
+            "ParentLogoItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentBackdropImageTags": [
+                "4dc643a0f1d0a2e7ba739dc747c4ab5d"
+            ],
+            "UserData": {
+                "PlaybackPositionTicks": 0,
+                "PlayCount": 2,
+                "IsFavorite": false,
+                "LastPlayedDate": "2026-09-23T03:25:37.2104251Z",
+                "Played": true,
+                "Key": "81189002003",
+                "ItemId": "00000000000000000000000000000000"
+            },
+            "SeriesName": "Breaking Bad",
+            "SeriesId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "SeasonId": "58f865f4dd79557028d28e6af6075a1e",
+            "SeriesPrimaryImageTag": "eb8df0da869e299a843bd9e1e0ffd90f",
+            "SeasonName": "Season 2",
+            "VideoType": "VideoFile",
+            "ImageTags": {
+                "Primary": "ae26f56fce3ee8d92d4105b77763661d"
+            },
+            "BackdropImageTags": [],
+            "ParentLogoImageTag": "382148adadc9149451a3f862355c9959",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "ae26f56fce3ee8d92d4105b77763661d": "W~J8bIjuoft7WBt7~qj[j[ofayoz-=j[WBj[jtofogj[WBayj[ay",
+                    "eb8df0da869e299a843bd9e1e0ffd90f": "dB97wgxt02IV_Kf5D+kDD.axnij]Dlai-ooH9FMz?a%K"
+                },
+                "Logo": {
+                    "382148adadc9149451a3f862355c9959": "WGDT39Xj8_jI%Mj[?boz?utQV[M{IUxbR%t7WBWB00xbIBWBR%t7"
+                },
+                "Thumb": {
+                    "20e6d4c7fd94a50899ebbb2bb3ac0ce0": "W89HOLXDD@?7029F?tkCN1%KRkN102MwV?Sj?H-;s*RkV?ICMy${"
+                },
+                "Backdrop": {
+                    "4dc643a0f1d0a2e7ba739dc747c4ab5d": "WTFii8xuslx]bbnhYk-:%2oft6tQEkt7Siaet6tRIVIpjYa#R-Rk"
+                }
+            },
+            "ParentThumbItemId": "3aaf1d2f2002de846ae4fd70d27aff80",
+            "ParentThumbImageTag": "20e6d4c7fd94a50899ebbb2bb3ac0ce0",
+            "Chapters": [
+                {
+                    "StartPositionTicks": 0,
+                    "Name": "Chapter 1",
+                    "ImagePath": "/config/metadata/library/ef/effd39fb50f5b9d695734a0d4a6143dc/chapters/639256927920000000_0.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:08.1570534Z",
+                    "ImageTag": "669903d98cfed455e9b437abc01f950f"
+                },
+                {
+                    "StartPositionTicks": 300000000,
+                    "Name": "Chapter 2",
+                    "ImagePath": "/config/metadata/library/ef/effd39fb50f5b9d695734a0d4a6143dc/chapters/639256927920000000_300000000.jpg",
+                    "ImageDateModified": "2026-09-23T02:00:08.2106257Z",
+                    "ImageTag": "669903d98cfed455e9b437abc01f950f"
+                }
+            ],
+            "Trickplay": {
+                "effd39fb50f5b9d695734a0d4a6143dc": {
+                    "320": {
+                        "Width": 320,
+                        "Height": 180,
+                        "TileWidth": 10,
+                        "TileHeight": 10,
+                        "ThumbnailCount": 6,
+                        "Interval": 10000,
+                        "Bandwidth": 782
+                    }
+                }
+            },
+            "LocationType": "FileSystem",
+            "MediaType": "Video"
+        }
+    ],
+    "TotalRecordCount": 10,
+    "StartIndex": 0
+}

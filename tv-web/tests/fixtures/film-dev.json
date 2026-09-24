@@ -1,0 +1,867 @@
+{
+    "Name": "The Matrix",
+    "OriginalTitle": "The Matrix",
+    "ServerId": "6cc26f6bbc534181a937364479f2910d",
+    "Id": "27657e067b46664f6b18c7606bf935e7",
+    "Etag": "e8496f0be6402eb5abb7eb38de003549",
+    "DateCreated": "2026-09-22T16:52:55.0000000Z",
+    "CanDelete": true,
+    "CanDownload": true,
+    "HasSubtitles": true,
+    "Container": "mkv",
+    "SortName": "matrix",
+    "PremiereDate": "1999-03-31T00:00:00.0000000Z",
+    "ExternalUrls": [
+        {
+            "Name": "IMDb",
+            "Url": "https://www.imdb.com/title/tt0133093"
+        },
+        {
+            "Name": "TheMovieDb",
+            "Url": "https://www.themoviedb.org/movie/603"
+        },
+        {
+            "Name": "TheMovieDb",
+            "Url": "https://www.themoviedb.org/collection/2344"
+        }
+    ],
+    "MediaSources": [
+        {
+            "Protocol": "File",
+            "Id": "27657e067b46664f6b18c7606bf935e7",
+            "Path": "/media/movies/The Matrix (1999)/The Matrix (1999).mkv",
+            "Type": "Default",
+            "Container": "mkv",
+            "Size": 4159585,
+            "Name": "The Matrix (1999)",
+            "IsRemote": false,
+            "ETag": "6c6071d2639aa3c40372b9442769f76c",
+            "RunTimeTicks": 900230000,
+            "ReadAtNativeFramerate": false,
+            "IgnoreDts": false,
+            "IgnoreIndex": false,
+            "GenPtsInput": false,
+            "SupportsTranscoding": true,
+            "SupportsDirectStream": true,
+            "SupportsDirectPlay": true,
+            "IsInfiniteStream": false,
+            "UseMostCompatibleTranscodingProfile": false,
+            "RequiresOpening": false,
+            "RequiresClosing": false,
+            "RequiresLooping": false,
+            "SupportsProbing": true,
+            "VideoType": "VideoFile",
+            "MediaStreams": [
+                {
+                    "Codec": "subrip",
+                    "Language": "spa",
+                    "TimeBase": "1/1000",
+                    "VideoRange": "Unknown",
+                    "VideoRangeType": "Unknown",
+                    "AudioSpatialFormat": "None",
+                    "LocalizedUndefined": "Undefined",
+                    "LocalizedDefault": "Default",
+                    "LocalizedForced": "Forced",
+                    "LocalizedExternal": "External",
+                    "LocalizedHearingImpaired": "Hearing Impaired",
+                    "DisplayTitle": "Spanish - SUBRIP - External",
+                    "IsInterlaced": false,
+                    "IsAVC": false,
+                    "IsDefault": false,
+                    "IsForced": false,
+                    "IsHearingImpaired": false,
+                    "Height": 0,
+                    "Width": 0,
+                    "Type": "Subtitle",
+                    "Index": 0,
+                    "IsExternal": true,
+                    "IsTextSubtitleStream": true,
+                    "SupportsExternalStream": true,
+                    "Path": "/media/movies/The Matrix (1999)/The Matrix (1999).es.srt",
+                    "Level": 0
+                },
+                {
+                    "Codec": "h264",
+                    "TimeBase": "1/1000",
+                    "VideoRange": "SDR",
+                    "VideoRangeType": "SDR",
+                    "AudioSpatialFormat": "None",
+                    "DisplayTitle": "360p H264 SDR",
+                    "NalLengthSize": "4",
+                    "IsInterlaced": false,
+                    "IsAVC": true,
+                    "BitRate": 369646,
+                    "BitDepth": 8,
+                    "RefFrames": 1,
+                    "IsDefault": false,
+                    "IsForced": false,
+                    "IsHearingImpaired": false,
+                    "Height": 360,
+                    "Width": 640,
+                    "AverageFrameRate": 24,
+                    "RealFrameRate": 24,
+                    "ReferenceFrameRate": 24,
+                    "Profile": "High",
+                    "Type": "Video",
+                    "AspectRatio": "16:9",
+                    "Index": 1,
+                    "IsExternal": false,
+                    "IsTextSubtitleStream": false,
+                    "SupportsExternalStream": false,
+                    "PixelFormat": "yuv420p",
+                    "Level": 30,
+                    "IsAnamorphic": false
+                },
+                {
+                    "Codec": "aac",
+                    "Language": "eng",
+                    "TimeBase": "1/1000",
+                    "Title": "English Stereo",
+                    "VideoRange": "Unknown",
+                    "VideoRangeType": "Unknown",
+                    "AudioSpatialFormat": "None",
+                    "LocalizedDefault": "Default",
+                    "LocalizedExternal": "External",
+                    "DisplayTitle": "English Stereo - AAC - Default",
+                    "IsInterlaced": false,
+                    "IsAVC": false,
+                    "ChannelLayout": "stereo",
+                    "BitRate": 192000,
+                    "Channels": 2,
+                    "SampleRate": 44100,
+                    "IsDefault": true,
+                    "IsForced": false,
+                    "IsHearingImpaired": false,
+                    "Profile": "LC",
+                    "Type": "Audio",
+                    "Index": 2,
+                    "IsExternal": false,
+                    "IsTextSubtitleStream": false,
+                    "SupportsExternalStream": false,
+                    "Level": 0
+                },
+                {
+                    "Codec": "aac",
+                    "Language": "spa",
+                    "TimeBase": "1/1000",
+                    "Title": "Espa\u00f1ol Stereo",
+                    "VideoRange": "Unknown",
+                    "VideoRangeType": "Unknown",
+                    "AudioSpatialFormat": "None",
+                    "LocalizedDefault": "Default",
+                    "LocalizedExternal": "External",
+                    "DisplayTitle": "Espa\u00f1ol Stereo - Spanish - AAC",
+                    "IsInterlaced": false,
+                    "IsAVC": false,
+                    "ChannelLayout": "stereo",
+                    "BitRate": 192000,
+                    "Channels": 2,
+                    "SampleRate": 44100,
+                    "IsDefault": false,
+                    "IsForced": false,
+                    "IsHearingImpaired": false,
+                    "Profile": "LC",
+                    "Type": "Audio",
+                    "Index": 3,
+                    "IsExternal": false,
+                    "IsTextSubtitleStream": false,
+                    "SupportsExternalStream": false,
+                    "Level": 0
+                },
+                {
+                    "Codec": "subrip",
+                    "Language": "eng",
+                    "TimeBase": "1/1000",
+                    "Title": "English",
+                    "VideoRange": "Unknown",
+                    "VideoRangeType": "Unknown",
+                    "AudioSpatialFormat": "None",
+                    "LocalizedUndefined": "Undefined",
+                    "LocalizedDefault": "Default",
+                    "LocalizedForced": "Forced",
+                    "LocalizedExternal": "External",
+                    "LocalizedHearingImpaired": "Hearing Impaired",
+                    "DisplayTitle": "English - SUBRIP",
+                    "IsInterlaced": false,
+                    "IsAVC": false,
+                    "IsDefault": false,
+                    "IsForced": false,
+                    "IsHearingImpaired": false,
+                    "Height": 0,
+                    "Width": 0,
+                    "Type": "Subtitle",
+                    "Index": 4,
+                    "IsExternal": false,
+                    "IsTextSubtitleStream": true,
+                    "SupportsExternalStream": true,
+                    "Level": 0
+                }
+            ],
+            "MediaAttachments": [],
+            "Formats": [],
+            "Bitrate": 753646,
+            "RequiredHttpHeaders": {},
+            "TranscodingSubProtocol": "http",
+            "DefaultAudioStreamIndex": 2,
+            "DefaultSubtitleStreamIndex": 0,
+            "HasSegments": false
+        }
+    ],
+    "CriticRating": 83,
+    "ProductionLocations": [
+        "United States of America"
+    ],
+    "Path": "/media/movies/The Matrix (1999)/The Matrix (1999).mkv",
+    "EnableMediaSourceDisplay": true,
+    "OfficialRating": "R",
+    "ChannelId": null,
+    "Overview": "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
+    "Taglines": [
+        "Believe the unbelievable."
+    ],
+    "Genres": [
+        "Action",
+        "Science Fiction"
+    ],
+    "CommunityRating": 8.259,
+    "RunTimeTicks": 900230000,
+    "PlayAccess": "Full",
+    "ProductionYear": 1999,
+    "RemoteTrailers": [
+        {
+            "Url": "https://www.youtube.com/watch?v=FVI84Dfx2-I",
+            "Name": "Official 25th Anniversary Trailer #3"
+        },
+        {
+            "Url": "https://www.youtube.com/watch?v=H5Xwfk1Tugw",
+            "Name": "25th Anniversary Spot"
+        },
+        {
+            "Url": "https://www.youtube.com/watch?v=d0XTFAMmhrE",
+            "Name": "25th Anniversary Official Trailer"
+        },
+        {
+            "Url": "https://www.youtube.com/watch?v=nUEQNVV3Gfs",
+            "Name": "Official 4K Trailer"
+        },
+        {
+            "Url": "https://www.youtube.com/watch?v=L0fw0WzFaBM",
+            "Name": "20th Anniversary UK Trailer"
+        }
+    ],
+    "ProviderIds": {
+        "Tmdb": "603",
+        "Imdb": "tt0133093",
+        "TmdbCollection": "2344"
+    },
+    "IsFolder": false,
+    "ParentId": "ba9c5cad4ccd875366bf54fd50e04928",
+    "Type": "Movie",
+    "People": [
+        {
+            "Name": "Keanu Reeves",
+            "Id": "25fbc31c18a101216aa1503a51abb0f7",
+            "Role": "Neo",
+            "Type": "Actor",
+            "PrimaryImageTag": "6844f286504fce9d61fade903f915064",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "6844f286504fce9d61fade903f915064": "dJC~uD?GKjJU~Vt7S#S4EMNGr?xZOYWW-VxtS$R+%1xa"
+                }
+            }
+        },
+        {
+            "Name": "Laurence Fishburne",
+            "Id": "c8bffb716b3684feb05b8391b02e92ca",
+            "Role": "Morpheus",
+            "Type": "Actor",
+            "PrimaryImageTag": "98a75749e67fe245f219d7f1e4baea18",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "98a75749e67fe245f219d7f1e4baea18": "dRExw.t70fV@=sWBOZxtI;WBnhbHOZogxDNFIUWB%Lxt"
+                }
+            }
+        },
+        {
+            "Name": "Carrie-Anne Moss",
+            "Id": "58382c130db3f159ff4621cb858f0206",
+            "Role": "Trinity",
+            "Type": "Actor",
+            "PrimaryImageTag": "ea2bd2c8a3ea352921eb4c0716dc7c30",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "ea2bd2c8a3ea352921eb4c0716dc7c30": "dYJ?+[~BBWNe0gMxnNWBXnS5?GxutRs:t7oexuj[xaxa"
+                }
+            }
+        },
+        {
+            "Name": "Hugo Weaving",
+            "Id": "b9b42ad334dd39779825b77c8898ab75",
+            "Role": "Agent Smith",
+            "Type": "Actor",
+            "PrimaryImageTag": "1a774cbbf44ac0f6942bdacee4f279c7",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "1a774cbbf44ac0f6942bdacee4f279c7": "dfG7}Mxa0yNH-ooeR*WBIUays:WVNGWVt7ofNHayxaof"
+                }
+            }
+        },
+        {
+            "Name": "Gloria Foster",
+            "Id": "531de5c41e68bfe228be04bdedf200b7",
+            "Role": "Oracle",
+            "Type": "Actor",
+            "PrimaryImageTag": "994f55acbc5e2ce86f522fe343053dfc",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "994f55acbc5e2ce86f522fe343053dfc": "dQH_=B?b~q%M_3t7xut7ofM{M{xu?bWB-;-;-;t7t7%M"
+                }
+            }
+        },
+        {
+            "Name": "Joe Pantoliano",
+            "Id": "33d058d5267bfbe8692c777137532c24",
+            "Role": "Cypher",
+            "Type": "Actor",
+            "PrimaryImageTag": "e65e765193388c6967e9c282ba3e1c28",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "e65e765193388c6967e9c282ba3e1c28": "doK9#.xG-:oz~Bj[-UxGELbanisnw^oLbGkC?GayxZs:"
+                }
+            }
+        },
+        {
+            "Name": "Marcus Chong",
+            "Id": "a41769f25d6a144bcf58372c5b76d1b4",
+            "Role": "Tank",
+            "Type": "Actor",
+            "PrimaryImageTag": "56f86f4a818700f3c4821053f9a48aa4",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "56f86f4a818700f3c4821053f9a48aa4": "dKF68|4n4n9F?bD%%MIU00Rj?bxuD%M{%Mxu?bIURjt7"
+                }
+            }
+        },
+        {
+            "Name": "Julian Arahanga",
+            "Id": "2485d584305958a25214eb015ca7005f",
+            "Role": "Apoc",
+            "Type": "Actor",
+            "PrimaryImageTag": "6a9ec063d3715d3a20094a48445172d7",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "6a9ec063d3715d3a20094a48445172d7": "dUD+C{%L0L9arroLxuWWE2Rj$%%1WUWBn*ofM{ay%2s:"
+                }
+            }
+        },
+        {
+            "Name": "Matt Doran",
+            "Id": "534ce27d852b8a1900755e7a1a5d7cb3",
+            "Role": "Mouse",
+            "Type": "Actor",
+            "PrimaryImageTag": "d481503945e6d8308232949f40952bc9",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "d481503945e6d8308232949f40952bc9": "dRHxKS0KPA^+?GofoykB0ft7$*IVNuV@%MkBNdt7%2j["
+                }
+            }
+        },
+        {
+            "Name": "Belinda McClory",
+            "Id": "983174feb3db64e7917d3918e22ad86d",
+            "Role": "Switch",
+            "Type": "Actor",
+            "PrimaryImageTag": "cc0252197c8c055e0d1ad493f2a871c4",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "cc0252197c8c055e0d1ad493f2a871c4": "dlIgv0%20LNGt7xa%1Rj9aRj%2ofIVM|t7t6NGRjoes:"
+                }
+            }
+        },
+        {
+            "Name": "Anthony Ray Parker",
+            "Id": "417f9fb7c113697aa864b7c2d89c3916",
+            "Role": "Dozer",
+            "Type": "Actor",
+            "PrimaryImageTag": "8c073427c890c23fda222679cfeb3adb",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "8c073427c890c23fda222679cfeb3adb": "dSCFbQWB0zxa=vWBIpxZ9uWX%1oJIpj[t6R*s:j[R*WC"
+                }
+            }
+        },
+        {
+            "Name": "Paul Goddard",
+            "Id": "c9817caa1b9bedc29b42ae1b5e974158",
+            "Role": "Agent Brown",
+            "Type": "Actor",
+            "PrimaryImageTag": "15f287694df4e5f6cbdcefacca24c4b7",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "15f287694df4e5f6cbdcefacca24c4b7": "dbECB]%L0LE1-ot6IoNGE1WB-pxaIVRks:ofR+ayt6of"
+                }
+            }
+        },
+        {
+            "Name": "Robert Taylor",
+            "Id": "2e8e3ddcbde54b4b6bcac5ec4b962ac2",
+            "Role": "Agent Jones",
+            "Type": "Actor",
+            "PrimaryImageTag": "b3b0e84e467a2fbcdeb28295827b705d",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "b3b0e84e467a2fbcdeb28295827b705d": "djIhgT%N?w%g~Wxu%Mt7jYaeVsoK%Mofoft7.8f+ofof"
+                }
+            }
+        },
+        {
+            "Name": "David Aston",
+            "Id": "86873038fde74721b1f5910e5f7f9bd7",
+            "Role": "Rhineheart",
+            "Type": "Actor",
+            "PrimaryImageTag": "7acd03c22b83baab0c67f99732e220bc",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "7acd03c22b83baab0c67f99732e220bc": "dZKav%-U0fa1COt6E2I:I:o2buSev$ay$*sCJ6S2oMj["
+                }
+            }
+        },
+        {
+            "Name": "Marc Aden Gray",
+            "Id": "9b80dcecb2d233d4982ad8bcef96f942",
+            "Role": "Choi",
+            "Type": "Actor",
+            "PrimaryImageTag": "fbfe90e0c7db0b4e0466caeed0b945ed",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "fbfe90e0c7db0b4e0466caeed0b945ed": "dkLg9V%2BqNL~XxvSiof9sozROoIo~axo#S4kDozo#t8"
+                }
+            }
+        },
+        {
+            "Name": "Lana Wachowski",
+            "Id": "43ffdf2d8ec8070a21cfd06d91f68393",
+            "Role": "Director",
+            "Type": "Director",
+            "PrimaryImageTag": "05b38e3ab9240fc8b73f9ca7f0e6d06f",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "05b38e3ab9240fc8b73f9ca7f0e6d06f": "dSN8dS-QIa=f}HoI-V-VO,xax?J6?ZR+kp%Ki{s:$*WU"
+                }
+            }
+        },
+        {
+            "Name": "Lilly Wachowski",
+            "Id": "ff23bb36e0e06debb96ffff450a4ab3f",
+            "Role": "Director",
+            "Type": "Director",
+            "PrimaryImageTag": "f51304ff94eacbbac1898e1429f9033c",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "f51304ff94eacbbac1898e1429f9033c": "dFF=5Yxt5p-pI.D%Si-p~q-;-qIo9]ni%NNH-;S5NGf6"
+                }
+            }
+        },
+        {
+            "Name": "Lana Wachowski",
+            "Id": "43ffdf2d8ec8070a21cfd06d91f68393",
+            "Role": "Writer",
+            "Type": "Writer",
+            "PrimaryImageTag": "05b38e3ab9240fc8b73f9ca7f0e6d06f",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "05b38e3ab9240fc8b73f9ca7f0e6d06f": "dSN8dS-QIa=f}HoI-V-VO,xax?J6?ZR+kp%Ki{s:$*WU"
+                }
+            }
+        },
+        {
+            "Name": "Lilly Wachowski",
+            "Id": "ff23bb36e0e06debb96ffff450a4ab3f",
+            "Role": "Writer",
+            "Type": "Writer",
+            "PrimaryImageTag": "f51304ff94eacbbac1898e1429f9033c",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "f51304ff94eacbbac1898e1429f9033c": "dFF=5Yxt5p-pI.D%Si-p~q-;-qIo9]ni%NNH-;S5NGf6"
+                }
+            }
+        },
+        {
+            "Name": "Joel Silver",
+            "Id": "5a03bedb8f9ec868b4c256b096c79428",
+            "Role": "Producer",
+            "Type": "Producer",
+            "PrimaryImageTag": "692607d1adc384c2e4d2b2b421d12cad",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "692607d1adc384c2e4d2b2b421d12cad": "d%IOLet7yDxu~qt7%Mxaxut7axoLa}oLM{RjtRWBjFay"
+                }
+            }
+        },
+        {
+            "Name": "Richard Mirisch",
+            "Id": "d0bd34b3268bc5eeb2afb04e3d7e5c09",
+            "Role": "Associate Producer",
+            "Type": "Producer",
+            "ImageBlurHashes": {
+                "Primary": {}
+            }
+        },
+        {
+            "Name": "Bruce Berman",
+            "Id": "5204c876448fc04cc98dae7163ae696a",
+            "Role": "Executive Producer",
+            "Type": "Producer",
+            "PrimaryImageTag": "4124c8d1368b335bbda0a7fa93bf528c",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "4124c8d1368b335bbda0a7fa93bf528c": "dSC5r3of0zax$fjsShfl9]of-BRjJ-j@r?W;adWVogoL"
+                }
+            }
+        },
+        {
+            "Name": "Carol Hughes",
+            "Id": "4df42a6f703985d3882b24e589bef6f8",
+            "Role": "Associate Producer",
+            "Type": "Producer",
+            "ImageBlurHashes": {
+                "Primary": {}
+            }
+        },
+        {
+            "Name": "Barrie M. Osborne",
+            "Id": "ecf1952fd77b659927bf8a8704fa94e3",
+            "Role": "Executive Producer",
+            "Type": "Producer",
+            "PrimaryImageTag": "1d28533c1e36e0fb78d6f54491604f4a",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "1d28533c1e36e0fb78d6f54491604f4a": "dLG8At^k0yR%~CoeSdxa9tWUxaj[b^t7RPRjNGR*$*oK"
+                }
+            }
+        },
+        {
+            "Name": "Andrew Mason",
+            "Id": "fddebd8cf98171c3650d4d92f92fa1cd",
+            "Role": "Executive Producer",
+            "Type": "Producer",
+            "ImageBlurHashes": {
+                "Primary": {}
+            }
+        },
+        {
+            "Name": "Dan Cracchiolo",
+            "Id": "cee8bc963a181099b1cc85994e36741b",
+            "Role": "Co-Producer",
+            "Type": "Producer",
+            "ImageBlurHashes": {
+                "Primary": {}
+            }
+        },
+        {
+            "Name": "Erwin Stoff",
+            "Id": "652d20acc4585822af88637c5f2a76d2",
+            "Role": "Executive Producer",
+            "Type": "Producer",
+            "PrimaryImageTag": "01d62742e5a7276cd3dc2207e261b4ca",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "01d62742e5a7276cd3dc2207e261b4ca": "dLByHm%10zI:w]s:I:R*9uR*-oxZI;R+sSoJNaj[s.WB"
+                }
+            }
+        },
+        {
+            "Name": "Lilly Wachowski",
+            "Id": "ff23bb36e0e06debb96ffff450a4ab3f",
+            "Role": "Executive Producer",
+            "Type": "Producer",
+            "PrimaryImageTag": "f51304ff94eacbbac1898e1429f9033c",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "f51304ff94eacbbac1898e1429f9033c": "dFF=5Yxt5p-pI.D%Si-p~q-;-qIo9]ni%NNH-;S5NGf6"
+                }
+            }
+        },
+        {
+            "Name": "Lana Wachowski",
+            "Id": "43ffdf2d8ec8070a21cfd06d91f68393",
+            "Role": "Executive Producer",
+            "Type": "Producer",
+            "PrimaryImageTag": "05b38e3ab9240fc8b73f9ca7f0e6d06f",
+            "ImageBlurHashes": {
+                "Primary": {
+                    "05b38e3ab9240fc8b73f9ca7f0e6d06f": "dSN8dS-QIa=f}HoI-V-VO,xax?J6?ZR+kp%Ki{s:$*WU"
+                }
+            }
+        }
+    ],
+    "Studios": [
+        {
+            "Name": "Village Roadshow Pictures",
+            "Id": "db3067ad2b9193bfa9343d9ee1c68017"
+        },
+        {
+            "Name": "Groucho II Film Partnership",
+            "Id": "3101fb7e21b38e345844efa24ea62888"
+        },
+        {
+            "Name": "Silver Pictures",
+            "Id": "8f145c14bdbb054f14ed2d3eeee5e5d6"
+        },
+        {
+            "Name": "Warner Bros. Pictures",
+            "Id": "3fc63208ae63fa64a67db18e32c13476"
+        }
+    ],
+    "GenreItems": [
+        {
+            "Name": "Action",
+            "Id": "ce06903d834d2c3417e0889dd4049f3b"
+        },
+        {
+            "Name": "Science Fiction",
+            "Id": "0430d514c35e1f158fa93f1eeb8361ea"
+        }
+    ],
+    "LocalTrailerCount": 0,
+    "UserData": {
+        "PlaybackPositionTicks": 0,
+        "PlayCount": 2,
+        "IsFavorite": false,
+        "LastPlayedDate": "2026-09-24T19:26:12.073056Z",
+        "Played": true,
+        "Key": "603",
+        "ItemId": "00000000000000000000000000000000"
+    },
+    "SpecialFeatureCount": 0,
+    "DisplayPreferencesId": "dbf7709c41faaa746463d67978eb863d",
+    "Tags": [
+        "man vs machine",
+        "martial arts",
+        "fortune teller",
+        "artificial intelligence (a.i.)",
+        "saving the world",
+        "prophecy",
+        "philosophy",
+        "dystopia",
+        "allegory",
+        "insurgence",
+        "chosen one",
+        "simulated reality ",
+        "cyberpunk",
+        "woman director",
+        "gnosticism"
+    ],
+    "PrimaryImageAspectRatio": 0.6666666666666666,
+    "MediaStreams": [
+        {
+            "Codec": "subrip",
+            "Language": "spa",
+            "TimeBase": "1/1000",
+            "VideoRange": "Unknown",
+            "VideoRangeType": "Unknown",
+            "AudioSpatialFormat": "None",
+            "LocalizedUndefined": "Undefined",
+            "LocalizedDefault": "Default",
+            "LocalizedForced": "Forced",
+            "LocalizedExternal": "External",
+            "LocalizedHearingImpaired": "Hearing Impaired",
+            "DisplayTitle": "Spanish - SUBRIP - External",
+            "IsInterlaced": false,
+            "IsAVC": false,
+            "IsDefault": false,
+            "IsForced": false,
+            "IsHearingImpaired": false,
+            "Height": 0,
+            "Width": 0,
+            "Type": "Subtitle",
+            "Index": 0,
+            "IsExternal": true,
+            "IsTextSubtitleStream": true,
+            "SupportsExternalStream": true,
+            "Path": "/media/movies/The Matrix (1999)/The Matrix (1999).es.srt",
+            "Level": 0
+        },
+        {
+            "Codec": "h264",
+            "TimeBase": "1/1000",
+            "VideoRange": "SDR",
+            "VideoRangeType": "SDR",
+            "AudioSpatialFormat": "None",
+            "DisplayTitle": "360p H264 SDR",
+            "NalLengthSize": "4",
+            "IsInterlaced": false,
+            "IsAVC": true,
+            "BitRate": 369646,
+            "BitDepth": 8,
+            "RefFrames": 1,
+            "IsDefault": false,
+            "IsForced": false,
+            "IsHearingImpaired": false,
+            "Height": 360,
+            "Width": 640,
+            "AverageFrameRate": 24,
+            "RealFrameRate": 24,
+            "ReferenceFrameRate": 24,
+            "Profile": "High",
+            "Type": "Video",
+            "AspectRatio": "16:9",
+            "Index": 1,
+            "IsExternal": false,
+            "IsTextSubtitleStream": false,
+            "SupportsExternalStream": false,
+            "PixelFormat": "yuv420p",
+            "Level": 30,
+            "IsAnamorphic": false
+        },
+        {
+            "Codec": "aac",
+            "Language": "eng",
+            "TimeBase": "1/1000",
+            "Title": "English Stereo",
+            "VideoRange": "Unknown",
+            "VideoRangeType": "Unknown",
+            "AudioSpatialFormat": "None",
+            "LocalizedDefault": "Default",
+            "LocalizedExternal": "External",
+            "DisplayTitle": "English Stereo - AAC - Default",
+            "IsInterlaced": false,
+            "IsAVC": false,
+            "ChannelLayout": "stereo",
+            "BitRate": 192000,
+            "Channels": 2,
+            "SampleRate": 44100,
+            "IsDefault": true,
+            "IsForced": false,
+            "IsHearingImpaired": false,
+            "Profile": "LC",
+            "Type": "Audio",
+            "Index": 2,
+            "IsExternal": false,
+            "IsTextSubtitleStream": false,
+            "SupportsExternalStream": false,
+            "Level": 0
+        },
+        {
+            "Codec": "aac",
+            "Language": "spa",
+            "TimeBase": "1/1000",
+            "Title": "Espa\u00f1ol Stereo",
+            "VideoRange": "Unknown",
+            "VideoRangeType": "Unknown",
+            "AudioSpatialFormat": "None",
+            "LocalizedDefault": "Default",
+            "LocalizedExternal": "External",
+            "DisplayTitle": "Espa\u00f1ol Stereo - Spanish - AAC",
+            "IsInterlaced": false,
+            "IsAVC": false,
+            "ChannelLayout": "stereo",
+            "BitRate": 192000,
+            "Channels": 2,
+            "SampleRate": 44100,
+            "IsDefault": false,
+            "IsForced": false,
+            "IsHearingImpaired": false,
+            "Profile": "LC",
+            "Type": "Audio",
+            "Index": 3,
+            "IsExternal": false,
+            "IsTextSubtitleStream": false,
+            "SupportsExternalStream": false,
+            "Level": 0
+        },
+        {
+            "Codec": "subrip",
+            "Language": "eng",
+            "TimeBase": "1/1000",
+            "Title": "English",
+            "VideoRange": "Unknown",
+            "VideoRangeType": "Unknown",
+            "AudioSpatialFormat": "None",
+            "LocalizedUndefined": "Undefined",
+            "LocalizedDefault": "Default",
+            "LocalizedForced": "Forced",
+            "LocalizedExternal": "External",
+            "LocalizedHearingImpaired": "Hearing Impaired",
+            "DisplayTitle": "English - SUBRIP",
+            "IsInterlaced": false,
+            "IsAVC": false,
+            "IsDefault": false,
+            "IsForced": false,
+            "IsHearingImpaired": false,
+            "Height": 0,
+            "Width": 0,
+            "Type": "Subtitle",
+            "Index": 4,
+            "IsExternal": false,
+            "IsTextSubtitleStream": true,
+            "SupportsExternalStream": true,
+            "Level": 0
+        }
+    ],
+    "VideoType": "VideoFile",
+    "ImageTags": {
+        "Primary": "7561c0e135617ffbcad00aee76a31464",
+        "Logo": "eaac309ae5aebda06a686d42c12f5cda",
+        "Thumb": "8f0e15ad9f62cbed356c710ba9568a24"
+    },
+    "BackdropImageTags": [
+        "c38a3c5662bd130c2b4318b64c9b35ea"
+    ],
+    "ImageBlurHashes": {
+        "Backdrop": {
+            "c38a3c5662bd130c2b4318b64c9b35ea": "W74.VWfi4Vah-:tP_Lae8{j]-:oy?tWCDjoy%LWU-:WBIVt7xtRk"
+        },
+        "Primary": {
+            "7561c0e135617ffbcad00aee76a31464": "dV7MN2oyoytk*GoykBtQt*oyV[j[btozV[aeX5t7aeWB"
+        },
+        "Logo": {
+            "eaac309ae5aebda06a686d42c12f5cda": "HNF@qlt7%3t7WBxuofxbof~Xs;-qWURjt7WBj[xb"
+        },
+        "Thumb": {
+            "8f0e15ad9f62cbed356c710ba9568a24": "WUC@56%gozkWM{t7~qxuWDWBRjRj-;xuM{M|WBRj%Nt7RjbHfjWB"
+        }
+    },
+    "Chapters": [
+        {
+            "StartPositionTicks": 0,
+            "Name": "Chapter 1",
+            "ImagePath": "/config/metadata/library/27/27657e067b46664f6b18c7606bf935e7/chapters/639256927750000000_0.jpg",
+            "ImageDateModified": "2026-09-23T02:00:02.828556Z",
+            "ImageTag": "fb6f5b8b1623b090e40245f70d5495e9"
+        },
+        {
+            "StartPositionTicks": 300000000,
+            "Name": "Chapter 2",
+            "ImagePath": "/config/metadata/library/27/27657e067b46664f6b18c7606bf935e7/chapters/639256927750000000_300000000.jpg",
+            "ImageDateModified": "2026-09-23T02:00:02.8807801Z",
+            "ImageTag": "fb6f5b8b1623b090e40245f70d5495e9"
+        },
+        {
+            "StartPositionTicks": 600000000,
+            "Name": "Chapter 3",
+            "ImagePath": "/config/metadata/library/27/27657e067b46664f6b18c7606bf935e7/chapters/639256927750000000_600000000.jpg",
+            "ImageDateModified": "2026-09-23T02:00:02.9324866Z",
+            "ImageTag": "fb6f5b8b1623b090e40245f70d5495e9"
+        }
+    ],
+    "Trickplay": {
+        "27657e067b46664f6b18c7606bf935e7": {
+            "320": {
+                "Width": 320,
+                "Height": 180,
+                "TileWidth": 10,
+                "TileHeight": 10,
+                "ThumbnailCount": 9,
+                "Interval": 10000,
+                "Bandwidth": 1003
+            }
+        }
+    },
+    "LocationType": "FileSystem",
+    "MediaType": "Video",
+    "LockedFields": [],
+    "LockData": false,
+    "Width": 640,
+    "Height": 360
+}

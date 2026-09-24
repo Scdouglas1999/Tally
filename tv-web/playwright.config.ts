@@ -6,7 +6,10 @@ import { defineConfig } from '@playwright/test';
  *   TALLY_SERVER      Jellyfin address (default http://127.0.0.1:18200)
  *   TALLY_TOKEN_FILE  an admin access token, used to approve the Quick Connect code the app shows
  *   CHROMIUM          browser binary (default /usr/bin/chromium; unset to use Playwright's own)
+ *   TALLY_PREVIEW_PORT  port for `vite preview` (default 4173; parallel workers each use their own)
  */
+const PORT = process.env.TALLY_PREVIEW_PORT ?? '4173';
+
 export default defineConfig({
   testDir: 'e2e',
   timeout: 90_000,
@@ -15,7 +18,7 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   globalSetup: './e2e/global-setup.ts',
   use: {
-    baseURL: 'http://127.0.0.1:4173',
+    baseURL: `http://127.0.0.1:${PORT}`,
     viewport: { width: 1920, height: 1080 },
     launchOptions: {
       executablePath: process.env.CHROMIUM ?? '/usr/bin/chromium',
@@ -25,8 +28,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   webServer: {
-    command: 'npx vite preview --port 4173 --strictPort --host 127.0.0.1',
-    url: 'http://127.0.0.1:4173/manifest.json',
+    command: `npx vite preview --port ${PORT} --strictPort --host 127.0.0.1`,
+    url: `http://127.0.0.1:${PORT}/manifest.json`,
     reuseExistingServer: true,
   },
 });

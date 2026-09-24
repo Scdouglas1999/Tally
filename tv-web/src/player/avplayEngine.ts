@@ -161,5 +161,22 @@ export function createAvPlayEngine(host: HTMLElement, events: EngineEvents): Pla
     selectNativeAudio(index: number) {
       avplay.setSelectTrack('AUDIO', index);
     },
+    // no setSpeed: AVPlay's speeds are trick play (silent), not a watching speed
+    setScale(scale) {
+      try {
+        avplay.setDisplayMethod(scale === 'fill' ? 'PLAYER_DISPLAY_MODE_FULL_SCREEN' : 'PLAYER_DISPLAY_MODE_LETTER_BOX');
+      } catch {
+        // not before open(): the next load starts letterboxed
+      }
+    },
+    // AVPlay has no crop mode
+    scales: () => ['fit', 'fill'],
+    setDisplayArea(x, y, width, height) {
+      try {
+        avplay.setDisplayRect(Math.round(x), Math.round(y), Math.round(width), Math.round(height));
+      } catch {
+        // before open(): load() sets the full screen
+      }
+    },
   };
 }
