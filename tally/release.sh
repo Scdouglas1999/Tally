@@ -51,13 +51,17 @@ rm -f app/ci.keystore
 
 OUT=tally/out; rm -rf "$OUT"; mkdir -p "$OUT"
 SRC=app/build/outputs/apk/default/release
-for abi in arm64-v8a armeabi-v7a x86_64; do cp "$SRC"/*-"$abi".apk "$OUT/Wholphin-release-$abi.apk"; done
+# Tally's names: Tally.apk (universal, what people download) and Tally-<abi>.apk (what the in-app updater picks from
+# 2.0.2 on). The Wholphin-release* copies are only for installs from before 2.0.2, whose updater knows no other names:
+# stop publishing them once no device reports an older version (see tally/README.md, "Release assets").
+for abi in arm64-v8a armeabi-v7a x86_64; do
+  cp "$SRC"/*-"$abi".apk "$OUT/Tally-$abi.apk"
+  cp "$SRC"/*-"$abi".apk "$OUT/Wholphin-release-$abi.apk"
+done
 # the universal APK is the one without an ABI suffix
 UNIVERSAL="$(ls "$SRC"/*.apk | grep -v -E -- '-(arm64-v8a|armeabi-v7a|x86_64)\.apk$')"
-cp "$UNIVERSAL" "$OUT/Wholphin-release.apk"
 cp "$UNIVERSAL" "$OUT/Tally.apk"
-# JellyTV.apk: the name older plugin installs and Downloader short codes point at; keep publishing it
-cp "$UNIVERSAL" "$OUT/JellyTV.apk"
+cp "$UNIVERSAL" "$OUT/Wholphin-release.apk"
 ls -lh "$OUT"
 
 # Store builds (no self-update, TV-only): an app bundle for Google Play, an APK for the Amazon Appstore.
@@ -87,7 +91,7 @@ grep -q "TALLY_VERSION: \"$SERVER_VERSION\"" "$OUT/docker-compose.yml" && grep -
 ( cd "$OUT" && md5sum Tally-server-*.zip Tally-Server-Setup.exe )
 ls -lh "$OUT"
 
-ASSETS=("$OUT"/Tally.apk "$OUT"/JellyTV.apk "$OUT"/Wholphin-release*.apk
+ASSETS=("$OUT"/Tally.apk "$OUT"/Tally-arm64-v8a.apk "$OUT"/Tally-armeabi-v7a.apk "$OUT"/Tally-x86_64.apk "$OUT"/Wholphin-release*.apk
         "$OUT"/Tally-server-"$SERVER_VERSION"-jf*.zip "$OUT"/Tally-Server-Setup.exe "$OUT"/docker-compose.yml "$OUT"/install-linux.sh)
 # After the release exists (so its zips can be downloaded), main gets the plugin repository entry and the new
 # default version for the Docker and Linux installs.

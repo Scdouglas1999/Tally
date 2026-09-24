@@ -82,15 +82,18 @@ file is a future merge conflict.** Therefore:
 | W52 | `ui/detail/PlaylistList.kt` (top of `PlaylistDialog`) | on a phone the add-to-playlist dialog is `PhonePlaylistSheet` (`media/kit/phone/`), for every caller |
 | W53 | `ui/preferences/PreferencesContent.kt` (version dialog, `DataLoadingState.Error` branch) | in the Tally look, release notes that cannot be fetched (no `tally-v` release: 404) show a calm "No release notes for this version" (`TallyReleaseNotesMissing`, `ui/settings/`) instead of upstream's red error |
 | W54 | `services/HomeSettingsService.kt` (RecentlyReleased request) | on servers before 10.11, leave out the aired-episode-order sort key (10.10 answers it with HTTP 500, so the row failed) |
+| W55 | `services/UpdateChecker.kt` (`getDownloadUrl`) | Tally's asset names first (`Tally-<abi>.apk`, `Tally.apk`), Wholphin's as the fallback |
 | (resource) | `res/values-v31/themes_tally.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 
 ## Releases and self-update
 
 Upstream's updater is kept and pointed at this fork (W8). It reads the GitHub release **name** as the version
-(`v<git describe>`, e.g. `v1.0.8-25-gabc1234`) and downloads the asset `Wholphin-release-<abi>.apk`, so release
-assets keep upstream's names; `JellyTV.apk` (universal) is an extra copy for the permanent install link
-`https://github.com/Scdouglas1999/Tally/releases/latest/download/JellyTV.apk`.
-Release git tags are `jtv-*`: they must NOT match `v*`/`p*`, which `app/build.gradle.kts` uses for the version.
+(`vX.Y.Z`, from the `tally-vX.Y.Z` tag, W41). From 2.0.2 it downloads `Tally-<abi>.apk` (else `Tally.apk`) and falls
+back to upstream's `Wholphin-release-<abi>.apk`; releases still carry the Wholphin-named copies for installs from
+before 2.0.2, whose updater knows only those names. `Tally.apk` (universal) is the permanent install link
+`https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk`.
+Release git tags are `tally-*` (earlier `jtv-*`): they must NOT match `v*`/`p*`, which `app/build.gradle.kts` uses
+for the upstream base version.
 `tally/release.sh` builds and signs; `tally/release.sh --publish` also creates the GitHub release.
 
 ## Conventions (match the surrounding code)

@@ -6,7 +6,7 @@ releases and rebases the fork. Tally's code is the package `io.github.scdouglas1
 (`app/src/main/java/io/github/scdouglas1999/tally/`), with `strings_tally*.xml`, the `TALLY` theme and the
 `TALLY: begin/end` markers in Wholphin's files. A few names keep the earlier working name, JellyTV, because
 changing them would break installed apps or servers: the application id `io.github.scoduglas1999.jellytv`, stored
-preference keys, the plugin's `/JellyTV/` web paths and the `JellyTV.apk` release asset.
+preference keys and the plugin's `/JellyTV/` web paths.
 
 ## Keeping close to Wholphin
 
@@ -38,9 +38,9 @@ which destinations Tally draws, reusing Wholphin's view models. Design rules are
 
 | Asset | Used by |
 |---|---|
-| `Tally.apk` | the README's install link (`releases/latest/download/Tally.apk`) |
-| `JellyTV.apk` | the same file under its old name, for plugin installs and Downloader short codes made before the rename |
-| `Wholphin-release-<abi>.apk`, `Wholphin-release.apk` | the in-app updater, which Wholphin wrote to look for these names |
+| `Tally.apk` | what people download: the README's install link (`releases/latest/download/Tally.apk`); the updater's fallback |
+| `Tally-arm64-v8a.apk`, `-armeabi-v7a.apk`, `-x86_64.apk` | the in-app updater from 2.0.2 on (smaller per-chip builds) |
+| `Wholphin-release-<abi>.apk`, `Wholphin-release.apk` | TRANSITIONAL: the updater in installs from before 2.0.2, which knows only Wholphin's names. Drop them from `release.sh` once no device on the owner's server reports an older version (Dashboard → Devices, or `/Devices`: `AppVersion`) |
 | `Tally-server-<version>-jf10.10.zip`, `-jf10.11.zip`, `-jf12.zip` | the server plugin: Jellyfin's plugin catalog (through `server/manifest.json`), the Docker Compose file and the Linux script download these |
 | `Tally-Server-Setup.exe` | the Windows installer (the three zips are inside it) |
 | `docker-compose.yml`, `install-linux.sh` | the Docker and Linux installs, with this release as their default version |

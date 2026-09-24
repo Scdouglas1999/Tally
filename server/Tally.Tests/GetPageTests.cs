@@ -40,8 +40,8 @@ public class GetPageTests
     }
 
     [Theory]
-    [InlineData("https://github.com/Scdouglas1999/Tally/releases/latest/download/JellyTV.apk", true)]
-    [InlineData("http://192.168.1.50:8096/files/JellyTV.apk", true)]
+    [InlineData("https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk", true)]
+    [InlineData("http://192.168.1.50:8096/files/Tally.apk", true)]
     [InlineData("", false)]
     [InlineData(null, false)]
     [InlineData("/relative/path.apk", false)]

@@ -420,6 +420,14 @@ fun getDownloadUrl(
     val releaseSuffix = if (debug) "-debug" else "-release"
     val preferredNames =
         buildList {
+            // TALLY: begin
+            // Tally's own asset names come first (Tally-arm64-v8a.apk, Tally.apk); Wholphin's names stay as the fallback
+            // while releases still carry them for installs from before 2.0.2.
+            if (!debug) {
+                add("Tally$abiSuffix.apk")
+                add("Tally.apk")
+            }
+            // TALLY: end
             add("$ASSET_NAME${releaseSuffix}$abiSuffix.apk")
             add("$ASSET_NAME$releaseSuffix.apk")
             if (!debug) add("$ASSET_NAME.apk")
