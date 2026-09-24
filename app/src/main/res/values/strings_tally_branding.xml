@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tally's name where Wholphin's own strings say "Wholphin" (Wholphin's strings.xml is maintained by its
+         translation workflow, so these replace them at seams instead). Names are prefixed tally_brand_. -->
+    <!-- %s is the new version, e.g. "v2.0.2". -->
+    <string name="tally_brand_updated_toast">Tally updated to %s</string>
+    <string name="tally_brand_crash_title">Tally crash report</string>
+    <string name="tally_brand_crash_text">Tally ran into a problem and closed. Would you like to send a crash report to your Jellyfin server?</string>
+    <string name="tally_brand_preset_default">Standard</string>
+    <string name="tally_brand_preset_compact">Compact</string>
+</resources>

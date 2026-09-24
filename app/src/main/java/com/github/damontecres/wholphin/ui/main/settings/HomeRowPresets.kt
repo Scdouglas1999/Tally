@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.ui.main.settings
 
 import androidx.compose.foundation.layout.Column
@@ -281,8 +284,10 @@ fun HomeRowPresetsContent(
 ) {
     val presets =
         listOf(
-            stringResource(R.string.display_preset_default) to HomeRowPresets.WholphinDefault,
-            stringResource(R.string.display_preset_compact) to HomeRowPresets.WholphinCompact,
+            // TALLY: begin
+            stringResource(R.string.tally_brand_preset_default) to HomeRowPresets.WholphinDefault,
+            stringResource(R.string.tally_brand_preset_compact) to HomeRowPresets.WholphinCompact,
+            // TALLY: end
             stringResource(R.string.display_preset_series_thumb) to HomeRowPresets.SeriesThumbs,
             stringResource(R.string.display_preset_episode_thumbnails) to HomeRowPresets.EpisodeThumbnails,
         )

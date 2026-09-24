@@ -83,6 +83,7 @@ file is a future merge conflict.** Therefore:
 | W53 | `ui/preferences/PreferencesContent.kt` (version dialog, `DataLoadingState.Error` branch) | in the Tally look, release notes that cannot be fetched (no `tally-v` release: 404) show a calm "No release notes for this version" (`TallyReleaseNotesMissing`, `ui/settings/`) instead of upstream's red error |
 | W54 | `services/HomeSettingsService.kt` (RecentlyReleased request) | on servers before 10.11, leave out the aired-episode-order sort key (10.10 answers it with HTTP 500, so the row failed) |
 | W55 | `services/UpdateChecker.kt` (`getDownloadUrl`) | Tally's asset names first (`Tally-<abi>.apk`, `Tally.apk`), Wholphin's as the fallback |
+| W56 | `MainActivity.kt` (update toast), `WholphinApplication.kt` (crash dialog), `ui/main/settings/HomeRowPresets.kt` (preset names) | Tally's name instead of "Wholphin" in text people see (`strings_tally_branding.xml`) |
 | (resource) | `res/values-v31/themes_tally.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 
 ## Releases and self-update

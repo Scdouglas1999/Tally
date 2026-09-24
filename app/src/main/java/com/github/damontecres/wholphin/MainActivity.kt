@@ -517,7 +517,9 @@ class MainActivityViewModel
                             showToast(
                                 context,
                                 context.getString(
-                                    R.string.updated_toast,
+                                    // TALLY: begin
+                                    R.string.tally_brand_updated_toast,
+                                    // TALLY: end
                                     appUpgradeHandler.currentVersion.toString(),
                                 ),
                             )

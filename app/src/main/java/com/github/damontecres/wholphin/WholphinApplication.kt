@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin
 
 import android.app.Application
@@ -96,10 +99,10 @@ class WholphinApplication :
                     ReportField.USER_CRASH_DATE,
                 )
             dialog {
-                text =
-                    "Wholphin has crashed! Would you like to attempt to " +
-                    "send a crash report to your Jellyfin server?"
-                title = "Wholphin Crash Report"
+                // TALLY: begin
+                text = this@WholphinApplication.getString(R.string.tally_brand_crash_text)
+                title = this@WholphinApplication.getString(R.string.tally_brand_crash_title)
+                // TALLY: end
                 positiveButtonText = "Send"
                 negativeButtonText = "Do not send"
             }
