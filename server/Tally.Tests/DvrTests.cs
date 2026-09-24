@@ -146,6 +146,95 @@ public class DvrPolicyTests
         var d = DvrPolicy.Evaluate(Job(), null, haveChannel: false, running: 0, Settings, Start.AddMinutes(61));
         Assert.Equal(DvrAction.Fail, d.Action);
     }
+
+    private const long Gb = DvrSettings.Gb;
+
+    /// <summary>Free space right at the 10 GB reserve: a 4 GB recording does not fit.</summary>
+    private static SpaceCheck AtTheReserve(bool bitrateKnown = true) => new(4 * Gb, 10 * Gb, 10 * Gb, bitrateKnown);
+
+    private static SpaceCheck Room => new(4 * Gb, 30 * Gb, 10 * Gb, true);
+
+    [Fact]
+    public void A_Team_Rule_Job_That_Would_Not_Fit_Today_Stays_Scheduled_With_A_Warning()
+    {
+        foreach (var now in new[] { Start.AddDays(-3), Start.AddHours(-3), Start.AddMinutes(-16) })
+        {
+            foreach (var haveChannel in new[] { false, true })
+            {
+                var d = DvrPolicy.Evaluate(Job(), Pre, haveChannel, running: 0, Settings, now, AtTheReserve());
+                Assert.Equal(DvrAction.None, d.Action);
+                Assert.Equal(JobState.Scheduled, d.State);
+                Assert.Equal("May not fit: needs ~4 GB, 10 GB free (10 GB kept free). Checked again when it starts", d.Reason);
+            }
+        }
+
+        // room again (a recording deleted): the warning goes
+        var ok = DvrPolicy.Evaluate(Job(), Pre, haveChannel: true, running: 0, Settings, Start.AddHours(-3), Room);
+        Assert.Equal(JobState.Scheduled, ok.State);
+        Assert.Null(ok.Reason);
+    }
+
+    [Fact]
+    public void In_The_Pre_Roll_A_Job_Without_Room_Waits_For_Space_And_Starts_When_There_Is_Some()
+    {
+        var d = DvrPolicy.Evaluate(Job(), Pre, haveChannel: true, running: 0, Settings, Start.AddMinutes(-15), AtTheReserve());
+        Assert.Equal(DvrAction.None, d.Action);
+        Assert.Equal(JobState.Waiting, d.State);
+        Assert.StartsWith("Waiting for space: needs ~4 GB, 10 GB free", d.Reason);
+
+        d = DvrPolicy.Evaluate(Job(JobState.Waiting), Pre, haveChannel: true, running: 0, Settings, Start.AddMinutes(-1), AtTheReserve());
+        Assert.Equal(DvrAction.None, d.Action);
+        Assert.Equal(JobState.Waiting, d.State);
+
+        d = DvrPolicy.Evaluate(Job(JobState.Waiting), Pre, haveChannel: true, running: 0, Settings, Start.AddMinutes(-5), Room);
+        Assert.Equal(DvrAction.StartRecording, d.Action);
+    }
+
+    [Fact]
+    public void A_Job_Still_Without_Room_When_The_Game_Starts_Fails()
+    {
+        var d = DvrPolicy.Evaluate(Job(JobState.Waiting), Pre, haveChannel: true, running: 0, Settings, Start, AtTheReserve());
+        Assert.Equal(DvrAction.Fail, d.Action);
+        Assert.Equal(JobState.Failed, d.State);
+        Assert.Equal("Not enough space: needs ~4 GB, 10 GB free (10 GB kept free)", d.Reason);
+
+        // a game that goes live early starts the check early too
+        d = DvrPolicy.Evaluate(Job(), Live, haveChannel: true, running: 0, Settings, Start.AddMinutes(-40), AtTheReserve());
+        Assert.Equal(DvrAction.Fail, d.Action);
+    }
+
+    [Fact]
+    public void Space_Does_Not_Fail_A_Job_That_Waits_For_A_Channel_Or_A_Slot()
+    {
+        var d = DvrPolicy.Evaluate(Job(), Live, haveChannel: false, running: 0, Settings, Start.AddMinutes(10), AtTheReserve());
+        Assert.Equal(DvrAction.None, d.Action);
+        Assert.Equal(JobState.Waiting, d.State);
+
+        d = DvrPolicy.Evaluate(Job(), Live, haveChannel: true, running: 3, Settings, Start.AddMinutes(10), AtTheReserve());
+        Assert.Equal(DvrAction.None, d.Action);
+        Assert.Contains("free slot", d.Reason);
+    }
+
+    [Fact]
+    public void An_Assumed_Bitrate_Only_Warns_The_Stream_Is_Judged_By_Its_First_Segments()
+    {
+        var d = DvrPolicy.Evaluate(Job(), Pre, haveChannel: true, running: 0, Settings, Start.AddHours(-2), AtTheReserve(bitrateKnown: false));
+        Assert.Equal(JobState.Scheduled, d.State);
+        Assert.StartsWith("May not fit", d.Reason);
+
+        d = DvrPolicy.Evaluate(Job(), Live, haveChannel: true, running: 0, Settings, Start, AtTheReserve(bitrateKnown: false));
+        Assert.Equal(DvrAction.StartRecording, d.Action);
+    }
+
+    [Fact]
+    public void Space_Is_Estimated_For_When_The_Recording_Would_Start()
+    {
+        // days ahead or at the pre-roll: the same whole game (pre-roll + typical length + post-roll), not less
+        var postRoll = TimeSpan.FromMinutes(5);
+        var atPreRoll = DvrSpace.TimeLeft("baseball/mlb", Start, "pre", Start - DvrPolicy.PreRoll, postRoll);
+        Assert.Equal(atPreRoll, DvrSpace.TimeLeft("baseball/mlb", Start, "pre", Start.AddDays(-3), postRoll));
+        Assert.Equal(TimeSpan.FromMinutes(15 + 180 + 5), atPreRoll);
+    }
 }
 
 public class DvrSpaceTests

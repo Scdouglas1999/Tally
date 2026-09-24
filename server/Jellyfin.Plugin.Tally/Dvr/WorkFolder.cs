@@ -69,17 +69,23 @@ public sealed class WorkFolder
 
     public static string ParentFor(string recordingsFolder) => System.IO.Path.Combine(recordingsFolder, ParentName);
 
-    /// <summary>Creates (or reopens) the folder and reads what it already holds.</summary>
-    public static WorkFolder Open(string path)
+    /// <summary>Creates <c>&lt;recordings&gt;/.tally-work</c> with the <c>.ignore</c> file that keeps Jellyfin's scanner
+    /// out of it. Also what keeps a new recordings folder from being empty: Jellyfin skips an empty library folder.</summary>
+    public static void EnsureParent(string parent)
     {
-        var parent = System.IO.Path.GetDirectoryName(path)!;
-        Directory.CreateDirectory(path);
+        Directory.CreateDirectory(parent);
         var ignore = System.IO.Path.Combine(parent, ".ignore");
         if (!File.Exists(ignore))
         {
             File.WriteAllText(ignore, "Tally's recordings in progress. Jellyfin skips folders that hold an .ignore file.\n");
         }
+    }
 
+    /// <summary>Creates (or reopens) the folder and reads what it already holds.</summary>
+    public static WorkFolder Open(string path)
+    {
+        EnsureParent(System.IO.Path.GetDirectoryName(path)!);
+        Directory.CreateDirectory(path);
         var wf = new WorkFolder(path);
         wf.Load();
         return wf;

@@ -190,7 +190,11 @@ time) and follows the live ladder's continuous playlist through source switches.
   cancel (what was recorded is kept).
 - **Finish**: Jellyfin's own ffmpeg remuxes the segments (stream copy, no transcode) into
   `<recordings>/<League>/<Away> at <Home> - <yyyy-MM-dd>.mp4`, with an NFO (title "Away at Home", date, league,
-  teams, never the score) and poster, backdrop and thumb art drawn from the game, then Jellyfin scans the folder.
+  teams, never the score) and poster, backdrop and thumb art drawn from the game, then the plugin adds it to the library
+  that covers the recordings folder (it scans just that folder, first adding the library folder itself if Jellyfin
+  skipped it for being empty), so the item appears within seconds and the job (and the game on the board) carries its
+  `itemId`. A file Jellyfin picks up later (a library created afterwards, a scan) is noted on the job as soon as it is
+  added.
   MP4 because Jellyfin web direct-plays it in every browser (no server remux), and the Tally app's players
   direct-play it too; MKV is the fallback for codecs MP4 cannot hold. When the drive has no room for a second copy
   the segments are joined in place into a `.ts` instead. The work folder is deleted once the file is verified.
@@ -200,12 +204,15 @@ time) and follows the live ladder's continuous playlist through source switches.
   Settings → Recordings (the page shows its free space). A recording starts only if the estimate (the stream's
   measured bitrate × the rest of a typical game: MLB 3 h, NFL and college football 3.5 h, NBA and NHL 2.5 h, soccer
   2 h, others 3 h) leaves the reserve free (10 GB by default), and stops, keeping what it has, if the drive falls
-  below the reserve. At most 3 recordings run at once (settable).
+  below the reserve. Space is judged for when the recording would start, not when the job is made: a scheduled job
+  that would not fit today stays scheduled with a warning ("May not fit: …"), waits for space in the pre-roll, and
+  fails with "Not enough space" only if there is still not enough when the game starts. At most 3 recordings run at
+  once (settable).
 - **Retention**: per team "keep the last N games", and "delete recordings after N days" (default: keep everything).
   A recording someone is watching is never deleted.
 - **Library**: Settings → Recordings offers **Create a Sports Recordings library** when no library covers the folder
   (a Movies library with every internet metadata and image fetcher off, so the NFO and art stay). Nothing is created
-  without that click.
+  without that click. A library made by hand works too.
 
 Client API v1 (authenticated): `GET /JellyTV/Client/v1/recordings` (rules and jobs, and whether the caller may
 record), `POST /JellyTV/Client/v1/recordings` with `{"gameId": "…"}` or `{"teamId": "…", "league": "baseball/mlb"

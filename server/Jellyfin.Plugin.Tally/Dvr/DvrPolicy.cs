@@ -27,8 +27,20 @@ public enum DvrAction
 public sealed record DvrDecision(DvrAction Action, string State, string? Reason, string? StopReason = null);
 
 /// <summary>
+/// What a job's recording would take against the free space, estimated for when it would start (the rest of a typical
+/// game from the pre-roll on, see <see cref="DvrSpace.TimeLeft"/>).
+/// </summary>
+/// <param name="BitrateKnown">The estimate uses the stream's probed bitrate; otherwise an assumed one, which only
+/// warns: a stream never probed is judged by its first segments once it records.</param>
+public sealed record SpaceCheck(long EstimateBytes, long FreeBytes, long ReserveBytes, bool BitrateKnown)
+{
+    public bool Fits => DvrSpace.Fits(FreeBytes, EstimateBytes, ReserveBytes);
+}
+
+/// <summary>
 /// The job state machine, without any I/O: given the job, what the scoreboard says, whether a channel carries the
-/// game and how many recordings are running, what happens next. The DVR service applies the decision.
+/// game, how many recordings are running and the space a job not started yet would need, what happens next. The DVR
+/// service applies the decision.
 /// </summary>
 public static class DvrPolicy
 {
@@ -40,7 +52,13 @@ public static class DvrPolicy
 
     public const string NoStream = "No stream found for this game";
 
-    public static DvrDecision Evaluate(RecordingJob job, GameStatus? game, bool haveChannel, int running, DvrSettings settings, DateTimeOffset now)
+    /// <summary>
+    /// Space is judged for when the recording would start, not when the job is made: until the pre-roll a job that
+    /// would not fit today stays scheduled with a warning (recordings finish, files get deleted, retention runs); in the
+    /// pre-roll it waits for space; only a job that still does not fit once the game starts fails.
+    /// </summary>
+    public static DvrDecision Evaluate(RecordingJob job, GameStatus? game, bool haveChannel, int running, DvrSettings settings, DateTimeOffset now,
+        SpaceCheck? space = null)
     {
         var state = job.State;
         if (JobState.IsFinal(state) || state == JobState.Finishing)
@@ -81,10 +99,11 @@ public static class DvrPolicy
                 haveChannel ? $"The game ended while {settings.MaxConcurrent} other recordings were running" : NoStream);
         }
 
-        var windowOpen = game?.State == "in" || now >= start - PreRoll;
+        var gameOn = game?.State == "in" || now >= start;
+        var windowOpen = gameOn || now >= start - PreRoll;
         if (!windowOpen)
         {
-            return new DvrDecision(DvrAction.None, JobState.Scheduled, null);
+            return new DvrDecision(DvrAction.None, JobState.Scheduled, space is { Fits: false } s ? DvrSpace.MayNotFit(s) : null);
         }
 
         if (!haveChannel)
@@ -98,6 +117,13 @@ public static class DvrPolicy
         {
             return new DvrDecision(DvrAction.None, JobState.Waiting,
                 $"Waiting for a free slot: {running} recording{(running == 1 ? string.Empty : "s")} already running (limit {settings.MaxConcurrent})");
+        }
+
+        if (space is { Fits: false, BitrateKnown: true } shortOf)
+        {
+            return gameOn
+                ? new DvrDecision(DvrAction.Fail, JobState.Failed, DvrSpace.NotEnough(shortOf.EstimateBytes, shortOf.FreeBytes, shortOf.ReserveBytes))
+                : new DvrDecision(DvrAction.None, JobState.Waiting, DvrSpace.WaitingForSpace(shortOf));
         }
 
         return new DvrDecision(DvrAction.StartRecording, JobState.Recording, null);
@@ -169,8 +195,19 @@ public static class DvrSpace
 
     /// <summary>"Not enough space: needs ~9 GB, 4 GB free" (plus the reserve when the space is there but taken by it).</summary>
     public static string NotEnough(long estimateBytes, long freeBytes, long reserveBytes)
+        => "Not enough space: " + Shortfall(estimateBytes, freeBytes, reserveBytes);
+
+    /// <summary>A scheduled job that would not fit today: a warning, it is judged again when it starts.</summary>
+    public static string MayNotFit(SpaceCheck s)
+        => $"May not fit: {Shortfall(s.EstimateBytes, s.FreeBytes, s.ReserveBytes)}. Checked again when it starts";
+
+    /// <summary>In the pre-roll, without the room yet.</summary>
+    public static string WaitingForSpace(SpaceCheck s)
+        => $"Waiting for space: {Shortfall(s.EstimateBytes, s.FreeBytes, s.ReserveBytes)}. Fails if there is still not enough when the game starts";
+
+    private static string Shortfall(long estimateBytes, long freeBytes, long reserveBytes)
     {
-        var text = $"Not enough space: needs ~{Size(estimateBytes)}, {Size(freeBytes)} free";
+        var text = $"needs ~{Size(estimateBytes)}, {Size(freeBytes)} free";
         return freeBytes >= estimateBytes ? text + $" ({Size(reserveBytes)} kept free)" : text;
     }
 
