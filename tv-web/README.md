@@ -54,8 +54,8 @@ scripts/package-webos.sh [--server http://192.168.1.10:8096]   # dist/io.github.
 
 `--server` stamps the Jellyfin address into the package, so the TV opens straight to Quick Connect. Without it the
 TV asks for the address on first start. For development, `--bundle http://<this-pc>:4173/` makes the shell load the
-bundle from `npm run preview` instead of the server's plugin (an emulator reaches this PC at `10.0.2.2`). **Back up `~/.tally/tizen`**: every later install on a TV must be signed with
-the same author certificate.
+bundle from `npm run preview` instead of the server's plugin (an emulator reaches this PC at `10.0.2.2`).
+**Back up `~/.tally/tizen`**: every later install on a TV must be signed with the same author certificate.
 
 ## Install on a TV
 
@@ -90,8 +90,9 @@ Installed without root under `~/tools/` on the development machine:
   TV-SAMSUNG-Public-WebAppDevelopment,cert-add-on,Certificate-Manager,Emulator`. On a non-Ubuntu host put a `dpkg`
   shim on `PATH` that reports the Ubuntu prerequisites as installed (`~/tools/shims/dpkg`), and skip its KVM `sudo`
   step when `/dev/kvm` is already usable.
-- **Tizen TV emulator**: `~/tools/tizen-studio/tools/emulator/bin/em-cli launch -n tally-tv` (VM created: 1080p,
-  1 GB RAM, Tizen 10.0 TV image). It only installs Samsung-certificate-signed apps.
+- **Tizen TV emulator**: `scripts/tizen-emulator.sh start|shot <png>|stop` runs the VM `tally-tv` (1080p, 1 GB RAM,
+  Tizen 10.0 TV image) on a private Xvfb display; it needs ≥ 7 GB free. Samsung documents that it installs only
+  Samsung-certificate-signed apps.
 - **webOS CLI**: `npm install --prefix ~/tools/webos-cli @webos-tools/cli@3.2.6` (commands in
   `~/tools/webos-cli/node_modules/.bin`).
 
