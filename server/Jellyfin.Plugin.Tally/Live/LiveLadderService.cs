@@ -48,6 +48,7 @@ public sealed class LiveLadderService : IHostedService, IDisposable
     private readonly ConcurrentDictionary<string, byte> _queued = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, DateTimeOffset> _singleProbed = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, (DateTimeOffset At, string Why)> _failures = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, (DateTimeOffset At, CadenceSummary Cadence)> _cadence = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, LiveSession> _sessions = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentQueue<(SourceChannel Channel, int Index)> _hot = new();
     private readonly ConcurrentQueue<(SourceChannel Channel, int Index)> _cold = new();
@@ -82,7 +83,17 @@ public sealed class LiveLadderService : IHostedService, IDisposable
     public bool ContinuousMode
         => !string.Equals(Plugin.Instance?.Configuration.LiveSwitchMode, "discontinuity", StringComparison.OrdinalIgnoreCase);
 
-    public CandidateProbe? Probe(string candidateKey) => _probes.TryGetValue(candidateKey, out var p) ? WithFailure(candidateKey, p) : null;
+    public CandidateProbe? Probe(string candidateKey) => _probes.TryGetValue(candidateKey, out var p) ? WithLatest(candidateKey, p) : null;
+
+    /// <summary>What a session saw of a candidate's cadence while playing it or watching it as an alternative: newer
+    /// than the probe's, so rankings and switches use it (a stream that turned bursty stops counting as healthy).</summary>
+    public void NoteCadence(string candidateKey, CadenceSummary cadence, DateTimeOffset at)
+    {
+        if (cadence.Enough)
+        {
+            _cadence[candidateKey] = (at, cadence);
+        }
+    }
 
     /// <summary>Every rung of a channel, best first. Candidates never probed contribute one unknown rung.</summary>
     public List<Tier> RankedTiers(SourceChannel c)
@@ -185,7 +196,8 @@ public sealed class LiveLadderService : IHostedService, IDisposable
     {
         _cts = new CancellationTokenSource();
         _sources.Refreshed += OnRefreshed;
-        _workers = Enumerable.Range(0, 2).Select(_ => Task.Run(() => WorkAsync(_cts.Token))).ToArray();
+        // probes of multi-stream channels spend most of their time waiting on a playlist watch
+        _workers = Enumerable.Range(0, 3).Select(_ => Task.Run(() => WorkAsync(_cts.Token))).ToArray();
         var now = _sources.GetChannels();
         if (now.Count > 0)
         {
@@ -338,7 +350,10 @@ public sealed class LiveLadderService : IHostedService, IDisposable
                 var cand = list[job.Index];
                 _queued.TryRemove(cand.Url, out _);
                 _probes.TryGetValue(cand.Url, out var previous);
-                var probe = await _prober.ProbeAsync(job.Index, cand, previous, withSegment: true, ct).ConfigureAwait(false);
+                // several streams: watch each one's playlist for a while too, so a bursty one is not ranked first
+                var probe = await _prober.ProbeAsync(job.Index, cand, previous, withSegment: true, ct,
+                    list.Count > 1 ? StreamProber.CadenceWatch : null).ConfigureAwait(false);
+
                 if (!probe.Ok)
                 {
                     NoteFailure(cand.Url, probe.Error ?? "probe failed");
@@ -359,19 +374,25 @@ public sealed class LiveLadderService : IHostedService, IDisposable
         }
     }
 
-    /// <summary>"it has not failed recently": a failure noted in the last 5 minutes spoils an older good probe.</summary>
-    private CandidateProbe WithFailure(string key, CandidateProbe p)
+    /// <summary>The probe with what was learned since: "it has not failed recently" (a failure noted in the last 5
+    /// minutes spoils an older good probe), and the newest cadence a session saw (within 10 minutes).</summary>
+    private CandidateProbe WithLatest(string key, CandidateProbe p)
     {
-        if (p.Ok && _failures.TryGetValue(key, out var f) && f.At > p.At && DateTimeOffset.UtcNow - f.At < TimeSpan.FromMinutes(5))
+        var now = DateTimeOffset.UtcNow;
+        var failure = _failures.TryGetValue(key, out var f) ? f : default;
+        var failed = p.Ok && failure.Why != null && failure.At > p.At && now - failure.At < TimeSpan.FromMinutes(5);
+        var seen = _cadence.TryGetValue(key, out var c) && c.At > p.At && now - c.At < TimeSpan.FromMinutes(10);
+        if (!failed && !seen)
         {
-            return new CandidateProbe
-            {
-                At = p.At, Ok = false, Error = f.Why, Tiers = p.Tiers, Throughput = p.Throughput, Fresh = p.Fresh,
-                TargetDuration = p.TargetDuration, NextSequence = p.NextSequence, IsTs = p.IsTs, Encrypted = p.Encrypted, IsLive = p.IsLive
-            };
+            return p;
         }
 
-        return p;
+        return new CandidateProbe
+        {
+            At = p.At, Ok = p.Ok && !failed, Error = failed ? failure.Why : p.Error, Tiers = p.Tiers, Throughput = p.Throughput, Fresh = p.Fresh,
+            TargetDuration = p.TargetDuration, NextSequence = p.NextSequence, IsTs = p.IsTs, Encrypted = p.Encrypted, IsLive = p.IsLive,
+            Cadence = seen ? c.Cadence : p.Cadence
+        };
     }
 
     public static string Summary(CandidateProbe p)
@@ -384,6 +405,6 @@ public sealed class LiveLadderService : IHostedService, IDisposable
         var tiers = string.Join(", ", LadderRanking.Rank(p.Tiers).Select(t =>
             (string.IsNullOrEmpty(t.Label) ? "?" : t.Label) + " @" + (t.Bitrate / 1e6).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + " Mbps"));
         return string.Create(System.Globalization.CultureInfo.InvariantCulture,
-            $"{tiers}; downloads at {(p.Throughput ?? 0) / 1e6:0.0} Mbps; target {p.TargetDuration:0}s; {(!p.IsLive ? "VOD" : p.Fresh ? "live" : "stale")}{(p.IsTs ? string.Empty : "; not MPEG-TS")}{(p.Encrypted ? "; AES" : string.Empty)}");
+            $"{tiers}; downloads at {(p.Throughput ?? 0) / 1e6:0.0} Mbps; target {p.TargetDuration:0}s; {(!p.IsLive ? "VOD" : p.Fresh ? "live" : "stale")}{(p.IsTs ? string.Empty : "; not MPEG-TS")}{(p.Encrypted ? "; AES" : string.Empty)}{(p.Cadence is { } c ? "; " + (c.Irregular ? "BURSTY: " : string.Empty) + c.Describe() : string.Empty)}");
     }
 }

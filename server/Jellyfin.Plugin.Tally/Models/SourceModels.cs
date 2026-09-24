@@ -37,6 +37,11 @@ public class SourceChannel
     /// link for one game, an M3U's "HD"/"BACKUP" duplicate). Channels sharing a key are merged by <c>ChannelGrouper</c>.</summary>
     public string GroupKey { get; set; } = string.Empty;
 
+    /// <summary>The name came from a web page's title (or another label that says nothing about the event): it stands
+    /// only if it names a game on the scoreboard, see <c>ChannelNaming</c>. Never persisted.</summary>
+    [JsonIgnore]
+    public bool NameFromTitle { get; set; }
+
     /// <summary>Every stream that carries this channel, first the one the channel was built from. Filled by
     /// <c>ChannelGrouper</c>; a channel nobody merged into has exactly one, its own <see cref="StreamUrl"/>.</summary>
     public List<StreamCandidate> Candidates { get; set; } = new();

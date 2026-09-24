@@ -19,7 +19,8 @@ case "${ANDROID_SERIAL:-emulator-5554}" in
 esac
 (
 flock -w 600 9 || { echo "emulator busy" >&2; exit 1; }
-$ADB shell monkey -p $PKG -c android.intent.category.LEANBACK_LAUNCHER 1 >/dev/null 2>&1; sleep 8
+# a fresh start: an app left running across a server restart may hold a dead websocket and miss the play command
+$ADB shell am force-stop $PKG; $ADB shell monkey -p $PKG -c android.intent.category.LEANBACK_LAUNCHER 1 >/dev/null 2>&1; sleep 10
 SESSION=$(curl -s -H "X-Emby-Token: $TOK" "$SERVER/Sessions" | python3 -c "
 import sys,json; ss=[s for s in json.load(sys.stdin) if s.get('DeviceId')==sys.argv[1]]; print(ss[0]['Id'] if ss else '')" "$DEVICE")
 [ -n "$SESSION" ] || { echo "no session for device $DEVICE" >&2; exit 4; }

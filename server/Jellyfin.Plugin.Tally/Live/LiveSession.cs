@@ -17,12 +17,15 @@ public sealed record SwitchRecord(DateTimeOffset At, string From, string To, str
 /// is the health measurement), and republishes it under the channel's own continuous playlist. A segment is listed
 /// only once it is in memory, so a slow or failing upstream never reaches the player as a slow or failing request:
 /// the session switches to another rung first, and the player just keeps reading. Idle after 45 s without requests.
+/// It also measures the upstream's cadence (a stream that publishes in bursts is trouble even when it downloads fast,
+/// see <see cref="SwitchPolicy"/>), keeps a cushion for such a stream (see <see cref="Cushion"/>), and logs one line a
+/// minute of what it saw (see <see cref="SessionStats"/>).
 /// </summary>
 public sealed class LiveSession
 {
     public static readonly TimeSpan IdleTimeout = TimeSpan.FromSeconds(45);
     private static readonly TimeSpan ReprobeEvery = TimeSpan.FromMinutes(3);
-    private const int InitialSegments = 3;
+    private static readonly TimeSpan WatchAlternatesFor = TimeSpan.FromMinutes(2);
 
     private readonly LiveLadderService _svc;
     private readonly ILogger _logger;
@@ -49,6 +52,22 @@ public sealed class LiveSession
     private DateTimeOffset _lastReprobe = DateTimeOffset.MinValue;
     private DateTimeOffset _startedAt;
     private long _lastTouchedTicks;
+
+    // cadence of the rung being played, and of the others while there is trouble (playlists only)
+    private CadenceMeter? _meter;
+    private readonly Dictionary<string, CadenceSummary> _alternates = new(StringComparer.Ordinal);
+    private Task? _watchTask;
+    private DateTimeOffset _watchUntil;
+
+    // segments downloaded (and spliced) but held back to keep a cushion, see Cushion
+    private readonly List<PublishedSegment> _pending = new();
+    private PublishedSegment? _lastProcessed;
+    private double _leadTarget;
+    private DateTimeOffset _paceStart;
+    private double _publishedSeconds;
+
+    private readonly object _statsGate = new();
+    private SessionStats _stats = new(DateTimeOffset.UtcNow);
 
     public LiveSession(LiveLadderService svc, SourceChannel channel, ILogger logger)
     {
@@ -89,7 +108,8 @@ public sealed class LiveSession
 
     /// <summary>The channel's playlist, or null when this channel is served by plain pass-through
     /// (one candidate, one rendition — exactly as before the ladder existed).</summary>
-    public async Task<string?> GetPlaylistAsync(Func<long, string> segmentUri, CancellationToken ct)
+    /// <param name="player">A viewer's player reads it (not the recorder): counts in the diagnostics.</param>
+    public async Task<string?> GetPlaylistAsync(Func<long, string> segmentUri, CancellationToken ct, bool player = true)
     {
         var previousTouch = LastTouched;
         Touch();
@@ -108,6 +128,14 @@ public sealed class LiveSession
             return null;
         }
 
+        if (player)
+        {
+            lock (_statsGate)
+            {
+                _stats.OnPlayerPoll(DateTimeOffset.UtcNow, Window.NextSequence - 1);
+            }
+        }
+
         return Window.Render(segmentUri);
     }
 
@@ -120,7 +148,88 @@ public sealed class LiveSession
             return null;
         }
 
-        return await seg.Body.WaitAsync(TimeSpan.FromSeconds(60), ct).ConfigureAwait(false);
+        var ready = seg.Body.IsCompleted;
+        var started = DateTimeOffset.UtcNow;
+        var bytes = await seg.Body.WaitAsync(TimeSpan.FromSeconds(60), ct).ConfigureAwait(false);
+        var now = DateTimeOffset.UtcNow;
+        lock (_statsGate)
+        {
+            _stats.OnRequest(now, sequence, seg.Duration, ready ? 0 : (now - started).TotalSeconds);
+            _stats.Sample(now, AheadOfPlayer(), ReserveSeconds);
+        }
+
+        return bytes;
+    }
+
+    /// <summary>Seconds held back (downloaded, not yet listed).</summary>
+    public double ReserveSeconds
+    {
+        get
+        {
+            lock (_pending)
+            {
+                return _pending.Sum(p => p.Duration);
+            }
+        }
+    }
+
+    /// <summary>The per-minute and whole-session numbers, and the cadence seen, for <c>GET /JellyTV/Ladder</c>.</summary>
+    public object Diagnostics()
+    {
+        var now = DateTimeOffset.UtcNow;
+        Dictionary<string, object> alternates;
+        lock (_alternates)
+        {
+            alternates = _alternates.ToDictionary(kv => kv.Key, kv => (object)CadenceJson(kv.Value));
+        }
+
+        object stats;
+        lock (_statsGate)
+        {
+            stats = _stats.Snapshot(now);
+        }
+
+        var meter = _meter;
+        return new
+        {
+            stats,
+            reserveSeconds = Math.Round(ReserveSeconds, 1),
+            leadTargetSeconds = _leadTarget,
+            aheadOfPlayerSeconds = Math.Round(AheadOfPlayer(), 1),
+            cadence = meter == null ? null : new
+            {
+                lastMinute = CadenceJson(meter.Summarize(now, SwitchPolicy.CadenceWindow)),
+                last5Minutes = CadenceJson(meter.Summarize(now, CadenceMeter.Horizon))
+            },
+            alternatesWatchedUntil = _watchUntil > now ? _watchUntil : (DateTimeOffset?)null,
+            alternates
+        };
+    }
+
+    public static object CadenceJson(CadenceSummary c) => new
+    {
+        watchedSeconds = Math.Round(c.Watched),
+        updates = c.Arrivals,
+        segments = c.Segments,
+        segmentSeconds = Math.Round(c.SegmentDuration, 2),
+        avgGapSeconds = Math.Round(c.AvgGap, 1),
+        maxGapSeconds = Math.Round(c.MaxGap, 1),
+        late = c.Late,
+        neededCushionSeconds = Math.Round(c.NeededCushion, 1),
+        irregular = c.Irregular,
+        text = c.Describe()
+    };
+
+    /// <summary>Listed seconds the player has not asked for yet.</summary>
+    private double AheadOfPlayer()
+    {
+        long max;
+        lock (_statsGate)
+        {
+            max = _stats.MaxRequested;
+        }
+
+        return Window.SecondsAfter(max);
     }
 
     private async Task StartAsync(CancellationToken ct)
@@ -144,12 +253,27 @@ public sealed class LiveSession
             var now = DateTimeOffset.UtcNow;
             var restarted = Window.NextSequence > 0;
             Window.Clear();
+            lock (_pending)
+            {
+                _pending.Clear();
+            }
+
+            _lastProcessed = null;
             _canonical = null;
             _canonicalReady = null;
             _map = SpliceMap.Identity;
             _epochPending = true;
             _discontinuityPending = restarted; // a player that was here before must reset its timeline
             _startedAt = now;
+            lock (_statsGate)
+            {
+                _stats = new SessionStats(now);
+            }
+
+            lock (_alternates)
+            {
+                _alternates.Clear();
+            }
 
             var first = SwitchPolicy.Initial(ranked, _svc.Probe, now, TimeSpan.FromMinutes(45));
             var order = new[] { first! }.Concat(ranked.Where(t => t.Key != first!.Key)).Take(4).ToList();
@@ -176,12 +300,28 @@ public sealed class LiveSession
             }
 
             _policy = new SwitchPolicy(_tier, now) { TargetDuration = playlist.TargetDuration };
-            _logger.LogInformation("JellyTV ladder: {Channel}: starting on {Tier} ({Rank} of {Count} rungs, {Candidates} streams)",
-                Channel.Name, SwitchPolicy.Describe(_tier), ranked.FindIndex(t => t.Key == _tier.Key) + 1, ranked.Count, Channel.Candidates.Count);
+            _meter = new CadenceMeter(now);
+            _meter.OnPlaylist(now, playlist.Segments);
 
             // List the newest few right away, downloading them in order in the background — the player asks for
             // them in order too, and its first request simply waits for the first download (same as a direct proxy).
-            var initial = playlist.Segments.Skip(Math.Max(0, playlist.Segments.Count - InitialSegments)).ToList();
+            // A stream seen publishing in bursts starts further back, the rest held back as a cushion (see Cushion).
+            var plan = Cushion.Plan(playlist, _svc.Probe(_tier.CandidateKey)?.Cadence);
+            _leadTarget = plan.LeadTarget;
+            _paceStart = now;
+            _publishedSeconds = plan.Listed.Sum(x => x.Duration);
+            if (plan.Why == null)
+            {
+                _logger.LogInformation("JellyTV ladder: {Channel}: starting on {Tier} ({Rank} of {Count} rungs, {Candidates} streams), {Behind:0} s behind its live edge",
+                    Channel.Name, SwitchPolicy.Describe(_tier), ranked.FindIndex(t => t.Key == _tier.Key) + 1, ranked.Count, Channel.Candidates.Count, plan.Behind);
+            }
+            else
+            {
+                _logger.LogInformation("JellyTV ladder: {Channel}: starting on {Tier} ({Rank} of {Count} rungs, {Candidates} streams), {Behind:0} s behind its live edge: {Listed:0} s listed, the rest held back as a cushion, because {Why}",
+                    Channel.Name, SwitchPolicy.Describe(_tier), ranked.FindIndex(t => t.Key == _tier.Key) + 1, ranked.Count, Channel.Candidates.Count, plan.Behind, plan.LeadTarget, plan.Why);
+            }
+
+            var initial = plan.Listed;
             Task previous = Task.CompletedTask;
             var tier = _tier;
             foreach (var seg in initial)
@@ -196,7 +336,13 @@ public sealed class LiveSession
                     Epoch = 0,
                     Body = tcs.Task
                 }, now);
+                _lastProcessed = published;
                 _discontinuityPending = false;
+                lock (_statsGate)
+                {
+                    _stats.OnPublished(now, seg.Duration);
+                }
+
                 var wait = previous;
                 var isFirst = _canonicalReady == null;
                 var job = Task.Run(async () =>
@@ -221,7 +367,7 @@ public sealed class LiveSession
 
             _epochPending = false;
             _epoch = 0;
-            _nextUpstreamSeq = initial[^1].Sequence + 1;
+            _nextUpstreamSeq = plan.NextSequence;
             _lastReprobe = now - ReprobeEvery + TimeSpan.FromSeconds(10); // first look at the others shortly
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
@@ -234,6 +380,55 @@ public sealed class LiveSession
     }
 
     public void Stop() => _cts?.Cancel();
+
+    /// <summary>Lists held-back segments that are due: all of them when nothing is held back on purpose, else as many
+    /// as keep the channel's playlist <see cref="_leadTarget"/> ahead of real time.</summary>
+    private void Release(DateTimeOffset now)
+    {
+        while (true)
+        {
+            PublishedSegment seg;
+            lock (_pending)
+            {
+                if (_pending.Count == 0)
+                {
+                    return;
+                }
+
+                if (_leadTarget > 0 && now < Cushion.NextRelease(_paceStart, _publishedSeconds, _leadTarget)
+                    && _pending.Sum(p => p.Duration) < Cushion.MaxBehind)
+                {
+                    return;
+                }
+
+                seg = _pending[0];
+                _pending.RemoveAt(0);
+            }
+
+            Window.Publish(seg, now);
+            _publishedSeconds += seg.Duration;
+            lock (_statsGate)
+            {
+                _stats.OnPublished(now, seg.Duration);
+                _stats.Sample(now, AheadOfPlayer(), ReserveSeconds);
+            }
+        }
+    }
+
+    /// <summary>How long the loop may sleep before a held-back segment is due.</summary>
+    private TimeSpan UntilNextRelease(DateTimeOffset now)
+    {
+        lock (_pending)
+        {
+            if (_pending.Count == 0 || _leadTarget <= 0)
+            {
+                return TimeSpan.MaxValue;
+            }
+        }
+
+        var due = Cushion.NextRelease(_paceStart, _publishedSeconds, _leadTarget) - now;
+        return due < TimeSpan.FromMilliseconds(100) ? TimeSpan.FromMilliseconds(100) : due;
+    }
 
     private async Task LoopAsync(CancellationToken ct)
     {
@@ -249,9 +444,17 @@ public sealed class LiveSession
                     break;
                 }
 
+                Release(now);
+                LogMinute(now);
                 var tier = _tier!;
                 var switched = false;
+                var fetchStarted = DateTimeOffset.UtcNow;
                 var (pl, uri, error) = await FetchMediaAsync(tier, _mediaUri!, ct).ConfigureAwait(false);
+                lock (_statsGate)
+                {
+                    _stats.OnPlaylistFetch((DateTimeOffset.UtcNow - fetchStarted).TotalSeconds);
+                }
+
                 if (pl == null)
                 {
                     // A rendition URL with an expired token: the latest probe may know the new one.
@@ -284,6 +487,7 @@ public sealed class LiveSession
 
                     _lastPlaylist = pl;
                     _lastPlaylistAt = DateTimeOffset.UtcNow;
+                    ObserveCadence(tier, pl, _lastPlaylistAt);
 
                     var fresh = pl.Segments.Where(s => s.Sequence >= _nextUpstreamSeq).ToList();
                     if (fresh.Count > 0)
@@ -304,6 +508,8 @@ public sealed class LiveSession
                             _nextUpstreamSeq = seg.Sequence + 1; // nowhere else to go: skip it, keep the channel moving
                         }
 
+                        Release(DateTimeOffset.UtcNow);
+
                         if (Evaluate())
                         {
                             switched = true;
@@ -318,6 +524,7 @@ public sealed class LiveSession
                 }
 
                 switched |= Evaluate();
+                Release(DateTimeOffset.UtcNow);
 
                 if (DateTimeOffset.UtcNow - _lastReprobe > ReprobeEvery)
                 {
@@ -325,10 +532,20 @@ public sealed class LiveSession
                     _svc.RequestProbes(Channel, except: _tier!.CandidateKey, hot: true);
                 }
 
+                if (_policy?.WatchAlternates == true && HasAlternative(_tier!))
+                {
+                    _watchUntil = DateTimeOffset.UtcNow + WatchAlternatesFor;
+                    if (_watchTask is not { IsCompleted: false })
+                    {
+                        _watchTask = Task.Run(() => WatchAlternatesAsync(ct), CancellationToken.None);
+                    }
+                }
+
                 if (!switched)
                 {
                     var wait = TimeSpan.FromSeconds(Math.Clamp((_policy?.TargetDuration ?? 6) / 3, 1, 3));
-                    await Task.Delay(wait, ct).ConfigureAwait(false);
+                    var release = UntilNextRelease(DateTimeOffset.UtcNow);
+                    await Task.Delay(release < wait ? release : wait, ct).ConfigureAwait(false);
                 }
             }
         }
@@ -338,6 +555,132 @@ public sealed class LiveSession
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "JellyTV ladder: {Channel}: session failed", Channel.Name);
+        }
+        finally
+        {
+            var now = DateTimeOffset.UtcNow;
+            string line;
+            lock (_statsGate)
+            {
+                line = _stats.TotalLine(now, _meter?.Summarize(now, now - _startedAt));
+            }
+
+            _logger.LogInformation("JellyTV ladder: {Channel}: session ended after {Minutes:0.0} min: {Line}", Channel.Name, (now - _startedAt).TotalMinutes, line);
+        }
+    }
+
+    /// <summary>One line a minute: what the session published, how the upstream behaved, how the player fared.</summary>
+    private void LogMinute(DateTimeOffset now)
+    {
+        string line;
+        lock (_statsGate)
+        {
+            if (!_stats.Due(now))
+            {
+                return;
+            }
+
+            line = _stats.MinuteLine(now, _meter?.Summarize(now, now - _stats.MinuteStart));
+        }
+
+        lock (_alternates)
+        {
+            var others = _alternates.Where(kv => kv.Key != _tier?.CandidateKey).ToList();
+            if (_watchUntil > now && others.Count > 0)
+            {
+                line += "; watching " + string.Join(", ", others.Select(kv => CandidateName(kv.Key) + ": " + kv.Value.Describe()));
+            }
+        }
+
+        _logger.LogInformation("JellyTV ladder: {Channel} [minute] on {Tier}: {Line}", Channel.Name,
+            _tier == null ? "-" : SwitchPolicy.Describe(_tier), line);
+    }
+
+    private string CandidateName(string key)
+    {
+        var list = LiveLadderService.Candidates(Channel);
+        for (var i = 0; i < list.Count; i++)
+        {
+            if (list[i].Url == key)
+            {
+                return "candidate " + (i + 1).ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
+        return "a former candidate";
+    }
+
+    /// <summary>Feeds a fetch of the current rung's playlist to its cadence meter and the policy.</summary>
+    private void ObserveCadence(Tier tier, HlsMediaPlaylist pl, DateTimeOffset now)
+    {
+        var meter = _meter ??= new CadenceMeter(now);
+        meter.OnPlaylist(now, pl.Segments);
+        _policy?.OnCadence(now, meter.Summarize(now, SwitchPolicy.CadenceWindow));
+        _svc.NoteCadence(tier.CandidateKey, meter.Summarize(now, TimeSpan.FromMinutes(2)), now);
+    }
+
+    /// <summary>
+    /// While the current stream's segments come late: fetches the other streams' media playlists (one rung each, never
+    /// a segment) every couple of seconds and records their cadence, so the policy knows whether one arrives steadier.
+    /// Stops <see cref="WatchAlternatesFor"/> after the last late update.
+    /// </summary>
+    private async Task WatchAlternatesAsync(CancellationToken ct)
+    {
+        var meters = new Dictionary<string, (Uri Uri, CadenceMeter Meter)>(StringComparer.Ordinal);
+        try
+        {
+            while (!ct.IsCancellationRequested && DateTimeOffset.UtcNow < _watchUntil)
+            {
+                var current = _tier;
+                lock (_alternates)
+                {
+                    if (current != null)
+                    {
+                        _alternates.Remove(current.CandidateKey); // now being played: its own meter tells
+                    }
+                }
+
+                var others = _svc.RankedTiers(Channel)
+                    .Where(t => current == null || t.CandidateKey != current.CandidateKey)
+                    .GroupBy(t => t.CandidateKey, StringComparer.Ordinal)
+                    .Select(g => g.First())
+                    .Take(3)
+                    .ToList();
+                var interval = 3.0;
+                foreach (var t in others)
+                {
+                    if (!meters.TryGetValue(t.CandidateKey, out var m))
+                    {
+                        m = (t.MediaUri, new CadenceMeter(DateTimeOffset.UtcNow));
+                    }
+
+                    var (pl, uri, _) = await FetchMediaAsync(t, m.Uri, ct).ConfigureAwait(false);
+                    var now = DateTimeOffset.UtcNow;
+                    if (pl != null)
+                    {
+                        m.Meter.OnPlaylist(now, pl.Segments);
+                        m = (uri, m.Meter);
+                        interval = Math.Min(interval, Math.Clamp(pl.TargetDuration / 3, 1, 3));
+                        var summary = m.Meter.Summarize(now, TimeSpan.FromMinutes(2));
+                        _svc.NoteCadence(t.CandidateKey, summary, now);
+                        lock (_alternates)
+                        {
+                            _alternates[t.CandidateKey] = summary;
+                        }
+                    }
+
+                    meters[t.CandidateKey] = m;
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(interval), ct).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "JellyTV ladder: {Channel}: watching the other streams failed", Channel.Name);
         }
     }
 
@@ -362,6 +705,11 @@ public sealed class LiveSession
                 : Math.Max(6, seg.Duration * 2.5)); // nowhere else to go: be patient
             var r = await _svc.Fetch.GetSegmentAsync(seg, headers, timeout, ct, alternative ? timeout : null).ConfigureAwait(false);
             total += r.Seconds;
+            lock (_statsGate)
+            {
+                _stats.OnDownload(r.Seconds, seg.Duration, r.Ok);
+            }
+
             if (r.Ok)
             {
                 if (_tier?.Key == tier.Key)
@@ -397,7 +745,7 @@ public sealed class LiveSession
     {
         var info = TsSplicer.Analyze(bytes);
         var disc = false;
-        var last = Window.Last;
+        var last = _lastProcessed;
         TsInfo? prevOut = null;
         if (last != null)
         {
@@ -480,7 +828,7 @@ public sealed class LiveSession
 
         var output = _map.IsIdentity ? bytes : TsSplicer.Rewrite(bytes, _map);
         var outInfo = _map.IsIdentity ? info : TsSplicer.Analyze(output);
-        Window.Publish(new PublishedSegment
+        var processed = new PublishedSegment
         {
             Duration = seg.Duration,
             Discontinuity = disc,
@@ -489,7 +837,14 @@ public sealed class LiveSession
             Epoch = _epoch,
             Body = Task.FromResult<byte[]?>(output),
             OutInfo = outInfo
-        }, DateTimeOffset.UtcNow);
+        };
+        _lastProcessed = processed;
+        lock (_pending)
+        {
+            _pending.Add(processed);
+        }
+
+        Release(DateTimeOffset.UtcNow);
     }
 
     /// <summary>Asks the policy; switches when it says so. True when a switch happened.</summary>
@@ -515,17 +870,27 @@ public sealed class LiveSession
         }
 
         var sameCandidate = d.Target.CandidateKey == from.CandidateKey;
+        var lastUpdate = _meter?.LastUpdateAt ?? _lastPlaylistAt;
         _tier = d.Target;
         _mediaUri = d.Target.MediaUri;
+        _meter = null; // a new playlist: its cadence starts over
+        lock (_statsGate)
+        {
+            _stats.OnSwitch();
+        }
+
         _epochPending = true;
         _switchReason = d.Reason;
         if (!sameCandidate)
         {
             // Another stream of the game: pick up at the same distance from its live edge as the old one's content
-            // ended (see SwitchAlignment).
-            // (what it had listed but we had not published, plus how far its live edge moved since we last looked)
+            // ended (see SwitchAlignment): what it had listed but we had not published, plus how far the live action
+            // has moved since its playlist last gained a segment. A stream that stalled or holds segments back lists
+            // an edge that stands still while the game goes on; entering the new stream that much further back
+            // publishes the missing seconds at once (they refill the viewer's cushion) instead of skipping them.
+            var since = Math.Max((now - lastUpdate).TotalSeconds, (now - _lastPlaylistAt).TotalSeconds);
             _anchorBehind = _lastPlaylist == null ? 0
-                : _lastPlaylist.Segments.Where(x => x.Sequence >= _nextUpstreamSeq).Sum(x => x.Duration) + (now - _lastPlaylistAt).TotalSeconds;
+                : _lastPlaylist.Segments.Where(x => x.Sequence >= _nextUpstreamSeq).Sum(x => x.Duration) + since;
             _anchorUrgent = !d.Up;
             _nextUpstreamSeq = -1;
         }

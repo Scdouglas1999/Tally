@@ -186,12 +186,15 @@ public partial class BrowserExtractor
                         string title;
                         try { title = await page.TitleAsync().ConfigureAwait(false) ?? string.Empty; }
                         catch (Exception) { title = string.Empty; }
-                        var pageName = NameFromUrl(current) ?? StreamClassifier.CleanName(title);
+                        // (a page title is only a hint: it stands only if it names a game, see ChannelNaming)
+                        var slugName = NameFromUrl(current);
+                        var pageName = slugName ?? StreamClassifier.CleanName(title);
                         foreach (var s in found.Where(s => s.Context == current || s.Referer.StartsWith(current, StringComparison.OrdinalIgnoreCase)))
                         {
                             if (string.IsNullOrEmpty(s.Name) && !string.IsNullOrEmpty(pageName))
                             {
                                 s.Name = pageName;
+                                s.NameFromTitle = slugName == null;
                             }
                         }
 
