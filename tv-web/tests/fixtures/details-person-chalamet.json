@@ -1,0 +1,77 @@
+{
+ "Name": "Timothée Chalamet",
+ "ServerId": "6cc26f6bbc534181a937364479f2910d",
+ "Id": "da5aa3243db377e39fa6dcbab1bb1763",
+ "Etag": "e67459fab394813513bd97a83cc048ee",
+ "DateCreated": "2026-09-22T16:54:06.7850714Z",
+ "CanDelete": false,
+ "CanDownload": false,
+ "SortName": "Timothée Chalamet",
+ "PremiereDate": "1995-12-27T00:00:00.0000000Z",
+ "ExternalUrls": [
+  {
+   "Name": "IMDb",
+   "Url": "https://www.imdb.com/name/nm3154303"
+  },
+  {
+   "Name": "TheMovieDb",
+   "Url": "https://www.themoviedb.org/person/1190668"
+  }
+ ],
+ "ProductionLocations": [
+  "Manhattan, New York City, New York, USA"
+ ],
+ "Path": "/config/metadata/People/T/Timothée Chalamet",
+ "EnableMediaSourceDisplay": true,
+ "ChannelId": null,
+ "Overview": "Timothée Hal Chalamet (born December 27, 1995) is an American actor. He began his career in television, appearing in the series Homeland. In 2014, he made his film debut in Men, Women & Children and appeared in Interstellar. In 2017, he had a leading role in Call Me by Your Name. He later appeared in Lady Bird (2017), Beautiful Boy (2018), and Little Women (2019). He has since taken on leading roles in Dune (2021–2026) and Wonka (2023), and appeared in A Complete Unknown (2024) and Marty Supreme (2025).",
+ "Taglines": [],
+ "Genres": [],
+ "PlayAccess": "Full",
+ "RemoteTrailers": [],
+ "ProviderIds": {
+  "Tmdb": "1190668",
+  "Imdb": "nm3154303"
+ },
+ "ParentId": null,
+ "Type": "Person",
+ "People": [],
+ "Studios": [],
+ "GenreItems": [],
+ "LocalTrailerCount": 0,
+ "UserData": {
+  "PlaybackPositionTicks": 0,
+  "PlayCount": 0,
+  "IsFavorite": false,
+  "Played": false,
+  "Key": "Person-Timothee Chalamet",
+  "ItemId": "00000000000000000000000000000000"
+ },
+ "ChildCount": 2,
+ "SpecialFeatureCount": 0,
+ "DisplayPreferencesId": "b607178b0ac2f604a458d3d2363fdc83",
+ "Tags": [],
+ "PrimaryImageAspectRatio": 0.6669802445907808,
+ "ImageTags": {
+  "Primary": "078f4e8287ec4b0bab85abea0ff00d62"
+ },
+ "BackdropImageTags": [],
+ "ImageBlurHashes": {
+  "Primary": {
+   "078f4e8287ec4b0bab85abea0ff00d62": "dWF}K7jF0L-pMwof%MRjAGa}nOR*aet6%2n%n$ofxas9"
+  }
+ },
+ "LocationType": "FileSystem",
+ "MediaType": "Unknown",
+ "LockedFields": [],
+ "TrailerCount": 0,
+ "MovieCount": 2,
+ "SeriesCount": 0,
+ "ProgramCount": 0,
+ "EpisodeCount": 0,
+ "SongCount": 0,
+ "AlbumCount": 0,
+ "ArtistCount": 0,
+ "MusicVideoCount": 0,
+ "LockData": false
+}

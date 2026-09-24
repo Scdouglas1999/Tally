@@ -1,0 +1,30 @@
+/* Panel (ui/settings/TallyDialogs.kt): 560dp wide, rows 56dp min, 20dp sides, key bar 40dp. 1 dp = 1.6 px. */
+.panel-window {
+  position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 40;
+  display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6);
+}
+.panel { width: 896px; background: var(--ground); border: var(--hairline) solid var(--rule-strong); }
+.panel-kicker { padding: 29px 32px 0; color: var(--accent); }
+.panel-rule { margin: 19px 32px 12px; height: var(--hairline); background: var(--rule); }
+.panel-body { padding: 0 32px 12px; font-size: 29px; line-height: 40px; color: var(--text-secondary); }
+.panel-list { position: relative; max-height: 666px; overflow: hidden; padding: 0 32px 12px; }
+.panel-slot { padding: 7px 0; }
+.panel-row {
+  position: relative; display: flex; align-items: center; min-height: 90px; padding: 16px 26px; background: var(--ground);
+}
+.panel-row::after {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none;
+}
+.panel-row[data-focused] { background: var(--ground-raised); }
+.panel-row[data-focused]::after { border: var(--focus) solid var(--accent); }
+.panel-row .texts { flex: 1; min-width: 0; }
+.panel-row .headline { font-family: var(--sans); font-size: 32px; line-height: 42px; color: var(--text); }
+.panel-row.destructive .headline { color: var(--live-text); }
+.panel-row .supporting { margin-top: 2px; font-size: 24px; line-height: 32px; color: var(--muted); }
+.panel-row .indicator { margin-left: 22px; }
+.panel-keys {
+  display: flex; align-items: center; height: 64px; padding: 0 22px; background: var(--label-bar);
+  border-top: var(--hairline) solid var(--rule);
+}
+.panel-keys .key { padding: 3px 13px; border: var(--hairline) solid var(--rule-strong); color: var(--text); }
+.panel-keys .hint { margin-left: 13px; font-size: 24px; color: var(--text-secondary); }

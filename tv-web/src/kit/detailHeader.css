@@ -1,0 +1,38 @@
+/*
+ * DetailHeader (media/kit/DetailHeader.kt). Sizes: 1 Tally dp = 1.6 px. Column max 480dp (768 px), 8dp (13 px)
+ * between its lines; the action row 24dp (38 px) under the tech boxes and 24dp before the next section.
+ */
+.detail-header { position: relative; padding: var(--margin-y) var(--margin-x) 0; }
+/* the image scrim over the backdrop (ground 88% → 50% → clear), nearly horizontal as on Android */
+.detail-header::before {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(94deg, rgba(14, 15, 14, 0.88) 0%, rgba(14, 15, 14, 0.5) 45%, rgba(14, 15, 14, 0) 85%);
+}
+.detail-header > * { position: relative; z-index: 1; }
+.dh-text > * + * { margin-top: 13px; }
+.dh-kicker { color: var(--muted); line-height: 29px; }
+.dh-kicker.accent { color: var(--accent); }
+.dh-logo { width: 576px; }
+.dh-logo img { display: block; max-width: 576px; max-height: 154px; }
+.dh-title { font-family: var(--sans); font-weight: 600; font-size: 64px; line-height: 74px; color: var(--text); }
+.dh-meta { display: flex; align-items: center; white-space: nowrap; overflow: hidden; color: var(--text-secondary); }
+.dh-meta > span { flex: none; }
+.dh-meta .sep { margin: 0 7px; } /* 6dp each side, less the letter-spacing the part before it already ends with */
+.dh-meta .boxed { padding: 1px 5px 2px 8px; border: var(--hairline) solid var(--rule-strong); }
+.dh-ends { color: var(--text-secondary); }
+.dh-genres { font-size: 24px; line-height: 32px; color: var(--muted); }
+.dh-tagline { font-size: 27px; line-height: 35px; color: var(--text-secondary); }
+.dh-overview {
+  position: relative; font-size: 32px; line-height: 45px; color: var(--text);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden;
+}
+.dh-overview[data-focused]::after {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--focus) solid var(--accent); pointer-events: none;
+}
+.dh-director { font-size: 24px; line-height: 32px; color: var(--muted); }
+.dh-tech { display: flex; flex-wrap: wrap; margin-bottom: -10px; }
+.dh-tech .box {
+  margin: 0 10px 10px 0; padding: 3px 8px 3px 10px; border: var(--hairline) solid var(--rule);
+  font-family: var(--mono); font-weight: 500; font-size: 16px; line-height: 21px; letter-spacing: 1.6px; color: var(--muted); white-space: nowrap;
+}
+.dh-actions { padding: 38px 0; }

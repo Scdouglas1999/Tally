@@ -1,0 +1,2339 @@
+{
+ "Items": [
+  {
+   "Name": "Good News About Hell",
+   "ServerId": "6cc26f6bbc534181a937364479f2910d",
+   "Id": "66f005090ead5adfe4b4d1e947de883e",
+   "HasSubtitles": true,
+   "Container": "mkv",
+   "PremiereDate": "2022-02-17T00:00:00.0000000Z",
+   "MediaSources": [
+    {
+     "Protocol": "File",
+     "Id": "66f005090ead5adfe4b4d1e947de883e",
+     "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E01.mkv",
+     "Type": "Default",
+     "Container": "mkv",
+     "Size": 2762582,
+     "Name": "Severance S01E01",
+     "IsRemote": false,
+     "ETag": "9de49e09bc7475968eb63996ea4e2fbd",
+     "RunTimeTicks": 600230000,
+     "ReadAtNativeFramerate": false,
+     "IgnoreDts": false,
+     "IgnoreIndex": false,
+     "GenPtsInput": false,
+     "SupportsTranscoding": true,
+     "SupportsDirectStream": true,
+     "SupportsDirectPlay": true,
+     "IsInfiniteStream": false,
+     "UseMostCompatibleTranscodingProfile": false,
+     "RequiresOpening": false,
+     "RequiresClosing": false,
+     "RequiresLooping": false,
+     "SupportsProbing": true,
+     "VideoType": "VideoFile",
+     "MediaStreams": [
+      {
+       "Codec": "subrip",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "Spanish - SUBRIP - External",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 0,
+       "IsExternal": true,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E01.es.srt",
+       "Level": 0
+      },
+      {
+       "Codec": "h264",
+       "TimeBase": "1/1000",
+       "VideoRange": "SDR",
+       "VideoRangeType": "SDR",
+       "AudioSpatialFormat": "None",
+       "DisplayTitle": "360p H264 SDR",
+       "NalLengthSize": "4",
+       "IsInterlaced": false,
+       "IsAVC": true,
+       "BitRate": 368203,
+       "BitDepth": 8,
+       "RefFrames": 1,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 360,
+       "Width": 640,
+       "AverageFrameRate": 24,
+       "RealFrameRate": 24,
+       "ReferenceFrameRate": 24,
+       "Profile": "High",
+       "Type": "Video",
+       "AspectRatio": "16:9",
+       "Index": 1,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "PixelFormat": "yuv420p",
+       "Level": 30,
+       "IsAnamorphic": false
+      },
+      {
+       "Codec": "aac",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "English Stereo - AAC - Default",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": true,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 2,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "aac",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "Title": "Español Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "Español Stereo - Spanish - AAC",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 3,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "subrip",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "English - SUBRIP",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 4,
+       "IsExternal": false,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Level": 0
+      }
+     ],
+     "MediaAttachments": [],
+     "Formats": [],
+     "Bitrate": 752203,
+     "RequiredHttpHeaders": {},
+     "TranscodingSubProtocol": "http",
+     "DefaultAudioStreamIndex": 2,
+     "DefaultSubtitleStreamIndex": 0,
+     "HasSegments": false
+    }
+   ],
+   "OfficialRating": "TV-MA",
+   "ChannelId": null,
+   "Overview": "Mark is promoted to lead a team who've had their memories surgically divided between their work and personal lives.",
+   "CommunityRating": 8.175,
+   "RunTimeTicks": 600230000,
+   "ProductionYear": 2022,
+   "IndexNumber": 1,
+   "ParentIndexNumber": 1,
+   "IsFolder": false,
+   "Type": "Episode",
+   "People": [
+    {
+     "Name": "Adam Scott",
+     "Id": "4f68f02ab5f5160c0a5c98b61d8c2897",
+     "Role": "Mark Scout",
+     "Type": "Actor",
+     "PrimaryImageTag": "72c5c122cd228e253f68119d05c1f3c8",
+     "ImageBlurHashes": {
+      "Primary": {
+       "72c5c122cd228e253f68119d05c1f3c8": "dVG+msJ8AD_Mk;w{M{NG9GW=$%RPO?tR.7oyNGsoofWB"
+      }
+     }
+    },
+    {
+     "Name": "Britt Lower",
+     "Id": "b9e412c2dc17d55fcbc6c0877376e6a0",
+     "Role": "Helly Riggs",
+     "Type": "Actor",
+     "PrimaryImageTag": "f3dddf79ebf1c13d2997cbbe9c4bda64",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f3dddf79ebf1c13d2997cbbe9c4bda64": "dbHU^7oy%z?a~pofx]xtIoofr?M{%foyWBbH?bjZV[t7"
+      }
+     }
+    },
+    {
+     "Name": "Tramell Tillman",
+     "Id": "a6f07b7712cb0f08da1af2edd42e6a8b",
+     "Role": "Seth Milchick",
+     "Type": "Actor",
+     "PrimaryImageTag": "bab3bfdf684fec4610f07aad7a68e1a5",
+     "ImageBlurHashes": {
+      "Primary": {
+       "bab3bfdf684fec4610f07aad7a68e1a5": "dbEWB]WAPXtmRjskW=V@?vWEs8t8tmbwtSkY-pt7jEof"
+      }
+     }
+    },
+    {
+     "Name": "Zach Cherry",
+     "Id": "019d7881764b94b1d833463fe0d8bf46",
+     "Role": "Dylan George",
+     "Type": "Actor",
+     "PrimaryImageTag": "0ca275edda9f2f71af2ae95d0cc1167f",
+     "ImageBlurHashes": {
+      "Primary": {
+       "0ca275edda9f2f71af2ae95d0cc1167f": "deGIfm$*Mzs;@XsAMyi_PBX8smflE2ae%LkCm,j[smjZ"
+      }
+     }
+    },
+    {
+     "Name": "Jen Tullock",
+     "Id": "962751e1747c9f14040c65346af2f442",
+     "Role": "Devon Scout-Hale",
+     "Type": "Actor",
+     "PrimaryImageTag": "f9be541a1b0fb120550679c0098fa539",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f9be541a1b0fb120550679c0098fa539": "dYHK93xZ0yoIEMof%1R*I:R*$*s:9uR*bbs:j[ax$*xZ"
+      }
+     }
+    },
+    {
+     "Name": "Michael Chernus",
+     "Id": "10d4ac8190c469866feafac2795c5711",
+     "Role": "Ricken Hale",
+     "Type": "Actor",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Dichen Lachman",
+     "Id": "c62770fbfcc994dc7ed0beb86c85e407",
+     "Role": "Ms. Casey",
+     "Type": "Actor",
+     "PrimaryImageTag": "06d475df429bcd125fab37e1df664a30",
+     "ImageBlurHashes": {
+      "Primary": {
+       "06d475df429bcd125fab37e1df664a30": "dNH^u4~CAJIqGKX9%NkX?dR*%N%Mb|Wq%3t8JXR+xatR"
+      }
+     }
+    },
+    {
+     "Name": "John Turturro",
+     "Id": "b79193ec51d23f93cdf57faa44e30b93",
+     "Role": "Irving Bailiff",
+     "Type": "Actor",
+     "PrimaryImageTag": "09f6ebe2ae36d015b398cb4c9147977d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "09f6ebe2ae36d015b398cb4c9147977d": "dzK-IHoe.8-;~qj[xvt7R*j[RPRj%NofjFt7%gj]t7t7"
+      }
+     }
+    },
+    {
+     "Name": "Christopher Walken",
+     "Id": "b187ccf4a2ea0aaf6b35bc44fa247433",
+     "Role": "Burt Goodman",
+     "Type": "Actor",
+     "PrimaryImageTag": "a105609e7933ebb8fcfec4280af9305d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "a105609e7933ebb8fcfec4280af9305d": "dQCFef-p0z57?HxaIpNG9uNG-V%2E2NGxaxaR+WCs.of"
+      }
+     }
+    },
+    {
+     "Name": "Patricia Arquette",
+     "Id": "8fa306fe0ad73a8c60cca56a7b8dc68b",
+     "Role": "Harmony Cobel",
+     "Type": "Actor",
+     "PrimaryImageTag": "27f5757cfd0ade29956be515173204f6",
+     "ImageBlurHashes": {
+      "Primary": {
+       "27f5757cfd0ade29956be515173204f6": "dTF;vVIo0#=|XAs,NIbbI;bcRjNGkCs:s:WBNeWCs.WC"
+      }
+     }
+    },
+    {
+     "Name": "Jeff McCarthy",
+     "Id": "14b8700f3ccae988d6f0c43a6eac6cf1",
+     "Role": "Nature Documentary Voice (voice)",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Anthoula Katsimatides",
+     "Id": "bed065566ad0ea22e3484ddf093acbd8",
+     "Role": "Florence",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Yul Vazquez",
+     "Id": "e11c9c67925512be28e32dccb3ba78e4",
+     "Role": "Peter 'Petey' Kilmer",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Annie McNamara",
+     "Id": "9e63456008972d5981b273f20b2ed775",
+     "Role": "Danise",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Donald Webber Jr.",
+     "Id": "668ffdc17c6ead6a2283a9545953a887",
+     "Role": "Patton",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Grace Rex",
+     "Id": "84a0299b46dd8bcf5e8b6704ce83de9a",
+     "Role": "Rebeck",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Michael Cumpsty",
+     "Id": "6f0fa0b278881e1fec5596816943629c",
+     "Role": "Doug Graner",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Mark Kenneth Smaltz",
+     "Id": "ef71c9710aef2ae13c08f6faf53fe900",
+     "Role": "Judd",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Ben Stiller",
+     "Id": "6e5e375bf0ab34e73d91bfd03f05afa3",
+     "Role": "Director",
+     "Type": "Director",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Dan Erickson",
+     "Id": "2fcb9b025fbf105e25ee923e4b198faf",
+     "Role": "Writer",
+     "Type": "Writer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Mark Friedman",
+     "Id": "e4be4a64f4db171ac397e5415bbf1edc",
+     "Role": "Executive Producer",
+     "Type": "Producer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Erika Rydell",
+     "Id": "33240bf28a3b5ca691efe5faec294ce6",
+     "Role": "Producer's Assistant",
+     "Type": "Producer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    }
+   ],
+   "ParentLogoItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropImageTags": [
+    "2179e7d73653530acf30716d492fb0e9"
+   ],
+   "UserData": {
+    "PlaybackPositionTicks": 0,
+    "PlayCount": 1,
+    "IsFavorite": false,
+    "LastPlayedDate": "2026-09-24T18:00:19.0873998Z",
+    "Played": true,
+    "Key": "371980001001",
+    "ItemId": "00000000000000000000000000000000"
+   },
+   "SeriesName": "Severance",
+   "SeriesId": "33e60e865132660eaf355c6fd0570697",
+   "SeasonId": "4fd2af9218506eced1d9ef710c6d0d73",
+   "SeriesPrimaryImageTag": "92fe8feffe6bb43d4283025432c6d16b",
+   "SeasonName": "Season 1",
+   "VideoType": "VideoFile",
+   "ImageTags": {
+    "Primary": "15a3feeffb26bb8b67107edf39dfca52"
+   },
+   "BackdropImageTags": [],
+   "ParentLogoImageTag": "de5c63f61a9b56c5ba14978250674ab0",
+   "ImageBlurHashes": {
+    "Primary": {
+     "15a3feeffb26bb8b67107edf39dfca52": "W784bz-:4.M|R*WB%LofR%WBayay0KNG-;xtxZt7IoR*xut7s:of",
+     "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+    },
+    "Logo": {
+     "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+    },
+    "Thumb": {
+     "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+    },
+    "Backdrop": {
+     "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+    }
+   },
+   "ParentThumbItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentThumbImageTag": "04f5a71913aacbaf96cc31d7380d4c13",
+   "LocationType": "FileSystem",
+   "MediaType": "Video"
+  },
+  {
+   "Name": "Half Loop",
+   "ServerId": "6cc26f6bbc534181a937364479f2910d",
+   "Id": "4ff952d1b952e4bcaa297edc8380f9ef",
+   "HasSubtitles": true,
+   "Container": "mkv",
+   "PremiereDate": "2022-02-17T00:00:00.0000000Z",
+   "MediaSources": [
+    {
+     "Protocol": "File",
+     "Id": "4ff952d1b952e4bcaa297edc8380f9ef",
+     "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E02.mkv",
+     "Type": "Default",
+     "Container": "mkv",
+     "Size": 2765039,
+     "Name": "Severance S01E02",
+     "IsRemote": false,
+     "ETag": "9de49e09bc7475968eb63996ea4e2fbd",
+     "RunTimeTicks": 600230000,
+     "ReadAtNativeFramerate": false,
+     "IgnoreDts": false,
+     "IgnoreIndex": false,
+     "GenPtsInput": false,
+     "SupportsTranscoding": true,
+     "SupportsDirectStream": true,
+     "SupportsDirectPlay": true,
+     "IsInfiniteStream": false,
+     "UseMostCompatibleTranscodingProfile": false,
+     "RequiresOpening": false,
+     "RequiresClosing": false,
+     "RequiresLooping": false,
+     "SupportsProbing": true,
+     "VideoType": "VideoFile",
+     "MediaStreams": [
+      {
+       "Codec": "subrip",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "Spanish - SUBRIP - External",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 0,
+       "IsExternal": true,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E02.es.srt",
+       "Level": 0
+      },
+      {
+       "Codec": "h264",
+       "TimeBase": "1/1000",
+       "VideoRange": "SDR",
+       "VideoRangeType": "SDR",
+       "AudioSpatialFormat": "None",
+       "DisplayTitle": "360p H264 SDR",
+       "NalLengthSize": "4",
+       "IsInterlaced": false,
+       "IsAVC": true,
+       "BitRate": 368530,
+       "BitDepth": 8,
+       "RefFrames": 1,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 360,
+       "Width": 640,
+       "AverageFrameRate": 24,
+       "RealFrameRate": 24,
+       "ReferenceFrameRate": 24,
+       "Profile": "High",
+       "Type": "Video",
+       "AspectRatio": "16:9",
+       "Index": 1,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "PixelFormat": "yuv420p",
+       "Level": 30,
+       "IsAnamorphic": false
+      },
+      {
+       "Codec": "aac",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "English Stereo - AAC - Default",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": true,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 2,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "aac",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "Title": "Español Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "Español Stereo - Spanish - AAC",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 3,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "subrip",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "English - SUBRIP",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 4,
+       "IsExternal": false,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Level": 0
+      }
+     ],
+     "MediaAttachments": [],
+     "Formats": [],
+     "Bitrate": 752530,
+     "RequiredHttpHeaders": {},
+     "TranscodingSubProtocol": "http",
+     "DefaultAudioStreamIndex": 2,
+     "DefaultSubtitleStreamIndex": 0,
+     "HasSegments": false
+    }
+   ],
+   "OfficialRating": "TV-MA",
+   "ChannelId": null,
+   "Overview": "The team train new hire Helly on macrodata refinement. Mark takes a day off to meet with a mysterious former colleague.",
+   "CommunityRating": 8.24,
+   "RunTimeTicks": 600230000,
+   "ProductionYear": 2022,
+   "IndexNumber": 2,
+   "ParentIndexNumber": 1,
+   "IsFolder": false,
+   "Type": "Episode",
+   "People": [
+    {
+     "Name": "Adam Scott",
+     "Id": "4f68f02ab5f5160c0a5c98b61d8c2897",
+     "Role": "Mark Scout",
+     "Type": "Actor",
+     "PrimaryImageTag": "72c5c122cd228e253f68119d05c1f3c8",
+     "ImageBlurHashes": {
+      "Primary": {
+       "72c5c122cd228e253f68119d05c1f3c8": "dVG+msJ8AD_Mk;w{M{NG9GW=$%RPO?tR.7oyNGsoofWB"
+      }
+     }
+    },
+    {
+     "Name": "Britt Lower",
+     "Id": "b9e412c2dc17d55fcbc6c0877376e6a0",
+     "Role": "Helly Riggs",
+     "Type": "Actor",
+     "PrimaryImageTag": "f3dddf79ebf1c13d2997cbbe9c4bda64",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f3dddf79ebf1c13d2997cbbe9c4bda64": "dbHU^7oy%z?a~pofx]xtIoofr?M{%foyWBbH?bjZV[t7"
+      }
+     }
+    },
+    {
+     "Name": "Tramell Tillman",
+     "Id": "a6f07b7712cb0f08da1af2edd42e6a8b",
+     "Role": "Seth Milchick",
+     "Type": "Actor",
+     "PrimaryImageTag": "bab3bfdf684fec4610f07aad7a68e1a5",
+     "ImageBlurHashes": {
+      "Primary": {
+       "bab3bfdf684fec4610f07aad7a68e1a5": "dbEWB]WAPXtmRjskW=V@?vWEs8t8tmbwtSkY-pt7jEof"
+      }
+     }
+    },
+    {
+     "Name": "Zach Cherry",
+     "Id": "019d7881764b94b1d833463fe0d8bf46",
+     "Role": "Dylan George",
+     "Type": "Actor",
+     "PrimaryImageTag": "0ca275edda9f2f71af2ae95d0cc1167f",
+     "ImageBlurHashes": {
+      "Primary": {
+       "0ca275edda9f2f71af2ae95d0cc1167f": "deGIfm$*Mzs;@XsAMyi_PBX8smflE2ae%LkCm,j[smjZ"
+      }
+     }
+    },
+    {
+     "Name": "Jen Tullock",
+     "Id": "962751e1747c9f14040c65346af2f442",
+     "Role": "Devon Scout-Hale",
+     "Type": "Actor",
+     "PrimaryImageTag": "f9be541a1b0fb120550679c0098fa539",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f9be541a1b0fb120550679c0098fa539": "dYHK93xZ0yoIEMof%1R*I:R*$*s:9uR*bbs:j[ax$*xZ"
+      }
+     }
+    },
+    {
+     "Name": "Michael Chernus",
+     "Id": "10d4ac8190c469866feafac2795c5711",
+     "Role": "Ricken Hale",
+     "Type": "Actor",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Dichen Lachman",
+     "Id": "c62770fbfcc994dc7ed0beb86c85e407",
+     "Role": "Ms. Casey",
+     "Type": "Actor",
+     "PrimaryImageTag": "06d475df429bcd125fab37e1df664a30",
+     "ImageBlurHashes": {
+      "Primary": {
+       "06d475df429bcd125fab37e1df664a30": "dNH^u4~CAJIqGKX9%NkX?dR*%N%Mb|Wq%3t8JXR+xatR"
+      }
+     }
+    },
+    {
+     "Name": "John Turturro",
+     "Id": "b79193ec51d23f93cdf57faa44e30b93",
+     "Role": "Irving Bailiff",
+     "Type": "Actor",
+     "PrimaryImageTag": "09f6ebe2ae36d015b398cb4c9147977d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "09f6ebe2ae36d015b398cb4c9147977d": "dzK-IHoe.8-;~qj[xvt7R*j[RPRj%NofjFt7%gj]t7t7"
+      }
+     }
+    },
+    {
+     "Name": "Christopher Walken",
+     "Id": "b187ccf4a2ea0aaf6b35bc44fa247433",
+     "Role": "Burt Goodman",
+     "Type": "Actor",
+     "PrimaryImageTag": "a105609e7933ebb8fcfec4280af9305d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "a105609e7933ebb8fcfec4280af9305d": "dQCFef-p0z57?HxaIpNG9uNG-V%2E2NGxaxaR+WCs.of"
+      }
+     }
+    },
+    {
+     "Name": "Patricia Arquette",
+     "Id": "8fa306fe0ad73a8c60cca56a7b8dc68b",
+     "Role": "Harmony Cobel",
+     "Type": "Actor",
+     "PrimaryImageTag": "27f5757cfd0ade29956be515173204f6",
+     "ImageBlurHashes": {
+      "Primary": {
+       "27f5757cfd0ade29956be515173204f6": "dTF;vVIo0#=|XAs,NIbbI;bcRjNGkCs:s:WBNeWCs.WC"
+      }
+     }
+    },
+    {
+     "Name": "Hudson Flynn",
+     "Id": "0412331315807a4be17bee6af510bff0",
+     "Role": "WMC Activist 1",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Ruby Stevens",
+     "Id": "add44bfd81864ac1f4aafd7cf67ca33c",
+     "Role": "WMC Activist 2",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Nikki M. James",
+     "Id": "b4be5c71bfb7316eca12f5069c4af41b",
+     "Role": "Alexa",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Yul Vazquez",
+     "Id": "e11c9c67925512be28e32dccb3ba78e4",
+     "Role": "Peter 'Petey' Kilmer",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Michael Cumpsty",
+     "Id": "6f0fa0b278881e1fec5596816943629c",
+     "Role": "Doug Graner",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Ben Stiller",
+     "Id": "6e5e375bf0ab34e73d91bfd03f05afa3",
+     "Role": "Director",
+     "Type": "Director",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Dan Erickson",
+     "Id": "2fcb9b025fbf105e25ee923e4b198faf",
+     "Role": "Writer",
+     "Type": "Writer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Mark Friedman",
+     "Id": "e4be4a64f4db171ac397e5415bbf1edc",
+     "Role": "Executive Producer",
+     "Type": "Producer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Erika Rydell",
+     "Id": "33240bf28a3b5ca691efe5faec294ce6",
+     "Role": "Producer's Assistant",
+     "Type": "Producer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    }
+   ],
+   "ParentLogoItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropImageTags": [
+    "2179e7d73653530acf30716d492fb0e9"
+   ],
+   "UserData": {
+    "PlaybackPositionTicks": 0,
+    "PlayCount": 0,
+    "IsFavorite": false,
+    "Played": false,
+    "Key": "371980001002",
+    "ItemId": "00000000000000000000000000000000"
+   },
+   "SeriesName": "Severance",
+   "SeriesId": "33e60e865132660eaf355c6fd0570697",
+   "SeasonId": "4fd2af9218506eced1d9ef710c6d0d73",
+   "SeriesPrimaryImageTag": "92fe8feffe6bb43d4283025432c6d16b",
+   "SeasonName": "Season 1",
+   "VideoType": "VideoFile",
+   "ImageTags": {
+    "Primary": "33e5c46d8fceb8227bd49bda630ca54a"
+   },
+   "BackdropImageTags": [],
+   "ParentLogoImageTag": "de5c63f61a9b56c5ba14978250674ab0",
+   "ImageBlurHashes": {
+    "Primary": {
+     "33e5c46d8fceb8227bd49bda630ca54a": "WoJ[hh-;_M?at7%M~Xxuogs;ofxu%LofD%WBjZWB?vt7M{t7WBj[",
+     "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+    },
+    "Logo": {
+     "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+    },
+    "Thumb": {
+     "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+    },
+    "Backdrop": {
+     "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+    }
+   },
+   "ParentThumbItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentThumbImageTag": "04f5a71913aacbaf96cc31d7380d4c13",
+   "LocationType": "FileSystem",
+   "MediaType": "Video"
+  },
+  {
+   "Name": "In Perpetuity",
+   "ServerId": "6cc26f6bbc534181a937364479f2910d",
+   "Id": "cd09dfce07177dfb807edca25489de6a",
+   "HasSubtitles": true,
+   "Container": "mkv",
+   "PremiereDate": "2022-02-24T00:00:00.0000000Z",
+   "MediaSources": [
+    {
+     "Protocol": "File",
+     "Id": "cd09dfce07177dfb807edca25489de6a",
+     "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E03.mkv",
+     "Type": "Default",
+     "Container": "mkv",
+     "Size": 2763971,
+     "Name": "Severance S01E03",
+     "IsRemote": false,
+     "ETag": "27c55cafc35c63595e052e5a396b8a75",
+     "RunTimeTicks": 600230000,
+     "ReadAtNativeFramerate": false,
+     "IgnoreDts": false,
+     "IgnoreIndex": false,
+     "GenPtsInput": false,
+     "SupportsTranscoding": true,
+     "SupportsDirectStream": true,
+     "SupportsDirectPlay": true,
+     "IsInfiniteStream": false,
+     "UseMostCompatibleTranscodingProfile": false,
+     "RequiresOpening": false,
+     "RequiresClosing": false,
+     "RequiresLooping": false,
+     "SupportsProbing": true,
+     "VideoType": "VideoFile",
+     "MediaStreams": [
+      {
+       "Codec": "subrip",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "Spanish - SUBRIP - External",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 0,
+       "IsExternal": true,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E03.es.srt",
+       "Level": 0
+      },
+      {
+       "Codec": "h264",
+       "TimeBase": "1/1000",
+       "VideoRange": "SDR",
+       "VideoRangeType": "SDR",
+       "AudioSpatialFormat": "None",
+       "DisplayTitle": "360p H264 SDR",
+       "NalLengthSize": "4",
+       "IsInterlaced": false,
+       "IsAVC": true,
+       "BitRate": 368388,
+       "BitDepth": 8,
+       "RefFrames": 1,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 360,
+       "Width": 640,
+       "AverageFrameRate": 24,
+       "RealFrameRate": 24,
+       "ReferenceFrameRate": 24,
+       "Profile": "High",
+       "Type": "Video",
+       "AspectRatio": "16:9",
+       "Index": 1,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "PixelFormat": "yuv420p",
+       "Level": 30,
+       "IsAnamorphic": false
+      },
+      {
+       "Codec": "aac",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "English Stereo - AAC - Default",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": true,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 2,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "aac",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "Title": "Español Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "Español Stereo - Spanish - AAC",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 3,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "subrip",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "English - SUBRIP",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 4,
+       "IsExternal": false,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Level": 0
+      }
+     ],
+     "MediaAttachments": [],
+     "Formats": [],
+     "Bitrate": 752388,
+     "RequiredHttpHeaders": {},
+     "TranscodingSubProtocol": "http",
+     "DefaultAudioStreamIndex": 2,
+     "DefaultSubtitleStreamIndex": 0,
+     "HasSegments": false
+    }
+   ],
+   "OfficialRating": "TV-MA",
+   "ChannelId": null,
+   "Overview": "Mark takes the team on a field trip, but Helly continues to rebel. A deteriorating Petey struggles to tell Mark about Lumon’s misdeeds.",
+   "CommunityRating": 8.035,
+   "RunTimeTicks": 600230000,
+   "ProductionYear": 2022,
+   "IndexNumber": 3,
+   "ParentIndexNumber": 1,
+   "IsFolder": false,
+   "Type": "Episode",
+   "People": [
+    {
+     "Name": "Adam Scott",
+     "Id": "4f68f02ab5f5160c0a5c98b61d8c2897",
+     "Role": "Mark Scout",
+     "Type": "Actor",
+     "PrimaryImageTag": "72c5c122cd228e253f68119d05c1f3c8",
+     "ImageBlurHashes": {
+      "Primary": {
+       "72c5c122cd228e253f68119d05c1f3c8": "dVG+msJ8AD_Mk;w{M{NG9GW=$%RPO?tR.7oyNGsoofWB"
+      }
+     }
+    },
+    {
+     "Name": "Britt Lower",
+     "Id": "b9e412c2dc17d55fcbc6c0877376e6a0",
+     "Role": "Helly Riggs",
+     "Type": "Actor",
+     "PrimaryImageTag": "f3dddf79ebf1c13d2997cbbe9c4bda64",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f3dddf79ebf1c13d2997cbbe9c4bda64": "dbHU^7oy%z?a~pofx]xtIoofr?M{%foyWBbH?bjZV[t7"
+      }
+     }
+    },
+    {
+     "Name": "Tramell Tillman",
+     "Id": "a6f07b7712cb0f08da1af2edd42e6a8b",
+     "Role": "Seth Milchick",
+     "Type": "Actor",
+     "PrimaryImageTag": "bab3bfdf684fec4610f07aad7a68e1a5",
+     "ImageBlurHashes": {
+      "Primary": {
+       "bab3bfdf684fec4610f07aad7a68e1a5": "dbEWB]WAPXtmRjskW=V@?vWEs8t8tmbwtSkY-pt7jEof"
+      }
+     }
+    },
+    {
+     "Name": "Zach Cherry",
+     "Id": "019d7881764b94b1d833463fe0d8bf46",
+     "Role": "Dylan George",
+     "Type": "Actor",
+     "PrimaryImageTag": "0ca275edda9f2f71af2ae95d0cc1167f",
+     "ImageBlurHashes": {
+      "Primary": {
+       "0ca275edda9f2f71af2ae95d0cc1167f": "deGIfm$*Mzs;@XsAMyi_PBX8smflE2ae%LkCm,j[smjZ"
+      }
+     }
+    },
+    {
+     "Name": "Jen Tullock",
+     "Id": "962751e1747c9f14040c65346af2f442",
+     "Role": "Devon Scout-Hale",
+     "Type": "Actor",
+     "PrimaryImageTag": "f9be541a1b0fb120550679c0098fa539",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f9be541a1b0fb120550679c0098fa539": "dYHK93xZ0yoIEMof%1R*I:R*$*s:9uR*bbs:j[ax$*xZ"
+      }
+     }
+    },
+    {
+     "Name": "Michael Chernus",
+     "Id": "10d4ac8190c469866feafac2795c5711",
+     "Role": "Ricken Hale",
+     "Type": "Actor",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Dichen Lachman",
+     "Id": "c62770fbfcc994dc7ed0beb86c85e407",
+     "Role": "Ms. Casey",
+     "Type": "Actor",
+     "PrimaryImageTag": "06d475df429bcd125fab37e1df664a30",
+     "ImageBlurHashes": {
+      "Primary": {
+       "06d475df429bcd125fab37e1df664a30": "dNH^u4~CAJIqGKX9%NkX?dR*%N%Mb|Wq%3t8JXR+xatR"
+      }
+     }
+    },
+    {
+     "Name": "John Turturro",
+     "Id": "b79193ec51d23f93cdf57faa44e30b93",
+     "Role": "Irving Bailiff",
+     "Type": "Actor",
+     "PrimaryImageTag": "09f6ebe2ae36d015b398cb4c9147977d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "09f6ebe2ae36d015b398cb4c9147977d": "dzK-IHoe.8-;~qj[xvt7R*j[RPRj%NofjFt7%gj]t7t7"
+      }
+     }
+    },
+    {
+     "Name": "Christopher Walken",
+     "Id": "b187ccf4a2ea0aaf6b35bc44fa247433",
+     "Role": "Burt Goodman",
+     "Type": "Actor",
+     "PrimaryImageTag": "a105609e7933ebb8fcfec4280af9305d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "a105609e7933ebb8fcfec4280af9305d": "dQCFef-p0z57?HxaIpNG9uNG-V%2E2NGxaxaR+WCs.of"
+      }
+     }
+    },
+    {
+     "Name": "Patricia Arquette",
+     "Id": "8fa306fe0ad73a8c60cca56a7b8dc68b",
+     "Role": "Harmony Cobel",
+     "Type": "Actor",
+     "PrimaryImageTag": "27f5757cfd0ade29956be515173204f6",
+     "ImageBlurHashes": {
+      "Primary": {
+       "27f5757cfd0ade29956be515173204f6": "dTF;vVIo0#=|XAs,NIbbI;bcRjNGkCs:s:WBNeWCs.WC"
+      }
+     }
+    },
+    {
+     "Name": "Alexis Cofield",
+     "Id": "454ee9c6027082af67fd647346ec1a91",
+     "Role": "Checkout Girl",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Alexandra Ferrara",
+     "Id": "64ab483dc7fd520f50978947ef48990a",
+     "Role": "Weather Channel Voiceover (voice)",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Michael Kayne",
+     "Id": "9065fdf01a46a1d608a153c47113d2a5",
+     "Role": "Steven",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Jillian Lindig",
+     "Id": "1df87c853d3179a159300263efb1adfe",
+     "Role": "Myrtle Eagan",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Lou Martini Jr.",
+     "Id": "c0ae33377ffce9030b26bd13d48f8dfd",
+     "Role": "Cop Voiceover (voice)",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Sydney Cole Alexander",
+     "Id": "bb0862ec1da2a52d8810398f63e97aa2",
+     "Role": "Natalie Kalen",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Yul Vazquez",
+     "Id": "e11c9c67925512be28e32dccb3ba78e4",
+     "Role": "Peter 'Petey' Kilmer",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Michael Cumpsty",
+     "Id": "6f0fa0b278881e1fec5596816943629c",
+     "Role": "Doug Graner",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Michael Siberry",
+     "Id": "28ca85559ff6926c36bdb1c571da9a95",
+     "Role": "Jame Eagan",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Claudia Robinson",
+     "Id": "b0edf118923587e518a6e948bf43c58c",
+     "Role": "Felicia",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Mark Kenneth Smaltz",
+     "Id": "ef71c9710aef2ae13c08f6faf53fe900",
+     "Role": "Judd",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Marc Geller",
+     "Id": "8b6eccc8349ae1ec1387dba365c3fc5a",
+     "Role": "Kier Eagan (voice)",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Ben Stiller",
+     "Id": "6e5e375bf0ab34e73d91bfd03f05afa3",
+     "Role": "Director",
+     "Type": "Director",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Andrew Colville",
+     "Id": "a8f91eaf27e17c560a60d5dd22be95c0",
+     "Role": "Writer",
+     "Type": "Writer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Mark Friedman",
+     "Id": "e4be4a64f4db171ac397e5415bbf1edc",
+     "Role": "Executive Producer",
+     "Type": "Producer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Erika Rydell",
+     "Id": "33240bf28a3b5ca691efe5faec294ce6",
+     "Role": "Producer's Assistant",
+     "Type": "Producer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    }
+   ],
+   "ParentLogoItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropImageTags": [
+    "2179e7d73653530acf30716d492fb0e9"
+   ],
+   "UserData": {
+    "PlaybackPositionTicks": 0,
+    "PlayCount": 0,
+    "IsFavorite": false,
+    "Played": false,
+    "Key": "371980001003",
+    "ItemId": "00000000000000000000000000000000"
+   },
+   "SeriesName": "Severance",
+   "SeriesId": "33e60e865132660eaf355c6fd0570697",
+   "SeasonId": "4fd2af9218506eced1d9ef710c6d0d73",
+   "SeriesPrimaryImageTag": "92fe8feffe6bb43d4283025432c6d16b",
+   "SeasonName": "Season 1",
+   "VideoType": "VideoFile",
+   "ImageTags": {
+    "Primary": "1402b9b3872b35aff84111ad3a5cee25"
+   },
+   "BackdropImageTags": [],
+   "ParentLogoImageTag": "de5c63f61a9b56c5ba14978250674ab0",
+   "ImageBlurHashes": {
+    "Primary": {
+     "1402b9b3872b35aff84111ad3a5cee25": "WOGb-lIUIU%MtR-;%Mofj@a{fkRj~qt7WBoeR*fl?bofxuayR+kC",
+     "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+    },
+    "Logo": {
+     "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+    },
+    "Thumb": {
+     "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+    },
+    "Backdrop": {
+     "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+    }
+   },
+   "ParentThumbItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentThumbImageTag": "04f5a71913aacbaf96cc31d7380d4c13",
+   "LocationType": "FileSystem",
+   "MediaType": "Video"
+  },
+  {
+   "Name": "The You You Are",
+   "ServerId": "6cc26f6bbc534181a937364479f2910d",
+   "Id": "4f88543d9b4713904a72ccd154f7ec50",
+   "HasSubtitles": true,
+   "Container": "mkv",
+   "PremiereDate": "2022-03-03T00:00:00.0000000Z",
+   "MediaSources": [
+    {
+     "Protocol": "File",
+     "Id": "4f88543d9b4713904a72ccd154f7ec50",
+     "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E04.mkv",
+     "Type": "Default",
+     "Container": "mkv",
+     "Size": 2762162,
+     "Name": "Severance S01E04",
+     "IsRemote": false,
+     "ETag": "27c55cafc35c63595e052e5a396b8a75",
+     "RunTimeTicks": 600230000,
+     "ReadAtNativeFramerate": false,
+     "IgnoreDts": false,
+     "IgnoreIndex": false,
+     "GenPtsInput": false,
+     "SupportsTranscoding": true,
+     "SupportsDirectStream": true,
+     "SupportsDirectPlay": true,
+     "IsInfiniteStream": false,
+     "UseMostCompatibleTranscodingProfile": false,
+     "RequiresOpening": false,
+     "RequiresClosing": false,
+     "RequiresLooping": false,
+     "SupportsProbing": true,
+     "VideoType": "VideoFile",
+     "MediaStreams": [
+      {
+       "Codec": "subrip",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "Spanish - SUBRIP - External",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 0,
+       "IsExternal": true,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E04.es.srt",
+       "Level": 0
+      },
+      {
+       "Codec": "h264",
+       "TimeBase": "1/1000",
+       "VideoRange": "SDR",
+       "VideoRangeType": "SDR",
+       "AudioSpatialFormat": "None",
+       "DisplayTitle": "360p H264 SDR",
+       "NalLengthSize": "4",
+       "IsInterlaced": false,
+       "IsAVC": true,
+       "BitRate": 368147,
+       "BitDepth": 8,
+       "RefFrames": 1,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 360,
+       "Width": 640,
+       "AverageFrameRate": 24,
+       "RealFrameRate": 24,
+       "ReferenceFrameRate": 24,
+       "Profile": "High",
+       "Type": "Video",
+       "AspectRatio": "16:9",
+       "Index": 1,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "PixelFormat": "yuv420p",
+       "Level": 30,
+       "IsAnamorphic": false
+      },
+      {
+       "Codec": "aac",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "English Stereo - AAC - Default",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": true,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 2,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "aac",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "Title": "Español Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "Español Stereo - Spanish - AAC",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 3,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "subrip",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "English - SUBRIP",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 4,
+       "IsExternal": false,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Level": 0
+      }
+     ],
+     "MediaAttachments": [],
+     "Formats": [],
+     "Bitrate": 752147,
+     "RequiredHttpHeaders": {},
+     "TranscodingSubProtocol": "http",
+     "DefaultAudioStreamIndex": 2,
+     "DefaultSubtitleStreamIndex": 0,
+     "HasSegments": false
+    }
+   ],
+   "OfficialRating": "TV-MA",
+   "ChannelId": null,
+   "Overview": "Irving finds an intriguing book at work. Helly aggressively pursues a meeting with her Outie. Mark attends a funeral with Ms. Selvig.",
+   "CommunityRating": 8.313,
+   "RunTimeTicks": 600230000,
+   "ProductionYear": 2022,
+   "IndexNumber": 4,
+   "ParentIndexNumber": 1,
+   "IsFolder": false,
+   "Type": "Episode",
+   "People": [
+    {
+     "Name": "Adam Scott",
+     "Id": "4f68f02ab5f5160c0a5c98b61d8c2897",
+     "Role": "Mark Scout",
+     "Type": "Actor",
+     "PrimaryImageTag": "72c5c122cd228e253f68119d05c1f3c8",
+     "ImageBlurHashes": {
+      "Primary": {
+       "72c5c122cd228e253f68119d05c1f3c8": "dVG+msJ8AD_Mk;w{M{NG9GW=$%RPO?tR.7oyNGsoofWB"
+      }
+     }
+    },
+    {
+     "Name": "Britt Lower",
+     "Id": "b9e412c2dc17d55fcbc6c0877376e6a0",
+     "Role": "Helly Riggs",
+     "Type": "Actor",
+     "PrimaryImageTag": "f3dddf79ebf1c13d2997cbbe9c4bda64",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f3dddf79ebf1c13d2997cbbe9c4bda64": "dbHU^7oy%z?a~pofx]xtIoofr?M{%foyWBbH?bjZV[t7"
+      }
+     }
+    },
+    {
+     "Name": "Tramell Tillman",
+     "Id": "a6f07b7712cb0f08da1af2edd42e6a8b",
+     "Role": "Seth Milchick",
+     "Type": "Actor",
+     "PrimaryImageTag": "bab3bfdf684fec4610f07aad7a68e1a5",
+     "ImageBlurHashes": {
+      "Primary": {
+       "bab3bfdf684fec4610f07aad7a68e1a5": "dbEWB]WAPXtmRjskW=V@?vWEs8t8tmbwtSkY-pt7jEof"
+      }
+     }
+    },
+    {
+     "Name": "Zach Cherry",
+     "Id": "019d7881764b94b1d833463fe0d8bf46",
+     "Role": "Dylan George",
+     "Type": "Actor",
+     "PrimaryImageTag": "0ca275edda9f2f71af2ae95d0cc1167f",
+     "ImageBlurHashes": {
+      "Primary": {
+       "0ca275edda9f2f71af2ae95d0cc1167f": "deGIfm$*Mzs;@XsAMyi_PBX8smflE2ae%LkCm,j[smjZ"
+      }
+     }
+    },
+    {
+     "Name": "Jen Tullock",
+     "Id": "962751e1747c9f14040c65346af2f442",
+     "Role": "Devon Scout-Hale",
+     "Type": "Actor",
+     "PrimaryImageTag": "f9be541a1b0fb120550679c0098fa539",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f9be541a1b0fb120550679c0098fa539": "dYHK93xZ0yoIEMof%1R*I:R*$*s:9uR*bbs:j[ax$*xZ"
+      }
+     }
+    },
+    {
+     "Name": "Michael Chernus",
+     "Id": "10d4ac8190c469866feafac2795c5711",
+     "Role": "Ricken Hale",
+     "Type": "Actor",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Dichen Lachman",
+     "Id": "c62770fbfcc994dc7ed0beb86c85e407",
+     "Role": "Ms. Casey",
+     "Type": "Actor",
+     "PrimaryImageTag": "06d475df429bcd125fab37e1df664a30",
+     "ImageBlurHashes": {
+      "Primary": {
+       "06d475df429bcd125fab37e1df664a30": "dNH^u4~CAJIqGKX9%NkX?dR*%N%Mb|Wq%3t8JXR+xatR"
+      }
+     }
+    },
+    {
+     "Name": "John Turturro",
+     "Id": "b79193ec51d23f93cdf57faa44e30b93",
+     "Role": "Irving Bailiff",
+     "Type": "Actor",
+     "PrimaryImageTag": "09f6ebe2ae36d015b398cb4c9147977d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "09f6ebe2ae36d015b398cb4c9147977d": "dzK-IHoe.8-;~qj[xvt7R*j[RPRj%NofjFt7%gj]t7t7"
+      }
+     }
+    },
+    {
+     "Name": "Christopher Walken",
+     "Id": "b187ccf4a2ea0aaf6b35bc44fa247433",
+     "Role": "Burt Goodman",
+     "Type": "Actor",
+     "PrimaryImageTag": "a105609e7933ebb8fcfec4280af9305d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "a105609e7933ebb8fcfec4280af9305d": "dQCFef-p0z57?HxaIpNG9uNG-V%2E2NGxaxaR+WCs.of"
+      }
+     }
+    },
+    {
+     "Name": "Patricia Arquette",
+     "Id": "8fa306fe0ad73a8c60cca56a7b8dc68b",
+     "Role": "Harmony Cobel",
+     "Type": "Actor",
+     "PrimaryImageTag": "27f5757cfd0ade29956be515173204f6",
+     "ImageBlurHashes": {
+      "Primary": {
+       "27f5757cfd0ade29956be515173204f6": "dTF;vVIo0#=|XAs,NIbbI;bcRjNGkCs:s:WBNeWCs.WC"
+      }
+     }
+    },
+    {
+     "Name": "James Augustus Lee",
+     "Id": "ab901a9b349d78e5f21d68b9d74a8cb7",
+     "Role": "Bartender",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Joanne Kelly",
+     "Id": "b4cb532045423e58e78c498037cc6bce",
+     "Role": "Nina Kilmer",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Cassidy Layton",
+     "Id": "bb2bb1facfb4ecead44b0ef489a60032",
+     "Role": "June Kilmer",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Yul Vazquez",
+     "Id": "e11c9c67925512be28e32dccb3ba78e4",
+     "Role": "Peter 'Petey' Kilmer",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Michael Cumpsty",
+     "Id": "6f0fa0b278881e1fec5596816943629c",
+     "Role": "Doug Graner",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Rachel Addington",
+     "Id": "8aa25cf74a58911961bc1b882b9ca523",
+     "Role": "Elizabeth",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Claudia Robinson",
+     "Id": "b0edf118923587e518a6e948bf43c58c",
+     "Role": "Felicia",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Aoife McArdle",
+     "Id": "7bf76adbec3e73d642b67af7a09403b3",
+     "Role": "Director",
+     "Type": "Director",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Kari Drake",
+     "Id": "88f5971a5740cf3187c8fedb89f14295",
+     "Role": "Writer",
+     "Type": "Writer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Erika Rydell",
+     "Id": "33240bf28a3b5ca691efe5faec294ce6",
+     "Role": "Producer's Assistant",
+     "Type": "Producer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    }
+   ],
+   "ParentLogoItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropImageTags": [
+    "2179e7d73653530acf30716d492fb0e9"
+   ],
+   "UserData": {
+    "PlaybackPositionTicks": 0,
+    "PlayCount": 0,
+    "IsFavorite": false,
+    "Played": false,
+    "Key": "371980001004",
+    "ItemId": "00000000000000000000000000000000"
+   },
+   "SeriesName": "Severance",
+   "SeriesId": "33e60e865132660eaf355c6fd0570697",
+   "SeasonId": "4fd2af9218506eced1d9ef710c6d0d73",
+   "SeriesPrimaryImageTag": "92fe8feffe6bb43d4283025432c6d16b",
+   "SeasonName": "Season 1",
+   "VideoType": "VideoFile",
+   "ImageTags": {
+    "Primary": "acfe4e6205c167064d6644630d811e5d"
+   },
+   "BackdropImageTags": [],
+   "ParentLogoImageTag": "de5c63f61a9b56c5ba14978250674ab0",
+   "ImageBlurHashes": {
+    "Primary": {
+     "acfe4e6205c167064d6644630d811e5d": "WfDAAQxuofIUxutR_N%gM{Rjozt7%Mx^M{bHWXjZt7kCayayaxV@",
+     "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+    },
+    "Logo": {
+     "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+    },
+    "Thumb": {
+     "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+    },
+    "Backdrop": {
+     "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+    }
+   },
+   "ParentThumbItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentThumbImageTag": "04f5a71913aacbaf96cc31d7380d4c13",
+   "LocationType": "FileSystem",
+   "MediaType": "Video"
+  },
+  {
+   "Name": "The Grim Barbarity of Optics and Design",
+   "ServerId": "6cc26f6bbc534181a937364479f2910d",
+   "Id": "e3e7450ab6472c319752ec411159a058",
+   "HasSubtitles": true,
+   "Container": "mkv",
+   "PremiereDate": "2022-03-10T00:00:00.0000000Z",
+   "MediaSources": [
+    {
+     "Protocol": "File",
+     "Id": "e3e7450ab6472c319752ec411159a058",
+     "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E05.mkv",
+     "Type": "Default",
+     "Container": "mkv",
+     "Size": 2763246,
+     "Name": "Severance S01E05",
+     "IsRemote": false,
+     "ETag": "27c55cafc35c63595e052e5a396b8a75",
+     "RunTimeTicks": 600230000,
+     "ReadAtNativeFramerate": false,
+     "IgnoreDts": false,
+     "IgnoreIndex": false,
+     "GenPtsInput": false,
+     "SupportsTranscoding": true,
+     "SupportsDirectStream": true,
+     "SupportsDirectPlay": true,
+     "IsInfiniteStream": false,
+     "UseMostCompatibleTranscodingProfile": false,
+     "RequiresOpening": false,
+     "RequiresClosing": false,
+     "RequiresLooping": false,
+     "SupportsProbing": true,
+     "VideoType": "VideoFile",
+     "MediaStreams": [
+      {
+       "Codec": "subrip",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "Spanish - SUBRIP - External",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 0,
+       "IsExternal": true,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Path": "/media/shows/Severance (2022)/Season 01/Severance S01E05.es.srt",
+       "Level": 0
+      },
+      {
+       "Codec": "h264",
+       "TimeBase": "1/1000",
+       "VideoRange": "SDR",
+       "VideoRangeType": "SDR",
+       "AudioSpatialFormat": "None",
+       "DisplayTitle": "360p H264 SDR",
+       "NalLengthSize": "4",
+       "IsInterlaced": false,
+       "IsAVC": true,
+       "BitRate": 368291,
+       "BitDepth": 8,
+       "RefFrames": 1,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 360,
+       "Width": 640,
+       "AverageFrameRate": 24,
+       "RealFrameRate": 24,
+       "ReferenceFrameRate": 24,
+       "Profile": "High",
+       "Type": "Video",
+       "AspectRatio": "16:9",
+       "Index": 1,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "PixelFormat": "yuv420p",
+       "Level": 30,
+       "IsAnamorphic": false
+      },
+      {
+       "Codec": "aac",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "English Stereo - AAC - Default",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": true,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 2,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "aac",
+       "Language": "spa",
+       "TimeBase": "1/1000",
+       "Title": "Español Stereo",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedDefault": "Default",
+       "LocalizedExternal": "External",
+       "DisplayTitle": "Español Stereo - Spanish - AAC",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "ChannelLayout": "stereo",
+       "BitRate": 192000,
+       "Channels": 2,
+       "SampleRate": 44100,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Profile": "LC",
+       "Type": "Audio",
+       "Index": 3,
+       "IsExternal": false,
+       "IsTextSubtitleStream": false,
+       "SupportsExternalStream": false,
+       "Level": 0
+      },
+      {
+       "Codec": "subrip",
+       "Language": "eng",
+       "TimeBase": "1/1000",
+       "Title": "English",
+       "VideoRange": "Unknown",
+       "VideoRangeType": "Unknown",
+       "AudioSpatialFormat": "None",
+       "LocalizedUndefined": "Undefined",
+       "LocalizedDefault": "Default",
+       "LocalizedForced": "Forced",
+       "LocalizedExternal": "External",
+       "LocalizedHearingImpaired": "Hearing Impaired",
+       "DisplayTitle": "English - SUBRIP",
+       "IsInterlaced": false,
+       "IsAVC": false,
+       "IsDefault": false,
+       "IsForced": false,
+       "IsHearingImpaired": false,
+       "Height": 0,
+       "Width": 0,
+       "Type": "Subtitle",
+       "Index": 4,
+       "IsExternal": false,
+       "IsTextSubtitleStream": true,
+       "SupportsExternalStream": true,
+       "Level": 0
+      }
+     ],
+     "MediaAttachments": [],
+     "Formats": [],
+     "Bitrate": 752291,
+     "RequiredHttpHeaders": {},
+     "TranscodingSubProtocol": "http",
+     "DefaultAudioStreamIndex": 2,
+     "DefaultSubtitleStreamIndex": 0,
+     "HasSegments": false
+    }
+   ],
+   "OfficialRating": "TV-MA",
+   "ChannelId": null,
+   "Overview": "Irving and Dylan confront Burt about his lies. Mark and Helly discover a strange new department.",
+   "CommunityRating": 8.03,
+   "RunTimeTicks": 600230000,
+   "ProductionYear": 2022,
+   "IndexNumber": 5,
+   "ParentIndexNumber": 1,
+   "IsFolder": false,
+   "Type": "Episode",
+   "People": [
+    {
+     "Name": "Adam Scott",
+     "Id": "4f68f02ab5f5160c0a5c98b61d8c2897",
+     "Role": "Mark Scout",
+     "Type": "Actor",
+     "PrimaryImageTag": "72c5c122cd228e253f68119d05c1f3c8",
+     "ImageBlurHashes": {
+      "Primary": {
+       "72c5c122cd228e253f68119d05c1f3c8": "dVG+msJ8AD_Mk;w{M{NG9GW=$%RPO?tR.7oyNGsoofWB"
+      }
+     }
+    },
+    {
+     "Name": "Britt Lower",
+     "Id": "b9e412c2dc17d55fcbc6c0877376e6a0",
+     "Role": "Helly Riggs",
+     "Type": "Actor",
+     "PrimaryImageTag": "f3dddf79ebf1c13d2997cbbe9c4bda64",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f3dddf79ebf1c13d2997cbbe9c4bda64": "dbHU^7oy%z?a~pofx]xtIoofr?M{%foyWBbH?bjZV[t7"
+      }
+     }
+    },
+    {
+     "Name": "Tramell Tillman",
+     "Id": "a6f07b7712cb0f08da1af2edd42e6a8b",
+     "Role": "Seth Milchick",
+     "Type": "Actor",
+     "PrimaryImageTag": "bab3bfdf684fec4610f07aad7a68e1a5",
+     "ImageBlurHashes": {
+      "Primary": {
+       "bab3bfdf684fec4610f07aad7a68e1a5": "dbEWB]WAPXtmRjskW=V@?vWEs8t8tmbwtSkY-pt7jEof"
+      }
+     }
+    },
+    {
+     "Name": "Zach Cherry",
+     "Id": "019d7881764b94b1d833463fe0d8bf46",
+     "Role": "Dylan George",
+     "Type": "Actor",
+     "PrimaryImageTag": "0ca275edda9f2f71af2ae95d0cc1167f",
+     "ImageBlurHashes": {
+      "Primary": {
+       "0ca275edda9f2f71af2ae95d0cc1167f": "deGIfm$*Mzs;@XsAMyi_PBX8smflE2ae%LkCm,j[smjZ"
+      }
+     }
+    },
+    {
+     "Name": "Jen Tullock",
+     "Id": "962751e1747c9f14040c65346af2f442",
+     "Role": "Devon Scout-Hale",
+     "Type": "Actor",
+     "PrimaryImageTag": "f9be541a1b0fb120550679c0098fa539",
+     "ImageBlurHashes": {
+      "Primary": {
+       "f9be541a1b0fb120550679c0098fa539": "dYHK93xZ0yoIEMof%1R*I:R*$*s:9uR*bbs:j[ax$*xZ"
+      }
+     }
+    },
+    {
+     "Name": "Michael Chernus",
+     "Id": "10d4ac8190c469866feafac2795c5711",
+     "Role": "Ricken Hale",
+     "Type": "Actor",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Dichen Lachman",
+     "Id": "c62770fbfcc994dc7ed0beb86c85e407",
+     "Role": "Ms. Casey",
+     "Type": "Actor",
+     "PrimaryImageTag": "06d475df429bcd125fab37e1df664a30",
+     "ImageBlurHashes": {
+      "Primary": {
+       "06d475df429bcd125fab37e1df664a30": "dNH^u4~CAJIqGKX9%NkX?dR*%N%Mb|Wq%3t8JXR+xatR"
+      }
+     }
+    },
+    {
+     "Name": "John Turturro",
+     "Id": "b79193ec51d23f93cdf57faa44e30b93",
+     "Role": "Irving Bailiff",
+     "Type": "Actor",
+     "PrimaryImageTag": "09f6ebe2ae36d015b398cb4c9147977d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "09f6ebe2ae36d015b398cb4c9147977d": "dzK-IHoe.8-;~qj[xvt7R*j[RPRj%NofjFt7%gj]t7t7"
+      }
+     }
+    },
+    {
+     "Name": "Christopher Walken",
+     "Id": "b187ccf4a2ea0aaf6b35bc44fa247433",
+     "Role": "Burt Goodman",
+     "Type": "Actor",
+     "PrimaryImageTag": "a105609e7933ebb8fcfec4280af9305d",
+     "ImageBlurHashes": {
+      "Primary": {
+       "a105609e7933ebb8fcfec4280af9305d": "dQCFef-p0z57?HxaIpNG9uNG-V%2E2NGxaxaR+WCs.of"
+      }
+     }
+    },
+    {
+     "Name": "Patricia Arquette",
+     "Id": "8fa306fe0ad73a8c60cca56a7b8dc68b",
+     "Role": "Harmony Cobel",
+     "Type": "Actor",
+     "PrimaryImageTag": "27f5757cfd0ade29956be515173204f6",
+     "ImageBlurHashes": {
+      "Primary": {
+       "27f5757cfd0ade29956be515173204f6": "dTF;vVIo0#=|XAs,NIbbI;bcRjNGkCs:s:WBNeWCs.WC"
+      }
+     }
+    },
+    {
+     "Name": "Anthoula Katsimatides",
+     "Id": "bed065566ad0ea22e3484ddf093acbd8",
+     "Role": "Florence",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Brian Rock",
+     "Id": "fbc9dee6473b6996d3d3aafb1faa6d31",
+     "Role": "Goat Wrangler",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Nikki M. James",
+     "Id": "b4be5c71bfb7316eca12f5069c4af41b",
+     "Role": "Alexa",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Michael Cumpsty",
+     "Id": "6f0fa0b278881e1fec5596816943629c",
+     "Role": "Doug Graner",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Rachel Addington",
+     "Id": "8aa25cf74a58911961bc1b882b9ca523",
+     "Role": "Elizabeth",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Nora Dale",
+     "Id": "d2c14422368760f42c96fa0eb3a10076",
+     "Role": "Gabriela 'Gabby' Arteta",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Claudia Robinson",
+     "Id": "b0edf118923587e518a6e948bf43c58c",
+     "Role": "Felicia",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Mark Kenneth Smaltz",
+     "Id": "ef71c9710aef2ae13c08f6faf53fe900",
+     "Role": "Judd",
+     "Type": "GuestStar",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Aoife McArdle",
+     "Id": "7bf76adbec3e73d642b67af7a09403b3",
+     "Role": "Director",
+     "Type": "Director",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Anna Ouyang Moench",
+     "Id": "9d3297d763b3a43d72e2c85a5005520b",
+     "Role": "Writer",
+     "Type": "Writer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    },
+    {
+     "Name": "Josephine Sorena",
+     "Id": "35a8e9496faa232cca4f299bd32ba63a",
+     "Role": "Producer's Assistant",
+     "Type": "Producer",
+     "ImageBlurHashes": {
+      "Primary": {}
+     }
+    }
+   ],
+   "ParentLogoItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropImageTags": [
+    "2179e7d73653530acf30716d492fb0e9"
+   ],
+   "UserData": {
+    "PlaybackPositionTicks": 0,
+    "PlayCount": 0,
+    "IsFavorite": false,
+    "Played": false,
+    "Key": "371980001005",
+    "ItemId": "00000000000000000000000000000000"
+   },
+   "SeriesName": "Severance",
+   "SeriesId": "33e60e865132660eaf355c6fd0570697",
+   "SeasonId": "4fd2af9218506eced1d9ef710c6d0d73",
+   "SeriesPrimaryImageTag": "92fe8feffe6bb43d4283025432c6d16b",
+   "SeasonName": "Season 1",
+   "VideoType": "VideoFile",
+   "ImageTags": {
+    "Primary": "83b311494e3909903d3ce61f0b621752"
+   },
+   "BackdropImageTags": [],
+   "ParentLogoImageTag": "de5c63f61a9b56c5ba14978250674ab0",
+   "ImageBlurHashes": {
+    "Primary": {
+     "83b311494e3909903d3ce61f0b621752": "WNDJu3%M%N%hIoS6Q,W?WCt7bFoz9FM|M{ngsoV?.TRPo0t8jFWC",
+     "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+    },
+    "Logo": {
+     "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+    },
+    "Thumb": {
+     "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+    },
+    "Backdrop": {
+     "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+    }
+   },
+   "ParentThumbItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentThumbImageTag": "04f5a71913aacbaf96cc31d7380d4c13",
+   "LocationType": "FileSystem",
+   "MediaType": "Video"
+  }
+ ],
+ "TotalRecordCount": 5,
+ "StartIndex": 0
+}

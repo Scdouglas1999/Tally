@@ -268,7 +268,13 @@ Scope, in this order; everything else follows through server updates (no reinsta
    rows: later).
 3. **Libraries**: grid with tabs (Recommended, Library, Collections, Genres), sort/filter, the alphabet jump.
 4. **Film, series (season tabs + episode list), season, episode pages**: DetailHeader, action row (Resume/Play, From
-   the start, Watched, Favorite, More), cast row, extras.
+   the start, Watched, Favorite, More), cast row, extras. *Done in tvweb-details* (`pages/details/`, `pages/person/`):
+   the `item` route opens films/videos, series, episodes and people by type, `season` is the rundown (season tabs,
+   numbered episodes with NEXT UP / progress / WATCHED, guest stars, season extras); rows: cast & crew (person page),
+   chapters, extras, the collection's next film (TMDb collection order, as Android's CollectionNext), more like this,
+   more from the season. Item menu (MORE, or MENU / INFO on a card), trailer list, full overview, series-watched
+   confirmation and Add to playlist are Tally panels (`kit/Panel`). New kit: DetailHeader, EpisodeRow, FrameCard /
+   PersonCard, Panel. Home cards open these pages (`pages/details/navigate.ts`, Android's `destination()`).
 5. **Player**: Tally controls (seek bar with trickplay, transport, chapters, next up, skip intro), subtitles, audio,
    quality (*the engine layer, app-drawn subtitles, audio/quality switching and the ladder are done*; the full
    controls are a task).
@@ -377,10 +383,10 @@ how), **not possible** (and why).
 | Navigation rail and drawer (Search, Home, libraries, Sports, Surprise me, Favorites, Settings) | done (destinations beyond Home/Settings are placeholders) |
 | Home: games row, header, library rows, backdrop, clock | done |
 | Home: Watch live channels row, household row, watch party row, row customization (Settings → Home) | planned |
-| Film / series / season / episode pages | planned (Samsung 1) |
+| Film / series / season / episode pages | done (tvweb-details); adapted: remote (YouTube) trailers open only in a browser (TVs: local trailers), extras of one kind are listed one by one (no grid page), no VERSION / audio / subtitle choice before playing (chosen in the player), no Delete (Android's media-management setting is off by default) |
 | Library grid, tabs, filter/sort, alphabet, genres, recommended | planned (Samsung 1) |
 | Search (text) | planned; voice: adapted (the TV's own voice/IME input into the field) |
-| Collections, person, favorites, playlists | planned |
+| Collections, person, favorites, playlists | person done (tvweb-details); collections, favorites, playlists planned |
 | Music: albums, artists, now playing, lyrics | planned; background music: not possible (web apps stop when hidden) |
 | Player: transport, seek bar, chapters, queue, next up, skip intro/credits (media segments) | planned (engine done) |
 | Player: subtitles (text + burned-in), audio tracks | done |

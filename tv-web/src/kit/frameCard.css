@@ -1,0 +1,9 @@
+/* FrameCard / PersonCard (media/kit/CardFrame.kt, PersonCard.kt): the .card look of kit.css at any size. */
+.frame-card .art img { object-position: center; }
+.frame-card .tag { display: flex; align-items: center; }
+.frame-card .tag .tag-glyph { font-size: 14px; margin-right: 6px; color: var(--text); }
+/* PersonCard: name in Sans Medium 13sp (not the 14sp card title) */
+.frame-card.person .bar .title { font-size: 21px; }
+
+/* the favorite button's accent square after its label (TallyButton trailing) */
+.btn .btn-trailing { display: flex; align-items: center; margin-left: 13px; }

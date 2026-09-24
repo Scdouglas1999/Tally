@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useFocusable, type FocusableOptions } from '../focus/focus';
 import { tallyUppercase } from '../util/format';
 import { GlyphIcon } from './Bits';
@@ -10,13 +11,16 @@ export function Button(
     onPress: () => void;
     primary?: boolean;
     glyph?: GlyphName;
-  } & Pick<FocusableOptions, 'focusKey' | 'onFocus'>,
+    /** Drawn after the label (the favorite button's accent square). */
+    trailing?: ComponentChildren;
+  } & Pick<FocusableOptions, 'focusKey' | 'onFocus' | 'onArrow'>,
 ) {
-  const f = useFocusable<HTMLDivElement>({ focusKey: props.focusKey, onEnter: props.onPress, onFocus: props.onFocus });
+  const f = useFocusable<HTMLDivElement>({ focusKey: props.focusKey, onEnter: props.onPress, onFocus: props.onFocus, onArrow: props.onArrow });
   return (
     <div ref={f.ref} class={'btn' + (props.primary === true ? ' primary' : '')} role="button" onClick={props.onPress}>
       {props.glyph !== undefined ? <GlyphIcon name={props.glyph} /> : null}
       <span>{tallyUppercase(props.label)}</span>
+      {props.trailing !== undefined ? <span class="btn-trailing">{props.trailing}</span> : null}
     </div>
   );
 }

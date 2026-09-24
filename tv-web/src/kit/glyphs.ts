@@ -19,6 +19,7 @@ export const Glyph = {
   volume: '',
   check: '',
   eye: '',
+  eyeSlash: '',
   user: '',
   rotateLeft: '',
   caretDown: '',
