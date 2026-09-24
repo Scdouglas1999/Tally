@@ -695,6 +695,22 @@ class PlaybackViewModel
                     positionMs,
                 )
 
+                // TALLY: begin
+                // a live stream is stopped before it is opened again: stopped after, the report closed the new stream
+                if (io.github.scdouglas1999.tally.playback.LiveStreamStop
+                        .stopsFirst(state.value.currentPlayback)
+                ) {
+                    val old =
+                        onMain {
+                            this@PlaybackViewModel.activityListener.also {
+                                this@PlaybackViewModel.activityListener = null
+                            }
+                        }
+                    io.github.scdouglas1999.tally.playback.LiveStreamStop
+                        .stop(player, old)
+                }
+                // TALLY: end
+
                 val maxBitrate =
                     // TALLY: begin
                     // in-player quality choice first, then upstream's preference
@@ -888,6 +904,10 @@ class PlaybackViewModel
                             mediaItem,
                             positionMs,
                         )
+                        // TALLY: begin
+                        io.github.scdouglas1999.tally.playback.LiveStreamStop
+                            .opened(player, item)
+                        // TALLY: end
                         val onFailure: () -> Unit = {
                             if (player is MpvPlayer && externalSubtitle != null) {
                                 // MpvPlayer may change tracks more than once to add external subtitles

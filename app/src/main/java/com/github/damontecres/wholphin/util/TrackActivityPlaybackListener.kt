@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.util
 
 import androidx.annotation.OptIn
@@ -99,6 +102,20 @@ class TrackActivityPlaybackListener(
             }
         }
     }
+
+    // TALLY: begin
+
+    /**
+     * The reports this listener is still sending; after [release], its stop report. A live stream is stopped before
+     * it is opened again (`io.github.scdouglas1999.tally.playback.LiveStreamStop`), so that report is waited for.
+     */
+    val tallyReportsInFlight: List<kotlinx.coroutines.Job>
+        get() =
+            coroutineScope.coroutineContext[kotlinx.coroutines.Job]
+                ?.children
+                ?.toList()
+                .orEmpty()
+    // TALLY: end
 
     override fun onIsPlayingChanged(isPlaying: Boolean) {
         if (initialized) {
