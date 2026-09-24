@@ -7,6 +7,31 @@
     "owner": "Tally",
     "category": "Live TV",
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
-    "versions": []
+    "versions": [
+      {
+        "version": "2.0.0.12",
+        "changelog": "Tally 2.0: picks the best stream for each live game and switches without stopping the picture; builds for Jellyfin 10.10, 10.11 and 12.1; its own plugin repository.\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.0/Tally-server-2.0.0-jf12.zip",
+        "checksum": "d97f72a72134af545bde90956dc720a8",
+        "timestamp": "2026-09-24T12:02:30.0000000Z"
+      },
+      {
+        "version": "2.0.0.11",
+        "changelog": "Tally 2.0: picks the best stream for each live game and switches without stopping the picture; builds for Jellyfin 10.10, 10.11 and 12.1; its own plugin repository.\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.0/Tally-server-2.0.0-jf10.11.zip",
+        "checksum": "7827e0bcfb1662901cced3f926eb38d6",
+        "timestamp": "2026-09-24T12:02:30.0000000Z"
+      },
+      {
+        "version": "2.0.0.10",
+        "changelog": "Tally 2.0: picks the best stream for each live game and switches without stopping the picture; builds for Jellyfin 10.10, 10.11 and 12.1; its own plugin repository.\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.0/Tally-server-2.0.0-jf10.10.zip",
+        "checksum": "1f04ec64e1c62bad59b2c85e3ca5b411",
+        "timestamp": "2026-09-24T12:02:30.0000000Z"
+      }
+    ]
   }
 ]
