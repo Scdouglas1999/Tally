@@ -73,6 +73,14 @@ bundle from `npm run preview` instead of the server's plugin (an emulator reache
 
 ### Samsung (2020 and newer)
 
+**For people installing Tally on their own TV: [INSTALL-SAMSUNG.md](INSTALL-SAMSUNG.md).** It uses *Tally for
+Samsung* (`Tally-Samsung-Installer-windows.exe`, `-macos-arm64`, `-macos-x64`, `-linux` on the release page), one
+program that finds the TV, signs Tally on the user's computer (a Tizen certificate for 2020-2022 TVs, a Samsung
+certificate for 2023 and newer) and installs it, without Tizen Studio. Its source and tests are in
+[`installer/`](installer/) (`installer/build.sh` builds all four; ARCHITECTURE.md §11 describes it).
+
+From a development machine with Tizen Studio, the script does the same:
+
 1. On the TV: open **Apps**, go to **App Settings** (or stay on the Apps screen), type **1 2 3 4 5** with the remote,
    switch **Developer mode** on, enter this PC's IP address as **Host PC IP**, then restart the TV fully (hold the
    power button; unplug it if Instant On is on).
