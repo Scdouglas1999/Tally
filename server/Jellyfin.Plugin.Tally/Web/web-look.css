@@ -467,6 +467,8 @@ html[data-tally-look] .listItem .mediaInfoItem { font: 400 12px/1.5 var(--tl-mon
 html[data-tally-look] .listItemIcon,
 html[data-tally-look] .listItemAside .material-icons { color: var(--tl-text-2); }
 html[data-tally-look] .listItemIcon:not(.listItemIcon-transparent) { background-color: var(--tl-raised-2); color: var(--tl-text); }
+/* the activity log paints its icons inline: jellyfin's blue becomes a raised square, warning and error colors stay */
+html[data-tally-look] .listItemIcon[style*="00a4dc" i] { background-color: var(--tl-raised-2) !important; }
 html[data-tally-look] .listItemImage { border: 1px solid var(--tl-rule-2); }
 html[data-tally-look] .paperList { background: transparent; border: 1px solid var(--tl-rule); }
 html[data-tally-look] .listItem .listItemImage .itemProgressBar { height: 4px; }
