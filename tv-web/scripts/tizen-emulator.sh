@@ -23,7 +23,9 @@ case "${1:-}" in
       echo $! >"$RUN/xvfb.pid"
       sleep 1
     fi
-    "$EM" modify -n "$VM" -g no >/dev/null
+    # GL stays on: with it off the TV image's tuner decoder fails ("winsys interface 'vigs_wsi' not found") and the VM
+    # exits at once (seen on this host). Under Xvfb the GL is Mesa's software renderer.
+    "$EM" modify -n "$VM" -g yes >/dev/null
     DISPLAY=":$DISPLAY_NUM" "$EM" launch -n "$VM" >"$RUN/emulator.log" 2>&1 &
     echo $! >"$RUN/emulator.pid"
     for _ in $(seq 1 90); do
