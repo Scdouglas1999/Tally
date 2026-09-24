@@ -4,6 +4,7 @@
   <a href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk"><img src="tally/readme/button-download.svg" alt="Download for Android" height="44"/></a>
   <a href="#install"><img src="tally/readme/button-install.svg" alt="How to install" height="44"/></a>
   <a href="https://github.com/Scdouglas1999/Tally/releases/latest"><img src="tally/readme/button-releases.svg" alt="What's new" height="44"/></a>
+  <a href="https://www.patreon.com/SeanDouglas"><img src="tally/readme/button-patreon.svg" alt="Support on Patreon" height="44"/></a>
 </p>
 
 <p align="center"><img src="tally/readme/tour.webp" alt="Moving through Tally: the home screen with today's games, then a film's page" width="100%"/></p>
@@ -174,6 +175,12 @@ The app's own code is in `app/src/main/java/io/github/scdouglas1999/tally/`. The
 Tally changes it only at marked places so it can keep taking Wholphin's updates. [TALLY.md](TALLY.md) explains how that works,
 [tally/UI.md](tally/UI.md) describes the design, and [CONTRIBUTING.md](CONTRIBUTING.md) covers bug reports and pull
 requests.
+
+## Support Tally
+
+Tally is free, and it will stay free. If it's become part of your evenings and you're able to chip in, you can
+support its development on [Patreon](https://www.patreon.com/SeanDouglas). It pays for the time that goes into it.
+Either way, thanks for using it.
 
 ## Credits
 

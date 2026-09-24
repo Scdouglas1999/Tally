@@ -42,6 +42,13 @@ else
 fi
 SERVER_TAG="tally-v$SERVER_VERSION"
 NOTES="${TALLY_NOTES:-Tally for Android TV $VERSION}"
+# One quiet line at the end of every release's notes. The app's update screen cuts the notes at the marker, so the line
+# shows on GitHub and not on the TV.
+NOTES="$NOTES
+
+<!-- tally-support -->
+---
+*Tally is free. If it's useful to you, you can support it on [Patreon](https://www.patreon.com/SeanDouglas).*"
 # the plugin's changelog in Jellyfin's catalog: one short paragraph (the first line of TALLY_NOTES by default)
 SERVER_CHANGELOG="${TALLY_SERVER_CHANGELOG:-$(printf '%s\n' "${TALLY_NOTES:-Tally $SERVER_VERSION}" | head -1)}"
 # R8 on the release build no longer fits in the 2 GB upstream's gradle.properties gives the daemon

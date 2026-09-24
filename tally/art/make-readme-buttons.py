@@ -49,3 +49,4 @@ def button(name, label, fill, ink, frame):
 button("button-download.svg", "DOWNLOAD FOR ANDROID", AMBER, GROUND, AMBER)
 button("button-install.svg", "HOW TO INSTALL", GROUND, TEXT, FRAME)
 button("button-releases.svg", "WHAT'S NEW", GROUND, TEXT, FRAME)
+button("button-patreon.svg", "SUPPORT ON PATREON", GROUND, TEXT, FRAME)
