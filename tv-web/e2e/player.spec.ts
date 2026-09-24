@@ -18,6 +18,7 @@ interface Item {
 /** Moves focus with DOWN/UP through the open menu until the focused option matches, then presses OK. */
 async function pickOption(page: Page, match: RegExp): Promise<void> {
   const options = page.locator('.player .menu .option');
+  await expect(page.locator('.player .menu .option[data-focused]')).toBeVisible();
   const count = await options.count();
   for (let i = 0; i < count; i++) await page.keyboard.press('ArrowUp');
   for (let i = 0; i < count; i++) {
@@ -84,7 +85,10 @@ test('Film: plays (hls.js), subtitles drawn by the app, audio switch restarts wi
   const before = await videoTime(page);
   await openControl(page, 'AUDIO');
   await expect(page.locator('.player .menu .menu-title')).toHaveText('AUDIO');
-  await page.keyboard.press('ArrowDown'); // from the current (first) track to the second
+  // the menu opens on the current (first) track; move to the second
+  await expect(page.locator('.player .menu .option.selected[data-focused]')).toBeVisible();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('.player .menu .option').nth(1)).toHaveAttribute('data-focused', 'true');
   await page.keyboard.press('Enter');
   // the server's stream really carries the other track (not just our request)
   await expect.poll(() => transcodingUrls.some((u) => u.includes(`AudioStreamIndex=${secondAudio.Index}`)), { timeout: 20_000 }).toBe(true);
