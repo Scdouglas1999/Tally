@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tally's mark in one color for notifications: the monitor frame, its label bar and the indicator square. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- frame: 20 x 14 outline, 2 thick -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M2,5h20v14h-20z M4,7v10h16v-10z" />
+    <!-- label bar -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M4,13.5h16v1h-16z" />
+    <!-- indicator square -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M5.5,15h2v1.5h-2z" />
+</vector>

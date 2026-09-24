@@ -345,6 +345,13 @@ class MusicService
             return MediaItem
                 .Builder()
                 .setUri(url)
+                // TALLY: begin
+                .apply {
+                    io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
+                        .localAudioUri(context, audio.id)
+                        ?.let { setUri(it) }
+                }
+                // TALLY: end
                 .setMediaId(audio.id.toServerString())
                 .setTag(AudioItem.from(audio, imageUrl))
                 .build()

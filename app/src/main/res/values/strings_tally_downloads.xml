@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Downloads (engine and its minimal page). American English. -->
+<resources>
+    <string name="tally_dl_channel_name">Downloads</string>
+    <string name="tally_dl_channel_description">Progress of downloads for offline playback</string>
+    <plurals name="tally_dl_notification_many">
+        <item quantity="one">%d download</item>
+        <item quantity="other">%d downloads</item>
+    </plurals>
+    <string name="tally_dl_notification_failed">%1$s: %2$s</string>
+
+    <string name="tally_dl_reason_no_download">Your account is not allowed to download from this server.</string>
+    <string name="tally_dl_reason_no_transcode">Your account is not allowed to have the server convert videos.</string>
+    <string name="tally_dl_reason_not_downloadable">The server does not allow downloading this.</string>
+
+    <string name="tally_dl_failed_unreachable">Can\'t reach the server. Tally will try again.</string>
+    <string name="tally_dl_failed_server">The server had a problem. Tally will try again.</string>
+    <string name="tally_dl_failed_removed">It was removed from the server.</string>
+    <string name="tally_dl_failed_not_allowed">The server refused the download.</string>
+    <string name="tally_dl_failed_disk_full">Not enough storage on this device.</string>
+    <string name="tally_dl_failed_storage">The storage card is not available.</string>
+    <string name="tally_dl_failed_unknown">The download failed. Tally will try again.</string>
+
+    <string name="tally_dl_waiting_wifi">Waiting for Wi-Fi</string>
+    <string name="tally_dl_waiting_network">Waiting for a connection</string>
+    <string name="tally_dl_waiting_user">Waiting for its user to sign in</string>
+
+    <string name="tally_dl_error_offline">Can\'t reach the server.</string>
+    <string name="tally_dl_error_nothing">There is nothing to download.</string>
+    <string name="tally_dl_error_space">Not enough storage: %1$s needed, %2$s free.</string>
+
+    <string name="tally_dl_page_title">Downloads</string>
+    <string name="tally_dl_page_offline">Offline</string>
+    <string name="tally_dl_page_empty">Nothing downloaded yet.</string>
+    <string name="tally_dl_state_done">Downloaded</string>
+    <string name="tally_dl_state_downloading">Downloading %1$d%%</string>
+    <string name="tally_dl_state_paused">Paused</string>
+    <string name="tally_dl_state_queued">Queued</string>
+</resources>

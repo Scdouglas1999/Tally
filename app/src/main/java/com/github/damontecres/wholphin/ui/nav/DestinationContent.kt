@@ -490,6 +490,13 @@ fun DestinationContent(
                 modifier = modifier,
             )
         }
+
+        Destination.TallyDownloads -> {
+            LaunchedEffect(Unit) { onClearBackdrop.invoke() }
+            io.github.scdouglas1999.tally.downloads.ui.DownloadsPage(
+                modifier = modifier,
+            )
+        }
         // TALLY: end
     }
 }

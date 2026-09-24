@@ -145,6 +145,10 @@ class PlayerFactory
                                 disableAudioOffload = disableAudioOffload,
                             )
 
+                        // TALLY: begin
+                        io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
+                            .readLocalCopies(context, mediaSourceFactory, dataSourceFactory)
+                        // TALLY: end
                         ExoPlayer
                             .Builder(context)
                             // TALLY: begin
@@ -202,6 +206,10 @@ class PlayerFactory
                     OkHttpDataSource.Factory(authOkHttpClient),
                     extractorsFactory,
                 )
+            // TALLY: begin
+            io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
+                .readLocalCopies(context, mediaSourceFactory, OkHttpDataSource.Factory(authOkHttpClient))
+            // TALLY: end
             val trackSelector = createTrackSelector(disableAudioOffload = disableAudioOffload)
             return ExoPlayer
                 .Builder(context)
