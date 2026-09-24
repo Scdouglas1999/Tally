@@ -496,6 +496,7 @@ internal fun LibraryItemCard(
         tagAccent = !played && unplayed > 0,
         favorite = item?.favorite == true,
         contentScale = viewOptions.contentScale.kitScale(),
+        downloadId = item?.id,
         label =
             if (viewOptions.showTitles) {
                 {

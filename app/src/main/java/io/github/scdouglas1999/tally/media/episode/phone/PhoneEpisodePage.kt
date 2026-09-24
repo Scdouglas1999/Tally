@@ -25,6 +25,9 @@ import com.github.damontecres.wholphin.ui.components.PersonContextActions
 import com.github.damontecres.wholphin.ui.detail.episode.EpisodeViewModel
 import com.github.damontecres.wholphin.ui.detail.series.SeasonEpisodeIds
 import com.github.damontecres.wholphin.ui.nav.Destination
+import io.github.scdouglas1999.tally.downloads.ui.DownloadSubject
+import io.github.scdouglas1999.tally.downloads.ui.phoneAction
+import io.github.scdouglas1999.tally.downloads.ui.rememberDownloadUi
 import io.github.scdouglas1999.tally.media.episode.EpisodeExtras
 import io.github.scdouglas1999.tally.media.episode.chapterImage
 import io.github.scdouglas1999.tally.media.episode.directorLine
@@ -69,6 +72,8 @@ fun PhoneEpisodeLoaded(
     val episodeNow by rememberUpdatedState(episode)
     val streamsNow by rememberUpdatedState(chosenStreams)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+    val downloads = rememberDownloadUi()
+    val downloadSubject = remember(episode.id, episode.name) { DownloadSubject.of(episode) }
 
     val people = if (extras.itemId == episode.id) extras.people else emptyList()
     val chapters = remember(episode.id, episode.data.chapters) { Chapter.fromDto(episode.data) }
@@ -152,31 +157,32 @@ fun PhoneEpisodeLoaded(
                     item = episode,
                     extra = emptyList(),
                     trailing =
-                        if (seriesId != null && seasonId != null) {
-                            listOf(
-                                PhoneAction(
-                                    key = "episodes",
-                                    glyph = stringResource(R.string.fa_list_ul),
-                                    label = stringResource(R.string.tally_signin_episodes),
-                                    onClick = {
-                                        viewModel.navigateTo(
-                                            Destination.SeriesOverview(
-                                                seriesId,
-                                                BaseItemKind.SERIES,
-                                                SeasonEpisodeIds(
-                                                    seasonId,
-                                                    episode.data.parentIndexNumber,
-                                                    episode.id,
-                                                    episode.indexNumber,
+                        listOfNotNull(downloadSubject?.let { downloads.phoneAction(it) }) +
+                            if (seriesId != null && seasonId != null) {
+                                listOf(
+                                    PhoneAction(
+                                        key = "episodes",
+                                        glyph = stringResource(R.string.fa_list_ul),
+                                        label = stringResource(R.string.tally_signin_episodes),
+                                        onClick = {
+                                            viewModel.navigateTo(
+                                                Destination.SeriesOverview(
+                                                    seriesId,
+                                                    BaseItemKind.SERIES,
+                                                    SeasonEpisodeIds(
+                                                        seasonId,
+                                                        episode.data.parentIndexNumber,
+                                                        episode.id,
+                                                        episode.indexNumber,
+                                                    ),
                                                 ),
-                                            ),
-                                        )
-                                    },
-                                ),
-                            )
-                        } else {
-                            emptyList()
-                        },
+                                            )
+                                        },
+                                    ),
+                                )
+                            } else {
+                                emptyList()
+                            },
                     onPlay = { position ->
                         viewModel.navigateTo(Destination.Playback(episode.id, position.inWholeMilliseconds))
                     },
@@ -262,6 +268,7 @@ fun PhoneEpisodeLoaded(
                             onLongClick = { openItemMenu(item) },
                             onPlay = { viewModel.navigateTo(Destination.Playback(item)) },
                             width = PhoneLandscapeWidth,
+                            downloadId = item.id,
                         )
                     }
                 }

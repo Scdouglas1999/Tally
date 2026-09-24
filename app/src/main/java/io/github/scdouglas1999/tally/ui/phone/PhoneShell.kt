@@ -35,6 +35,7 @@ import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.nav.DestinationContent
 import com.github.damontecres.wholphin.ui.nav.NavDrawerViewModel
 import com.github.damontecres.wholphin.ui.preferences.PreferenceScreenOption
+import io.github.scdouglas1999.tally.downloads.ui.rememberOfflineMode
 import io.github.scdouglas1999.tally.media.music.phone.PhoneMiniPlayer
 import io.github.scdouglas1999.tally.media.music.phone.phoneMiniPlayerSpace
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
@@ -90,7 +91,16 @@ fun PhoneShell(
     val state by viewModel.state.collectAsState()
     val nav = remember(serviceState) { PhoneNavModel.from(serviceState) }
     val onSettings = destination is Destination.Settings
-    val current = if (onSettings) PhoneTab.MORE else nav.currentTab(state.selectedIndex)
+    val onDownloads = destination is Destination.TallyDownloads
+    // offline mode (the server cannot be reached): the bar offers only Downloads and Settings
+    val offline = rememberOfflineMode()
+    val current =
+        when {
+            offline && onSettings -> PhoneTab.SETTINGS
+            offline -> PhoneTab.DOWNLOADS
+            onSettings || onDownloads -> PhoneTab.MORE
+            else -> nav.currentTab(state.selectedIndex)
+        }
     var moreOpen by remember { mutableStateOf(false) }
 
     val showBar = !WindowInsets.isImeVisible
@@ -129,6 +139,7 @@ fun PhoneShell(
             )
             PhoneBottomBar(
                 nav = nav,
+                tabs = nav.tabs(offline),
                 current = current,
                 onTab = { tab ->
                     when (tab) {
@@ -157,6 +168,16 @@ fun PhoneShell(
                         PhoneTab.MORE -> {
                             moreOpen = true
                         }
+
+                        PhoneTab.DOWNLOADS -> {
+                            if (!onDownloads) viewModel.navigationManager.replace(Destination.TallyDownloads)
+                        }
+
+                        PhoneTab.SETTINGS -> {
+                            if (!onSettings) {
+                                viewModel.navigationManager.navigateTo(Destination.Settings(PreferenceScreenOption.BASIC))
+                            }
+                        }
                     }
                 },
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -175,6 +196,11 @@ fun PhoneShell(
             serverName = server.name ?: server.url,
             userImageUrl = userImageUrl,
             nowPlayingTitle = if (serviceState.nowPlayingEnabled) serviceState.nowPlayingTitle.orEmpty() else null,
+            onDownloads = onDownloads,
+            onDownloadsClick = {
+                moreOpen = false
+                if (!onDownloads) viewModel.navigationManager.navigateTo(Destination.TallyDownloads)
+            },
             onDismiss = { moreOpen = false },
             onProfile = {
                 moreOpen = false

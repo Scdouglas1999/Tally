@@ -47,8 +47,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
@@ -57,6 +60,7 @@ import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.data.model.Trailer
 import com.github.damontecres.wholphin.preferences.UserPreferences
 import com.github.damontecres.wholphin.services.TrailerService
+import com.github.damontecres.wholphin.ui.FontAwesome
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
 import com.github.damontecres.wholphin.ui.components.ConfirmDialog
 import com.github.damontecres.wholphin.ui.components.ContextMenu
@@ -72,6 +76,15 @@ import com.github.damontecres.wholphin.ui.detail.series.buildDialogForSeason
 import com.github.damontecres.wholphin.ui.logCoilError
 import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.playback.playable
+import io.github.scdouglas1999.tally.downloads.ui.DownloadStatus
+import io.github.scdouglas1999.tally.downloads.ui.DownloadSubject
+import io.github.scdouglas1999.tally.downloads.ui.DownloadUi
+import io.github.scdouglas1999.tally.downloads.ui.DownloadedSquare
+import io.github.scdouglas1999.tally.downloads.ui.downloadEdge
+import io.github.scdouglas1999.tally.downloads.ui.downloadMark
+import io.github.scdouglas1999.tally.downloads.ui.phoneAction
+import io.github.scdouglas1999.tally.downloads.ui.rememberDownloadUi
+import io.github.scdouglas1999.tally.downloads.ui.status
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.resumePercent
@@ -139,6 +152,12 @@ fun PhoneSeriesLoaded(
     val episodes = state.episodes
     var showTrailers by remember { mutableStateOf(false) }
     var confirmWatch by remember { mutableStateOf(false) }
+    val downloads = rememberDownloadUi()
+    val shownSeason = seasons.getOrNull(position.seasonTabIndex)
+    val showSubject =
+        remember(series.id, series.name, shownSeason?.id) {
+            DownloadSubject.Show(series.id, shownSeason?.id, shownSeason?.indexNumber, series.name ?: "")
+        }
 
     fun selectSeason(index: Int) {
         val season = seasons.getOrNull(index) ?: return
@@ -318,6 +337,7 @@ fun PhoneSeriesLoaded(
                         },
                     trailing =
                         buildList {
+                            add(downloads.phoneAction(showSubject))
                             state.discoverSeries?.let { discover ->
                                 add(
                                     PhoneAction(
@@ -356,6 +376,32 @@ fun PhoneSeriesLoaded(
                             }
                         },
                         onMenu = ::openSeasonMenu,
+                        download = {
+                            val season = shownSeason
+                            if (season != null) {
+                                SeasonDownloadButton(
+                                    downloads = downloads,
+                                    subject =
+                                        DownloadSubject.Season(
+                                            seriesId = series.id,
+                                            seasonId = season.id,
+                                            seasonNumber = season.indexNumber,
+                                            title = "${series.name ?: ""} · ${seasonTabLabel(season)}",
+                                        ),
+                                    total =
+                                        (episodes as? EpisodeList.Success)
+                                            ?.takeIf { it.seasonId == season.id }
+                                            ?.episodes
+                                            ?.size,
+                                    label =
+                                        when (val n = season.indexNumber) {
+                                            null -> stringResource(R.string.tally_dlui_download_ellipsis)
+                                            0 -> stringResource(R.string.tally_dlui_download_specials)
+                                            else -> stringResource(R.string.tally_dlui_download_season, n)
+                                        },
+                                )
+                            }
+                        },
                     )
                 }
                 when (episodes) {
@@ -494,6 +540,7 @@ private fun SeasonTabs(
     current: Int,
     onSelect: (Int) -> Unit,
     onMenu: (BaseItem) -> Unit,
+    download: @Composable () -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxWidth().background(TallyColors.ground)) {
         Spacer(
@@ -503,8 +550,8 @@ private fun SeasonTabs(
                 layout(placeable.width, room) { placeable.place(0, 0) }
             },
         )
-        LazyRow(
-            contentPadding = PaddingValues(horizontal = PhoneDimens.margin - 12.dp),
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -519,34 +566,88 @@ private fun SeasonTabs(
                         )
                     },
         ) {
-            itemsIndexed(seasons, key = { index, season -> season?.id ?: "season-$index" }) { index, season ->
-                val selected = index == current
-                val label = seasonTabLabel(season)
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier =
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = PhoneDimens.margin - 12.dp),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            ) {
+                itemsIndexed(seasons, key = { index, season -> season?.id ?: "season-$index" }) { index, season ->
+                    val selected = index == current
+                    val label = seasonTabLabel(season)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier =
+                            Modifier
+                                .fillMaxHeight()
+                                .phoneClickable(onLongClick = season?.let { { onMenu(it) } }) { onSelect(index) }
+                                .drawWithContent {
+                                    drawContent()
+                                    if (selected) {
+                                        val bar = 2.dp.toPx()
+                                        drawRect(
+                                            color = TallyColors.accent,
+                                            topLeft = Offset(0f, size.height - bar),
+                                            size = Size(size.width, bar),
+                                        )
+                                    }
+                                }.padding(horizontal = 12.dp),
+                    ) {
+                        Text(
+                            text = label.tallyUppercase(),
+                            style = PhoneType.labelLarge,
+                            color = if (selected) TallyColors.text else TallyColors.muted,
+                            maxLines = 1,
+                        )
+                    }
+                }
+            }
+            download()
+        }
+    }
+}
+
+/**
+ * The download glyph at the end of the season tabs (`Download season 2`): a 48dp target with the download glyph,
+ * a thin progress bar while the season downloads, a check once it is downloaded. Tap and long-press as DOWNLOAD.
+ */
+@Composable
+private fun SeasonDownloadButton(
+    downloads: DownloadUi,
+    subject: DownloadSubject.Season,
+    total: Int?,
+    label: String,
+) {
+    val status = downloads.status(subject)
+    // the check only once every episode of the season is on the device
+    val complete = status is DownloadStatus.Done && (total == null || status.entries.size >= total)
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier =
+            Modifier
+                .fillMaxHeight()
+                .width(PhoneDimens.touchTarget + 8.dp)
+                .semantics { contentDescription = label }
+                .phoneClickable(onLongClick = { downloads.onLongPress(subject) }) { downloads.onTap(subject, status) },
+    ) {
+        when (status) {
+            is DownloadStatus.Active -> {
+                Box(Modifier.size(width = 20.dp, height = 3.dp).background(TallyColors.ruleStrong)) {
+                    Box(
                         Modifier
                             .fillMaxHeight()
-                            .phoneClickable(onLongClick = season?.let { { onMenu(it) } }) { onSelect(index) }
-                            .drawWithContent {
-                                drawContent()
-                                if (selected) {
-                                    val bar = 2.dp.toPx()
-                                    drawRect(
-                                        color = TallyColors.accent,
-                                        topLeft = Offset(0f, size.height - bar),
-                                        size = Size(size.width, bar),
-                                    )
-                                }
-                            }.padding(horizontal = 12.dp),
-                ) {
-                    Text(
-                        text = label.tallyUppercase(),
-                        style = PhoneType.labelLarge,
-                        color = if (selected) TallyColors.text else TallyColors.muted,
-                        maxLines = 1,
+                            .fillMaxWidth(status.progress.coerceIn(0.02f, 1f))
+                            .background(TallyColors.accent),
                     )
                 }
+            }
+
+            else -> {
+                Text(
+                    text = stringResource(if (complete) R.string.fa_check else R.string.fa_download),
+                    fontFamily = FontAwesome,
+                    fontSize = 16.sp,
+                    color = TallyColors.textSecondary,
+                    maxLines = 1,
+                )
             }
         }
     }
@@ -619,6 +720,7 @@ private fun PhoneEpisodeRow(
         ).joinToString(" · ")
     val images = LocalImageUrlService.current
     val imageUrl = remember(episode.id, dto.imageTags) { images.getItemImageUrl(episode, ImageType.PRIMARY) }
+    val download = downloadMark(episode.id)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
@@ -626,6 +728,7 @@ private fun PhoneEpisodeRow(
                 .fillMaxWidth()
                 .height(RowHeight)
                 .phoneClickable(onLongClick = onLongClick, onClick = onClick)
+                .downloadEdge(download)
                 .padding(horizontal = PhoneDimens.margin, vertical = 6.dp),
     ) {
         Box(
@@ -662,6 +765,14 @@ private fun PhoneEpisodeRow(
                 }
             }
             if (episode.played) WatchedTick(modifier = Modifier.align(Alignment.TopEnd))
+            if (download?.done == true) {
+                DownloadedSquare(
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(start = 5.dp, bottom = if (inProgress && percent in 1..99) 8.dp else 5.dp),
+                )
+            }
         }
         Spacer(Modifier.width(12.dp))
         Column(

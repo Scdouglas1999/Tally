@@ -56,6 +56,7 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownColor
 import com.mikepenz.markdown.m3.markdownTypography
 import io.github.scdouglas1999.tally.media.kit.TallyButton
+import io.github.scdouglas1999.tally.support.TallySupport
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.settings.phone.PhoneButton
 import io.github.scdouglas1999.tally.ui.settings.phone.PhoneButtonKind
@@ -304,7 +305,11 @@ private fun ReleaseNotes(
     val scope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
-    val content = remember(release) { release.content.substringAfter('\n', release.content).trim() }
+    // The Patreon line after the support marker is for GitHub only.
+    val content =
+        remember(release) {
+            TallySupport.cutReleaseNotes(release.content.substringAfter('\n', release.content).trim())
+        }
     LazyColumn(
         state = listState,
         contentPadding = PaddingValues(24.dp),

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
@@ -365,13 +366,20 @@ fun PhonePrimaryButton(
     }
 }
 
-/** One icon-over-label button of a detail page's action row. [active] colors the glyph accent (a favorite). */
+/**
+ * One icon-over-label button of a detail page's action row. [active] colors the glyph accent (a favorite).
+ * [onLongClick] is the long-press (DOWNLOAD opens its quality sheet). [progress] (0..1) replaces the glyph by a thin
+ * progress bar (a download under way); [failed] draws the label red.
+ */
 data class PhoneAction(
     val key: String,
     val glyph: String,
     val label: String,
     val onClick: () -> Unit,
     val active: Boolean = false,
+    val onLongClick: (() -> Unit)? = null,
+    val progress: Float? = null,
+    val failed: Boolean = false,
 )
 
 /** The action buttons in one row of equal cells, each at least 48dp tall, 1dp `ruleStrong` frames. */
@@ -380,8 +388,12 @@ fun PhoneActionRow(
     actions: List<PhoneAction>,
     modifier: Modifier = Modifier,
 ) {
+    // Five cells (TRAILER · WATCHED · FAVORITE · DOWNLOAD · MORE) only fit a phone's width with a slightly tighter
+    // label: 10sp, less tracking, closer cells, so "DOWNLOADED" and "FAVORITED" are not cut.
+    val crowded = actions.size >= CROWDED_ACTIONS
+    val labelStyle = if (crowded) PhoneType.label.copy(fontSize = 10.sp, letterSpacing = 0.04.em) else PhoneType.label
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(if (crowded) 6.dp else 8.dp),
         modifier = modifier.fillMaxWidth(),
     ) {
         actions.forEach { action ->
@@ -393,23 +405,28 @@ fun PhoneActionRow(
                         .weight(1f)
                         .height(PhoneActionHeight)
                         .border(PhoneDimens.hairline, TallyColors.ruleStrong)
-                        .phoneClickable(onClick = action.onClick),
+                        .phoneClickable(onLongClick = action.onLongClick, onClick = action.onClick),
             ) {
-                Text(
-                    text = action.glyph,
-                    fontFamily = FontAwesome,
-                    fontSize = 18.sp,
-                    color = if (action.active) TallyColors.accent else TallyColors.text,
-                    maxLines = 1,
-                )
+                val progress = action.progress
+                if (progress != null) {
+                    ActionProgress(action.glyph, progress)
+                } else {
+                    Text(
+                        text = action.glyph,
+                        fontFamily = FontAwesome,
+                        fontSize = 18.sp,
+                        color = if (action.active) TallyColors.accent else TallyColors.text,
+                        maxLines = 1,
+                    )
+                }
                 Text(
                     text = action.label.tallyUppercase(),
-                    style = PhoneType.label,
-                    color = TallyColors.textSecondary,
+                    style = labelStyle,
+                    color = if (action.failed) TallyColors.liveText else TallyColors.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 4.dp),
+                    modifier = Modifier.padding(horizontal = if (crowded) 2.dp else 4.dp),
                 )
             }
         }
@@ -417,6 +434,41 @@ fun PhoneActionRow(
 }
 
 private val PhoneActionHeight = 64.dp
+
+/** From this many buttons the row tightens its labels. */
+private const val CROWDED_ACTIONS = 5
+
+/**
+ * A thin progress bar in the glyph's place: 28x3dp, accent on `ruleStrong`, centered on an invisible copy of the
+ * glyph so the label under it stays where the other buttons' labels are.
+ */
+@Composable
+private fun ActionProgress(
+    glyph: String,
+    progress: Float,
+) {
+    Box(contentAlignment = Alignment.Center) {
+        Text(
+            text = glyph,
+            fontFamily = FontAwesome,
+            fontSize = 18.sp,
+            color = Color.Transparent,
+            maxLines = 1,
+        )
+        Box(
+            Modifier
+                .size(width = 28.dp, height = 3.dp)
+                .background(TallyColors.ruleStrong),
+        ) {
+            Box(
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(progress.coerceIn(0f, 1f))
+                    .background(TallyColors.accent),
+            )
+        }
+    }
+}
 
 /** The overview, 4 lines; a tap shows the rest (and a second tap folds it again). */
 @Composable

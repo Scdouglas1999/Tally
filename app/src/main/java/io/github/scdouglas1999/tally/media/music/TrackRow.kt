@@ -73,9 +73,11 @@ fun TrackRow(
     modifier: Modifier = Modifier,
     queued: Boolean = false,
     onFocused: () -> Unit = {},
+    downloadId: java.util.UUID? = null,
 ) {
     if (isPhone()) {
         PhoneTrackRow(
+            downloadId = downloadId,
             number = number,
             title = title,
             artist = artist,

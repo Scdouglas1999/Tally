@@ -214,6 +214,16 @@ private fun PlaylistHeader(
                 onClick = { onPlayAll(true) },
                 modifier = Modifier.weight(1f),
             )
+            if (playlist != null) {
+                io.github.scdouglas1999.tally.media.music.phone.PhoneDownloadSquare(
+                    downloads =
+                        io.github.scdouglas1999.tally.downloads.ui
+                            .rememberDownloadUi(),
+                    subject =
+                        io.github.scdouglas1999.tally.downloads.ui.DownloadSubject
+                            .Playlist(playlist.id, playlist.name ?: ""),
+                )
+            }
             // As tall as the buttons beside it (the album page's MORE).
             io.github.scdouglas1999.tally.media.music.phone.PhoneIconSquare(
                 glyph = stringResource(R.string.fa_ellipsis),

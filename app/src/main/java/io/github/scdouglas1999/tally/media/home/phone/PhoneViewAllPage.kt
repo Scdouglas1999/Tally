@@ -243,6 +243,7 @@ private fun ViewAllCard(
         progress = if (item?.played != true && percent in 1..99) percent / 100f else null,
         tag = if (item?.played == true) stringResource(R.string.tally_media_seen) else null,
         favorite = item?.favorite == true,
+        downloadId = item?.id,
         label = {
             Text(
                 text = title,

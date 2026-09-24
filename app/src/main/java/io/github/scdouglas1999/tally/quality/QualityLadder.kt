@@ -47,6 +47,17 @@ object QualityLadder {
             Rung(360, 1),
         )
 
+    /** The 16:9 width that goes with a rung's [height] (`MaxWidth` beside `MaxHeight`): 1920 for 1080, 854 for 480. */
+    fun widthFor(height: Int): Int =
+        when (height) {
+            2160 -> 3840
+            1080 -> 1920
+            720 -> 1280
+            480 -> 854
+            360 -> 640
+            else -> (height * 16 + 8) / 9
+        }
+
     /** The picture height of the rung with this bitrate (a value from [options]), or null for anything else. */
     fun heightFor(bitsPerSecond: Int): Int? = rungs.firstOrNull { it.bitsPerSecond == bitsPerSecond }?.height
 

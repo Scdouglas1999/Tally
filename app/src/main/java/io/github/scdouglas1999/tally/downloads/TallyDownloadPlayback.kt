@@ -9,6 +9,7 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import com.github.damontecres.wholphin.preferences.PlayerBackend
 import io.github.scdouglas1999.tally.downloads.db.DownloadRecord
+import io.github.scdouglas1999.tally.ui.formfactor.isTallyPhone
 import org.jellyfin.sdk.api.client.Response
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.MediaSourceInfo
@@ -31,7 +32,9 @@ object TallyDownloadPlayback {
      */
     private fun entryPointOrNull(context: Context): DownloadsEntryPoint? =
         try {
-            downloadsEntryPoint(context)
+            // Hilt first: in Wholphin's unit tests (a plain or mocked context) this throws before the device is asked.
+            // Downloads are a phone feature: a TV plays and starts exactly as Wholphin does, even with old downloads.
+            downloadsEntryPoint(context).takeIf { isTallyPhone(context) }
         } catch (e: RuntimeException) {
             // not a Hilt app (a test's plain or mocked context); in the app this lookup cannot fail
             null
@@ -105,6 +108,19 @@ object TallyDownloadPlayback {
         val engine = engine(context) ?: return
         factory.setDataSourceFactory(LocalFirstDataSource.Factory(upstream, engine.lookup))
     }
+
+    /**
+     * The cover of a downloaded track on the device (`file://`), for the music player and its notification offline;
+     * null when the track is not downloaded (use the server's image).
+     */
+    fun localArtwork(
+        context: Context,
+        itemId: UUID,
+    ): String? =
+        engine(context)
+            ?.completed(itemId)
+            ?.posterPath
+            ?.let { "file://$it" }
 
     /** `MusicService.convert`: the download of a track to play instead of the server stream, or null. */
     fun localAudioUri(

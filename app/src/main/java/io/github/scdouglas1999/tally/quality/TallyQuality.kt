@@ -42,14 +42,32 @@ object TallyQuality {
      *    for a live channel is 18 bits/s, so a bitrate cap alone left live video at full resolution (measured:
      *    1080p at ~4.9 Mbps for "480p · 2"). The height is what reliably lowers it, and it makes every rung's label
      *    true (a 1 Mbps cap alone gave 480p where the label says 360p).
+     *  - `MaxWidth`, the 16:9 width of that height: Jellyfin 10.10 ignores `MaxHeight` alone for films and episodes.
      */
     fun transcodingUrl(url: String): String {
         val choice = _choice.value ?: return url
         var result = url
         if (!url.contains("AllowVideoStreamCopy=", ignoreCase = true)) result += "&AllowVideoStreamCopy=false"
-        val height = QualityLadder.heightFor(choice)
-        if (height != null && !url.contains("MaxHeight=", ignoreCase = true)) result += "&MaxHeight=$height"
+        val height = QualityLadder.heightFor(choice) ?: return result
+        // Jellyfin 10.10 ignores MaxHeight alone for films and episodes, and the device profile may already have put a
+        // larger MaxWidth in the URL: both are set to the rung (the smaller value wins), so a 1080p film at 480p plays
+        // at 852x480
+        result = capParameter(result, "MaxHeight", height)
+        result = capParameter(result, "MaxWidth", QualityLadder.widthFor(height))
         return result
+    }
+
+    /** [url] with its [name] query parameter at most [value]: lowered when present and larger, added when missing. */
+    internal fun capParameter(
+        url: String,
+        name: String,
+        value: Int,
+    ): String {
+        val match = Regex("([?&])$name=(\\d*)", RegexOption.IGNORE_CASE).find(url)
+        if (match == null) return "$url&$name=$value"
+        val current = match.groupValues[2].toIntOrNull()
+        if (current != null && current <= value) return url
+        return url.replaceRange(match.range, "${match.groupValues[1]}$name=$value")
     }
 
     /** The dialog chose a quality: remember it and restart the stream at the current position. */

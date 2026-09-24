@@ -32,6 +32,7 @@ import androidx.tv.material3.Text
 import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.nav.NavDrawerItem
+import io.github.scdouglas1999.tally.downloads.ui.downloadsSummary
 import io.github.scdouglas1999.tally.media.drawer.TallyGlyph
 import io.github.scdouglas1999.tally.media.drawer.tallyGlyph
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
@@ -67,6 +68,8 @@ internal fun PhoneMoreSheet(
     serverName: String,
     userImageUrl: String?,
     nowPlayingTitle: String?,
+    onDownloads: Boolean,
+    onDownloadsClick: () -> Unit,
     onDismiss: () -> Unit,
     onProfile: () -> Unit,
     onNowPlaying: () -> Unit,
@@ -126,6 +129,15 @@ internal fun PhoneMoreSheet(
                     )
                 }
             }
+            item(key = "downloads") {
+                PhoneSheetRow(
+                    label = stringResource(R.string.tally_dl_page_title),
+                    glyph = TallyGlyph.Font(R.string.fa_download),
+                    current = onDownloads,
+                    detail = downloadsSummary(),
+                    onClick = onDownloadsClick,
+                )
+            }
             item(key = "settings-rule") { SheetRule() }
             item(key = "settings") {
                 PhoneSheetRow(
@@ -162,6 +174,7 @@ internal fun PhoneSheetRow(
     modifier: Modifier = Modifier,
     kicker: String? = null,
     current: Boolean = false,
+    detail: String? = null,
 ) {
     Box(
         contentAlignment = Alignment.CenterStart,
@@ -201,6 +214,14 @@ internal fun PhoneSheetRow(
                     color = TallyColors.text,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                )
+            }
+            if (detail != null) {
+                Text(
+                    text = detail.tallyUppercase(),
+                    style = PhoneType.meta,
+                    color = TallyColors.textSecondary,
+                    maxLines = 1,
                 )
             }
         }

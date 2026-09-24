@@ -220,6 +220,7 @@ fun HomeItemCard(
         tagAccent = kickerTag || (!played && unplayed > 0),
         favorite = item?.favorite == true,
         contentScale = contentScale,
+        downloadId = item?.id,
         label =
             if (showLabel) {
                 {

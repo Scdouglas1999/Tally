@@ -46,6 +46,7 @@ internal fun PhoneBottomBar(
     current: PhoneTab,
     onTab: (PhoneTab) -> Unit,
     modifier: Modifier = Modifier,
+    tabs: List<PhoneTab> = nav.tabs,
 ) {
     Column(
         modifier =
@@ -69,7 +70,7 @@ internal fun PhoneBottomBar(
                     .height(PhoneDimens.bottomBarHeight)
                     .padding(top = PhoneDimens.hairline),
         ) {
-            nav.tabs.forEach { tab ->
+            tabs.forEach { tab ->
                 PhoneTabCell(
                     label = stringResource(tab.label()),
                     glyph = tab.glyph(nav),
@@ -90,6 +91,8 @@ private fun PhoneTab.label(): Int =
         PhoneTab.SHOWS -> R.string.tally_phone_tab_shows
         PhoneTab.SPORTS -> R.string.tally_phone_tab_sports
         PhoneTab.MORE -> R.string.tally_phone_tab_more
+        PhoneTab.DOWNLOADS -> R.string.tally_dl_page_title
+        PhoneTab.SETTINGS -> R.string.settings
     }
 
 /** The drawer's glyph for the same entry. */
@@ -100,6 +103,8 @@ private fun PhoneTab.glyph(nav: PhoneNavModel): TallyGlyph =
         PhoneTab.SHOWS -> nav.shows?.let { tallyGlyph(it.value) } ?: TallyGlyph.Font(R.string.fa_tv)
         PhoneTab.SPORTS -> TallyGlyph.Font(R.string.tally_drawer_fa_trophy)
         PhoneTab.MORE -> TallyGlyph.Font(R.string.fa_ellipsis)
+        PhoneTab.DOWNLOADS -> TallyGlyph.Font(R.string.fa_download)
+        PhoneTab.SETTINGS -> TallyGlyph.Font(R.string.tally_drawer_fa_settings)
     }
 
 @Composable

@@ -41,6 +41,7 @@ import com.github.damontecres.wholphin.ui.nav.Destination
 import com.github.damontecres.wholphin.ui.rememberInt
 import com.github.damontecres.wholphin.util.ExceptionHandler
 import com.github.damontecres.wholphin.util.LoadingState
+import io.github.scdouglas1999.tally.downloads.ui.DownloadSubject
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.kit.arrivalFocus
@@ -229,6 +230,7 @@ private fun ArtistLoaded(
                                 onShuffle = { viewModel.play(artist, shuffled = true) },
                                 onInstantMix = { viewModel.startInstantMix(artist.id) },
                                 onFavorite = { viewModel.setFavorite(artist.id, !artist.favorite) },
+                                download = DownloadSubject.Artist(artist.id, artist.name ?: ""),
                                 onMore = { menuFor(artist, 0, fromLongClick = false) },
                             )
                         },
@@ -300,6 +302,7 @@ private fun ArtistLoaded(
                                     duration = MusicFormat.duration(song?.data?.runTimeTicks),
                                     playing = song != null && currentMusic.currentItemId == song.id,
                                     queued = song != null && song.id in currentMusic.queuedIds,
+                                    downloadId = song?.id,
                                     onClick = {
                                         position = index
                                         song?.let { viewModel.play(it) }

@@ -245,9 +245,19 @@ private fun TallySettingsBody(
         }
     }
 
+    // the groups as the list shows them in the Tally look (About moved last: TallyExtraSettings)
+    val context = LocalContext.current
+    val shownGroups =
+        remember(screen, context) {
+            if (screen == PreferenceScreenOption.BASIC) {
+                TallyExtraSettings.basicGroups(basicPreferences, context)
+            } else {
+                preferenceGroups(screen)
+            }
+        }
     val focused =
         focusedIndex?.let { (group, index) ->
-            focusedPreference(preferenceGroups(screen), preferences, group, index)
+            focusedPreference(shownGroups, preferences, group, index)
         }
     TallyScale {
         BoxWithConstraints(

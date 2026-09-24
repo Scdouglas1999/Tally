@@ -21,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.ContentScale
@@ -39,6 +41,8 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.ui.FontAwesome
 import com.github.damontecres.wholphin.ui.logCoilError
 import com.github.damontecres.wholphin.ui.playback.isPlayKeyUp
+import io.github.scdouglas1999.tally.downloads.ui.DownloadedSquare
+import io.github.scdouglas1999.tally.downloads.ui.downloadMark
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
@@ -87,7 +91,10 @@ fun CardFrame(
     label: (@Composable () -> Unit)? = null,
     tagGlyph: String? = null,
     contentScale: ContentScale = ContentScale.Crop,
+    downloadId: java.util.UUID? = null,
 ) {
+    // phones only: always null on a TV
+    val download = downloadMark(downloadId)
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     LaunchedEffect(focused) {
@@ -145,7 +152,23 @@ fun CardFrame(
                     }
                 }.tallyClickable(onClick = onClick, onLongClick = onLongClick),
     ) {
-        Column {
+        Column(
+            modifier =
+                if (download != null && !download.done) {
+                    // a download under way: a 2dp accent line along the card's bottom edge
+                    Modifier.drawWithContent {
+                        drawContent()
+                        val line = 2.dp.toPx()
+                        drawRect(
+                            color = TallyColors.accent,
+                            topLeft = Offset(0f, size.height - line),
+                            size = Size(size.width * download.progress.coerceIn(0.02f, 1f), line),
+                        )
+                    }
+                } else {
+                    Modifier
+                },
+        ) {
             Box(
                 modifier =
                     Modifier
@@ -216,6 +239,14 @@ fun CardFrame(
                                 .align(Alignment.TopStart)
                                 .background(TallyColors.labelBar)
                                 .padding(horizontal = 6.dp, vertical = 2.dp),
+                    )
+                }
+                if (download?.done == true) {
+                    DownloadedSquare(
+                        modifier =
+                            Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(start = 6.dp, bottom = if (fraction != null && fraction > 0f) 10.dp else 6.dp),
                     )
                 }
                 if (favorite) {

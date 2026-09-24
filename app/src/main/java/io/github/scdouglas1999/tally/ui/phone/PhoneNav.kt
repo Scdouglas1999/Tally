@@ -14,8 +14,8 @@ internal const val HOME_INDEX = -1
 internal const val SEARCH_INDEX = -2
 internal const val NOW_PLAYING_INDEX = -3
 
-/** The five places of the bottom bar. */
-internal enum class PhoneTab { HOME, MOVIES, SHOWS, SPORTS, MORE }
+/** The five places of the bottom bar; offline mode has only [DOWNLOADS] and [SETTINGS]. */
+internal enum class PhoneTab { HOME, MOVIES, SHOWS, SPORTS, MORE, DOWNLOADS, SETTINGS }
 
 /**
  * What the phone's navigation shows, from the drawer's items: the first Movies and TV Shows libraries and Sports for
@@ -39,6 +39,9 @@ internal data class PhoneNavModel(
                 if (sports != null) add(PhoneTab.SPORTS)
                 add(PhoneTab.MORE)
             }
+
+    /** The bar's tabs: in offline mode (the server cannot be reached) only Downloads and Settings. */
+    fun tabs(offline: Boolean): List<PhoneTab> = if (offline) listOf(PhoneTab.DOWNLOADS, PhoneTab.SETTINGS) else tabs
 
     /** The tab the drawer's [selectedIndex] belongs to: anything that is not a tab is under More. */
     fun currentTab(selectedIndex: Int): PhoneTab =

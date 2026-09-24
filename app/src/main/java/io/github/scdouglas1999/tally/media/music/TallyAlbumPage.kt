@@ -77,6 +77,7 @@ import com.github.damontecres.wholphin.ui.rememberInt
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import com.github.damontecres.wholphin.util.ExceptionHandler
 import com.github.damontecres.wholphin.util.LoadingState
+import io.github.scdouglas1999.tally.downloads.ui.DownloadSubject
 import io.github.scdouglas1999.tally.media.kit.CardFrame
 import io.github.scdouglas1999.tally.media.kit.CardKickerStyle
 import io.github.scdouglas1999.tally.media.kit.CardTitleText
@@ -322,6 +323,7 @@ private fun AlbumLoaded(
                                 onShuffle = { viewModel.play(true, 0) },
                                 onInstantMix = { viewModel.startInstantMix(album.id) },
                                 onFavorite = { viewModel.setFavorite(album.id, !album.favorite) },
+                                download = DownloadSubject.Album(album.id, album.name ?: ""),
                                 onMore = {
                                     dialogs.contextMenu =
                                         ContextMenu.ForMusic(
@@ -371,6 +373,7 @@ private fun AlbumLoaded(
                                 duration = MusicFormat.duration(song?.data?.runTimeTicks),
                                 playing = song != null && currentMusic.currentItemId == song.id,
                                 queued = song != null && song.id in currentMusic.queuedIds,
+                                downloadId = song?.id,
                                 onClick = {
                                     position = index
                                     viewModel.play(false, index)
@@ -556,6 +559,7 @@ fun TallySongPage(
                             onShuffle = null,
                             onInstantMix = { viewModel.startInstantMix(song.id) },
                             onFavorite = { viewModel.setFavorite(song.id, !song.favorite) },
+                            download = DownloadSubject.Item(song.id, song.name ?: ""),
                             onMore = {
                                 dialogs.contextMenu =
                                     ContextMenu.ForMusic(
@@ -910,6 +914,7 @@ internal fun MusicActions(
     onInstantMix: () -> Unit,
     onFavorite: () -> Unit,
     onMore: () -> Unit,
+    download: DownloadSubject? = null,
 ) {
     if (isPhone()) {
         PhoneMusicActions(
@@ -919,6 +924,7 @@ internal fun MusicActions(
             onInstantMix = onInstantMix,
             onFavorite = onFavorite,
             onMore = onMore,
+            download = download,
         )
         return
     }

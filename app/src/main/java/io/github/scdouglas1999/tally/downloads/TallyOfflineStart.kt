@@ -12,6 +12,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import io.github.scdouglas1999.tally.ui.formfactor.isTallyPhone
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
@@ -46,10 +47,15 @@ object TallyOfflineStart {
         entryPointOrNull(context)?.downloads()?.start()
     }
 
-    /** Null where the app's Hilt graph is not there (Wholphin's unit tests): then startup is exactly Wholphin's. */
+    /**
+     * Null where the app's Hilt graph is not there (Wholphin's unit tests), and on a TV (downloads and offline mode are
+     * a phone feature): then startup is exactly Wholphin's.
+     */
     private fun entryPointOrNull(context: Context): DownloadsEntryPoint? =
         try {
-            downloadsEntryPoint(context)
+            // Hilt first: in Wholphin's unit tests (a plain or mocked context) this throws before the device is asked.
+            // Downloads are a phone feature: a TV plays and starts exactly as Wholphin does, even with old downloads.
+            downloadsEntryPoint(context).takeIf { isTallyPhone(context) }
         } catch (e: RuntimeException) {
             // not a Hilt app (a test's plain or mocked context); in the app this lookup cannot fail
             null

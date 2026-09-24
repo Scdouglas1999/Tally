@@ -50,6 +50,14 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.ui.FontAwesome
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
+import io.github.scdouglas1999.tally.downloads.ui.DownloadStatus
+import io.github.scdouglas1999.tally.downloads.ui.DownloadSubject
+import io.github.scdouglas1999.tally.downloads.ui.DownloadUi
+import io.github.scdouglas1999.tally.downloads.ui.DownloadedSquare
+import io.github.scdouglas1999.tally.downloads.ui.downloadEdge
+import io.github.scdouglas1999.tally.downloads.ui.downloadMark
+import io.github.scdouglas1999.tally.downloads.ui.rememberDownloadUi
+import io.github.scdouglas1999.tally.downloads.ui.status
 import io.github.scdouglas1999.tally.media.kit.CardDetailStyle
 import io.github.scdouglas1999.tally.media.kit.CardFrame
 import io.github.scdouglas1999.tally.media.kit.CardTitleStyle
@@ -217,7 +225,8 @@ internal fun PhoneMusicHeader(
 
 /**
  * The action row of the music pages on a phone: PLAY (accent) and SHUFFLE side by side (PLAY alone when there is no
- * [onShuffle]), then INSTANT MIX, FAVORITE (accent when on) and MORE as 48dp icon squares.
+ * [onShuffle]), then INSTANT MIX, FAVORITE (accent when on), DOWNLOAD (when [download] is set; SHUFFLE is then a
+ * glyph square too, for room) and MORE as 48dp icon squares.
  */
 @Composable
 internal fun PhoneMusicActions(
@@ -227,7 +236,9 @@ internal fun PhoneMusicActions(
     onInstantMix: () -> Unit,
     onFavorite: () -> Unit,
     onMore: () -> Unit,
+    download: DownloadSubject? = null,
 ) {
+    val downloads = if (download != null) rememberDownloadUi() else null
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -239,11 +250,18 @@ internal fun PhoneMusicActions(
             kind = PhoneButtonKind.PRIMARY,
             modifier = Modifier.weight(1f),
         )
-        if (onShuffle != null) {
+        if (onShuffle != null && downloads == null) {
             PhoneButton(
                 label = stringResource(R.string.tally_music_shuffle),
                 onClick = onShuffle,
                 modifier = Modifier.weight(1f),
+            )
+        } else if (onShuffle != null) {
+            // with DOWNLOAD in the row there is no room for a SHUFFLE label: the glyph square, named for accessibility
+            PhoneIconSquare(
+                glyph = stringResource(R.string.fa_shuffle),
+                label = stringResource(R.string.tally_music_shuffle),
+                onClick = onShuffle,
             )
         }
         PhoneIconSquare(
@@ -257,12 +275,44 @@ internal fun PhoneMusicActions(
             onClick = onFavorite,
             color = if (favorite) TallyColors.accent else TallyColors.text,
         )
+        if (downloads != null && download != null) PhoneDownloadSquare(downloads, download)
         PhoneIconSquare(
             glyph = stringResource(R.string.fa_ellipsis),
             label = stringResource(R.string.tally_music_more),
             onClick = onMore,
         )
     }
+}
+
+/**
+ * DOWNLOAD on the music pages: the download glyph square; while downloading the percentage beside it (PAUSED when
+ * paused), a check once downloaded. Tap and long-press as [DownloadUi].
+ */
+@Composable
+internal fun PhoneDownloadSquare(
+    downloads: DownloadUi,
+    subject: DownloadSubject,
+) {
+    val status = downloads.status(subject)
+    PhoneIconSquare(
+        glyph = stringResource(if (status is DownloadStatus.Done) R.string.fa_check else R.string.fa_download),
+        label =
+            stringResource(
+                if (status is DownloadStatus.Done) R.string.tally_dlui_downloaded else R.string.tally_dlui_download,
+            ),
+        onClick = { downloads.onTap(subject, status) },
+        onLongClick = { downloads.onLongPress(subject) },
+        tag =
+            (status as? DownloadStatus.Active)?.let {
+                when {
+                    it.failed -> stringResource(R.string.tally_dlui_failed)
+                    it.paused -> stringResource(R.string.tally_dlui_paused)
+                    it.queued -> stringResource(R.string.tally_dlui_queued)
+                    else -> stringResource(R.string.tally_dlui_percent, it.percent)
+                }
+            },
+        color = if ((status as? DownloadStatus.Active)?.failed == true) TallyColors.liveText else TallyColors.text,
+    )
 }
 
 /** A 48dp square icon button with a 1dp `ruleStrong` frame; [label] is its accessibility name. */
@@ -279,6 +329,7 @@ internal fun PhoneIconSquare(
     frameWidth: Dp = PhoneDimens.hairline,
     glyphSize: Int = 17,
     tag: String? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     Box(
         contentAlignment = Alignment.Center,
@@ -289,7 +340,7 @@ internal fun PhoneIconSquare(
                 .height(size)
                 .border(frameWidth, frame)
                 .semantics { contentDescription = label }
-                .phoneTouch(onClick = onClick, enabled = enabled)
+                .phoneTouch(onClick = onClick, enabled = enabled, onLongClick = onLongClick)
                 .alpha(if (enabled) 1f else DISABLED_ALPHA),
     ) {
         Row(
@@ -321,7 +372,9 @@ internal fun PhoneTrackRow(
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
+    downloadId: java.util.UUID? = null,
 ) {
+    val download = downloadMark(downloadId)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
@@ -329,6 +382,7 @@ internal fun PhoneTrackRow(
                 .fillMaxWidth()
                 .height(PhoneTrackRowHeight)
                 .phoneTouch(onClick = onClick, onLongClick = onLongClick)
+                .downloadEdge(download)
                 .padding(horizontal = PhoneDimens.margin),
     ) {
         Row(
@@ -361,6 +415,10 @@ internal fun PhoneTrackRow(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+        if (download?.done == true) {
+            Spacer(Modifier.width(12.dp))
+            DownloadedSquare()
         }
         if (duration.isNotBlank()) {
             Spacer(Modifier.width(12.dp))
@@ -425,6 +483,7 @@ internal fun PhoneAlbumRow(
                     onClick = { item?.let(onClick) },
                     onLongClick = { item?.let { onLongClick(index, it) } },
                     favorite = item?.favorite == true,
+                    downloadId = item?.id,
                     label = {
                         Text(
                             text = item?.name ?: "",

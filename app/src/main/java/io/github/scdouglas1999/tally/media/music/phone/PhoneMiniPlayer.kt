@@ -124,10 +124,10 @@ fun PhoneMiniPlayer(
                     .background(TallyColors.screen)
                     .border(PhoneDimens.hairline, TallyColors.rule),
         ) {
-            current?.imageUrl?.let {
+            io.github.scdouglas1999.tally.downloads.ui.musicCover(current)?.let {
                 AsyncImage(
                     model = it,
-                    contentDescription = current.title,
+                    contentDescription = current?.title,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize().padding(PhoneDimens.hairline),
                 )

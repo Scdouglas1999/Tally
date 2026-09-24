@@ -27,6 +27,7 @@ fun LandscapeCard(
     progress: Float? = null,
     favorite: Boolean = false,
     width: Dp = LandscapeWidth,
+    downloadId: java.util.UUID? = null,
 ) {
     CardFrame(
         imageUrl = imageUrl,
@@ -40,6 +41,7 @@ fun LandscapeCard(
         onFocused = onFocused,
         progress = progress,
         favorite = favorite,
+        downloadId = downloadId,
         label = {
             if (!kicker.isNullOrBlank()) {
                 Text(

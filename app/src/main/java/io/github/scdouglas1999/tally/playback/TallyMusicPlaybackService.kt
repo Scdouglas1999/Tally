@@ -14,6 +14,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.github.damontecres.wholphin.data.model.AudioItem
+import io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import timber.log.Timber
 
@@ -40,6 +41,7 @@ object TallyMusicPlayback {
     ) {
         if (TallyFormFactor.of(context) != TallyFormFactor.PHONE) return
         session = mediaSession
+        SessionArtwork.appContext = context.applicationContext
         SessionArtwork.attach(mediaSession)
         val running = service
         if (running != null) {
@@ -133,6 +135,9 @@ internal object SessionArtwork : Player.Listener {
     private var player: Player? = null
     private var filling = false
 
+    /** For the covers of downloaded tracks (offline, the server's cover cannot load). */
+    @Volatile var appContext: Context? = null
+
     /** Called from any thread; the session's player is used on the main thread, the player's own (upstream's). */
     fun attach(session: MediaSession) {
         main.post {
@@ -187,7 +192,9 @@ internal object SessionArtwork : Player.Listener {
     /** [item] with its album art as artwork, or null when it already has one or has no album art. */
     private fun withArtwork(item: MediaItem): MediaItem? {
         if (item.mediaMetadata.artworkUri != null || item.mediaMetadata.artworkData != null) return null
-        val imageUrl = (item.localConfiguration?.tag as? AudioItem)?.imageUrl ?: return null
+        val audio = item.localConfiguration?.tag as? AudioItem ?: return null
+        val local = appContext?.let { TallyDownloadPlayback.localArtwork(it, audio.id) }
+        val imageUrl = local ?: audio.imageUrl ?: return null
         return item
             .buildUpon()
             .setMediaMetadata(

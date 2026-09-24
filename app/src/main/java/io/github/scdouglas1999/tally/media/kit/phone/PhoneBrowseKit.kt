@@ -458,6 +458,7 @@ fun PhoneItemCard(
                 onLongClick = onLongClick,
                 modifier = modifier,
                 width = PhoneDimens.landscapeCardWidth,
+                downloadId = item?.id,
             )
         }
 
@@ -473,6 +474,7 @@ fun PhoneItemCard(
                 onLongClick = onLongClick,
                 favorite = item?.favorite == true,
                 modifier = modifier,
+                downloadId = item?.id,
                 label = {
                     Text(
                         text = item?.name ?: "",

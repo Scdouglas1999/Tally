@@ -345,6 +345,15 @@ fun ReleaseNotes(
     release: Release,
     modifier: Modifier = Modifier,
 ) {
+    // TALLY: begin
+    if (release.body?.contains(io.github.scdouglas1999.tally.support.TallySupport.NOTES_MARKER) == true) {
+        val cut =
+            io.github.scdouglas1999.tally.support.TallySupport
+                .cutReleaseNotes(release.body)
+        ReleaseNotes(release.copy(body = cut), modifier)
+        return
+    }
+    // TALLY: end
     Markdown(
         content = release.content,
         typography =

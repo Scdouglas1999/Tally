@@ -9,6 +9,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.data.ChosenStreams
 import com.github.damontecres.wholphin.data.model.BaseItem
@@ -29,6 +31,13 @@ import com.github.damontecres.wholphin.ui.playback.SimpleMediaStream
 import com.github.damontecres.wholphin.ui.roundMinutes
 import com.github.damontecres.wholphin.util.supportedPlayableTypes
 import com.github.damontecres.wholphin.util.supportedShufflableTypes
+import io.github.scdouglas1999.tally.downloads.ui.DownloadQualitySheet
+import io.github.scdouglas1999.tally.downloads.ui.DownloadRemoveSheet
+import io.github.scdouglas1999.tally.downloads.ui.DownloadStatus
+import io.github.scdouglas1999.tally.downloads.ui.DownloadSubject
+import io.github.scdouglas1999.tally.downloads.ui.DownloadUiViewModel
+import io.github.scdouglas1999.tally.downloads.ui.rememberNotificationAsk
+import io.github.scdouglas1999.tally.downloads.ui.statusOf
 import io.github.scdouglas1999.tally.ui.settings.phone.isPhone
 import kotlinx.coroutines.delay
 import org.jellyfin.sdk.model.api.BaseItemDto
@@ -244,6 +253,85 @@ private sealed interface SubMenu {
     data object PlayWith : SubMenu
 
     data object Delete : SubMenu
+
+    /** A phone's download quality sheet for the item. */
+    data object Download : SubMenu
+
+    /** A phone's "Remove download?" for the item. */
+    data object RemoveDownload : SubMenu
+}
+
+/**
+ * The download entries of an item's menu on a phone (downloads are a phone feature): "Download…" for anything that
+ * can be downloaded, and "Remove download" once something of it is downloaded or downloading. Empty on a TV.
+ */
+@Composable
+private fun downloadEntries(
+    item: BaseItem,
+    onDownload: () -> Unit,
+    onRemove: () -> Unit,
+): Pair<List<PanelEntry>, MenuDownload?> {
+    if (!isPhone()) return emptyList<PanelEntry>() to null
+    val subject = remember(item.id, item.type) { DownloadSubject.of(item) } ?: return emptyList<PanelEntry>() to null
+    val viewModel: DownloadUiViewModel = hiltViewModel()
+    val entries by viewModel.entries.collectAsStateWithLifecycle()
+    val status = remember(entries, subject) { statusOf(subject, entries) }
+    val rows =
+        buildList {
+            add(panelItem(label = stringResource(R.string.tally_dlui_download_ellipsis), onClick = onDownload))
+            if (status != DownloadStatus.None) {
+                add(
+                    panelItem(
+                        label =
+                            stringResource(
+                                if (subject.isGroup) R.string.tally_dlui_remove_downloads else R.string.tally_dlui_remove_download,
+                            ),
+                        onClick = onRemove,
+                        destructive = true,
+                    ),
+                )
+            }
+        }
+    return rows to MenuDownload(subject, viewModel)
+}
+
+private class MenuDownload(
+    val subject: DownloadSubject,
+    val viewModel: DownloadUiViewModel,
+)
+
+/** The download sheets an item's menu opens on a phone. */
+@Composable
+private fun MenuDownloadSheets(
+    sub: SubMenu?,
+    download: MenuDownload?,
+    onDismissRequest: () -> Unit,
+) {
+    if (download == null) return
+    val askNotifications = rememberNotificationAsk(download.viewModel)
+    when (sub) {
+        SubMenu.Download -> {
+            DownloadQualitySheet(
+                subject = download.subject,
+                viewModel = download.viewModel,
+                onStarted = {
+                    askNotifications()
+                    onDismissRequest()
+                },
+                onDismiss = onDismissRequest,
+            )
+        }
+
+        SubMenu.RemoveDownload -> {
+            DownloadRemoveSheet(
+                subject = download.subject,
+                viewModel = download.viewModel,
+                onDismiss = onDismissRequest,
+            )
+        }
+
+        else -> {}
+    }
 }
 
 @Composable
@@ -279,6 +367,12 @@ private fun ItemMenu(
         getMediaSource?.invoke(item.data, chosen?.itemPlayback)?.let { subMenu = SubMenu.Streams(type, it) }
     }
 
+    val (downloadRows, download) =
+        downloadEntries(
+            item = item,
+            onDownload = { subMenu = SubMenu.Download },
+            onRemove = { subMenu = SubMenu.RemoveDownload },
+        )
     val entries =
         itemActions.map { action ->
             val label = itemActionLabel(resources, action)
@@ -385,7 +479,7 @@ private fun ItemMenu(
                     }
                 },
             )
-        }
+        } + downloadRows
     // A phone shows one sheet at a time: the menu steps aside while its chooser or confirmation is open.
     if (!isPhone() || subMenu == null) {
         MenuPanel(
@@ -441,6 +535,10 @@ private fun ItemMenu(
                     onDismissRequest()
                 },
             )
+        }
+
+        SubMenu.Download, SubMenu.RemoveDownload -> {
+            MenuDownloadSheets(sub, download, onDismissRequest = onDismissRequest)
         }
 
         null -> {}
@@ -687,6 +785,13 @@ private fun MusicMenu(
     val item = menu.item
     val index = menu.index
     var confirmDelete by remember { mutableStateOf(false) }
+    var subMenu by remember { mutableStateOf<SubMenu?>(null) }
+    val (downloadRows, download) =
+        downloadEntries(
+            item = item,
+            onDownload = { subMenu = SubMenu.Download },
+            onRemove = { subMenu = SubMenu.RemoveDownload },
+        )
 
     fun then(block: () -> Unit): () -> Unit =
         {
@@ -736,7 +841,12 @@ private fun MusicMenu(
             if ((item.type == BaseItemKind.AUDIO || item.type == BaseItemKind.MUSIC_ALBUM) && artistId != null) {
                 add(panelItem(stringResource(R.string.go_to_artist), then { actions.onClickGoToArtist(artistId) }))
             }
+            addAll(downloadRows)
         }
+    if (subMenu != null) {
+        MenuDownloadSheets(subMenu, download, onDismissRequest = onDismissRequest)
+        return
+    }
     if (!isPhone() || !confirmDelete) {
         MenuPanel(
             title = item.title ?: "",

@@ -374,4 +374,34 @@ class QualityLadderTest {
         }
         assertNull(QualityLadder.heightFor(4_000_000))
     }
+
+    @Test
+    fun `a chosen rung sends its width with its height`() {
+        assertEquals(854, QualityLadder.widthFor(480))
+        assertEquals(1920, QualityLadder.widthFor(1080))
+        io.github.scdouglas1999.tally.quality.TallyQuality
+            .choose(mbit(2))
+        try {
+            val url =
+                io.github.scdouglas1999.tally.quality.TallyQuality
+                    .transcodingUrl("/videos/x/master.m3u8?VideoBitrate=2000000")
+            assertTrue(url.contains("MaxHeight=480"))
+            assertTrue(url.contains("MaxWidth=854"))
+            assertTrue(url.contains("AllowVideoStreamCopy=false"))
+            // a larger width from the device profile is lowered to the rung's, a smaller one is kept
+            val profiled =
+                io.github.scdouglas1999.tally.quality.TallyQuality
+                    .transcodingUrl("/videos/x/master.m3u8?MaxWidth=1920&VideoBitrate=2000000")
+            assertTrue(profiled.contains("?MaxWidth=854&"))
+            assertFalse(profiled.contains("MaxWidth=1920"))
+            val smaller =
+                io.github.scdouglas1999.tally.quality.TallyQuality
+                    .transcodingUrl("/videos/x/master.m3u8?maxWidth=640")
+            assertTrue(smaller.contains("maxWidth=640"))
+            assertFalse(smaller.contains("MaxWidth=854"))
+        } finally {
+            io.github.scdouglas1999.tally.quality.TallyQuality
+                .choose(null)
+        }
+    }
 }

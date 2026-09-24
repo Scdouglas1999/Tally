@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
 import android.app.SearchManager
@@ -55,6 +58,11 @@ class IntentService
                 val query = intent.getStringParam(SearchManager.QUERY)
                 return IntentResult.Target(listOf(Destination.Search(query ?: "")))
             }
+            // TALLY: begin
+            if (intent.data?.host == io.github.scdouglas1999.tally.downloads.ui.DownloadsLink.HOST) {
+                return IntentResult.Target(listOf(Destination.TallyDownloads))
+            }
+            // TALLY: end
             val itemId =
                 intent.getStringParam("itemId")?.toUUIDOrNull()
                     ?: return IntentResult.Error("No item id provided")

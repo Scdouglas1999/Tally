@@ -157,10 +157,13 @@ internal fun PhoneNowPlaying(
                                     .background(TallyColors.screen)
                                     .border(PhoneDimens.hairline, TallyColors.rule),
                         ) {
-                            if (current?.imageUrl != null) {
+                            val cover =
+                                io.github.scdouglas1999.tally.downloads.ui
+                                    .musicCover(current)
+                            if (cover != null) {
                                 coil3.compose.AsyncImage(
-                                    model = current.imageUrl,
-                                    contentDescription = current.title,
+                                    model = cover,
+                                    contentDescription = current?.title,
                                     contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize().padding(PhoneDimens.hairline),
                                 )

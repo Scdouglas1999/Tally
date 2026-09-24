@@ -55,6 +55,7 @@ fun PosterCard(
         tag = tag,
         tagAccent = !played && unplayed > 0,
         favorite = item.favorite,
+        downloadId = item.id,
         label =
             if (showLabel) {
                 {

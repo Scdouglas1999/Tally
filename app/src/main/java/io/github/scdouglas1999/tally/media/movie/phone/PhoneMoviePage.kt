@@ -51,6 +51,9 @@ import com.github.damontecres.wholphin.ui.playback.playable
 import com.github.damontecres.wholphin.ui.util.ResStringProvider
 import com.github.damontecres.wholphin.util.DataLoadingState
 import com.github.damontecres.wholphin.util.DiscoverRequestType
+import io.github.scdouglas1999.tally.downloads.ui.DownloadSubject
+import io.github.scdouglas1999.tally.downloads.ui.phoneAction
+import io.github.scdouglas1999.tally.downloads.ui.rememberDownloadUi
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
 import io.github.scdouglas1999.tally.media.kit.LandscapeCard
 import io.github.scdouglas1999.tally.media.kit.PersonCard
@@ -89,6 +92,8 @@ fun PhoneMovieLoaded(
     val streamsNow by rememberUpdatedState(state.chosenStreams)
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     var showTrailers by remember { mutableStateOf(false) }
+    val downloads = rememberDownloadUi()
+    val downloadSubject = remember(movie.id, movie.name) { DownloadSubject.of(movie) }
 
     fun openMovieMenu(fromLongClick: Boolean) {
         dialogs.contextMenu =
@@ -176,7 +181,7 @@ fun PhoneMovieLoaded(
                                 )
                             }
                         },
-                    trailing = emptyList(),
+                    trailing = listOfNotNull(downloadSubject?.let { downloads.phoneAction(it) }),
                     onPlay = { position ->
                         viewModel.navigateTo(Destination.Playback(movie.id, position.inWholeMilliseconds))
                     },

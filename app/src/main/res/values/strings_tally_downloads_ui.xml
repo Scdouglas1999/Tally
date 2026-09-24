@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Downloads UI (phones) and Support Tally. American English. -->
+<resources>
+    <!-- DOWNLOAD controls and menus -->
+    <string name="tally_dlui_download">Download</string>
+    <string name="tally_dlui_downloaded">Downloaded</string>
+    <string name="tally_dlui_download_ellipsis">Download…</string>
+    <string name="tally_dlui_download_season">Download season %1$d</string>
+    <string name="tally_dlui_download_specials">Download specials</string>
+    <string name="tally_dlui_download_more">Download more…</string>
+    <string name="tally_dlui_remove_download">Remove download</string>
+    <string name="tally_dlui_remove_downloads">Remove downloads</string>
+    <string name="tally_dlui_remove_download_q">Remove download?</string>
+    <string name="tally_dlui_remove_downloads_q">Remove downloads?</string>
+    <string name="tally_dlui_percent">%1$d%%</string>
+    <string name="tally_dlui_paused">Paused</string>
+    <string name="tally_dlui_failed">Failed</string>
+    <string name="tally_dlui_queued">Queued</string>
+    <string name="tally_dlui_downloading">Downloading</string>
+    <string name="tally_dlui_n_of_m_done">%1$d of %2$d downloaded</string>
+    <string name="tally_dlui_not_downloaded">Not downloaded.</string>
+
+    <!-- The quality sheet -->
+    <string name="tally_dlui_sheet_title">Download · %1$s</string>
+    <string name="tally_dlui_checking">Checking sizes…</string>
+    <string name="tally_dlui_convert_note">Your server converts this file first, so it may take longer than the download itself.</string>
+    <string name="tally_dlui_total">Total · about %1$s</string>
+    <string name="tally_dlui_next_n">Next %1$d</string>
+    <string name="tally_dlui_all_unwatched">All unwatched</string>
+    <string name="tally_dlui_this_season">This season</string>
+    <string name="tally_dlui_cancel">Cancel</string>
+    <string name="tally_dlui_original">Original</string>
+
+    <!-- The status sheet -->
+    <string name="tally_dlui_pause">Pause</string>
+    <string name="tally_dlui_resume">Resume</string>
+    <string name="tally_dlui_cancel_download">Cancel download</string>
+    <string name="tally_dlui_play_offline">Play from this device</string>
+    <string name="tally_dlui_open_downloads">Go to Downloads</string>
+    <plurals name="tally_dlui_items">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+
+    <!-- The Downloads page -->
+    <string name="tally_dlui_empty">Nothing downloaded yet. Look for DOWNLOAD on a film, show or album.</string>
+    <string name="tally_dlui_in_progress">In progress</string>
+    <string name="tally_dlui_films">Films</string>
+    <string name="tally_dlui_shows">Shows</string>
+    <string name="tally_dlui_music">Music</string>
+    <string name="tally_dlui_storage_used">Tally %1$s</string>
+    <string name="tally_dlui_storage_free">%1$s free</string>
+    <string name="tally_dlui_speed">%1$s/s</string>
+    <string name="tally_dlui_offline_bar">Offline · Showing your downloads</string>
+    <string name="tally_dlui_back_online">Back online</string>
+    <string name="tally_dlui_retry">Retry</string>
+    <string name="tally_dlui_select">Select</string>
+    <string name="tally_dlui_done">Done</string>
+    <string name="tally_dlui_delete">Delete</string>
+    <plurals name="tally_dlui_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="tally_dlui_remove_n_q">
+        <item quantity="one">Remove %d download?</item>
+        <item quantity="other">Remove %d downloads?</item>
+    </plurals>
+    <plurals name="tally_dlui_remove_watched">
+        <item quantity="one">Remove %d watched episode</item>
+        <item quantity="other">Remove %d watched episodes</item>
+    </plurals>
+    <plurals name="tally_dlui_episodes">
+        <item quantity="one">%d episode</item>
+        <item quantity="other">%d episodes</item>
+    </plurals>
+    <plurals name="tally_dlui_tracks">
+        <item quantity="one">%d track</item>
+        <item quantity="other">%d tracks</item>
+    </plurals>
+
+    <!-- Settings: Downloads -->
+    <string name="tally_dlui_set_quality">Default quality</string>
+    <string name="tally_dlui_ask_each_time">Ask each time</string>
+    <string name="tally_dlui_set_wifi">Wi-Fi only</string>
+    <string name="tally_dlui_set_wifi_summary">Downloads wait for Wi-Fi</string>
+    <string name="tally_dlui_set_simultaneous">Simultaneous downloads</string>
+    <string name="tally_dlui_set_delete_watched">Delete watched episodes</string>
+    <string name="tally_dlui_off">Off</string>
+    <string name="tally_dlui_after_day">After 1 day</string>
+    <string name="tally_dlui_after_week">After 1 week</string>
+    <string name="tally_dlui_set_location">Storage location</string>
+    <string name="tally_dlui_this_device">This device</string>
+    <string name="tally_dlui_sd_card">SD card</string>
+    <string name="tally_dlui_set_remove_all">Remove all downloads</string>
+    <string name="tally_dlui_set_remove_all_summary">%1$s on this device</string>
+    <string name="tally_dlui_remove_all_q">Remove all downloads?</string>
+    <string name="tally_dlui_remove_all_body">Everything downloaded on this device (%1$s) is removed. Your watch progress stays.</string>
+
+    <!-- Notifications -->
+    <string name="tally_dlui_notification_title">Downloading %1$d of %2$d</string>
+    <string name="tally_dlui_notification_waiting">Downloads waiting</string>
+    <string name="tally_dlui_notification_done">Downloaded · %1$s</string>
+
+    <!-- Support Tally (Settings > About) -->
+    <string name="tally_support_title">Support Tally</string>
+    <string name="tally_support_summary">Tally is free. If it\'s useful to you, you can chip in on Patreon.</string>
+    <string name="tally_support_close">Close</string>
+</resources>

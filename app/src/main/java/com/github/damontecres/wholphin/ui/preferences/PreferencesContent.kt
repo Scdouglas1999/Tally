@@ -149,6 +149,15 @@ fun PreferencesContent(
             updateState.release?.version?.isGreaterThan(installedVersion) ?: false
         }
 
+    // TALLY: begin
+    val tallyBasic =
+        io.github.scdouglas1999.tally.ui.settings.TallyExtraSettings
+            .basicGroups(basicPreferences, context)
+            .takeIf {
+                io.github.scdouglas1999.tally.ui.settings.TallySettings.active &&
+                    preferenceScreenOption == PreferenceScreenOption.BASIC
+            }
+    // TALLY: end
     val prefList =
         when (preferenceScreenOption) {
             PreferenceScreenOption.BASIC -> basicPreferences
@@ -236,6 +245,11 @@ fun PreferencesContent(
                 contentPadding = PaddingValues(16.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
+                // TALLY: begin
+                // the Tally layout of the main settings: About last, Downloads on a phone (TallyExtraSettings)
+                @Suppress("NAME_SHADOWING")
+                val prefList = tallyBasic ?: prefList
+                // TALLY: end
                 if (showUpdate) {
                     item {
                         val updateFocusRequester = remember { FocusRequester() }
@@ -321,6 +335,13 @@ fun PreferencesContent(
                                     onFocus.invoke(groupIndex, prefIndex)
                                 }
                             }
+                            // TALLY: begin
+                            if (io.github.scdouglas1999.tally.ui.settings.TallyExtraSettings
+                                    .Row(pref, interactionSource, focusModifier)
+                            ) {
+                                return@item
+                            }
+                            // TALLY: end
                             when (pref) {
                                 AppPreference.InstalledVersion -> {
                                     ClickPreference(
