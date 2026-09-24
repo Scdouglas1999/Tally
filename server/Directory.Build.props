@@ -1,0 +1,13 @@
+<Project>
+  <!-- Separate intermediate/output trees per Jellyfin line so the two builds never share restore state. -->
+  <PropertyGroup>
+    <JellyfinLine Condition="'$(JellyfinLine)' == ''">10</JellyfinLine>
+    <!-- The plugin is versioned with the Tally app: Tally 2.0.0 ships plugin 2.0.0.10, .11 and .12
+         (one per Jellyfin line, see the plugin's csproj). tally/release.sh passes the
+         release's version; this is the default for local builds. -->
+    <TallyVersion Condition="'$(TallyVersion)' == ''">2.0.0</TallyVersion>
+    <BaseIntermediateOutputPath>obj/jf$(JellyfinLine)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin/jf$(JellyfinLine)/</BaseOutputPath>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**;bin/**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>

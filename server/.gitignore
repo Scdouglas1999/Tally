@@ -1,0 +1,5 @@
+bin/
+obj/
+dist/
+preview/
+__pycache__/

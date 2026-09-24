@@ -1,0 +1,910 @@
+/* ============================================================================
+   JellyTV — visual design system ("control room, off duty")
+   Flat near-black ground, hairline rules, square corners. One accent (amber)
+   for selection/now, red reserved for live + failure. IBM Plex Sans for
+   reading, IBM Plex Mono for times, labels and anything instrument-like.
+   No gradients-as-decoration, no blur, no glow.
+
+   Everything is scoped to #jellytv-app plus the plugin's own body-level
+   overlays (.jtv-player, .jtv-modal-veil, .jtv-toast) so Jellyfin's UI is
+   never touched and Jellyfin's element styles are overridden explicitly.
+   ============================================================================ */
+
+/* Fonts ship with the plugin (SIL OFL, see plex-OFL.txt) — no third-party requests. */
+@font-face {
+  font-family: 'JTV Plex Sans'; font-style: normal; font-weight: 100 700; font-display: swap;
+  src: url(plex-sans.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JTV Plex Sans'; font-style: normal; font-weight: 100 700; font-display: swap;
+  src: url(plex-sans-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face { font-family: 'JTV Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(plex-mono-400.woff2) format('woff2'); }
+@font-face { font-family: 'JTV Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(plex-mono-500.woff2) format('woff2'); }
+@font-face { font-family: 'JTV Plex Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url(plex-mono-600.woff2) format('woff2'); }
+
+:root {
+  --jtv-bg: #0e0f0e;
+  --jtv-bg-2: #121312;          /* headers, sticky columns */
+  --jtv-panel: #161716;         /* raised: modal, inputs on hover */
+  --jtv-screen: #050505;        /* monitor faces */
+  --jtv-rule: #2a2c2a;          /* structural hairlines */
+  --jtv-rule-2: #3a3d38;        /* control borders, ruler ticks */
+  --jtv-rule-soft: #1d1f1d;     /* in-grid half-hour lines */
+  --jtv-text: #e3e5de;
+  --jtv-text-2: #a9ada3;
+  --jtv-muted: #8b9084;
+  --jtv-dim: #7d8277;           /* past programmes */
+  --jtv-accent: #ffb000;
+  --jtv-accent-ink: #0e0f0e;    /* text on accent fills */
+  --jtv-accent-wash: #1f1b0e;   /* "on now" cell ground */
+  --jtv-live: #ff3b30;
+  --jtv-live-text: #ff6a61;     /* red that passes contrast as small text */
+  --jtv-ok: #35d07f;
+  --jtv-topbar: 64px;
+  --jtv-ease: cubic-bezier(.2, .7, .3, 1);
+  --jtv-font: 'JTV Plex Sans', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --jtv-mono: 'JTV Plex Mono', 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace;
+}
+
+/* ---------- reset ---------- */
+#jellytv-app, #jellytv-app *, #jellytv-app *::before, #jellytv-app *::after,
+.jtv-player, .jtv-player *, .jtv-player *::before, .jtv-player *::after,
+.jtv-modal-veil, .jtv-modal-veil *, .jtv-modal-veil *::before, .jtv-modal-veil *::after {
+  box-sizing: border-box;
+}
+#jellytv-app button, .jtv-player button, .jtv-modal-veil button {
+  font: inherit; color: inherit; background: none; border: 0; border-radius: 0;
+  padding: 0; margin: 0; cursor: pointer; text-align: left;
+}
+
+/* default icon sizing — viewBox-only SVGs otherwise fill flex containers */
+#jellytv-app svg, .jtv-player svg, .jtv-modal-veil svg { width: 18px; height: 18px; flex: none; }
+
+#jellytv-app ::selection, .jtv-player ::selection, .jtv-modal-veil ::selection {
+  background: var(--jtv-accent); color: var(--jtv-accent-ink);
+}
+
+/* focus: hidden for pointer users, crisp accent outline for keyboard users */
+#jellytv-app :focus, .jtv-player :focus, .jtv-modal-veil :focus { outline: none; }
+#jellytv-app :focus-visible, .jtv-player :focus-visible, .jtv-modal-veil :focus-visible {
+  outline: 2px solid var(--jtv-accent); outline-offset: -2px;
+}
+
+/* ---------- shared atoms ---------- */
+
+/* indicator square: gray = idle, amber = selected, red = live/on a bus */
+#jellytv-app .led, .jtv-player .led, .jtv-modal-veil .led, .jtv-toast .led {
+  display: inline-block; width: 7px; height: 7px; flex: none; background: var(--jtv-rule-2);
+}
+#jellytv-app .led.on, .jtv-toast .led.on { background: var(--jtv-accent); }
+#jellytv-app .led.live, .jtv-player .led.live, .jtv-toast .led.live { background: var(--jtv-live); }
+
+/* small mono caps label */
+#jellytv-app .jtv-k, .jtv-player .jtv-k, .jtv-modal-veil .jtv-k {
+  font: 500 11px/1.2 var(--jtv-mono); letter-spacing: 1.6px; text-transform: uppercase; color: var(--jtv-muted);
+}
+#jellytv-app .jtv-k.live, .jtv-player .jtv-k.live { color: var(--jtv-live-text); }
+
+/* solid tag on a monitor face */
+#jellytv-app .jtv-tag, .jtv-player .jtv-tag {
+  display: inline-block; padding: 2px 7px;
+  font: 600 11px/1.3 var(--jtv-mono); letter-spacing: 1.5px;
+  background: var(--jtv-rule-2); color: var(--jtv-text);
+}
+#jellytv-app .jtv-tag.live, .jtv-player .jtv-tag.live { background: var(--jtv-live); color: var(--jtv-accent-ink); }
+
+/* segmented progress — the gaps are a mask, so it sits on any ground */
+#jellytv-app .jtv-progress, .jtv-player .jtv-progress {
+  height: 6px; background: #242623; overflow: hidden;
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+  mask-image: repeating-linear-gradient(90deg, #000 0 9px, transparent 9px 12px);
+}
+#jellytv-app .jtv-progress > div, .jtv-player .jtv-progress > div { height: 100%; background: var(--jtv-accent); }
+
+/* labeled reading: small caption over a mono value */
+#jellytv-app .jtv-stats, .jtv-player .jtv-stats { display: flex; gap: 32px; flex-wrap: wrap; }
+#jellytv-app .jtv-stat, .jtv-player .jtv-stat { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+#jellytv-app .jtv-stat .l, .jtv-player .jtv-stat .l { font-size: 12px; color: var(--jtv-muted); }
+#jellytv-app .jtv-stat .v, .jtv-player .jtv-stat .v {
+  font: 400 15px/1.3 var(--jtv-mono); font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 320px;
+}
+#jellytv-app .jtv-stat .v.txt, .jtv-player .jtv-stat .v.txt { font-family: var(--jtv-font); }
+#jellytv-app .jtv-stat .v.hot, .jtv-player .jtv-stat .v.hot { color: var(--jtv-accent); }
+
+/* monitor: a black 16:9 face with an under-monitor label bar */
+#jellytv-app .jtv-monitor {
+  position: relative; aspect-ratio: 16/9; background: var(--jtv-screen);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+#jellytv-app .jtv-monitor > img { max-width: 52%; max-height: 56%; object-fit: contain; }
+#jellytv-app .jtv-monitor > .mono {
+  font: 600 34px/1 var(--jtv-mono); letter-spacing: 2px; color: var(--jtv-rule-2);
+}
+#jellytv-app .jtv-monitor > .jtv-tag { position: absolute; top: 0; left: 0; }
+#jellytv-app .jtv-umd {
+  height: 26px; padding: 0 10px; display: flex; align-items: center; gap: 8px;
+  background: #000; border-top: 1px solid var(--jtv-rule);
+  font: 500 11px/1 var(--jtv-mono); letter-spacing: .8px; color: var(--jtv-text);
+}
+#jellytv-app .jtv-umd .nm { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#jellytv-app .jtv-umd .fav { color: var(--jtv-accent); display: inline-flex; }
+#jellytv-app .jtv-umd .fav svg { width: 11px; height: 11px; }
+
+/* ============ shell ============ */
+#jellytv-app .jtv-shell {
+  position: fixed; inset: 0; z-index: 10000;
+  display: flex; flex-direction: column;
+  background: var(--jtv-bg); color: var(--jtv-text);
+  font: 400 14px/1.4 var(--jtv-font);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+
+/* boot + full-screen states */
+#jellytv-app .jtv-boot { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+#jellytv-app .jtv-boot .jtv-logo { font-size: 24px; letter-spacing: 5px; margin: 0; }
+#jellytv-app .jtv-boot-bar { width: 216px; }
+#jellytv-app .jtv-boot-bar > div { width: 35%; animation: jtv-bootslide 1.2s steps(12) infinite; }
+@keyframes jtv-bootslide { from { transform: translateX(-100%); } to { transform: translateX(286%); } }
+
+/* ============ top bar ============ */
+#jellytv-app .jtv-topbar {
+  position: relative; z-index: 30; flex: none;
+  display: flex; align-items: center; gap: 28px;
+  height: var(--jtv-topbar); padding: 0 20px 0 10px;
+  border-bottom: 1px solid var(--jtv-rule);
+}
+#jellytv-app .jtv-back {
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px; flex: none; color: var(--jtv-muted);
+  transition: color .15s;
+}
+#jellytv-app .jtv-back:hover { color: var(--jtv-text); }
+#jellytv-app .jtv-logo { font-size: 19px; font-weight: 700; letter-spacing: 3px; user-select: none; margin-left: -14px; }
+
+#jellytv-app .jtv-nav { display: flex; gap: 4px; margin-left: 12px; align-self: stretch; }
+#jellytv-app .jtv-tab {
+  display: flex; align-items: center; gap: 9px; padding: 0 14px;
+  font: 500 12px/1 var(--jtv-mono); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--jtv-text-2); user-select: none;
+  box-shadow: inset 0 -2px 0 transparent;
+  transition: color .15s, box-shadow .15s;
+}
+#jellytv-app .jtv-tab:hover { color: var(--jtv-text); }
+#jellytv-app .jtv-tab.active { color: var(--jtv-accent); box-shadow: inset 0 -2px 0 var(--jtv-accent); }
+#jellytv-app .jtv-tab.active .led { background: var(--jtv-accent); }
+#jellytv-app .jtv-tab .cnt { color: var(--jtv-muted); margin-left: -3px; }
+#jellytv-app .jtv-tab .cnt:empty { display: none; }
+
+#jellytv-app .jtv-topright { margin-left: auto; display: flex; align-items: center; gap: 24px; }
+#jellytv-app .jtv-tvbtn {
+  display: inline-flex; align-items: center; gap: 9px; height: 36px; padding: 0 12px; max-width: 240px;
+  border: 1px solid var(--jtv-rule-2); color: var(--jtv-text-2);
+  font: 500 11px/1 var(--jtv-mono); letter-spacing: 1.2px; text-transform: uppercase;
+  transition: border-color .15s, color .15s;
+}
+#jellytv-app .jtv-tvbtn svg { width: 15px; height: 15px; }
+#jellytv-app .jtv-tvbtn .lbl { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#jellytv-app .jtv-tvbtn:hover { border-color: var(--jtv-muted); color: var(--jtv-text); }
+#jellytv-app .jtv-tvbtn.on { border-color: var(--jtv-accent); color: var(--jtv-accent); }
+#jellytv-app .jtv-livecount {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 11px/1 var(--jtv-mono); letter-spacing: 1.5px; color: var(--jtv-muted); white-space: nowrap;
+}
+#jellytv-app .jtv-clock {
+  font: 500 20px/1 var(--jtv-mono); color: var(--jtv-accent);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* ============ content / scrollbars ============ */
+#jellytv-app .jtv-content {
+  position: relative; z-index: 10;
+  flex: 1; overflow: hidden; display: flex; flex-direction: column;
+}
+#jellytv-app .jtv-view {
+  flex: 1; overflow: auto; padding: 24px 20px 48px;
+  overscroll-behavior: contain;
+}
+
+#jellytv-app .jtv-view, #jellytv-app .jtv-guide-scroll, .jtv-modal-veil .m-body {
+  scrollbar-width: thin; scrollbar-color: var(--jtv-rule-2) transparent;
+}
+#jellytv-app .jtv-view::-webkit-scrollbar, #jellytv-app .jtv-guide-scroll::-webkit-scrollbar,
+.jtv-modal-veil .m-body::-webkit-scrollbar { width: 10px; height: 10px; }
+#jellytv-app .jtv-view::-webkit-scrollbar-thumb, #jellytv-app .jtv-guide-scroll::-webkit-scrollbar-thumb,
+.jtv-modal-veil .m-body::-webkit-scrollbar-thumb { background: var(--jtv-rule-2); border: 3px solid var(--jtv-bg); }
+#jellytv-app .jtv-view::-webkit-scrollbar-thumb:hover, #jellytv-app .jtv-guide-scroll::-webkit-scrollbar-thumb:hover,
+.jtv-modal-veil .m-body::-webkit-scrollbar-thumb:hover { background: var(--jtv-muted); }
+#jellytv-app .jtv-view::-webkit-scrollbar-track, #jellytv-app .jtv-guide-scroll::-webkit-scrollbar-track,
+.jtv-modal-veil .m-body::-webkit-scrollbar-track,
+#jellytv-app .jtv-view::-webkit-scrollbar-corner, #jellytv-app .jtv-guide-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* ============ view headers / filters ============ */
+#jellytv-app .jtv-viewhead { display: flex; align-items: baseline; gap: 14px; margin-bottom: 18px; }
+#jellytv-app .jtv-h2 { font-size: 22px; font-weight: 600; letter-spacing: -.2px; margin: 0; }
+#jellytv-app .jtv-viewhead .jtv-k { flex: 1; }
+
+#jellytv-app .jtv-filterbar {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+  border-top: 1px solid var(--jtv-rule); border-bottom: 1px solid var(--jtv-rule);
+}
+#jellytv-app .jtv-chips { display: flex; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+#jellytv-app .jtv-chips::-webkit-scrollbar { display: none; }
+#jellytv-app .jtv-chip {
+  height: 44px; padding: 0 14px; flex: none; user-select: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  font: 500 12px/1 var(--jtv-mono); letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--jtv-text-2);
+  box-shadow: inset 0 -2px 0 transparent;
+  transition: color .15s, box-shadow .15s;
+}
+#jellytv-app .jtv-chip svg { width: 11px; height: 11px; }
+#jellytv-app .jtv-chip:hover { color: var(--jtv-text); }
+#jellytv-app .jtv-chip.active { color: var(--jtv-accent); box-shadow: inset 0 -2px 0 var(--jtv-accent); }
+#jellytv-app .jtv-search {
+  width: 240px; height: 32px; flex: none; padding: 0 10px;
+  border: 1px solid var(--jtv-rule-2); border-radius: 0; background: transparent;
+  color: var(--jtv-text); font: 400 13px var(--jtv-font); outline: none;
+  transition: border-color .15s;
+}
+#jellytv-app .jtv-search::placeholder { color: var(--jtv-muted); }
+#jellytv-app .jtv-search:focus { border-color: var(--jtv-accent); }
+
+/* ============ buttons ============ */
+#jellytv-app .btn, .jtv-player .btn, .jtv-modal-veil .btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 44px; padding: 0 18px; user-select: none; white-space: nowrap;
+  border: 1px solid var(--jtv-rule-2);
+  font: 500 14px/1 var(--jtv-font); color: var(--jtv-text);
+  transition: background .15s, border-color .15s, color .15s;
+}
+#jellytv-app .btn svg, .jtv-player .btn svg { width: 15px; height: 15px; }
+#jellytv-app .btn:hover, .jtv-player .btn:hover, .jtv-modal-veil .btn:hover { border-color: var(--jtv-muted); background: var(--jtv-panel); }
+#jellytv-app .btn:active, .jtv-player .btn:active { background: var(--jtv-rule); }
+#jellytv-app .btn:disabled, .jtv-player .btn:disabled { opacity: .45; cursor: not-allowed; }
+#jellytv-app .btn.is-on { color: var(--jtv-accent); border-color: var(--jtv-accent); }
+
+#jellytv-app .btn-primary, .jtv-player .btn-primary {
+  padding: 0 28px; font-weight: 600;
+  background: var(--jtv-accent); border-color: var(--jtv-accent); color: var(--jtv-accent-ink);
+}
+#jellytv-app .btn-primary:hover, .jtv-player .btn-primary:hover { background: #ffc233; border-color: #ffc233; }
+#jellytv-app .btn-primary:active, .jtv-player .btn-primary:active { background: #e09b00; }
+#jellytv-app .btn-ghost, .jtv-player .btn-ghost { background: transparent; }
+#jellytv-app .btn-danger { color: var(--jtv-live-text); }
+#jellytv-app .btn-danger:hover { border-color: var(--jtv-live); background: transparent; }
+
+#jellytv-app .icon-btn, .jtv-modal-veil .icon-btn, .jtv-player .icon-btn {
+  width: 32px; height: 32px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--jtv-rule-2); background: #000; color: var(--jtv-text);
+  transition: border-color .15s, color .15s;
+}
+#jellytv-app .icon-btn:hover, .jtv-modal-veil .icon-btn:hover, .jtv-player .icon-btn:hover { border-color: var(--jtv-text); }
+#jellytv-app .icon-btn svg, .jtv-modal-veil .icon-btn svg, .jtv-player .icon-btn svg { width: 14px; height: 14px; }
+#jellytv-app .icon-btn.faved { color: var(--jtv-accent); border-color: var(--jtv-accent); }
+
+/* ============ guide: detail panel ============ */
+#jellytv-app .jtv-guide-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+#jellytv-app .jtv-detail {
+  flex: none; height: 216px; padding: 20px; display: flex; gap: 24px;
+  border-bottom: 1px solid var(--jtv-rule);
+}
+#jellytv-app .jtv-detail .d-mon { width: 266px; flex: none; border: 1px solid var(--jtv-rule-2); align-self: flex-start; }
+#jellytv-app .jtv-detail .d-mon.live { border-color: var(--jtv-live); }
+#jellytv-app .jtv-detail .d-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 9px; }
+#jellytv-app .jtv-detail .d-title {
+  font-size: 28px; font-weight: 600; line-height: 1.1; letter-spacing: -.3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#jellytv-app .jtv-detail .d-desc {
+  font-size: 13px; color: var(--jtv-text-2); max-width: 760px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#jellytv-app .jtv-detail .jtv-progress { max-width: 760px; }
+#jellytv-app .jtv-detail .d-actions { display: flex; gap: 8px; margin-top: auto; }
+
+#jellytv-app .jtv-bus { width: 252px; flex: none; display: flex; flex-direction: column; gap: 8px; }
+#jellytv-app .jtv-bus-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; }
+#jellytv-app .bus-slot {
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  border: 1px solid var(--jtv-rule-2); background: var(--jtv-screen);
+  transition: border-color .15s, color .15s;
+}
+#jellytv-app .bus-slot:hover { border-color: var(--jtv-text); }
+#jellytv-app .bus-slot .face { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+#jellytv-app .bus-slot .face img { max-width: 50%; max-height: 60%; object-fit: contain; }
+#jellytv-app .bus-slot .jtv-umd { height: 18px; padding: 0 6px; font-size: 10px; gap: 6px; }
+#jellytv-app .bus-slot .jtv-umd .led { width: 5px; height: 5px; }
+#jellytv-app .bus-slot.empty {
+  align-items: center; justify-content: center; background: transparent;
+  border-style: dashed; color: var(--jtv-muted); font-size: 12px;
+}
+#jellytv-app .bus-slot.empty:hover { color: var(--jtv-text); }
+
+/* ============ guide: grid ============ */
+#jellytv-app .jtv-guide-scroll { flex: 1; overflow: auto; position: relative; overscroll-behavior: contain; }
+
+#jellytv-app .jtv-guide-head { display: flex; position: sticky; top: 0; z-index: 5; height: 32px; }
+#jellytv-app .ghead-chan {
+  width: 280px; height: 32px; flex: none; position: sticky; left: 0; z-index: 6;
+  display: flex; align-items: center; padding: 0 20px;
+  background: var(--jtv-bg-2);
+  border-right: 1px solid var(--jtv-rule); border-bottom: 1px solid var(--jtv-rule);
+  font: 500 10px/1 var(--jtv-mono); letter-spacing: 1.8px; color: var(--jtv-muted);
+}
+#jellytv-app .ghead-time {
+  flex: none; height: 32px; display: flex; align-items: center; padding: 0 8px;
+  font: 400 12px/1 var(--jtv-mono); color: var(--jtv-muted); font-variant-numeric: tabular-nums;
+  /* 5-minute ruler ticks along the bottom edge (30px = 5 min at 6px/min) */
+  background: linear-gradient(90deg, var(--jtv-rule-2) 1px, transparent 1px) left bottom / 30px 5px repeat-x, var(--jtv-bg-2);
+  border-bottom: 1px solid var(--jtv-rule); border-left: 1px solid var(--jtv-rule-2);
+}
+#jellytv-app .ghead-time.under-now { color: transparent; }  /* the now-line label is sitting on it */
+#jellytv-app .ghead-fill { flex: 1; background: var(--jtv-bg-2); border-bottom: 1px solid var(--jtv-rule); }
+
+#jellytv-app .jtv-guide-body { position: relative; }
+#jellytv-app .grow { display: flex; height: 60px; border-bottom: 1px solid var(--jtv-rule); }
+
+#jellytv-app .gcell-chan {
+  width: 280px; flex: none; position: sticky; left: 0; z-index: 8; /* above the now-line */
+  display: flex; align-items: center; gap: 12px; padding: 0 20px;
+  background: var(--jtv-bg); border-right: 1px solid var(--jtv-rule);
+  cursor: pointer; transition: background .12s;
+}
+#jellytv-app .gcell-chan:hover, #jellytv-app .grow.sel .gcell-chan { background: var(--jtv-panel); }
+#jellytv-app .gcell-chan img { width: 34px; height: 34px; object-fit: contain; flex: none; }
+#jellytv-app .mono-sm, .jtv-modal-veil .mono-sm {
+  width: 34px; height: 34px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--jtv-rule-2); color: var(--jtv-muted);
+  font: 500 11px/1 var(--jtv-mono); letter-spacing: .5px;
+}
+#jellytv-app .gcell-chan .ctext { min-width: 0; }
+#jellytv-app .gcell-chan .cname {
+  font-size: 15px; font-weight: 600; line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#jellytv-app .gcell-chan .cname.fav { color: var(--jtv-accent); }
+#jellytv-app .gcell-chan .cgroup {
+  font: 400 10px/1.3 var(--jtv-mono); letter-spacing: 1.2px; text-transform: uppercase; color: var(--jtv-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+#jellytv-app .gtrack {
+  position: relative; flex: none;
+  /* half-hour hairlines, aligned to the header slots via --jtv-slot0 */
+  background-image: linear-gradient(90deg, var(--jtv-rule-soft) 1px, transparent 1px);
+  background-size: 180px 100%; background-position: var(--jtv-slot0, 0px) 0;
+}
+#jellytv-app .gprog {
+  position: absolute; top: 0; bottom: 0; padding: 0 12px; cursor: pointer;
+  /* clip, not hidden: hidden would make the cell a scroll container and kill the sticky titles below */
+  overflow: hidden; overflow: clip;
+  background: var(--jtv-bg); border-right: 1px solid var(--jtv-rule);
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px;
+  transition: background .12s;
+}
+/* titles ride the channel column's edge, so a programme that began off-screen still reads */
+#jellytv-app .gprog .t, #jellytv-app .gprog .tm { position: sticky; left: 292px; max-width: 100%; }
+#jellytv-app .gprog:hover, #jellytv-app .gprog.sel { background: var(--jtv-panel); }
+#jellytv-app .gprog .t {
+  font-size: 14px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#jellytv-app .gprog .tm {
+  font: 400 11px/1.2 var(--jtv-mono); color: var(--jtv-muted);
+  white-space: nowrap; overflow: hidden; font-variant-numeric: tabular-nums;
+}
+#jellytv-app .gprog.live { background: var(--jtv-accent-wash); color: var(--jtv-accent); box-shadow: inset 0 2px 0 var(--jtv-accent); }
+#jellytv-app .gprog.live .tm { color: var(--jtv-accent); }
+#jellytv-app .gprog.live:hover, #jellytv-app .gprog.live.sel { background: #2a2411; }
+#jellytv-app .gprog.past, #jellytv-app .gprog.past .tm { color: var(--jtv-dim); }
+#jellytv-app .gprog.noepg { color: var(--jtv-dim); font-size: 13px; }
+#jellytv-app .gprog.noepg span { position: sticky; left: 292px; }
+
+#jellytv-app .jtv-nowline {
+  position: absolute; top: 0; bottom: 0; width: 1px; z-index: 7;
+  background: var(--jtv-live); pointer-events: none;
+}
+#jellytv-app .jtv-nowline span {
+  position: sticky; top: 7px; display: block; width: max-content;
+  padding: 2px 6px; background: var(--jtv-live); color: var(--jtv-accent-ink);
+  font: 600 11px/1.3 var(--jtv-mono); font-variant-numeric: tabular-nums;
+}
+
+/* guide loading skeleton */
+#jellytv-app .jtv-skel-guide { display: flex; flex-direction: column; min-width: 1400px; }
+#jellytv-app .skel-row { display: flex; height: 60px; border-bottom: 1px solid var(--jtv-rule); }
+#jellytv-app .skel-cell {
+  width: 280px; flex: none; display: flex; align-items: center; gap: 12px;
+  padding: 0 20px; border-right: 1px solid var(--jtv-rule);
+}
+#jellytv-app .skel-logo { width: 34px; height: 34px; flex: none; }
+#jellytv-app .skel-txt { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+#jellytv-app .skel-txt .shimmer { height: 10px; }
+#jellytv-app .skel-txt .shimmer.w60 { width: 60%; }
+#jellytv-app .skel-track { position: relative; flex: 1; }
+#jellytv-app .skel-track .shimmer { position: absolute; top: 18px; height: 24px; }
+
+/* ============ live: monitor wall ============ */
+#jellytv-app .jtv-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+#jellytv-app .jtv-card {
+  position: relative; cursor: pointer;
+  border: 1px solid var(--jtv-rule-2); background: var(--jtv-bg);
+  transition: border-color .15s;
+}
+#jellytv-app .jtv-card:hover, #jellytv-app .jtv-card:focus-visible { border-color: var(--jtv-accent); }
+#jellytv-app .jtv-card:focus-visible { outline-offset: 0; }
+
+#jellytv-app .jtv-card .hover-cta {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5, 5, 5, .72); opacity: 0; transition: opacity .15s;
+}
+#jellytv-app .jtv-card:hover .hover-cta, #jellytv-app .jtv-card:focus-visible .hover-cta { opacity: 1; }
+#jellytv-app .hover-cta .playbtn {
+  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 16px;
+  background: var(--jtv-accent); color: var(--jtv-accent-ink);
+  font: 600 13px/1 var(--jtv-font);
+}
+#jellytv-app .hover-cta .playbtn svg { width: 13px; height: 13px; }
+
+#jellytv-app .jtv-card .mini-actions {
+  position: absolute; top: 8px; right: 8px; z-index: 3;
+  display: flex; gap: 6px; opacity: 0; transition: opacity .15s;
+}
+#jellytv-app .jtv-card:hover .mini-actions, #jellytv-app .jtv-card:focus-within .mini-actions { opacity: 1; }
+
+#jellytv-app .jtv-card-info { padding: 11px 12px 13px; border-top: 1px solid var(--jtv-rule); }
+#jellytv-app .jtv-card-now { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#jellytv-app .jtv-card-time {
+  font: 400 11px/1.3 var(--jtv-mono); color: var(--jtv-muted); margin-top: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums;
+}
+#jellytv-app .jtv-card-info .jtv-progress { height: 4px; margin-top: 10px; }
+
+/* ============ games board ============ */
+#jellytv-app .jtv-viewhead .btn { height: 36px; padding: 0 14px; font-size: 13px; align-self: center; }
+#jellytv-app .jtv-filterbar > .jtv-chip { border-left: 1px solid var(--jtv-rule); }
+
+#jellytv-app .g-feed {
+  display: flex; align-items: baseline; gap: 12px; padding: 10px 12px; margin-bottom: 20px;
+  border: 1px solid var(--jtv-live); font-size: 13px; color: var(--jtv-text-2);
+}
+#jellytv-app .g-feed .jtv-k { flex: none; }
+#jellytv-app .g-sec { padding: 22px 0 8px; border-bottom: 1px solid var(--jtv-rule-2); }
+#jellytv-app .jtv-filterbar + .g-sec { padding-top: 0; }
+#jellytv-app .game {
+  display: grid; grid-template-columns: 132px 264px minmax(0, 1fr) auto; column-gap: 24px; align-items: center;
+  min-height: 84px; padding: 12px 0 12px 12px; border-bottom: 1px solid var(--jtv-rule);
+  box-shadow: inset 2px 0 0 transparent; transition: background .12s;
+}
+#jellytv-app .game.can { cursor: pointer; }
+#jellytv-app .game.can:hover { background: var(--jtv-panel); }
+#jellytv-app .game.live { box-shadow: inset 2px 0 0 var(--jtv-accent); }
+#jellytv-app .game.flash { animation: jtv-flash 8s ease-out; }
+@keyframes jtv-flash { 0%, 12% { background: #3a2f0c; } 100% { background: transparent; } }
+
+#jellytv-app .g-status { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+#jellytv-app .g-clock { font: 500 14px/1.2 var(--jtv-mono); color: var(--jtv-text-2); font-variant-numeric: tabular-nums; }
+#jellytv-app .game.live .g-clock { color: var(--jtv-accent); }
+
+#jellytv-app .g-teams { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+#jellytv-app .g-team { display: flex; align-items: center; gap: 10px; min-width: 0; }
+#jellytv-app .g-team.lose { color: var(--jtv-dim); }
+#jellytv-app .g-logo { width: 22px; height: 22px; flex: none; object-fit: contain; }
+#jellytv-app .g-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#jellytv-app .g-rec { font: 400 11px/1 var(--jtv-mono); color: var(--jtv-muted); flex: none; }
+#jellytv-app .g-score {
+  margin-left: auto; padding-left: 8px; flex: none;
+  font: 600 22px/1 var(--jtv-mono); font-variant-numeric: tabular-nums;
+}
+
+#jellytv-app .g-sit { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+#jellytv-app .g-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+#jellytv-app .g-tags .jtv-tag { font-size: 10px; letter-spacing: 1.3px; }
+#jellytv-app .g-line {
+  display: flex; align-items: center; gap: 10px; min-height: 16px;
+  font: 500 13px/1.2 var(--jtv-mono); color: var(--jtv-accent); font-variant-numeric: tabular-nums;
+}
+#jellytv-app .g-line:empty { display: none; }
+#jellytv-app .g-wp { margin-left: auto; font-weight: 400; font-size: 11px; letter-spacing: 1px; color: var(--jtv-muted); white-space: nowrap; }
+#jellytv-app .g-play {
+  font-size: 13px; line-height: 1.4; color: var(--jtv-text-2);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* baseball runners: second on top, third left, first right */
+#jellytv-app .diamond { position: relative; width: 24px; height: 17px; flex: none; }
+#jellytv-app .diamond i {
+  position: absolute; width: 8px; height: 8px; transform: rotate(45deg);
+  border: 1px solid var(--jtv-muted); background: transparent;
+}
+#jellytv-app .diamond i.on { background: var(--jtv-accent); border-color: var(--jtv-accent); }
+#jellytv-app .diamond .b2 { left: 8px; top: 1px; }
+#jellytv-app .diamond .b3 { left: 1px; top: 8px; }
+#jellytv-app .diamond .b1 { left: 15px; top: 8px; }
+
+#jellytv-app .g-watch { display: flex; align-items: center; gap: 6px; justify-content: flex-end; padding-right: 4px; }
+#jellytv-app .g-chan {
+  display: inline-flex; align-items: center; gap: 8px; height: 32px; max-width: 190px; padding: 0 10px;
+  background: #000; border: 1px solid var(--jtv-rule-2);
+  font: 500 11px/1 var(--jtv-mono); letter-spacing: .8px; color: var(--jtv-text);
+  transition: border-color .15s, color .15s;
+}
+#jellytv-app .g-chan .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#jellytv-app .g-chan .q { color: var(--jtv-muted); font-size: 9px; letter-spacing: 1.2px; }
+#jellytv-app .g-chan:hover, #jellytv-app .game.can:hover .g-chan.first { border-color: var(--jtv-accent); color: var(--jtv-accent); }
+#jellytv-app .g-none { font: 400 11px/1 var(--jtv-mono); letter-spacing: 1px; text-transform: uppercase; color: var(--jtv-dim); }
+
+/* live score bug wherever a channel is named: cards, multiview label bars, player */
+#jellytv-app .mv-bug { flex: none; font-variant-numeric: tabular-nums; }
+#jellytv-app .mv-bug.on, #jellytv-app .jtv-card-time.on { color: var(--jtv-accent); }
+.jtv-player .jp-bug {
+  margin-left: auto; padding: 8px 12px; background: rgba(0, 0, 0, .6); border: 1px solid rgba(255, 255, 255, .25);
+  font: 500 14px/1 var(--jtv-mono); letter-spacing: .6px; color: var(--jtv-accent); font-variant-numeric: tabular-nums;
+}
+.jtv-player .jp-bug:empty { display: none; }
+.jtv-player .jp-play { font-size: 14px; color: rgba(255, 255, 255, .85); max-width: 760px; }
+.jtv-player .jp-play b { font: 500 13px/1 var(--jtv-mono); color: var(--jtv-accent); margin-right: 10px; }
+
+/* switch alert — appended to <body>, above the player */
+.jtv-alert {
+  position: fixed; right: 24px; bottom: 24px; z-index: 10050; width: min(360px, calc(100vw - 32px));
+  display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 16px;
+  background: #0e0f0e; border: 1px solid #ff3b30; color: #e3e5de;
+  font: 400 14px/1.4 var(--jtv-font); -webkit-font-smoothing: antialiased;
+  animation: jtv-alertin .2s var(--jtv-ease);
+}
+@keyframes jtv-alertin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.jtv-alert, .jtv-alert * { box-sizing: border-box; }
+.jtv-alert button { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; padding: 0; margin: 0; cursor: pointer; }
+.jtv-alert svg { width: 14px; height: 14px; }
+.jtv-alert .a-head { display: flex; align-items: center; gap: 10px; }
+.jtv-alert .jtv-tag { display: inline-block; padding: 2px 7px; font: 600 11px/1.3 var(--jtv-mono); letter-spacing: 1.5px; background: #ff3b30; color: #0e0f0e; }
+.jtv-alert .jtv-k { flex: 1; font: 500 11px/1.2 var(--jtv-mono); letter-spacing: 1.4px; text-transform: uppercase; color: #8b9084; }
+.jtv-alert .a-x { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; color: #8b9084; margin: -6px -8px -6px 0; }
+.jtv-alert .a-x:hover { color: #e3e5de; }
+.jtv-alert .a-score { display: flex; align-items: baseline; gap: 8px; font: 500 15px/1 var(--jtv-mono); letter-spacing: .5px; }
+.jtv-alert .a-score b { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.jtv-alert .a-score span { color: #8b9084; margin: 0 4px; }
+.jtv-alert .a-sit { font-size: 13px; color: #a9ada3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.jtv-alert .a-actions { display: flex; gap: 8px; margin-top: 2px; }
+.jtv-alert .btn {
+  display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 14px; min-width: 0;
+  border: 1px solid #3a3d38; font: 500 13px/1 var(--jtv-font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.jtv-alert .btn:hover { border-color: #8b9084; }
+.jtv-alert .btn-primary { flex: 1; font-weight: 600; background: var(--jtv-accent); border-color: var(--jtv-accent); color: #0e0f0e; }
+.jtv-alert .btn-primary:hover { background: #ffc233; border-color: #ffc233; }
+
+/* ============ player ============ */
+.jtv-player {
+  position: fixed; inset: 0; z-index: 10010; background: #000;
+  display: flex; flex-direction: column;
+  font: 400 14px/1.4 var(--jtv-font); color: var(--jtv-text);
+  -webkit-font-smoothing: antialiased;
+}
+.jtv-player video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+.jtv-player .jp-top, .jtv-player .jp-bottom {
+  position: absolute; left: 0; right: 0; z-index: 2;
+  display: flex; align-items: center; gap: 16px;
+  transition: opacity .25s ease;
+}
+/* scrims are functional: they keep the overlay text legible over any picture */
+.jtv-player .jp-top {
+  top: 0; padding: 20px 24px 56px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .85), rgba(0, 0, 0, .4) 55%, transparent);
+}
+.jtv-player .jp-bottom {
+  bottom: 0; padding: 72px 24px 24px; align-items: flex-end; gap: 32px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, .9), rgba(0, 0, 0, .5) 55%, transparent);
+}
+.jtv-player.hide-ui .jp-top, .jtv-player.hide-ui .jp-bottom { opacity: 0; pointer-events: none; }
+.jtv-player.hide-ui { cursor: none; }
+
+.jtv-player .jp-back {
+  width: 44px; height: 44px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(255, 255, 255, .35); background: rgba(0, 0, 0, .5); color: #fff;
+  transition: border-color .15s;
+}
+.jtv-player .jp-back:hover { border-color: #fff; }
+.jtv-player .jp-chan { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.jtv-player .jp-chan img { width: 40px; height: 40px; object-fit: contain; flex: none; }
+.jtv-player .jp-chan .n { font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+.jtv-player .jp-chan .g { margin-top: 3px; color: rgba(255, 255, 255, .7); }
+
+.jtv-player .jp-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.jtv-player .jp-title {
+  font-size: 28px; font-weight: 600; line-height: 1.1; letter-spacing: -.3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.jtv-player .jtv-stat .l { color: rgba(255, 255, 255, .7); }
+.jtv-player .jtv-progress { max-width: 640px; background: rgba(255, 255, 255, .22); }
+.jtv-player .jp-actions { display: flex; gap: 8px; flex: none; }
+.jtv-player .jp-actions .btn { border-color: rgba(255, 255, 255, .35); background: rgba(0, 0, 0, .5); color: #fff; }
+.jtv-player #jp-full { padding: 0; width: 44px; }
+.jtv-player #jp-full svg { width: 16px; height: 16px; }
+.jtv-player:fullscreen, .jtv-player:-webkit-full-screen { width: 100%; height: 100%; }
+.jtv-player .jp-actions .btn:hover { border-color: #fff; background: rgba(0, 0, 0, .7); }
+
+.jtv-player .jp-error {
+  position: absolute; inset: 0; z-index: 3;
+  display: flex; flex-direction: column; gap: 12px;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 24px; background: rgba(5, 5, 5, .88);
+}
+.jtv-player .jp-error .ttl { font-size: 22px; font-weight: 600; }
+.jtv-player .jp-error .msg { color: var(--jtv-text-2); max-width: 440px; line-height: 1.5; }
+.jtv-player .jp-error .jp-err-btns { display: flex; gap: 8px; margin-top: 10px; }
+
+/* ============ multiview ============ */
+#jellytv-app .jtv-mv-wrap { flex: 1; display: flex; flex-direction: column; padding: 20px; overflow: hidden; }
+#jellytv-app .jtv-mv-wrap .jtv-viewhead { margin-bottom: 14px; }
+#jellytv-app .jtv-mv-grid { flex: 1; display: grid; gap: 12px; min-height: 0; }
+#jellytv-app .jtv-mv-grid.n1 { grid-template-columns: 1fr; }
+#jellytv-app .jtv-mv-grid.n2 { grid-template-columns: 1fr 1fr; }
+#jellytv-app .jtv-mv-grid.n3, #jellytv-app .jtv-mv-grid.n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
+#jellytv-app .mv-tile {
+  position: relative; display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  background: #000; border: 1px solid var(--jtv-rule-2); cursor: pointer;
+  transition: border-color .15s;
+}
+#jellytv-app .mv-tile:hover { border-color: var(--jtv-muted); }
+#jellytv-app .mv-tile.focused { border-color: var(--jtv-accent); box-shadow: inset 0 0 0 1px var(--jtv-accent); }
+#jellytv-app .mv-tile video { flex: 1; min-height: 0; width: 100%; object-fit: contain; display: block; }
+#jellytv-app .mv-tile .jtv-umd { flex: none; height: 28px; font-size: 12px; }
+#jellytv-app .mv-tile .jtv-umd img { width: 18px; height: 18px; object-fit: contain; }
+#jellytv-app .mv-tile .mv-audio {
+  position: absolute; top: 0; left: 0; z-index: 3; padding: 3px 8px;
+  font: 600 10px/1.3 var(--jtv-mono); letter-spacing: 1.4px;
+  background: #000; color: var(--jtv-muted);
+}
+#jellytv-app .mv-tile.focused .mv-audio { background: var(--jtv-accent); color: var(--jtv-accent-ink); }
+#jellytv-app .mv-tile .mv-close { position: absolute; top: 8px; right: 8px; z-index: 3; opacity: 0; transition: opacity .15s; }
+#jellytv-app .mv-tile:hover .mv-close, #jellytv-app .mv-tile .mv-close:focus-visible { opacity: 1; }
+
+#jellytv-app .mv-tile.mv-failed { border: 1px dashed var(--jtv-live); box-shadow: none; }
+#jellytv-app .mv-tile.mv-failed video { opacity: .15; }
+#jellytv-app .mv-err {
+  position: absolute; inset: 0 0 28px 0; z-index: 2;
+  display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center;
+  text-align: center; padding: 20px; color: var(--jtv-text-2); font-size: 13px;
+}
+
+#jellytv-app .mv-add {
+  align-items: center; justify-content: center; gap: 10px;
+  background: transparent; border: 1px dashed var(--jtv-rule-2);
+  color: var(--jtv-muted); font-size: 14px; font-weight: 500;
+}
+#jellytv-app .mv-add:hover { border-color: var(--jtv-accent); color: var(--jtv-text); }
+#jellytv-app .mv-add .plus { font: 400 28px/1 var(--jtv-mono); }
+
+/* ============ modal / channel picker ============ */
+.jtv-modal-veil {
+  position: fixed; inset: 0; z-index: 10020;
+  background: rgba(5, 5, 5, .8);
+  display: flex; align-items: center; justify-content: center;
+  font: 400 14px/1.4 var(--jtv-font); color: var(--jtv-text);
+  -webkit-font-smoothing: antialiased;
+  animation: jtv-fadein .15s ease;
+}
+@keyframes jtv-fadein { from { opacity: 0; } to { opacity: 1; } }
+.jtv-modal-veil .jtv-modal {
+  width: min(540px, 92vw); max-height: 78vh; display: flex; flex-direction: column;
+  background: var(--jtv-bg); border: 1px solid var(--jtv-rule-2); overflow: hidden;
+}
+.jtv-modal-veil .m-head {
+  height: 56px; flex: none; padding: 0 12px 0 20px; border-bottom: 1px solid var(--jtv-rule);
+  display: flex; align-items: center; gap: 12px;
+}
+.jtv-modal-veil .m-head h3 { margin: 0; font-size: 16px; font-weight: 600; flex: 1; }
+.jtv-modal-veil .m-search {
+  display: block; width: 100%; height: 48px; flex: none; padding: 0 20px;
+  border: 0; border-bottom: 1px solid var(--jtv-rule); border-radius: 0; background: var(--jtv-bg-2);
+  color: var(--jtv-text); font: 400 14px var(--jtv-font); outline: none;
+  box-shadow: inset 0 -2px 0 transparent; transition: box-shadow .15s;
+}
+.jtv-modal-veil .m-search::placeholder { color: var(--jtv-muted); }
+.jtv-modal-veil .m-search:focus, .jtv-modal-veil .m-search:focus-visible { outline: none; box-shadow: inset 0 -2px 0 var(--jtv-accent); }
+.jtv-modal-veil .m-body { overflow: auto; overscroll-behavior: contain; }
+.jtv-modal-veil .m-row {
+  display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 20px;
+  border-bottom: 1px solid var(--jtv-rule); cursor: pointer; transition: background .12s;
+}
+.jtv-modal-veil .m-row:hover, .jtv-modal-veil .m-row:focus-visible { background: var(--jtv-panel); }
+.jtv-modal-veil .m-row img { width: 34px; height: 34px; object-fit: contain; flex: none; }
+.jtv-modal-veil .m-row .r-text { min-width: 0; }
+.jtv-modal-veil .m-row .r-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jtv-modal-veil .m-row .r-sub { font-size: 12px; color: var(--jtv-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jtv-modal-veil .tv-row.on .r-name { color: var(--jtv-accent); }
+.jtv-modal-veil .tv-row.off { opacity: .55; }
+.jtv-modal-veil .m-foot { flex: none; display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-top: 1px solid var(--jtv-rule); }
+.jtv-modal-veil .m-foot:empty { display: none; }
+.jtv-modal-veil .m-foot .check { flex: 1; display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--jtv-text-2); cursor: pointer; }
+.jtv-modal-veil .m-foot .btn { height: 36px; flex: none; }
+.jtv-modal-veil .toggle { position: relative; width: 44px; height: 24px; flex: none; border: 1px solid var(--jtv-rule-2); background: transparent; }
+.jtv-modal-veil .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: var(--jtv-muted); transition: transform .15s var(--jtv-ease), background .15s; }
+.jtv-modal-veil .toggle.on { border-color: var(--jtv-accent); }
+.jtv-modal-veil .toggle.on::after { transform: translateX(20px); background: var(--jtv-accent); }
+.jtv-modal-veil .m-none { padding: 32px; text-align: center; color: var(--jtv-muted); }
+
+/* ============ settings ============ */
+#jellytv-app .jtv-settings { max-width: 760px; }
+#jellytv-app .set-card { border-top: 1px solid var(--jtv-rule-2); padding: 20px 0 32px; }
+#jellytv-app .set-card h3 {
+  margin: 0 0 6px; font-size: 17px; font-weight: 600;
+  display: flex; align-items: baseline; gap: 10px;
+}
+#jellytv-app .set-card .hint { color: var(--jtv-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.5; }
+#jellytv-app .set-build { padding-top: 16px; border-top: 1px solid var(--jtv-rule); }
+#jellytv-app .set-note { font-size: 13px; color: var(--jtv-text-2); }
+#jellytv-app .set-sub { border-top: 1px solid var(--jtv-rule); margin-top: 20px; padding-top: 20px; }
+#jellytv-app .set-actions { display: flex; gap: 8px; }
+#jellytv-app .set-msg { margin-top: 14px; font: 400 12px/1.5 var(--jtv-mono); color: var(--jtv-text-2); }
+#jellytv-app .set-msg .ok { color: var(--jtv-ok); }
+#jellytv-app .set-msg .bad { color: var(--jtv-live-text); }
+
+#jellytv-app .f-row { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+#jellytv-app .f-row label { font-size: 13px; font-weight: 500; color: var(--jtv-text-2); }
+#jellytv-app .f-row label.check { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+#jellytv-app .f-row input[type=text], #jellytv-app .f-row input[type=number],
+#jellytv-app .f-row select, #jellytv-app .f-row textarea {
+  height: 44px; padding: 0 12px; border-radius: 0;
+  border: 1px solid var(--jtv-rule-2); background-color: var(--jtv-bg-2);
+  color: var(--jtv-text); font: 400 14px var(--jtv-font); outline: none;
+  transition: border-color .15s;
+}
+#jellytv-app .f-row input::placeholder, #jellytv-app .f-row textarea::placeholder { color: var(--jtv-dim); }
+#jellytv-app .f-row input:hover, #jellytv-app .f-row textarea:hover, #jellytv-app .f-row select:hover { border-color: var(--jtv-muted); }
+#jellytv-app .f-row input:focus, #jellytv-app .f-row textarea:focus, #jellytv-app .f-row select:focus { border-color: var(--jtv-accent); outline: none; }
+#jellytv-app .f-row textarea {
+  height: auto; min-height: 84px; padding: 10px 12px; resize: vertical;
+  font: 400 12.5px/1.55 var(--jtv-mono);
+}
+#jellytv-app .f-row input[type=number] { max-width: 160px; font-family: var(--jtv-mono); }
+#jellytv-app .f-row input[type=checkbox] { accent-color: var(--jtv-accent); width: 16px; height: 16px; margin: 0; }
+#jellytv-app .f-row select {
+  appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 40px;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b9084' stroke-width='2' stroke-linecap='square'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat; background-position: right 12px center; background-size: 14px;
+}
+#jellytv-app .f-row select option { background: var(--jtv-panel); color: var(--jtv-text); }
+
+#jellytv-app .src-row {
+  display: flex; align-items: center; gap: 14px; min-height: 60px; padding: 10px 0;
+  border-top: 1px solid var(--jtv-rule);
+}
+#jellytv-app #src-list { margin-bottom: 16px; border-bottom: 1px solid var(--jtv-rule); }
+#jellytv-app #src-list:empty { border: 0; }
+#jellytv-app .src-row .s-text { flex: 1; min-width: 0; }
+#jellytv-app .src-row .s-name { font-weight: 600; font-size: 14px; }
+#jellytv-app .src-row .s-meta { font: 400 11px/1.4 var(--jtv-mono); color: var(--jtv-muted); margin-top: 2px; word-break: break-all; }
+#jellytv-app .src-error { font-size: 12px; color: var(--jtv-live-text); margin-top: 5px; }
+
+/* two-position square switch */
+#jellytv-app .toggle {
+  position: relative; width: 44px; height: 24px; flex: none;
+  border: 1px solid var(--jtv-rule-2); background: transparent;
+  transition: border-color .15s;
+}
+#jellytv-app .toggle::after {
+  content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+  background: var(--jtv-muted); transition: transform .15s var(--jtv-ease), background .15s;
+}
+#jellytv-app .toggle.on { border-color: var(--jtv-ok); }
+#jellytv-app .toggle.on::after { transform: translateX(20px); background: var(--jtv-ok); }
+
+/* ============ misc ============ */
+#jellytv-app .jtv-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; padding: 72px 20px; text-align: center; color: var(--jtv-text-2);
+  border: 1px dashed var(--jtv-rule-2);
+}
+#jellytv-app .jtv-empty.full { margin: auto; border: 0; }
+#jellytv-app .jtv-empty .sub { font-size: 12px; color: var(--jtv-muted); }
+
+#jellytv-app .shimmer, .jtv-modal-veil .shimmer {
+  display: block; background: #1a1c1a; animation: jtv-blink 1.4s ease-in-out infinite;
+}
+@keyframes jtv-blink { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+
+/* toast notifications — appended to <body> */
+.jtv-toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  z-index: 10040; display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; max-width: min(560px, 92vw);
+  background: #161716; border: 1px solid #3a3d38; color: #e3e5de;
+  font: 500 13px/1.4 var(--jtv-font);
+  animation: jtv-toastin .2s var(--jtv-ease);
+}
+.jtv-toast.err { border-color: var(--jtv-live); }
+@keyframes jtv-toastin {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ============ responsive / motion ============ */
+@media (max-width: 1100px) {
+  #jellytv-app .jtv-bus { display: none; }
+  #jellytv-app .game { grid-template-columns: 110px 220px minmax(0, 1fr) auto; column-gap: 16px; }
+  #jellytv-app .g-chan:not(.first) { display: none; }
+}
+@media (max-width: 720px) {
+  #jellytv-app .jtv-topbar { gap: 12px; padding: 0 12px 0 4px; }
+  #jellytv-app .jtv-logo { display: none; }
+  #jellytv-app .jtv-nav { margin-left: 0; gap: 0; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+  #jellytv-app .jtv-nav::-webkit-scrollbar { display: none; }
+  #jellytv-app .jtv-tab { flex: none; }
+  #jellytv-app .jtv-topright { gap: 0; }
+  #jellytv-app .jtv-livecount { display: none; }
+  #jellytv-app .jtv-tvbtn { padding: 0 10px; border: 0; }
+  #jellytv-app .jtv-tvbtn .lbl { display: none; }
+  #jellytv-app .jtv-tvbtn.on .lbl { display: inline; max-width: 84px; }
+  #jellytv-app .jtv-tab { padding: 0 9px; font-size: 11px; letter-spacing: 1px; }
+  #jellytv-app .jtv-tab .led, #jellytv-app .jtv-clock { display: none; }
+  #jellytv-app .jtv-view { padding: 16px 12px 36px; }
+  #jellytv-app .jtv-filterbar { flex-direction: column-reverse; align-items: stretch; gap: 0; border-top: 0; }
+  #jellytv-app .jtv-search { width: 100%; height: 44px; margin-bottom: 8px; }
+  #jellytv-app .jtv-cards { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  #jellytv-app .jtv-viewhead { flex-wrap: wrap; row-gap: 10px; }
+  #jellytv-app .jtv-filterbar.g-filter { flex-direction: row; flex-wrap: wrap; border-top: 1px solid var(--jtv-rule); }
+  #jellytv-app .jtv-filterbar.g-filter .jtv-chips { flex: 1 1 100%; border-bottom: 1px solid var(--jtv-rule); }
+  #jellytv-app .jtv-filterbar.g-filter > .jtv-chip { flex: 1; border-left: 0; justify-content: center; }
+  #jellytv-app .game { grid-template-columns: minmax(0, 1fr) auto; row-gap: 10px; padding-left: 10px; }
+  #jellytv-app .g-status { flex-direction: row; align-items: baseline; gap: 10px; grid-column: 1 / -1; }
+  #jellytv-app .g-teams, #jellytv-app .g-sit { grid-column: 1 / -1; }
+  #jellytv-app .g-watch { grid-column: 1 / -1; justify-content: flex-start; flex-wrap: wrap; }
+  .jtv-player .jp-bug { font-size: 12px; padding: 6px 8px; }
+  .jtv-alert { right: 16px; bottom: 16px; }
+  #jellytv-app .jtv-detail { height: auto; padding: 14px 12px; }
+  #jellytv-app .jtv-detail .d-mon { display: none; }
+  #jellytv-app .jtv-detail .d-title { font-size: 20px; }
+  #jellytv-app .jtv-detail .d-actions { flex-wrap: wrap; margin-top: 4px; }
+  #jellytv-app .gcell-chan, #jellytv-app .ghead-chan, #jellytv-app .skel-cell { width: 148px; padding: 0 10px; }
+  #jellytv-app .gcell-chan img, #jellytv-app .gcell-chan .mono-sm { display: none; }
+  #jellytv-app .gprog.noepg span, #jellytv-app .gprog .t, #jellytv-app .gprog .tm { left: 158px; }
+  .jtv-player .jp-bottom { flex-direction: column; align-items: stretch; gap: 16px; }
+  .jtv-player .jp-title { font-size: 20px; }
+}
+
+/* phones held sideways: height is the scarce dimension — give it to the video */
+@media (max-height: 480px) and (orientation: landscape) {
+  #jellytv-app .jtv-topbar { height: 44px; }
+  #jellytv-app .jtv-logo, #jellytv-app .jtv-clock { display: none; }
+  #jellytv-app .jtv-mv-wrap { padding: 6px; }
+  #jellytv-app .jtv-mv-wrap .jtv-viewhead { display: none; }
+  #jellytv-app .jtv-mv-grid { gap: 6px; }
+  #jellytv-app .mv-tile .jtv-umd { height: 22px; font-size: 10px; }
+  #jellytv-app .jtv-view { padding-top: 12px; }
+  .jtv-player .jp-top { padding: 10px 14px 36px; }
+  .jtv-player .jp-bottom { padding: 40px 14px 10px; flex-direction: row; align-items: flex-end; gap: 16px; }
+  .jtv-player .jp-title { font-size: 18px; }
+  .jtv-player .jtv-stats, .jtv-player .jp-play { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #jellytv-app *, .jtv-player *, .jtv-modal-veil *, .jtv-modal-veil, .jtv-toast, .jtv-alert {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ---- settings: get the TV app ---- */
+#jellytv-app .get-app { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+#jellytv-app .get-qr { display: block; width: 148px; height: 148px; border: 1px solid var(--jtv-rule-2); background: #e3e5de; }
+#jellytv-app .get-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; flex: 1 1 220px; }
+#jellytv-app .get-link { font-family: var(--jtv-mono, 'JTV Plex Mono', monospace); font-size: 15px; color: var(--jtv-accent); overflow-wrap: anywhere; }
+#jellytv-app .get-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#jellytv-app .f-row label .mono { font-family: var(--jtv-mono); overflow-wrap: anywhere; }

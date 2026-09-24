@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Tally on your TV</title>
+<style>
+@font-face { font-family: 'JTV Plex Sans'; font-weight: 100 700; font-display: swap; src: url(Assets/plex-sans.woff2) format('woff2'); }
+@font-face { font-family: 'JTV Plex Mono'; font-weight: 500; font-display: swap; src: url(Assets/plex-mono-500.woff2) format('woff2'); }
+:root { --ground: #0e0f0e; --raised: #1b1c1a; --rule: #2a2c2a; --rule-2: #3a3d38; --text: #e3e5de; --text-2: #a9ada3; --muted: #8b9084; --accent: #ffb000; }
+* { box-sizing: border-box; }
+html { background: var(--ground); }
+body { margin: 0; background: var(--ground); color: var(--text); font: 17px/1.55 'JTV Plex Sans', system-ui, sans-serif; -webkit-text-size-adjust: 100%; }
+.mono { font-family: 'JTV Plex Mono', ui-monospace, monospace; }
+header { border-bottom: 1px solid var(--rule); padding: 20px 16px; }
+header div, main { max-width: 640px; margin: 0 auto; }
+.brand { font-weight: 700; letter-spacing: 5px; font-size: 18px; }
+main { padding: 28px 16px 64px; }
+h1 { font-size: 30px; line-height: 1.15; letter-spacing: -0.4px; margin: 0 0 10px; text-wrap: balance; }
+.lede { color: var(--text-2); margin: 0 0 28px; }
+.k { font-family: 'JTV Plex Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--muted); }
+.picker { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 10px 0 32px; }
+.picker button { font: inherit; color: var(--text); background: none; border: 1px solid var(--rule-2); padding: 14px 16px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.picker button span { color: var(--muted); font-size: 14px; }
+.picker button[aria-pressed="true"] { border-color: var(--accent); background: var(--raised); box-shadow: inset 3px 0 0 var(--accent); }
+.picker button:focus-visible, a:focus-visible, .copy:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+section[hidden] { display: none; }
+ol { list-style: none; counter-reset: step; padding: 0; margin: 0; }
+ol > li { counter-increment: step; border-top: 1px solid var(--rule); padding: 18px 0 18px 44px; position: relative; }
+ol > li::before { content: counter(step); position: absolute; left: 0; top: 18px; font: 500 15px 'JTV Plex Mono', ui-monospace, monospace; color: var(--ground); background: var(--accent); width: 26px; height: 26px; display: grid; place-items: center; }
+li p { margin: 0 0 8px; } li p:last-child { margin-bottom: 0; }
+.sub { color: var(--text-2); font-size: 15px; }
+.type-this { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 10px 0; padding: 14px; background: #000; border: 1px solid var(--rule-2); }
+.type-this code { font: 500 clamp(17px, 5.2vw, 24px) 'JTV Plex Mono', ui-monospace, monospace; color: var(--accent); overflow-wrap: anywhere; flex: 1 1 200px; }
+.copy { font: 500 12px 'JTV Plex Mono', ui-monospace, monospace; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text); background: none; border: 1px solid var(--rule-2); padding: 8px 12px; cursor: pointer; }
+.no-code .with-code, .has-code .without-code { display: none; }
+.send { display: grid; gap: 8px; margin: 12px 0; }
+.send-btn { display: flex; flex-direction: column; gap: 2px; padding: 14px 16px; background: var(--accent); color: var(--ground); font-weight: 600; text-decoration: none; }
+.send-btn span { font-weight: 400; font-size: 14px; color: #3a2a00; }
+.pair { display: grid; gap: 10px; margin: 12px 0; }
+.pair label { font-size: 14px; color: var(--text-2); }
+.pair input { font: inherit; color: var(--text); background: #000; border: 1px solid var(--rule-2); border-radius: 0; padding: 12px 14px; width: 100%; }
+.pair input:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.pair .code-input { font: 500 30px 'JTV Plex Mono', ui-monospace, monospace; letter-spacing: 10px; color: var(--accent); text-align: center; }
+#pair-login { display: grid; gap: 8px; }
+#pair-login[hidden] { display: none; }
+.pair button { font: 600 17px 'JTV Plex Sans', system-ui, sans-serif; color: var(--ground); background: var(--accent); border: 0; padding: 14px 16px; cursor: pointer; }
+.pair button:disabled { background: var(--rule-2); color: var(--muted); cursor: default; }
+#pair-msg.ok { color: #35d07f; } #pair-msg.bad { color: #ff6a61; }
+.note { border: 1px solid var(--rule-2); padding: 14px 16px; margin-top: 24px; color: var(--text-2); font-size: 15px; }
+.note strong { color: var(--text); font-weight: 600; }
+a { color: var(--accent); }
+</style>
+</head>
+<body class="{{HAS_CODE}}">
+<header><div class="brand">TALLY</div></header>
+<main>
+  <h1>Get Tally on your TV</h1>
+  <p class="lede">Live games with scores, a switcher and multiview. About three minutes, once, mostly from this phone. After that the app keeps itself up to date.</p>
+
+  <div class="k">What kind of TV is it?</div>
+  <div class="picker" role="group" aria-label="TV type">
+    <button type="button" data-tv="android" aria-pressed="true">Google TV, Fire TV, Android TV <span>Chromecast, Fire Stick, Shield, onn, Sony, TCL, Hisense</span></button>
+    <button type="button" data-tv="web" aria-pressed="false">LG or Xbox <span>nothing special to install</span></button>
+    <button type="button" data-tv="apple" aria-pressed="false">Apple TV, Samsung or Roku <span>pick games on your phone, watch on the TV</span></button>
+  </div>
+
+  <section data-for="android">
+    <ol>
+      <li>
+        <p>Send the free <strong>Downloader</strong> app to your TV from this phone. It is only the installer.</p>
+        <div class="send">
+          <a class="send-btn" href="https://play.google.com/store/apps/details?id=com.esaba.downloader" target="_blank" rel="noopener">Send to my Google TV<span>Chromecast, Shield, onn, Sony, TCL, Hisense</span></a>
+          <a class="send-btn" href="https://www.amazon.com/dp/B01N0BP507" target="_blank" rel="noopener">Send to my Fire TV<span>Fire Stick, Fire TV Cube, Fire TV sets</span></a>
+        </div>
+        <p class="sub"><strong>Google:</strong> tap the small arrow beside Install (or "Install on more devices"), tick your TV, tap Install. <strong>Amazon:</strong> under "Deliver to" choose your Fire TV, then tap Get. Use the same Google or Amazon account the TV is signed in to. Then come back to this page.</p>
+        <p class="sub">TV not listed there? On the TV, open the app store, search for Downloader (orange icon, by AFTVnews) and install it. Either way, open it on the TV and choose Allow if it asks about files.</p>
+      </li>
+      <li>
+        <p class="with-code">In Downloader's box, type this code and press <strong>Go</strong>:</p>
+        <p class="without-code">In Downloader's box, type this address and press <strong>Go</strong>:</p>
+        <div class="type-this with-code"><code>{{CODE}}</code></div>
+        <div class="type-this without-code"><code id="app-address">{{APP_ADDRESS}}</code></div>
+        <p class="sub">The download starts by itself.</p>
+      </li>
+      <li>
+        <p>Press <strong>Install</strong>.</p>
+        <p class="sub">The first time, the TV says it is not allowed to install unknown apps. Choose <strong>Settings</strong>, switch <strong>Downloader</strong> on, press Back, then Install again.</p>
+      </li>
+      <li>
+        <p>Open <strong>Tally</strong> on the TV. It finds this server by itself and shows a <strong>6-digit code</strong>. Type the code here:</p>
+        <form id="pair" class="pair" autocomplete="on" novalidate>
+          <input id="pair-code" class="code-input" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="one-time-code" placeholder="000000" aria-label="Code shown on the TV">
+          <div id="pair-login" hidden>
+            <label for="pair-user">Your name here</label>
+            <input id="pair-user" type="text" autocomplete="username" autocapitalize="off" spellcheck="false">
+            <label for="pair-pass">Your password</label>
+            <input id="pair-pass" type="password" autocomplete="current-password">
+          </div>
+          <button type="submit" id="pair-go">Sign in my TV</button>
+          <p id="pair-msg" class="sub" role="status" aria-live="polite"></p>
+        </form>
+        <p class="sub">No code on the TV? Choose Add Server there and enter <span class="mono">{{SERVER}}</span>, then Add User.</p>
+      </li>
+    </ol>
+    <div class="note"><strong>Updates.</strong> When a new version is out, Tally opens an update screen by itself: press <strong>Download &amp; Update</strong>, then <strong>Update</strong>, and open Tally again. The very first time, the TV asks once more to allow installs, this time for Tally: choose Settings, switch <strong>Tally</strong> on, press Back twice and press Download &amp; Update again. You can delete Downloader afterwards; it is not needed again.</div>
+  </section>
+
+  <section data-for="web" hidden>
+    <ol>
+      <li><p>On the TV, open the app store, install <strong>Jellyfin</strong> and open it.</p></li>
+      <li>
+        <p>Enter this server address and sign in:</p>
+        <div class="type-this"><code>{{SERVER}}</code></div>
+      </li>
+      <li><p>Open <strong>Live TV</strong>. That is JellyTV.</p></li>
+    </ol>
+  </section>
+
+  <section data-for="apple" hidden>
+    <ol>
+      <li><p>On the TV, install <strong>Swiftfin</strong> (Apple TV) or <strong>Jellyfin</strong> (Samsung, Roku) from its app store.</p></li>
+      <li>
+        <p>Enter this server address and sign in:</p>
+        <div class="type-this"><code>{{SERVER}}</code></div>
+      </li>
+      <li>
+        <p>On your phone, open <a href="{{SERVER}}/web/#/livetv">Live TV on this server</a>, tap <strong>TV</strong> at the top and pick your TV.</p>
+        <p class="sub">Now any game you tap on the phone starts playing on the TV.</p>
+      </li>
+    </ol>
+  </section>
+</main>
+<script>
+(function () {
+  var buttons = document.querySelectorAll('.picker button');
+  function pick(tv) {
+    buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.tv === tv)); });
+    document.querySelectorAll('section[data-for]').forEach(function (s) { s.hidden = s.dataset.for !== tv; });
+  }
+  buttons.forEach(function (b) { b.addEventListener('click', function () { pick(b.dataset.tv); }); });
+  // ---- sign the TV in from here (Jellyfin Quick Connect), so nobody types a password with a remote ----
+  var form = document.getElementById('pair'), code = document.getElementById('pair-code'), login = document.getElementById('pair-login'),
+    user = document.getElementById('pair-user'), pass = document.getElementById('pair-pass'), go = document.getElementById('pair-go'), msg = document.getElementById('pair-msg');
+  var api = new URL('..', location.href).href;               // works behind a base path too
+  function say(text, kind) { msg.textContent = text; msg.className = 'sub ' + (kind || ''); }
+  function deviceId() { try { var k = 'jellytv_setup_device', v = localStorage.getItem(k); if (!v) { v = 'setup-' + Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem(k, v); } return v; } catch (e) { return 'setup-' + Date.now(); } }
+  function header(token) { return 'MediaBrowser Client="Tally setup", Device="Phone", DeviceId="' + deviceId() + '", Version="1"' + (token ? ', Token="' + token + '"' : ''); }
+  // already signed in to Jellyfin in this browser? then the code is all we need
+  function savedToken() { try { var c = JSON.parse(localStorage.getItem('jellyfin_credentials') || '{}'); var s = (c.Servers || []).filter(function (x) { return x.AccessToken; })[0]; return s ? s.AccessToken : null; } catch (e) { return null; } }
+  var preset = new URLSearchParams(location.search).get('u'); if (preset) user.value = preset;
+  if (!savedToken()) login.hidden = false;
+
+  async function authorize(token) {
+    var r = await fetch(api + 'QuickConnect/Authorize?code=' + encodeURIComponent(code.value.trim()), { method: 'POST', headers: { Authorization: header(token) } });
+    if (r.status === 401) return 'login';
+    if (!r.ok) return 'code';
+    return (await r.text()).trim() === 'true' ? 'ok' : 'code';
+  }
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!/^[0-9]{6}$/.test(code.value.trim())) { say('Enter the six digits shown on the TV.', 'bad'); code.focus(); return; }
+    go.disabled = true; say('Signing in your TV…');
+    try {
+      var token = savedToken(), temporary = false, result = token ? await authorize(token) : 'login';
+      if (result === 'login') {
+        login.hidden = false;
+        if (!user.value.trim()) { say('Enter your name and password for this server.', 'bad'); user.focus(); return; }
+        var a = await fetch(api + 'Users/AuthenticateByName', { method: 'POST', headers: { Authorization: header(), 'Content-Type': 'application/json' }, body: JSON.stringify({ Username: user.value.trim(), Pw: pass.value }) });
+        if (!a.ok) { say(a.status === 401 ? 'That name or password is not right.' : 'The server said no (' + a.status + '). Try again in a minute.', 'bad'); return; }
+        token = (await a.json()).AccessToken; temporary = true;
+        result = await authorize(token);
+      }
+      if (result === 'ok') say('Done. Look at your TV: it is signing in now.', 'ok');
+      else say('The TV did not recognize that code. Codes expire after a few minutes: check the TV and type the one it shows now.', 'bad');
+      if (temporary) fetch(api + 'Sessions/Logout', { method: 'POST', headers: { Authorization: header(token) } }).catch(function () {});
+    } catch (err) { say('Could not reach the server. Check your connection and try again.', 'bad'); }
+    finally { go.disabled = false; }
+  });
+
+  document.querySelectorAll('.copy').forEach(function (c) {
+    c.addEventListener('click', function () {
+      var text = document.getElementById(c.dataset.copy).textContent;
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(function () { c.textContent = 'Copied'; setTimeout(function () { c.textContent = 'Copy'; }, 1500); });
+    });
+  });
+})();
+</script>
+</body>
+</html>

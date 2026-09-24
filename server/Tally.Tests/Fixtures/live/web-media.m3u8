@@ -1,0 +1,10 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:5
+#EXT-X-MEDIA-SEQUENCE:800
+#EXTINF:5.000000,
+https://mirror1.cdn.source.example/scripts/stream/p1000_800.txt?X-Amz-Signature=REDACTED
+#EXTINF:5.000000,
+https://mirror1.cdn.source.example/scripts/stream/p1000_801.txt?X-Amz-Signature=REDACTED
+#EXTINF:5.000000,
+https://mirror1.cdn.source.example/scripts/stream/p1000_802.txt?X-Amz-Signature=REDACTED

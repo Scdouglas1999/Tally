@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- One codebase, three servers. Default build targets Jellyfin 10.10; `-p:JellyfinLine=11` targets 10.11 (.NET 9)
+       and `-p:JellyfinLine=12` targets 12.1 (.NET 10). 10.11 and 12 share SkiaSharp 3 and the relocated
+       user-permission types (the JF12 symbol). build.sh makes all three. -->
+  <PropertyGroup>
+    <JellyfinLine Condition="'$(JellyfinLine)' == ''">10</JellyfinLine>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(JellyfinLine)' == '10'">
+    <TargetFramework>net8.0</TargetFramework>
+    <JellyfinPackageVersion>10.10.6</JellyfinPackageVersion>
+    <SkiaPackageVersion>2.88.9</SkiaPackageVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(JellyfinLine)' == '11'">
+    <TargetFramework>net9.0</TargetFramework>
+    <JellyfinPackageVersion>10.11.0</JellyfinPackageVersion>
+    <SkiaPackageVersion>3.116.1</SkiaPackageVersion>
+    <DefineConstants>$(DefineConstants);JF12</DefineConstants>
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(JellyfinLine)' == '12'">
+    <TargetFramework>net10.0</TargetFramework>
+    <JellyfinPackageVersion>12.1.0</JellyfinPackageVersion>
+    <SkiaPackageVersion>3.119.4</SkiaPackageVersion>
+    <DefineConstants>$(DefineConstants);JF12</DefineConstants>
+    <!-- SkiaSharp 3 deprecates the SKPaint text API that 2.88 requires; both builds share one renderer -->
+    <NoWarn>$(NoWarn);CS0618</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <!-- Kept from the plugin's first name: Jellyfin names the plugin's settings file after the assembly, so
+         renaming it would drop every server's saved settings. -->
+    <AssemblyName>Jellyfin.Plugin.JellyTV</AssemblyName>
+    <RootNamespace>Jellyfin.Plugin.Tally</RootNamespace>
+    <!-- The fourth part names the Jellyfin line (2.0.0.10, 2.0.0.11, 2.0.0.12), so each build has its own version and
+         Jellyfin's plugin updater moves a server to the right build by itself after a Jellyfin upgrade. -->
+    <TallyRevision Condition="'$(JellyfinLine)' == '10'">10</TallyRevision>
+    <TallyRevision Condition="'$(JellyfinLine)' == '11'">11</TallyRevision>
+    <TallyRevision Condition="'$(JellyfinLine)' == '12'">12</TallyRevision>
+    <AssemblyVersion>$(TallyVersion).$(TallyRevision)</AssemblyVersion>
+    <FileVersion>$(TallyVersion).$(TallyRevision)</FileVersion>
+    <Version>$(TallyVersion)</Version>
+    <!-- build stamp -> InformationalVersion "2.0.0+b202609201630"; surfaced by /JellyTV/Status and Settings -->
+    <SourceRevisionId>b$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmm"))</SourceRevisionId>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jellyfin.Controller" Version="$(JellyfinPackageVersion)" />
+    <PackageReference Include="AngleSharp" Version="1.8.1" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.62.0" />
+    <!-- Compile against the SkiaSharp that ships inside the target Jellyfin (2.88.9 in 10.10, 3.119 in 12.1) and use the server's copy at
+         runtime: bundling our own would load a second, conflicting native library into the server process. -->
+    <PackageReference Include="SkiaSharp" Version="$(SkiaPackageVersion)" ExcludeAssets="runtime" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Web\**\*.js;Web\**\*.css;Web\**\*.html;Web\**\*.woff2;Assets\*.ttf" />
+  </ItemGroup>
+
+</Project>

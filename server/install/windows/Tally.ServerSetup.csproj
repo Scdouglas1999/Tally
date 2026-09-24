@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Tally-Server-Setup.exe: a self-contained Windows installer for the Tally plugin, cross-built from Linux.
+       The plugin zips from ../../build.sh are embedded, so the installer needs no download of its own besides
+       Jellyfin (from repo.jellyfin.org) when the computer has none.
+       Build: ~/.dotnet/dotnet publish server/install/windows -c Release -o <dir> -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <!-- .NET 10 refuses to start on Windows 10 builds that are not fully updated ("Your Windows doesn't fully
+         support CET"); a server that has not seen Windows Update in a while must still be able to run the setup. -->
+    <CETCompat>false</CETCompat>
+    <DebugType>none</DebugType>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Tally-Server-Setup</AssemblyName>
+    <RootNamespace>Tally.ServerSetup</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>tally.ico</ApplicationIcon>
+    <Product>Tally Server Setup</Product>
+    <Version>$(TallyVersion)</Version>
+    <AssemblyVersion>$(TallyVersion).0</AssemblyVersion>
+    <FileVersion>$(TallyVersion).0</FileVersion>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <TallyDist Condition="'$(TallyDist)' == ''">$(MSBuildThisFileDirectory)../../dist/</TallyDist>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.0" />
+    <PackageReference Include="System.Management" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="$(TallyDist)Tally-server-$(TallyVersion)-jf*.zip" LogicalName="%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <Target Name="RequirePluginZips" BeforeTargets="BeforeBuild">
+    <Error Condition="!Exists('$(TallyDist)Tally-server-$(TallyVersion)-jf10.10.zip') Or !Exists('$(TallyDist)Tally-server-$(TallyVersion)-jf10.11.zip') Or !Exists('$(TallyDist)Tally-server-$(TallyVersion)-jf12.zip')"
+           Text="Build the plugin first (server/build.sh): the installer embeds $(TallyDist)Tally-server-$(TallyVersion)-jf*.zip" />
+  </Target>
+
+</Project>

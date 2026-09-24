@@ -1,0 +1,68 @@
+# Jellyfin with the Tally plugin. Put this file in an empty folder and run:  docker compose up -d
+# Then open http://<this computer>:8096 and follow Jellyfin's setup. Details: README.md next to this file in
+# https://github.com/Scdouglas1999/Tally/tree/main/server/install
+#
+# Jellyfin itself is the official jellyfin/jellyfin image, pulled from Docker Hub. Before it starts, the one-shot
+# "tally-plugin" service puts the Tally plugin into the config folder. After that, Jellyfin keeps Tally up to date
+# through its own plugin updates (the plugin adds Tally's plugin repository on its first start).
+
+services:
+  tally-plugin:
+    image: alpine:3.20
+    restart: "no"
+    environment:
+      # The Tally release to install first. Later versions arrive through Jellyfin's plugin updates.
+      TALLY_VERSION: "2.0.0"
+      JELLYFIN_VERSION: ${JELLYFIN_VERSION:-12.1}
+      TALLY_RELEASES: ${TALLY_RELEASES:-https://github.com/Scdouglas1999/Tally/releases/download}
+    volumes:
+      - ./config:/config
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        case "$$JELLYFIN_VERSION" in
+          10.10|10.10.*) abi=10.10; rev=10 ;;
+          10.11|10.11.*) abi=10.11; rev=11 ;;
+          12.0|12.0.*) echo "Tally's build for Jellyfin 12 needs 12.1 or later, not $$JELLYFIN_VERSION"; exit 1 ;;
+          12|12.*|latest) abi=12; rev=12 ;;
+          *) echo "Tally has builds for Jellyfin 10.10, 10.11 and 12.1 or later, not $$JELLYFIN_VERSION"; exit 1 ;;
+        esac
+        mkdir -p /config/plugins
+        for meta in /config/plugins/*/meta.json; do
+          [ -f "$$meta" ] && grep -qi 91920c7b-e920-46ee-b4d3-421f05d3761b "$$meta" || continue
+          dir="$${meta%/meta.json}"
+          if grep -q "\"targetAbi\": *\"$$abi\." "$$dir/meta.json"; then
+            echo "Tally is already installed ($${dir##*/}); Jellyfin keeps it up to date."; exit 0
+          fi
+          echo "Removing $${dir##*/}: it is the build for another Jellyfin version."
+          rm -rf "$$dir"
+        done
+        zip="Tally-server-$$TALLY_VERSION-jf$$abi.zip"
+        echo "Downloading $$zip"
+        wget -q -O /tmp/tally.zip "$$TALLY_RELEASES/tally-v$$TALLY_VERSION/$$zip"
+        target="/config/plugins/Tally_$$TALLY_VERSION.$$rev"
+        mkdir -p "$$target"
+        unzip -o -q /tmp/tally.zip -d "$$target"
+        chown -R "$$(stat -c %u:%g /config)" /config/plugins
+        echo "Installed Tally $$TALLY_VERSION for Jellyfin $$abi in $${target#/config/}"
+
+  jellyfin:
+    image: jellyfin/jellyfin:${JELLYFIN_VERSION:-12.1}
+    depends_on:
+      tally-plugin:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    environment:
+      # Your time zone (a name from the tz database). Tally's channel cards and guide show times in the server's
+      # zone, and containers run in UTC unless told otherwise. Set TZ in your shell or an .env file next to this
+      # file, or change the default here.
+      TZ: ${TZ:-America/New_York}
+    ports:
+      - "8096:8096"
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      # Your media, read-only. Add one line per folder:
+      # - /path/to/movies:/media/movies:ro
