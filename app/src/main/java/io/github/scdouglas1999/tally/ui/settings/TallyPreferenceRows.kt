@@ -433,6 +433,28 @@ fun TallySwitchPreference(
     }
 }
 
+/** A row that reports a value (at the right, no `›`: it opens nothing); OK or a tap runs [onClick]. */
+@Composable
+fun TallyValuePreference(
+    title: String,
+    value: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    summary: String? = null,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+) {
+    PreferenceRow(
+        title = title,
+        summary = summary,
+        onClick = onClick,
+        onLongClick = null,
+        interactionSource = interactionSource,
+        modifier = modifier,
+    ) {
+        if (value != null) ValueText(value)
+    }
+}
+
 /** Tally [com.github.damontecres.wholphin.ui.preferences.ClickPreference]: a `›` at the right. */
 @Composable
 fun TallyClickPreference(

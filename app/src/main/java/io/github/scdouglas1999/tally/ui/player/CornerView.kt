@@ -48,6 +48,7 @@ import io.github.scdouglas1999.tally.api.TallyChannel
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyWatch
 import io.github.scdouglas1999.tally.data.BoardOrganizer
+import io.github.scdouglas1999.tally.lan.TallyServerRoute
 import io.github.scdouglas1999.tally.ui.components.LabelBar
 import io.github.scdouglas1999.tally.ui.components.TallySamples
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewTilePlayback
@@ -136,7 +137,12 @@ class CornerViewController(
         val channelId: String,
         val url: String,
     ) {
-        val player: ExoPlayer = ExoPlayer.Builder(appContext).build()
+        val player: ExoPlayer =
+            ExoPlayer
+                .Builder(appContext)
+                // the server's address in use (home network or internet), see TallyServerRoute
+                .setMediaSourceFactory(TallyServerRoute.mediaSources(appContext))
+                .build()
         var retries = 0
         var errorMessage: String? = null
         var pendingRetry: Runnable? = null

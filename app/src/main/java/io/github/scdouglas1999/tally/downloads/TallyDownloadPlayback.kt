@@ -9,6 +9,7 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import com.github.damontecres.wholphin.preferences.PlayerBackend
 import io.github.scdouglas1999.tally.downloads.db.DownloadRecord
+import io.github.scdouglas1999.tally.lan.RoutedDataSource
 import io.github.scdouglas1999.tally.ui.formfactor.isTallyPhone
 import org.jellyfin.sdk.api.client.Response
 import org.jellyfin.sdk.model.api.BaseItemDto
@@ -99,14 +100,18 @@ object TallyDownloadPlayback {
         itemId: UUID,
     ): PlayerBackend? = engine(context)?.completedRecord(itemId)?.let { PlayerBackend.EXO_PLAYER }
 
-    /** `PlayerFactory`: the player's [factory] reads downloads first, then [upstream] (what it used before). */
+    /**
+     * `PlayerFactory`: the player's [factory] reads downloads first (phones), then [upstream] (what it used before)
+     * through the server route ([RoutedDataSource]: the home network or internet address in use, on a TV too).
+     */
     fun readLocalCopies(
         context: Context,
         factory: DefaultMediaSourceFactory,
         upstream: DataSource.Factory,
     ) {
-        val engine = engine(context) ?: return
-        factory.setDataSourceFactory(LocalFirstDataSource.Factory(upstream, engine.lookup))
+        val routed = RoutedDataSource.Factory(upstream)
+        val engine = engine(context)
+        factory.setDataSourceFactory(if (engine == null) routed else LocalFirstDataSource.Factory(routed, engine.lookup))
     }
 
     /**

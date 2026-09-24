@@ -101,6 +101,10 @@ object AppModule {
             .Builder()
             .apply {
                 // TODO user agent, timeouts, logging, etc
+                // TALLY: begin
+                // every request to a known server goes to its active address: home network or internet
+                addInterceptor(io.github.scdouglas1999.tally.lan.TallyServerRoute.interceptor)
+                // TALLY: end
             }.build()
 
     @AuthOkHttpClient
