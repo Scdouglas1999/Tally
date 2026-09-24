@@ -276,7 +276,7 @@ html[data-tally-look] .MuiAppBar-root .MuiButton-startIcon:has(> img)::after {
   content: 'TALLY'; font: 600 16px/1 var(--tl-sans); letter-spacing: .34em; color: var(--tl-text);
 }
 /* the phone bar has no logo of its own (menu button, then the icons): the brand goes after the menu button */
-html[data-tally-look] .MuiAppBar-positionFixed .MuiToolbar-root > button:first-child + .MuiBox-root::before {
+html[data-tally-look] .MuiAppBar-positionFixed .MuiToolbar-root > button.MuiIconButton-root:first-child + .MuiBox-root::before {
   content: 'TALLY'; margin-right: auto; align-self: center; padding-left: 24px;
   font: 600 15px/13px var(--tl-sans); letter-spacing: .32em; color: var(--tl-text);
   background: linear-gradient(var(--tl-accent), var(--tl-accent)) no-repeat 0 50% / 12px 12px;
@@ -377,7 +377,9 @@ html[data-tally-look] .card.show-animation:focus > .cardBox { transform: none !i
 
 /* the hover overlay: darken less, square buttons */
 html[data-tally-look] .cardOverlayContainer { background: rgba(5, 5, 5, .55); }
-html[data-tally-look] .cardOverlayButton { color: var(--tl-text); }
+html[data-tally-look] .cardOverlayButton,
+html[data-tally-look] .cardOverlayButton-br,
+html[data-tally-look] .cardScalable > a { color: var(--tl-text); }
 html[data-tally-look] .cardOverlayButton:hover { color: var(--tl-accent); background: transparent; }
 html[data-tally-look] .cardOverlayButton-br,
 html[data-tally-look] .cardOverlayFab-primary {

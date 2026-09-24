@@ -20,13 +20,15 @@ new versions arrive through Jellyfin's own plugin updates.
 
 ## After installing
 
-Open the **Live TV** card on the Jellyfin home screen (or *Live TV* in the side menu). Tally opens in place of
-Jellyfin's own Live TV page, for every user, not just admins. Reload the browser tab once after installing so the
-web client picks this up.
+Reload the browser tab once after installing. The Jellyfin web client now looks like Tally (its theme, name and
+icon), and its side menu has a **Sports** entry; that entry, the **Live TV** card on the home screen and *Live TV* in
+the side menu all open Tally in place of Jellyfin's own Live TV page, for every user, not just admins.
 
-> How: the plugin adds one `<script>` tag to `web/index.html` *as it is served* (`Services/WebInjection.cs`); that
-> script mounts Tally whenever the web client is on its Live TV route. No Jellyfin files are modified. Switch it off
-> under **Settings → Live TV takeover** (or uninstall) and the web client is exactly as shipped.
+> How: the plugin adds a few tags to `web/index.html` *as it is served* (`Services/WebInjection.cs`): the Tally look
+> (`Web/web-look.css` and `Web/web-look.js`) and a script that mounts Tally whenever the web client is on its Live TV
+> route (`Web/inject.js`). No Jellyfin files are modified. Each is a switch under **Settings → Jellyfin web client**
+> (*Tally look for Jellyfin web* and *Replace Jellyfin's Live TV page with Tally*); switch both off (or uninstall) and
+> the web client is exactly as shipped. The look follows jellyfin-web 10.10, 10.11 and 12.
 >
 > This covers everything built on the web client: browsers, Jellyfin Media Player and the Android and iOS mobile
 > apps. Native TV apps (Android TV, Roku, …) have their own Live TV screen and are unaffected; they use the native
