@@ -106,6 +106,11 @@ public class ClientApiController : ControllerBase
         foreach (var g in board.Games)
         {
             g.BackdropPath = Request.PathBase.Value + GameArtService.BackdropPath(g);
+            if (g.Recording?.StartOverPath is { } startOver)
+            {
+                g.Recording.StartOverPath = Request.PathBase.Value + startOver;
+            }
+
             var pick = WatchResolver.Resolve(g, board.Games, byId.ContainsKey);
             if (pick != null)
             {

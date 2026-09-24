@@ -270,6 +270,54 @@ public sealed class CardArtService
         DrawText(c, asOf, Mono.Value, 24, Muted, Width / 2f, 690, SKTextAlign.Center, 400);
     }
 
+    /// <summary>Artwork for a recorded game (the DVR): a 16:9 thumb (the pre-game matchup card: logos, names, league,
+    /// date and time) and a 2:3 poster. Neither ever shows a score: the game is drawn as not yet started.</summary>
+    public async Task<(byte[] Thumb, byte[] Poster)> RenderRecordingArtAsync(GameInfo scoreless, TimeZoneInfo zone, CancellationToken ct)
+    {
+        var away = await GetDarkLogoAsync(scoreless.Away.Logo, ct).ConfigureAwait(false);
+        var home = await GetDarkLogoAsync(scoreless.Home.Logo, ct).ConfigureAwait(false);
+        var game = scoreless.Clone();
+        game.State = "pre";
+        game.Away.Score = null;
+        game.Home.Score = null;
+        return (RenderMatchup(game, away, home, zone, DateTimeOffset.UtcNow), RenderPoster(game, away, home, zone));
+    }
+
+    public const int PosterWidth = 1000;
+    public const int PosterHeight = 1500;
+
+    /// <summary>2:3 poster of a matchup: league, both teams stacked with "AT" between them, and the date.</summary>
+    public static byte[] RenderPoster(GameInfo g, byte[]? awayLogo, byte[]? homeLogo, TimeZoneInfo zone)
+    {
+        using var surface = SKSurface.Create(new SKImageInfo(PosterWidth, PosterHeight, SKColorType.Rgba8888, SKAlphaType.Premul));
+        var c = surface.Canvas;
+        c.Clear(Ground);
+        using (var accent = new SKPaint { Color = Accent, Style = SKPaintStyle.Fill })
+        {
+            c.DrawRect(new SKRect(0, 0, PosterWidth, 10), accent);
+        }
+
+        using (var rule = new SKPaint { Color = Rule, Style = SKPaintStyle.Stroke, StrokeWidth = 3 })
+        {
+            c.DrawRect(new SKRect(1.5f, 1.5f, PosterWidth - 1.5f, PosterHeight - 1.5f), rule);
+        }
+
+        const float cx = PosterWidth / 2f;
+        DrawText(c, (string.IsNullOrEmpty(g.League) ? "SPORTS" : g.League).ToUpperInvariant(), Mono.Value, 56, Accent, cx, 130, SKTextAlign.Center, 860);
+
+        DrawLogo(c, g.Away, awayLogo, cx, 200, 340);
+        DrawText(c, TeamLabel(g.Away), Sans.Value, 76, Text, cx, 640, SKTextAlign.Center, 900);
+        DrawText(c, "AT", Mono.Value, 54, Muted, cx, 745, SKTextAlign.Center, 200);
+        DrawLogo(c, g.Home, homeLogo, cx, 800, 340);
+        DrawText(c, TeamLabel(g.Home), Sans.Value, 76, Text, cx, 1240, SKTextAlign.Center, 900);
+
+        var date = TimeZoneInfo.ConvertTime(g.Start, zone).ToString("MMM d, yyyy", CultureInfo.InvariantCulture).ToUpperInvariant();
+        DrawText(c, date, Mono.Value, 48, Text, cx, 1400, SKTextAlign.Center, 860);
+        return Encode(surface);
+    }
+
+    private static string TeamLabel(GameTeam t) => !string.IsNullOrEmpty(t.ShortName) ? t.ShortName : !string.IsNullOrEmpty(t.Name) ? t.Name : t.Abbr;
+
     public static byte[] RenderTitle(string name, string? group)
     {
         using var surface = SKSurface.Create(new SKImageInfo(Width, Height, SKColorType.Rgba8888, SKAlphaType.Premul));

@@ -20,6 +20,14 @@ is visible in the picture.
 | `:8080/SOLO/index.m3u8` | 720p30, ~3 Mbps | a channel with a single candidate |
 | `:8080/bed.m3u` | M3U source | "Bed Game HD" (A), "Bed Game" (B), "Bed Game BACKUP" (C) share `tvg-id="bed.game"`, so the plugin merges them into one channel "Bed Game" with three candidates; "Bed Solo" stays on its own |
 
+`/games.m3u` lists channels named after fictional games (see `GAMES` in `serve.py`), each only once it is switched on
+with `./ctl.sh game otters` (`./ctl.sh game otters off` lists it no more), so a game's stream can "appear" late, as
+web page sources do near game time. Pair them with games of the same names in the score simulator
+(`tally/dev/score-sim.py serve --offline`, then `add` and `state`): that is how the DVR is tested end to end.
+"otters" has three streams (A, B and C, so the ladder and its failover are in play), "hawks" and "cranes" one
+rendition of SOLO (the plain pass-through path), "bears" B alone. `BED_NAME=<name>` runs a second bed (and steers
+it with `ctl.sh`) next to one already running.
+
 The proxy on `:8081` sits in front of A and C and can be told to misbehave, per source:
 
 ```

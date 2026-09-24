@@ -18,6 +18,14 @@ Then, from any shell:
   score-sim.py bump NYY                       # the Yankees score 1 (baseball); --points 7 for a touchdown
   score-sim.py reset                          # back to the captured payload
   score-sim.py point ""                       # back to ESPN
+
+Fictional games (for the DVR and anything else that needs a game to start and end on command). `serve --offline`
+never contacts ESPN: every league starts empty and only has the games you add.
+  score-sim.py add --id 900001 --away ROT:Riverton:Otters --home LKH:Lakeside:Herons --start +20
+                                              # an MLB game 20 minutes from now (--league, --start ISO or +/-minutes)
+  score-sim.py state 900001 in                # live; also: pre, post (final), postponed, canceled
+  score-sim.py start 900001 -- -5             # move the listed start (ISO or +/-minutes from now)
+  score-sim.py remove 900001
 The plugin re-reads a live league every 12 s and the app polls its board, so a bump shows within ~15-20 s.
 """
 import argparse
@@ -38,6 +46,7 @@ DEV_SERVER = os.environ.get("TALLY_DEV_SERVER", "http://127.0.0.1:18200")
 DEV_TOKEN = os.environ.get("TALLY_DEV_TOKEN", "")
 PLUGIN_ID = "JellyTV"  # the plugin's page key; its configuration is found by name below
 
+OFFLINE = os.environ.get("SIM_OFFLINE") == "1"  # set by `serve --offline`: never fetch ESPN, leagues start empty
 captured = {}  # league -> payload as ESPN sent it
 state = {}  # league -> payload with bumps applied
 lock = threading.Lock()
@@ -49,12 +58,80 @@ def fetch_espn(league):
         return json.load(response)
 
 
+def empty_board(league):
+    return {"leagues": [{"abbreviation": league.split("/")[-1].upper()}], "events": []}
+
+
 def board(league):
     with lock:
         if league not in captured:
-            captured[league] = fetch_espn(league)
+            captured[league] = empty_board(league) if OFFLINE else fetch_espn(league)
             state[league] = copy.deepcopy(captured[league])
         return state[league]
+
+
+STATUS = {
+    # state -> (ESPN state, status name, short detail, completed)
+    "pre": ("pre", "STATUS_SCHEDULED", None, False),
+    "in": ("in", "STATUS_IN_PROGRESS", "Top 1st", False),
+    "post": ("post", "STATUS_FINAL", "Final", True),
+    "postponed": ("post", "STATUS_POSTPONED", "Postponed", False),
+    "canceled": ("post", "STATUS_CANCELED", "Canceled", False),
+}
+
+
+def when(value):
+    """ISO time, or +/-minutes from now."""
+    if value.startswith(("+", "-")) or value.lstrip("-").isdigit():
+        return time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(time.time() + float(value) * 60))
+    return value
+
+
+def set_status(event, name):
+    espn_state, status_name, detail, completed = STATUS[name]
+    if detail is None:
+        detail = event["date"]
+    event["status"] = {
+        "clock": 0, "displayClock": "0:00", "period": 1 if espn_state != "pre" else 0,
+        "type": {"id": "1", "name": status_name, "state": espn_state, "completed": completed,
+                 "description": detail, "detail": detail, "shortDetail": detail},
+    }
+
+
+def team(spec, home_away):
+    abbr, location, name = (spec.split(":") + ["", ""])[:3]
+    team_id = str(900000 + sum(ord(c) * (i + 1) for i, c in enumerate(abbr)))  # stable per team, like ESPN's ids
+    return {
+        "id": team_id, "homeAway": home_away, "score": "0",
+        "team": {"id": team_id, "abbreviation": abbr, "location": location, "name": name,
+                 "displayName": f"{location} {name}".strip(), "shortDisplayName": name or abbr,
+                 "color": "1d4f91" if home_away == "home" else "b3282d", "alternateColor": "ffffff"},
+    }
+
+
+def add_game(league, event_id, away, home, start, status="pre", broadcast=None):
+    payload = board(league)
+    with lock:
+        payload["events"] = [e for e in payload.get("events", []) if e.get("id") != event_id]
+        away_c, home_c = team(away, "away"), team(home, "home")
+        event = {
+            "id": event_id, "date": when(start),
+            "name": f'{away_c["team"]["displayName"]} at {home_c["team"]["displayName"]}',
+            "shortName": f'{away_c["team"]["abbreviation"]} @ {home_c["team"]["abbreviation"]}',
+            "competitions": [{"id": event_id, "competitors": [home_c, away_c],
+                              "broadcasts": [{"market": "national", "names": [broadcast]}] if broadcast else []}],
+        }
+        set_status(event, status)
+        payload["events"].append(event)
+        return f'{league}: {event["name"]} ({event_id}) at {event["date"]}, {status}'
+
+
+def find_event(event_id):
+    for lg, payload in state.items():
+        for e in payload.get("events", []):
+            if e.get("id") == event_id:
+                return lg, e
+    return None, None
 
 
 def competitors(event):
@@ -142,6 +219,31 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/sim/bump":
             result = bump(query["team"][0], int(query.get("points", ["1"])[0]), query.get("league", [None])[0])
             self.send_json(200 if result else 404, {"result": result or "no such team in the captured boards"})
+        elif url.path == "/sim/add":
+            q = {k: v[0] for k, v in query.items()}
+            try:
+                result = add_game(q.get("league", "baseball/mlb"), q["id"], q["away"], q["home"], q.get("start", "+30"),
+                                  q.get("state", "pre"), q.get("broadcast"))
+                self.send_json(200, {"result": result})
+            except (KeyError, ValueError) as error:
+                self.send_json(400, {"error": f"bad request: {error}"})
+        elif url.path in ("/sim/state", "/sim/start", "/sim/remove"):
+            event_id = query.get("id", [""])[0]
+            with lock:
+                lg, event = find_event(event_id)
+                if event is None:
+                    self.send_json(404, {"result": "no such game"})
+                    return
+                if url.path == "/sim/state":
+                    set_status(event, query["state"][0])
+                    result = f'{event["name"]}: {event["status"]["type"]["name"]}'
+                elif url.path == "/sim/start":
+                    event["date"] = when(query["start"][0])
+                    result = f'{event["name"]}: starts {event["date"]}'
+                else:
+                    state[lg]["events"].remove(event)
+                    result = f'{event["name"]}: removed'
+            self.send_json(200, {"result": result})
         elif url.path == "/sim/reset":
             with lock:
                 for lg in captured:
@@ -185,7 +287,24 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--port", type=int, default=8765)
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("serve")
+    serve_parser = sub.add_parser("serve")
+    serve_parser.add_argument("--offline", action="store_true", help="never fetch ESPN; leagues hold only added games")
+    add_parser = sub.add_parser("add")
+    add_parser.add_argument("--id", required=True)
+    add_parser.add_argument("--away", required=True, help="ABBR:Location:Name")
+    add_parser.add_argument("--home", required=True, help="ABBR:Location:Name")
+    add_parser.add_argument("--league", default="baseball/mlb")
+    add_parser.add_argument("--start", default="+30", help="ISO time or +/-minutes from now")
+    add_parser.add_argument("--state", default="pre", choices=list(STATUS))
+    add_parser.add_argument("--broadcast")
+    state_parser = sub.add_parser("state")
+    state_parser.add_argument("id")
+    state_parser.add_argument("state", choices=list(STATUS))
+    start_parser = sub.add_parser("start")
+    start_parser.add_argument("id")
+    start_parser.add_argument("start", help="ISO time or +/-minutes from now")
+    remove_parser = sub.add_parser("remove")
+    remove_parser.add_argument("id")
     sub.add_parser("list")
     sub.add_parser("reset")
     bump_parser = sub.add_parser("bump")
@@ -197,7 +316,9 @@ def main():
     args = parser.parse_args()
 
     if args.command == "serve":
-        print(f"score-sim serving on 0.0.0.0:{args.port}", flush=True)
+        global OFFLINE
+        OFFLINE = OFFLINE or args.offline
+        print(f"score-sim serving on 0.0.0.0:{args.port}{' (offline)' if OFFLINE else ''}", flush=True)
         ThreadingHTTPServer(("0.0.0.0", args.port), Handler).serve_forever()
     elif args.command == "list":
         for game in control(args.port, "GET", "/sim/list"):
@@ -209,6 +330,17 @@ def main():
             {k: v for k, v in {"team": args.team, "points": args.points, "league": args.league}.items() if v}
         )
         print(control(args.port, "POST", f"/sim/bump?{query}")["result"])
+    elif args.command == "add":
+        query = urllib.parse.urlencode({k: v for k, v in {
+            "id": args.id, "away": args.away, "home": args.home, "league": args.league, "start": args.start,
+            "state": args.state, "broadcast": args.broadcast}.items() if v})
+        print(control(args.port, "POST", f"/sim/add?{query}").get("result"))
+    elif args.command == "state":
+        print(control(args.port, "POST", f"/sim/state?{urllib.parse.urlencode({'id': args.id, 'state': args.state})}")["result"])
+    elif args.command == "start":
+        print(control(args.port, "POST", f"/sim/start?{urllib.parse.urlencode({'id': args.id, 'start': args.start})}")["result"])
+    elif args.command == "remove":
+        print(control(args.port, "POST", f"/sim/remove?{urllib.parse.urlencode({'id': args.id})}")["result"])
     elif args.command == "point":
         point(args.base)
 

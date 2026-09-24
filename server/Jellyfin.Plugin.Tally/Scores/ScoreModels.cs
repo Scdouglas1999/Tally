@@ -79,6 +79,13 @@ public class GameInfo
     /// <summary>"pre", "in" or "post".</summary>
     [JsonPropertyName("state")] public string State { get; set; } = "pre";
 
+    /// <summary>The feed's status name ("STATUS_IN_PROGRESS", "STATUS_POSTPONED"…). Server-side only: the DVR tells a
+    /// postponed or canceled game from a finished one by it.</summary>
+    [JsonIgnore] public string StatusName { get; set; } = string.Empty;
+
+    /// <summary>The configured league path the game came from ("baseball/mlb"). Server-side only.</summary>
+    [JsonIgnore] public string LeaguePath { get; set; } = string.Empty;
+
     /// <summary>Human status, e.g. "7:58 - 4th", "Top 8th", "FT", "Sun 4:25 PM".</summary>
     [JsonPropertyName("detail")] public string Detail { get; set; } = string.Empty;
 
@@ -136,8 +143,21 @@ public class GameInfo
     /// Client API. It does not change with the score, so clients may cache it for the life of the game.</summary>
     [JsonPropertyName("backdropPath")] public string? BackdropPath { get; set; }
 
+    /// <summary>The DVR's job for this game (see Dvr/), absent when there is none.</summary>
+    [JsonPropertyName("recording")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dvr.GameRecording? Recording { get; set; }
+
     /// <summary>Per-module additions, keyed by module name ("fantasy"…). Clients ignore keys they don't know.</summary>
     [JsonPropertyName("extras")] public Dictionary<string, object> Extras { get; set; } = new();
+
+    /// <summary>Postponed or canceled, by the feed's status (such a game is "post" without having been played).</summary>
+    [JsonIgnore]
+    public bool IsCalledOff
+        => StatusName.Contains("POSTPONED", StringComparison.OrdinalIgnoreCase)
+           || StatusName.Contains("CANCELED", StringComparison.OrdinalIgnoreCase)
+           || StatusName.Contains("CANCELLED", StringComparison.OrdinalIgnoreCase)
+           || (StatusName.Length == 0 && Detail is "Postponed" or "Canceled" or "Cancelled");
 
     /// <summary>Copy with its own channel/tag lists — cached games are shared between requests,
     /// matching and heat are computed per request.</summary>
@@ -150,6 +170,7 @@ public class GameInfo
         copy.Tags = new List<string>();
         copy.Extras = new Dictionary<string, object>();
         copy.Watch = null;
+        copy.Recording = null;
         return copy;
     }
 }

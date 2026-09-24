@@ -153,7 +153,7 @@ function ensureHls() {
   return hlsReady;
 }
 
-async function attachStream(video, url) {
+async function attachStream(video, url, extra) {
   await ensureHls();
   // Handle object survives internal re-creations — callers just hold it and
   // call .destroy(); fatal-error recovery swaps the inner hls instance.
@@ -206,7 +206,8 @@ async function attachStream(video, url) {
         fragLoadingMaxRetry: 6,
         fragLoadingRetryDelay: 1000,
         fragLoadingMaxRetryDelay: 8000,
-        fragLoadingTimeOut: 40000
+        fragLoadingTimeOut: 40000,
+        ...(extra || {})
       });
       h.on(Hls.Events.ERROR, (_e, d) => {
         if (handle.dead || !d.fatal) return;
@@ -319,7 +320,7 @@ async function loadSettings() { try { state.settings = (await api('UserSettings'
 
 /* ---------------- shell ---------------- */
 
-let root, clockTimer, refreshTimer, scoreTimer;
+let root, clockTimer, refreshTimer, scoreTimer, dvrTimer;
 function shell() {
   root.innerHTML = `
   <div class="jtv-shell">
@@ -1324,6 +1325,7 @@ async function renderSettings(content) {
       </div>
     </div>
 
+    <div id="jtv-dvr"></div>
     <div id="jtv-admin"></div>
     <div class="jtv-k set-build">Tally ${esc((state.status && (state.status.build || state.status.version)) || '')}</div>
   </div></div>`;
@@ -1346,6 +1348,7 @@ async function renderSettings(content) {
     navigator.share({ title: 'Tally on your TV', text: 'Set up Tally on your TV (about three minutes):', url: getUrl() }).catch(() => {});
   };
 
+  renderDvr($('#jtv-dvr', content), isAdmin, true);
   if (isAdmin) renderAdmin($('#jtv-admin', content), true);
 }
 
@@ -1406,7 +1409,7 @@ async function renderAdmin(container, fresh) {
 
     <div class="set-card">
       <h3>Live scores <span class="jtv-k">Admin</span></h3>
-      <div class="hint">Scores, last play and game situation come from ESPN's public scoreboard feed, fetched by this server only while someone has Tally open. Turn it off and the server makes no third-party requests of its own.</div>
+      <div class="hint">Scores, last play and game situation come from ESPN's public scoreboard feed, fetched by this server only while someone has Tally open or a recording is scheduled. Turn it off and the server makes no third-party requests of its own (and cannot record games).</div>
       <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.ScoresEnabled !== false ? ' on' : ''}" id="set-scores" role="switch" aria-checked="${!!(cfg && cfg.ScoresEnabled !== false)}"></button>
         Show the Games board, score bugs and switch alerts</label></div>
       <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.LiveCardsEnabled !== false ? ' on' : ''}" id="set-livecards" role="switch" aria-checked="${!!(cfg && cfg.LiveCardsEnabled !== false)}"></button>
@@ -1559,6 +1562,200 @@ async function renderAdmin(container, fresh) {
   };
 }
 
+/* ---------------- DVR ---------------- */
+
+// Recordings: what is recording, scheduled, done and failed (everyone who may record), a way to record a game or a
+// team, and for admins the folder, space and limits. Refreshed every 10 s while it is on screen.
+const GB = 1024 * 1024 * 1024;
+const fmtBytes = (b) => b == null ? '?' : b >= 10 * GB ? Math.round(b / GB) + ' GB' : b >= GB ? (b / GB).toFixed(1).replace(/\.0$/, '') + ' GB' : Math.round(b / 1048576) + ' MB';
+const fmtWhen = (d) => new Date(d).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+const DVR_STATE = { scheduled: 'Scheduled', waiting: 'Waiting', recording: 'Recording', finishing: 'Finishing', done: 'Recorded', failed: 'Failed', canceled: 'Canceled' };
+
+async function dvrApi(path, opts) {
+  opts = opts || {};
+  const headers = Object.assign({ Authorization: 'MediaBrowser Token="' + env.token() + '"' }, opts.headers);
+  if (opts.body && typeof opts.body !== 'string') { opts.body = JSON.stringify(opts.body); headers['Content-Type'] = 'application/json'; }
+  const r = await fetch(env.url('JellyTV/' + path), Object.assign({}, opts, { headers }));
+  if (r.status === 204) return null;
+  const body = await r.json().catch(() => null);
+  if (!r.ok) throw new Error((body && body.error) || 'HTTP ' + r.status);
+  return body;
+}
+
+function dvrJobRow(j, canManage) {
+  const live = j.state === 'recording';
+  const bits = [j.game.league, fmtWhen(j.game.start), DVR_STATE[j.state] || j.state];
+  if (live || j.state === 'finishing') bits.push(fmtSpan((j.seconds || 0) * 1000) + ' · ' + fmtBytes(j.bytes) + (j.channelName ? ' · ' + j.channelName : ''));
+  if (j.state === 'done') bits.push(fmtSpan((j.seconds || 0) * 1000) + ' · ' + fmtBytes(j.fileBytes) + (j.itemId ? ' · in the library' : ''));
+  const btns = [];
+  if (live && j.startOverPath) btns.push(`<button class="btn btn-ghost" data-dvr-watch="${esc(j.id)}">Watch from start</button>`);
+  if (canManage && ['scheduled', 'waiting', 'recording'].includes(j.state)) btns.push(`<button class="btn btn-danger" data-dvr-cancel="${esc(j.id)}">${live ? 'Stop' : 'Cancel'}</button>`);
+  if (canManage && j.state === 'done') btns.push(`<button class="btn btn-danger" data-dvr-delete="${esc(j.id)}">Delete</button>`);
+  return `<div class="src-row">
+    ${live ? '<i class="led live" title="Recording"></i>' : ''}
+    <div class="s-text"><div class="s-name">${esc(j.title)}</div>
+      <div class="s-meta">${esc(bits.join(' · '))}</div>
+      ${j.reason ? `<div class="${j.state === 'failed' ? 'src-error' : 'src-browser'}">${esc(j.reason)}</div>` : ''}</div>
+    ${btns.join('')}
+  </div>`;
+}
+
+async function renderDvr(container, isAdmin, fresh) {
+  clearTimeout(dvrTimer);
+  if (!container || !document.contains(container)) return;
+  let list, admin = null, games = state.games || [];
+  try {
+    list = await dvrApi('Client/v1/recordings');
+    if (isAdmin && (fresh || !state.dvrAdmin)) state.dvrAdmin = await dvrApi('Recordings/Settings');
+    admin = isAdmin ? state.dvrAdmin : null;
+    if (list.canManage && fresh && state.status && state.status.scoresEnabled !== false) { await loadScores().catch(() => {}); games = state.games || []; }
+  } catch (e) {
+    container.innerHTML = `<div class="set-card"><h3>Recordings</h3><div class="set-note">${esc(e.message)}</div></div>`;
+    return;
+  }
+  if (!document.contains(container)) return;
+  const jobs = list.jobs || [];
+  const active = jobs.filter(j => ['recording', 'finishing', 'waiting', 'scheduled'].includes(j.state));
+  const done = jobs.filter(j => j.state === 'done');
+  const failed = jobs.filter(j => j.state === 'failed' || j.state === 'canceled').slice(0, 8);
+  const recordable = games.filter(g => g.state !== 'post');
+  const teams = [];
+  const seen = new Set();
+  games.forEach(g => [g.away, g.home].forEach(t => {
+    const k = g.league + ':' + t.id;
+    if (t.id && !seen.has(k)) { seen.add(k); teams.push({ id: t.id, name: t.name || t.shortName, league: g.league }); }
+  }));
+  teams.sort((a, b) => a.name.localeCompare(b.name));
+  const s = admin && admin.settings;
+
+  container.innerHTML = `
+    <div class="set-card">
+      <h3>Recordings</h3>
+      <div class="hint">The server records games in the background: it starts when the game does (up to 15 minutes early once a channel carries it), follows the channel through stream switches, stops a few minutes after the final and files the game in your library. Recordings are shared by everyone on this server.</div>
+      ${list.canManage ? `
+        <div class="f-row"><label for="dvr-game">Record a game</label>
+          <div class="set-actions"><select id="dvr-game" style="flex:1">${recordable.length ? recordable.map(g => `<option value="${esc(g.id)}">${esc(g.league + ' · ' + g.away.name + ' at ' + g.home.name + ' · ' + (g.state === 'in' ? 'live now' : fmtWhen(g.start)))}</option>`).join('') : '<option value="">No upcoming games on the board</option>'}</select>
+          <button class="btn btn-primary" id="dvr-rec-game"${recordable.length ? '' : ' disabled'}>Record</button></div></div>
+        <div class="f-row"><label for="dvr-team">Record every game of a team</label>
+          <div class="set-actions"><select id="dvr-team" style="flex:1">${teams.length ? teams.map(t => `<option value="${esc(t.league + '|' + t.id)}">${esc(t.name + ' (' + t.league + ')')}</option>`).join('') : '<option value="">No teams on the board</option>'}</select>
+          <input type="number" id="dvr-keep" min="0" max="999" value="0" title="Keep the last N games (0 = all)" style="max-width:110px">
+          <button class="btn btn-ghost" id="dvr-rec-team"${teams.length ? '' : ' disabled'}>Record team</button></div>
+          <div class="set-note">The number keeps only the last N recorded games of the team (0 keeps them all).</div></div>`
+        : `<div class="set-note" style="margin-bottom:16px">${esc(list.reason || '')}</div>`}
+      <div id="dvr-msg" class="set-msg" role="status"></div>
+      <div id="src-list">
+        ${active.map(j => dvrJobRow(j, list.canManage)).join('') || '<div class="set-note" style="padding:12px 0">Nothing scheduled.</div>'}
+      </div>
+      ${(list.rules || []).filter(r => r.kind === 'team').length ? `<div class="f-row"><label>Team rules</label>${list.rules.filter(r => r.kind === 'team').map(r => `
+        <div class="src-row"><div class="s-text"><div class="s-name">${esc(r.title)}</div>
+          <div class="s-meta">${esc((r.leaguePath || 'any league') + (r.keepLast ? ' · keeps the last ' + r.keepLast : ' · keeps all') + ' · by ' + (r.createdByName || '?'))}</div></div>
+          ${list.canManage ? `<button class="btn btn-danger" data-dvr-rule="${esc(r.id)}">Remove</button>` : ''}</div>`).join('')}</div>` : ''}
+      ${done.length ? `<div class="f-row"><label>Recorded</label><div>${done.slice(0, 20).map(j => dvrJobRow(j, list.canManage)).join('')}</div></div>` : ''}
+      ${failed.length ? `<div class="f-row"><label>Did not record</label><div>${failed.map(j => dvrJobRow(j, list.canManage)).join('')}</div></div>` : ''}
+    </div>
+    ${s ? `
+    <div class="set-card">
+      <h3>Recording settings <span class="jtv-k">Admin</span></h3>
+      <div class="hint">Where recordings go and how much of the drive they may use. A recording only starts when its estimated size (the stream's bitrate times a typical game) still leaves the reserve free, and stops, keeping what it has, if the drive falls below the reserve.</div>
+      <div class="f-row"><label for="dvr-folder">Recordings folder, blank for the default (${esc(admin.defaultFolder)})</label>
+        <div class="set-actions"><input type="text" id="dvr-folder" style="flex:1" value="${esc(s.folder || '')}" placeholder="${esc(admin.defaultFolder)}" autocapitalize="off" spellcheck="false">
+        <button class="btn btn-ghost" id="dvr-check">Check</button></div>
+        <div class="set-note" id="dvr-space">${esc(admin.folder)}: ${admin.freeBytes != null ? esc(fmtBytes(admin.freeBytes)) + ' free of ' + esc(fmtBytes(admin.totalBytes)) : 'free space unknown'} · recordings use ${esc(fmtBytes(admin.usedBytes))}</div></div>
+      <div class="f-row"><label for="dvr-reserve">Keep this much free (GB)</label><input type="number" id="dvr-reserve" min="0" step="0.5" value="${+(s.reserveBytes / GB).toFixed(2)}"></div>
+      <div class="f-row"><label for="dvr-conc">Recordings at the same time</label><input type="number" id="dvr-conc" min="1" max="20" value="${s.maxConcurrent}"></div>
+      <div class="f-row"><label for="dvr-post">Keep recording after the final (minutes)</label><input type="number" id="dvr-post" min="0" max="120" value="${s.postRollMinutes}"></div>
+      <div class="f-row"><label for="dvr-max">Longest recording (hours)</label><input type="number" id="dvr-max" min="0.25" max="24" step="0.25" value="${s.maxHours}"></div>
+      <div class="f-row"><label for="dvr-days">Delete recordings after (days, 0 = never)</label><input type="number" id="dvr-days" min="0" max="3650" value="${s.deleteAfterDays}"></div>
+      <div class="f-row"><label>Library</label>
+        ${admin.library ? `<div class="set-note">Recordings appear in the Jellyfin library "${esc(admin.library)}".</div>`
+          : `<div class="set-note">No Jellyfin library includes the recordings folder yet, so finished recordings are only files on the drive.</div>
+             <div><button class="btn btn-ghost" id="dvr-lib">Create a Sports Recordings library</button></div>`}</div>
+      <div class="set-actions"><button class="btn btn-primary" id="dvr-save">Save recording settings</button></div>
+      <div id="dvr-set-msg" class="set-msg" role="status"></div>
+    </div>` : ''}`;
+
+  const msg = (text, bad) => { const m = $('#dvr-msg', container); if (m) m.innerHTML = `<span class="${bad ? 'bad' : 'ok'}">${esc(text)}</span>`; };
+  const again = () => renderDvr(container, isAdmin, false);
+  const act = async (fn, ok) => { try { await fn(); if (ok) toast(ok); again(); } catch (e) { msg(e.message, true); } };
+
+  if ($('#dvr-rec-game', container)) $('#dvr-rec-game', container).onclick = () => act(() => dvrApi('Client/v1/recordings', { method: 'POST', body: { gameId: $('#dvr-game', container).value } }), 'Recording scheduled');
+  if ($('#dvr-rec-team', container)) $('#dvr-rec-team', container).onclick = () => act(() => {
+    const [league, id] = $('#dvr-team', container).value.split('|');
+    return dvrApi('Client/v1/recordings', { method: 'POST', body: { teamId: id, league, keepLast: +$('#dvr-keep', container).value || 0 } });
+  }, 'Team rule added');
+  $$('[data-dvr-cancel]', container).forEach(b => b.onclick = () => act(() => dvrApi('Client/v1/recordings/jobs/' + b.dataset.dvrCancel, { method: 'DELETE' }), 'Canceled'));
+  $$('[data-dvr-delete]', container).forEach(b => b.onclick = () => { if (confirm('Delete this recording and its file?')) act(() => dvrApi('Client/v1/recordings/jobs/' + b.dataset.dvrDelete + '/recording', { method: 'DELETE' }), 'Deleted'); });
+  $$('[data-dvr-rule]', container).forEach(b => b.onclick = () => act(() => dvrApi('Client/v1/recordings/rules/' + b.dataset.dvrRule, { method: 'DELETE' }), 'Rule removed'));
+  $$('[data-dvr-watch]', container).forEach(b => b.onclick = () => { const j = jobs.find(x => x.id === b.dataset.dvrWatch); if (j) playRecording(j); });
+
+  if (s) {
+    const setMsg = (text, bad) => { const m = $('#dvr-set-msg', container); if (m) m.innerHTML = `<span class="${bad ? 'bad' : 'ok'}">${esc(text)}</span>`; };
+    $('#dvr-check', container).onclick = async () => {
+      try {
+        const r = await dvrApi('Recordings/Folder?path=' + encodeURIComponent($('#dvr-folder', container).value.trim()));
+        $('#dvr-space', container).innerHTML = r.ok ? `${esc(r.folder)}: ${esc(fmtBytes(r.freeBytes))} free of ${esc(fmtBytes(r.totalBytes))}` : `<span class="bad">${esc(r.error)}</span>`;
+      } catch (e) { setMsg(e.message, true); }
+    };
+    $('#dvr-save', container).onclick = async () => {
+      try {
+        state.dvrAdmin = await dvrApi('Recordings/Settings', { method: 'POST', body: {
+          folder: $('#dvr-folder', container).value.trim(),
+          reserveBytes: Math.round((+$('#dvr-reserve', container).value || 0) * GB),
+          maxConcurrent: +$('#dvr-conc', container).value || 3,
+          postRollMinutes: +$('#dvr-post', container).value || 0,
+          maxHours: +$('#dvr-max', container).value || 6,
+          deleteAfterDays: +$('#dvr-days', container).value || 0
+        } });
+        toast('Recording settings saved');
+        again();
+      } catch (e) { setMsg(e.message, true); }
+    };
+    if ($('#dvr-lib', container)) $('#dvr-lib', container).onclick = async () => {
+      try {
+        const r = await dvrApi('Recordings/Library', { method: 'POST' });
+        toast('Library "' + r.library + '" ' + (r.created ? 'created' : 'already covers the folder'));
+        renderDvr(container, isAdmin, true);
+      } catch (e) { setMsg(e.message, true); }
+    };
+  }
+
+  // keep the list moving while it is on screen (not while someone is typing in the settings)
+  dvrTimer = setTimeout(() => {
+    if (!document.contains(container)) return;
+    const typing = document.activeElement && container.contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName);
+    if (typing) { dvrTimer = setTimeout(() => again(), 10e3); return; }
+    again();
+  }, active.length ? 10e3 : 30e3);
+}
+
+/* A recording in progress from its first minute: the server's growing (EVENT) playlist, seekable, with the
+   browser's own controls. The finished recording is a normal library item and plays in Jellyfin's player. */
+async function playRecording(job) {
+  closePlayer();
+  const overlay = el(`<div class="jtv-player" id="jtv-player">
+    <video autoplay playsinline controls></video>
+    <div class="jp-top">
+      <button class="jp-back" id="jp-back" title="Close" aria-label="Close player">${icons.back}</button>
+      <div class="jp-chan"><div><div class="n">${esc(job.title)} <span class="jtv-tag live">REC</span></div>
+        <div class="g jtv-k">From the start · still recording</div></div></div>
+    </div>
+  </div>`);
+  document.body.appendChild(overlay);
+  const video = $('video', overlay);
+  const player = { id: null, hls: null, video, overlay, timer: null };
+  state.player = player;
+  syncImmersive();
+  $('#jp-back', overlay).onclick = closePlayer;
+  try {
+    const h = await attachStream(video, job.startOverPath, { startPosition: 0, liveMaxLatencyDurationCount: Infinity });
+    if (state.player !== player) { h.destroy(); return; }
+    player.hls = h;
+    await video.play().catch(async () => { video.muted = true; try { await video.play(); } catch (_) {} });
+  } catch (e) {
+    toast('The recording could not be played: ' + e.message, true);
+  }
+}
+
 /* The headless browser web page sources need is set up on first use (a one-time download that can take minutes):
    its state shows under every web page source, and the page follows it until it settles. */
 const isWeb = (s) => s.Kind === 2 || s.Kind === 'Web';
@@ -1627,6 +1824,7 @@ async function boot() {
     clearInterval(refreshTimer);
     clearInterval(scoreTimer);
     clearTimeout(browserTimer);
+    clearTimeout(dvrTimer);
     setImmersive(false);
     $$('.jtv-alert').forEach(n => n.remove());
     closePlayer();
