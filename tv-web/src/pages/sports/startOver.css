@@ -1,0 +1,38 @@
+/* WATCH FROM THE START (StartOverPage.kt TvStartOverPage): the picture, a top gradient with the kicker and title, the
+   bottom band with the seek bar over what has been recorded, back 10 / play / forward 30 and LIVE. */
+.startover { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+.startover .engine-video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #000; }
+.startover .engine-avplay { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+body.native-video .startover { background: transparent; }
+.startover .tune-in { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--ground); transition: opacity 250ms ease-out; }
+.startover .tune-in.gone { opacity: 0; }
+.startover .tune-in .label { margin-top: 38px; color: var(--muted); }
+.startover .tune-in .what { margin-top: 20px; font-family: var(--sans); font-weight: 500; font-size: 29px; color: var(--text); }
+.startover .tune-in .failed { margin-top: 20px; max-width: 1200px; text-align: center; color: var(--text-secondary); font-size: 29px; }
+
+.so-controls { transition: opacity 150ms linear; }
+.so-controls.hidden { opacity: 0; }
+.so-top { position: absolute; left: 0; right: 0; top: 0; padding: 43px 77px 58px; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)); }
+.so-top .kicker { display: flex; align-items: center; color: var(--live-text); }
+.so-top .kicker .indicator { margin-right: 13px; }
+.so-top .title { margin-top: 10px; font-family: var(--sans); font-weight: 600; font-size: 45px; line-height: 56px; color: var(--text); }
+.so-bottom { position: absolute; left: 0; right: 0; bottom: 0; padding: 38px 77px 26px; background: rgba(14, 15, 14, 0.82); }
+.so-seek { position: relative; height: 32px; }
+.so-seek .track { position: absolute; left: 0; right: 0; top: 13px; height: 6px; background: rgba(227, 229, 222, 0.35); }
+.so-seek .done { position: absolute; left: 0; top: 13px; height: 6px; background: var(--text); }
+.so-seek .knob { position: absolute; top: 6px; width: 20px; height: 20px; margin-left: -10px; background: var(--accent); }
+.so-times { display: flex; justify-content: space-between; margin-top: 10px; font-family: var(--mono); font-weight: 500; font-size: 24px; letter-spacing: 1.6px; color: var(--text); }
+.so-times .live { color: var(--accent); }
+.so-times span + span { color: var(--text-secondary); }
+.so-times span.live { color: var(--accent); }
+.so-buttons { position: relative; height: 104px; margin-top: 22px; }
+.so-buttons .center { position: absolute; left: 50%; top: 0; transform: translateX(-50%); display: flex; }
+.so-buttons .right { position: absolute; right: 0; top: 20px; }
+.so-btn { position: relative; width: 104px; height: 104px; display: flex; align-items: center; justify-content: center; }
+.so-btn + .so-btn { margin-left: 16px; }
+.so-btn::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.so-btn .glyph { font-size: 38px; color: var(--text); }
+.so-btn[data-focused] { background: var(--accent); }
+.so-btn[data-focused] .glyph { color: var(--on-accent); }
+.so-btn[data-focused]::after { border: var(--focus) solid var(--text); }
+.so-caption { height: 30px; margin-top: 10px; text-align: center; color: var(--muted); }

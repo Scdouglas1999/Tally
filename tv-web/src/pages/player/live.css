@@ -1,0 +1,69 @@
+/* The live player's Tally overlays (ui/player/*.kt, TallyPlaybackPage.kt) at 1080p: Android dp × 1.6. Scoped to
+   `.player.live` so they win over player.css's placeholders. */
+
+/* ---- Score bug (ScoreBug.kt): top-end, 27dp + 64dp down ---- */
+.player.live .score-bug {
+  position: absolute; right: 77px; top: 146px; padding: 13px 22px; text-align: right; background: rgba(0, 0, 0, 0.7);
+  border: var(--hairline) solid #5a5d57; transition: opacity 140ms linear;
+}
+.player.live .score-bug.faded { opacity: 0; transition: opacity 420ms linear; }
+.player.live .score-bug .line1 { display: flex; align-items: center; justify-content: flex-end; font-family: var(--mono); font-weight: 500; font-size: 42px; line-height: 54px; color: var(--text); white-space: pre; }
+.player.live .score-bug .line1 .possession { margin-right: 16px; }
+.player.live .score-bug .bug-score { font-weight: 600; }
+.player.live .score-bug .line2 { max-width: 900px; font-family: var(--mono); font-weight: 500; font-size: 26px; line-height: 34px; color: var(--accent); }
+
+/* ---- Box score (BoxScoreOverlay.kt): dark behind the text, then a fade ---- */
+.player.live .box-score {
+  position: absolute; left: 0; right: 0; top: 0; padding: 43px 77px 154px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.86) 0%, rgba(0, 0, 0, 0.8) 70%, rgba(0, 0, 0, 0) 100%);
+}
+.player.live .box-title { font-family: var(--sans); font-weight: 600; font-size: 45px; line-height: 54px; color: var(--text); }
+.player.live .box-kicker { margin-top: 10px; color: var(--muted); }
+.player.live .box-kicker.live { color: var(--live-text); }
+.player.live .box-lines { margin-top: 22px; }
+.player.live .box-situation { margin-top: 19px; font-family: var(--mono); font-weight: 500; font-size: 42px; line-height: 52px; color: var(--accent); }
+.player.live .box-situation.baseball { display: flex; align-items: center; }
+.player.live .box-situation.baseball .diamond { margin-right: 22px; }
+.player.live .box-body { margin-top: 13px; max-width: 1400px; font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text-secondary); }
+.player.live .box-body.muted { color: var(--muted); }
+
+/* ---- Game switcher (GameSwitcher.kt): bottom scrim, header + key hints, a row of game cards ---- */
+.player.live .game-switcher {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 179px 0 43px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.78) 32%, rgba(0, 0, 0, 0.94) 100%);
+}
+.player.live .switcher-head { display: flex; align-items: center; margin: 0 77px 22px; }
+.player.live .switcher-head .row-header { flex: 1; height: auto; }
+.player.live .switcher-head .hints { display: flex; align-items: center; }
+.player.live .game-switcher .media-row { margin-bottom: 0; }
+.player.live .game-switcher .media-row > .row-header { display: none; }
+.player.live .game-switcher .row-track { padding: 0 77px; }
+.player.live .game-switcher .row-track > * + * { margin-left: 29px; }
+
+/* ---- Event banner (EventBanner.kt, LowerThird.kt): top-start; an amber bar, then the panel opens left to right ---- */
+.player.live .event-banner { position: absolute; left: 77px; top: 43px; display: flex; align-items: stretch; }
+.player.live .event-banner .lt-bar { flex: none; width: 5px; background: var(--accent); }
+.player.live .event-banner .lt-bar.off { background: transparent; }
+.player.live .event-banner .lt-panel {
+  max-width: 896px; padding: 16px 22px; background: var(--label-bar); border: var(--hairline) solid var(--live);
+  clip-path: inset(0 100% 0 0); transition: clip-path 150ms ease-out;
+}
+.player.live .event-banner .lt-panel.open { clip-path: inset(0 0 0 0); transition: clip-path 200ms ease-out; }
+.player.live .event-banner .ev-title { color: var(--live-text); }
+.player.live .event-banner .ev-text { margin-top: 6px; font-family: var(--mono); font-size: 32px; line-height: 40px; color: var(--text); }
+.player.live .event-banner .ev-hint { margin-top: 10px; font-family: var(--sans); font-size: 24px; color: var(--muted); }
+
+/* ---- The live controls (the upstream player's top line and bottom band, as on Android) ---- */
+.player.live .live-top {
+  position: absolute; left: 0; right: 0; top: 0; height: 260px; padding: 43px 77px;
+  background: linear-gradient(to bottom, rgba(14, 15, 14, 0.85), rgba(14, 15, 14, 0));
+}
+.player.live .live-top .kicker { color: var(--accent); }
+.player.live .live-top .title { margin-top: 8px; max-width: 1300px; font-family: var(--sans); font-weight: 500; font-size: 51px; line-height: 64px; color: var(--text); }
+.player.live .live-top .clock { position: absolute; right: 77px; top: 43px; font-family: var(--mono); font-weight: 500; font-size: 38px; color: var(--text); }
+.player.live .live-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 38px 77px 43px; background: rgba(14, 15, 14, 0.82); }
+.player.live .live-bar .row1 { display: flex; align-items: center; }
+.player.live .live-bar .live-tag { display: flex; align-items: center; margin-right: 26px; color: var(--accent); }
+.player.live .live-bar .live-tag .indicator { width: 22px; height: 22px; margin-right: 16px; background: var(--accent); }
+.player.live .live-bar .channel { flex: 1; min-width: 0; text-align: right; color: var(--text-secondary); }
+.player.live .live-bar .hints { display: flex; align-items: center; margin-top: 29px; }

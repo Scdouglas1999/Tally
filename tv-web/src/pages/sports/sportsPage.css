@@ -1,0 +1,147 @@
+/* Sports (ui/TallyScreens.kt and friends) on the 1920x1080 canvas: Android dp × 1.6. */
+.sports-page { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+
+/* ---- Top bar (TallyTopBar.kt): 78dp, hairline under it, wordmark, tabs, clock ---- */
+.sports-topbar {
+  position: absolute; left: 0; top: 0; right: 0; height: 125px; display: flex; align-items: center; padding: 0 77px;
+  background: var(--ground); border-bottom: var(--hairline) solid var(--rule);
+}
+.sports-topbar .wordmark { flex: none; margin-right: 58px; font-family: var(--sans); font-weight: 700; font-size: 35px; letter-spacing: 8px; color: var(--text); }
+.sports-topbar .tabs { display: flex; height: 100%; }
+.sports-tab { position: relative; display: flex; align-items: center; height: 100%; padding: 0 29px; color: var(--text-secondary); }
+.sports-tab .indicator { background: currentColor; margin-right: 13px; }
+.sports-tab .label { font-family: var(--mono); font-weight: 500; font-size: 26px; letter-spacing: 3.2px; line-height: 1; }
+.sports-tab[data-focused] { background: var(--ground-raised); color: var(--text); }
+.sports-tab.selected { color: var(--accent); }
+.sports-tab.selected::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--accent); }
+.sports-clock { position: absolute; right: 50px; top: 30px; font-family: var(--sans); font-size: 45px; color: var(--text); }
+
+.sports-body { position: absolute; left: 0; right: 0; top: 125px; bottom: 0; }
+
+/* ---- Games board (GamesBoard.kt) ---- */
+.games-board { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; flex-direction: column; }
+.games-board .board-rows { position: relative; flex: 1; min-height: 0; margin-top: 26px; }
+.games-board .board-rows .scroll-page { padding-bottom: 43px; }
+.games-board .media-row { margin-bottom: 38px; }
+.games-board .media-row .row-header { height: 31px; margin-bottom: 13px; }
+.games-board .row-track { padding: 0 77px; }
+.games-board .row-track > * + * { margin-left: 29px; }
+.games-board .board-empty { flex: 1; margin: 26px 77px 43px; }
+.games-board .feed-errors { flex: none; margin: 19px 77px 0; padding: 13px 19px; border: var(--hairline) solid var(--live); color: var(--live-text); }
+
+/* ---- Focused game panel (FocusedGamePanel.kt): 312dp ---- */
+.hero-panel {
+  position: relative; flex: none; display: flex; flex-direction: column; height: 499px; margin: 26px 77px 0; padding: 26px 32px;
+  background: var(--ground-raised); border: var(--hairline) solid var(--rule-strong);
+}
+.hero-main { flex: 1; display: flex; min-height: 0; }
+.hero-left { flex: 0 0 55%; display: flex; flex-direction: column; min-width: 0; }
+/* 45% of the row, holding 28dp, the rule, 28dp, then the text (the rule is drawn inside the column, as on Android) */
+.hero-right { position: relative; flex: 0 0 45%; min-width: 0; padding-left: 92px; }
+.hero-right::before { content: ''; position: absolute; left: 45px; top: 0; bottom: 0; width: var(--hairline); background: var(--rule); }
+.hero-kicker { display: flex; align-items: center; flex: none; color: var(--muted); }
+.hero-kicker.live { color: var(--live-text); }
+.hero-kicker .indicator { width: 16px; height: 16px; margin-right: 16px; }
+.hero-team { flex: 1; display: flex; align-items: center; min-height: 0; }
+.hero-team .who { flex: 1; min-width: 0; margin-left: 26px; }
+.hero-team .name { font-family: var(--sans); font-weight: 600; font-size: 70px; line-height: 84px; color: var(--text); }
+.hero-team .record { color: var(--muted); }
+.hero-team .possession { width: 16px; height: 16px; margin-left: 26px; }
+.hero-team .hero-score { margin-left: 26px; font-family: var(--mono); font-weight: 500; font-size: 134px; line-height: 1; color: var(--text); }
+.hero-team.loser .name, .hero-team.loser .hero-score { color: var(--muted); }
+.hero-heading { color: var(--muted); }
+.hero-right .situation { margin-top: 13px; font-family: var(--mono); font-weight: 500; font-size: 42px; line-height: 52px; color: var(--accent); }
+.hero-right .situation.final { color: var(--text-secondary); }
+.hero-right .situation.baseball { display: flex; align-items: center; }
+.hero-right .situation.baseball .diamond { margin-right: 22px; }
+.hero-body { margin-top: 16px; font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text-secondary); }
+.hero-body.muted { margin-top: 13px; color: var(--muted); }
+.hero-lines { margin-top: 16px; }
+.watch-bar {
+  flex: none; display: flex; align-items: center; height: 61px; margin-top: 19px; padding: 0 19px;
+  background: var(--label-bar); border: var(--hairline) solid var(--rule-strong);
+}
+.watch-bar .indicator { margin-right: 16px; }
+.watch-bar .channel { flex: 1; min-width: 0; margin-right: 38px; color: var(--text); }
+.watch-bar .channel.muted { color: var(--muted); }
+.watch-bar .broadcasters { flex: none; max-width: 700px; font-family: var(--sans); font-size: 24px; color: var(--muted); }
+.game-card .strip .rec-tag { margin-left: 13px; }
+
+/* ---- Channels grid (ChannelsGrid.kt): 4 columns, 176dp cards ---- */
+.channels-grid { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
+.channels-grid .grid { display: flex; flex-wrap: wrap; padding: 43px 77px; }
+.channel-card {
+  position: relative; display: flex; flex-direction: column; flex: none; width: calc((100% - 87px) / 4); height: 282px;
+  margin: 0 29px 29px 0; background: var(--ground);
+}
+.channel-card:nth-child(4n) { margin-right: 0; }
+.channel-card::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.channel-card[data-focused] { background: var(--ground-raised); }
+.channel-card[data-focused]::after { border: var(--focus) solid var(--accent); }
+.channel-card .art { position: relative; flex: 1; overflow: hidden; background: var(--screen); }
+.channel-card .art img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+.channel-card .label-bar .trailing { flex: none; margin-left: 13px; color: var(--accent); }
+
+/* ---- Lists (multiview queue, settings) ---- */
+.tab-list { padding: 38px 77px 0; }
+.tab-list > * + * { margin-top: 19px; }
+.tab-empty { margin: 38px 77px 0; }
+.tab-empty.fill { position: absolute; left: 0; right: 0; top: 0; bottom: 43px; margin: 26px 77px 0; }
+.server-block { padding-top: 38px; }
+.server-block .heading { color: var(--muted); }
+.server-block .line { margin-top: 10px; font-family: var(--sans); font-size: 24px; line-height: 32px; color: var(--muted); }
+
+/* ---- Recordings (RecordingsTab.kt) ---- */
+.recordings-tab { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.recordings-tab .scroll-page { padding-bottom: 43px; }
+.recordings-tab .storage-line { margin: 32px 77px 0; min-height: 26px; color: var(--muted); }
+.recordings-tab .tab-empty.in-list { margin: 38px 77px 0; }
+.dvr-section { margin-top: 16px; }
+.dvr-section .row-header { margin: 22px 77px 0; }
+.dvr-rows { padding: 0 77px; }
+.dvr-rows > * { margin-top: 16px; }
+.recordings-tab .media-row { margin-top: 38px; }
+.dvr-row { position: relative; display: flex; align-items: center; min-height: 102px; padding: 16px 26px; background: var(--ground); }
+.dvr-row::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.dvr-row[data-focused] { background: var(--ground-raised); }
+.dvr-row[data-focused]::after { border: var(--focus) solid var(--accent); }
+.dvr-row .dvr-dot { flex: none; width: 16px; height: 16px; margin-right: 26px; background: var(--rule-strong); }
+.dvr-row .dvr-dot.live { background: var(--live); }
+.dvr-row .dvr-dot.muted { background: var(--muted); }
+.dvr-row .text { flex: 1; min-width: 0; }
+.dvr-row .title { font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text); }
+.dvr-row .meta { color: var(--text-secondary); }
+.dvr-row .meta.live { color: var(--live-text); }
+.dvr-row .hints { flex: none; display: flex; align-items: center; margin-left: 26px; }
+.dvr-row .hints .key-hint + .key-hint { margin-left: 32px; }
+
+/* ---- Menus (GameActionsDialog / DvrTvMenuDialog): over everything, rail included ---- */
+.menu-scrim {
+  position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 30; display: flex; align-items: center;
+  justify-content: center; background: rgba(0, 0, 0, 0.6);
+}
+.menu-panel {
+  display: flex; flex-direction: column; width: 896px; max-height: 800px; padding: 32px; background: var(--ground);
+  border: var(--hairline) solid var(--rule);
+}
+.menu-head { flex: none; }
+.menu-head > * + * { margin-top: 10px; }
+.menu-kicker { color: var(--muted); white-space: pre; }
+.menu-kicker.live { color: var(--accent); }
+.menu-title { font-family: var(--sans); font-weight: 600; font-size: 45px; line-height: 54px; color: var(--text); }
+.menu-subtitle { color: var(--text-secondary); }
+.menu-rows { position: relative; flex: 1; min-height: 0; margin-top: 26px; overflow: hidden; }
+.menu-line + .menu-line { margin-top: 13px; }
+.menu-info { display: flex; align-items: center; margin-bottom: 13px; color: var(--text-secondary); }
+.menu-info.live { color: var(--live-text); }
+.menu-info .indicator { margin-right: 13px; }
+.menu-panel .tally-row .marked { width: 16px; height: 16px; }
+
+.confirm-panel { width: 832px; background: var(--ground); border: var(--hairline) solid var(--rule-strong); }
+.confirm-panel .kicker { padding: 29px 32px 0; color: var(--accent); }
+.confirm-panel .rule { height: var(--hairline); margin: 19px 32px; background: var(--rule); }
+.confirm-panel .message { padding: 0 32px; font-family: var(--sans); font-size: 27px; line-height: 38px; color: var(--text); }
+.confirm-panel .buttons { display: flex; padding: 29px 32px 32px; }
+.confirm-panel .destructive { margin-left: 19px; }
+.confirm-panel .destructive .btn { color: var(--live-text); }
+.confirm-panel .destructive .btn:not([data-focused])::after { border-color: var(--live); }

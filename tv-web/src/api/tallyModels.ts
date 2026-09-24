@@ -40,6 +40,21 @@ export interface TallyWatch {
   confidence: string;
 }
 
+/**
+ * A game's recording as the board shows it (the server DVR's most relevant job for the game, feature `dvr`). Never
+ * carries a score. States: scheduled | waiting | recording | finishing | done | failed | canceled.
+ */
+export interface TallyGameRecording {
+  state: string;
+  jobId: string;
+  /** Root-relative, signed HLS of everything recorded so far (a growing EVENT playlist), while recording. */
+  startOverPath: string | null;
+  /** The Jellyfin library item of the finished recording, once the server has scanned it. */
+  itemId: string | null;
+  /** Why it is waiting, why it failed, or why it stopped early. */
+  reason: string | null;
+}
+
 export interface TallyGame {
   id: string;
   sport: string;
@@ -65,6 +80,8 @@ export interface TallyGame {
   broadcasts: string[];
   watch: TallyWatch | null;
   backdropPath: string | null;
+  /** The server DVR's job for this game; null when there is none (or the server does not record). */
+  recording: TallyGameRecording | null;
 }
 
 export interface TallyProgramme {
@@ -201,6 +218,19 @@ export function decodeGame(v: unknown): TallyGame {
     broadcasts: arr(o.broadcasts).filter((b): b is string => typeof b === 'string'),
     watch: decodeWatch(o.watch),
     backdropPath: strOrNull(o.backdropPath),
+    recording: decodeRecording(o.recording),
+  };
+}
+
+function decodeRecording(v: unknown): TallyGameRecording | null {
+  if (v === null || v === undefined) return null;
+  const o = obj(v);
+  return {
+    state: str(o.state),
+    jobId: str(o.jobId),
+    startOverPath: strOrNull(o.startOverPath),
+    itemId: strOrNull(o.itemId),
+    reason: strOrNull(o.reason),
   };
 }
 

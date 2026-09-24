@@ -1,0 +1,6 @@
+/* Toast: a one-line notice at the bottom center, above everything on the page (not a dialog: never takes focus). */
+.toast-host { position: absolute; left: 0; right: 0; bottom: 96px; z-index: 40; text-align: center; pointer-events: none; }
+.toast {
+  display: inline-block; max-width: 1400px; padding: 16px 32px; background: var(--ground-raised);
+  border: var(--hairline) solid var(--rule-strong); font-family: var(--sans); font-size: 28px; line-height: 38px; color: var(--text);
+}

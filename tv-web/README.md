@@ -31,7 +31,7 @@ npm run build && npm run preview              # the production bundle at http://
 
 `?server=` sets the Jellyfin address (remembered). A Tally server also serves the app itself at
 `http://<server>/JellyTV/TV/index.html`. Arrow keys, Enter, Escape (BACK) and PageUp/PageDown (channel ±) stand in for
-the remote. `window.TallyDebug.push({ name: 'player', itemId: '…' })` opens any route from the console.
+the remote; holding Enter is HOLD OK (a game's actions, a channel into multiview), as is the ContextMenu key. `window.TallyDebug.push({ name: 'player', itemId: '…' })` opens any route from the console.
 
 ## End-to-end tests
 
@@ -41,8 +41,20 @@ npm run e2e         # Playwright, Chromium at 1920x1080, against TALLY_SERVER (d
 ```
 
 The tests sign in through Quick Connect and approve the code with an admin token (`TALLY_TOKEN_FILE`, default
-`~/Documents/Tally/devmedia/.tools/dev-server.token`). `CHROMIUM` picks the browser (default `/usr/bin/chromium`).
-Screenshots land in `test-results/shots/`, the report in `playwright-report/`.
+`~/Documents/Tally/devmedia/.tools/dev-server.token`). `CHROMIUM` picks the browser (default `/usr/bin/chromium`),
+`TALLY_PREVIEW_PORT` the port of the `vite preview` the tests start (default 4173). Screenshots land in
+`test-results/shots/`, the report in `playwright-report/`.
+
+Sports needs live games. The score simulator makes them on the dev server (`tally/dev/score-sim.py`):
+
+```sh
+TALLY_DEV_TOKEN=~/Documents/Tally/devmedia/.tools/dev-server.token ../tally/dev/score-sim-docker.sh
+docker exec tally-score-sim python /sim.py state 401817062 in      # a captured game goes live (its id on the board)
+docker exec tally-score-sim python /sim.py add --id 900001 --away "TOR:Toronto:Blue Jays" \
+  --home "BAL:Baltimore:Orioles" --start -30 --state in               # a fictional game on the Toronto channel
+TALLY_SIM=1 npm run e2e                                              # bumps scores through the simulator
+TALLY_DEV_TOKEN=… python3 ../tally/dev/score-sim.py point "" && docker rm -f tally-score-sim   # back to ESPN
+```
 
 ## Package
 

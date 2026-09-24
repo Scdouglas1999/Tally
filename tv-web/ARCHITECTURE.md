@@ -163,19 +163,37 @@ Performance rules (the reason a DOM app is quick on a TV):
   multiview uses; the live ladder keeps it going across source switches. hls.js holds ~15 s (5 segments) behind the
   edge like Android's `TallyLivePlayback`; AVPlay gets a 6 s start buffer. Fallback (not built): the channel's
   Jellyfin Live TV item through PlaybackInfo when a TV cannot decode the source (e.g. 1080p60 HEVC on an old set).
-  Verified in Chromium: playlist requests, playback, score bug, CH+/CH- (and UP/DOWN) switching.
+  Verified in Chromium: playlist requests, playback, score bug, CH+/CH- switching.
+- **Live overlays** (`pages/player/LivePage.tsx`, `liveOverlays.tsx`; tvweb-sports), as on the Android TV live player
+  (TallyPlaybackPage.kt): the **score bug** (back on open, on every score/period/situation change, while the
+  switcher is up and for 8 s after a key; its digits roll), **UP** = the box score (line score, situation, last
+  play; closes on the next key or after 12 s), **DOWN** = the "also on now" switcher (other live games on channels
+  in board order, or the looping channels when none is live; OK switches in place, HOLD opens the game's actions),
+  **event banners** for scoring plays in *other* games (the board poll's `since` events, 8 s, a lower third; never
+  while scores are hidden), CH+/CH- step through the channels, REWIND = watch from the start while the game is being
+  recorded. Verified in Chromium with the score simulator (bump → bug roll + amber flash; bump in another game →
+  banner).
 - **Reporting**: `/Sessions/Playing` on start, `/Progress` every 10 s, `/Stopped` on leave: resume points and
   Continue Watching stay right (verified in Chromium: start, progress and stopped reports with the real position, all
   answered 204; the dev films are 90 s, under Jellyfin's 5-minute minimum for a resume point).
 - **Trickplay** (planned with the player controls task): the item's `Trickplay` info (width, tile size, interval) and
   `/Videos/{id}/Trickplay/{width}/{index}.jpg` tiles, drawn as a background-position crop above the seek bar.
-- **Multiview**: decoders are the limit, so it degrades instead of disappearing:
-  - Tizen: one AVPlay instance is guaranteed. 2021+ models expose `webapis.avplaystore` for a second player on sets
-    that support dual decoding (to verify per model). Beyond that, tiles show the plugin's live **cards**
-    (`/JellyTV/Card/{id}.png`, redrawn every 2 minutes) with the focused tile playing; switching the audio/video tile
-    is a channel change on the one decoder.
-  - webOS: one hardware <video> is guaranteed; a second where the set allows it (not on all 2020 models).
-  - Browser: 4-up as on Android (software decoders).
+- **Multiview** (`pages/multiview/`, tvweb-sports): the Android page (TallyMultiviewPage.kt) as it is: up to four
+  tiles (equal grid / focus layout with the large tile at 68%, the same slot math and D-pad map, unit-tested), the
+  swap-in rail, audio follows focus, OK toggles the layout, HOLD opens the tile's actions. Every tile is its own
+  `<video>` engine (`createHtml5Engine`: hls.js in browsers, the TV's native HLS in `<video>` on Tizen/webOS), never
+  AVPlay: AVPlay is one instance drawn on a full-screen plane, and a tile needs a positioned picture. Decoders are the
+  limit, so it degrades instead of disappearing: `multiviewDecoders()` (multiviewLayout.ts) says how many tiles may
+  play at once, the audio (focused) tile first (`playingTiles`); the others show the plugin's live **card**
+  (`/JellyTV/Card/{id}.png`) until focus reaches them, when the picture moves there (a channel change on the one
+  decoder). Tiles stop when the page is covered (full screen from a tile) and restart on return.
+  - Browser: **4** (software decoders; verified in Chromium: four tiles playing, one unmuted).
+  - Tizen and webOS: **1** until probed. The probe (to write and run on real sets, per model): open tiles one at a
+    time on the dev channels; a tile counts when its `<video>` reaches `playing` within 8 s and every earlier tile
+    keeps advancing `currentTime` for 10 s more; stop at the first failure (a `MEDIA_ERR_DECODE`, a stall, an earlier
+    tile freezing). Record the count per `productinfo.getRealModel()` (Tizen) / `webOS.deviceInfo` model name (LG)
+    and make `multiviewDecoders()` read it. Expectation to check: 2021+ Samsung sets decode two HD streams (the same
+    hardware that gives `webapis.avplaystore` a second player); LG webOS 5 sets vary by SoC.
 - **Screensaver / lifecycle**: Tizen `appcommon.setScreenSaver(OFF)` while a player is open; AVPlay is suspended on
   `visibilitychange` (hidden) and restored at the same position.
 
@@ -222,6 +240,12 @@ Performance rules (the reason a DOM app is quick on a TV):
 - **Lifecycle**: `visibilitychange` (both platforms): AVPlay suspend/restore; the board poll stops with its screens.
   webOS relaunch (`webOSRelaunch`) and Tizen deep links: later (Play-on-TV arrives through Jellyfin's websocket
   instead, see parity).
+- **HOLD OK** (the Android TV long press: a game's actions, a channel into multiview; `pages/sports/useOkHold.ts`):
+  on screens that have holds, OK is delivered on key-up; held for 500 ms it is a hold. The remote's auto-repeat while
+  the key is down is swallowed (a key-down within 700 ms of the last counts as a repeat: Tizen does not flag repeats
+  reliably), so a menu opening under the finger does not pick its first row; menus also ignore OK for their first
+  400 ms, as on Android. MENU/INFO (where the remote has them; ContextMenu on a keyboard) open the same actions. To
+  verify on a TV: that OK's key-up arrives (without it a short press only acts after the hold time).
 
 ## 9. Code layout and parallel work
 
@@ -273,8 +297,10 @@ Scope, in this order; everything else follows through server updates (no reinsta
    quality (*the engine layer, app-drawn subtitles, audio/quality switching and the ladder are done*; the full
    controls are a task).
 6. **Sports**: Games board (focused game panel + rows per league/state), Channels grid, and the **live player** with
-   the score bug, event banners and the game switcher (*live playback from the continuous playlist and the score
-   bug are done; the rest is a task*).
+   the score bug, event banners and the game switcher. *Done in tvweb-sports*: the Sports section (GAMES, CHANNELS,
+   MULTIVIEW, RECORDINGS when the server records, SETTINGS), the game actions menu (watch, multiview, follow, hide
+   scores, record, record every game of a team), multiview, the Recordings tab and watch-from-the-start, the live
+   overlays (verified in Chromium against the dev server with the score simulator).
 7. **Tizen verification**: AVPlay engine, remote keys, screensaver, suspend/resume, device profile on a real set.
 
 Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3), `tvweb-player` (5),
@@ -338,13 +364,18 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
 - **Unit** (`npm test`, Vitest): lamp timeline (Android numbers), quality ladder, key maps, formats, home-row
   selection on real boards (the Android fixture and one captured from the dev server), device profiles, subtitles,
   scroll math, drawer order, and the AVPlay engine against a recording fake of `webapis.avplay` (call order,
-  suspend/restore, tracks). 34 tests.
+  suspend/restore, tracks), and for Sports: the board rows (the Android BoardOrganizer cases), line score labels and
+  column fitting, the score roll's offsets and restarts, the followed-team countdown, DVR models and words (the
+  Android DvrModelsTest payload), multiview slots, D-pad map and decoder allotment. 59 tests.
 - **Lint** (`npm run lint`): ESLint (typescript-eslint + compat for Chromium 68), `tsc --noEmit` strict, CSS legacy
   check. **Build** adds the ES2019 parse of the bundle.
 - **End-to-end** (`npm run e2e`, Playwright 1.63, Chromium at 1920x1080, the production bundle through
   `vite preview`, the dev server at `127.0.0.1:18200`): Quick Connect sign-in (approved with the admin token),
   password error, Home (games row, library rows, header, drawer open/close), film playback with a subtitle and an
-  audio switch, live channel from the continuous playlist with the score bug. Screenshots in
+  audio switch, live channel from the continuous playlist with the score bug; Sports (`e2e/sports.spec.ts`): the
+  board and its tabs, HOLD menus, channels, the multiview queue, settings, recordings, four-tile multiview, the live
+  overlays, a team recording rule end to end, the start-over page. Live states come from the score simulator
+  (`tally/dev/score-sim.py`, run with `TALLY_SIM=1`; its parts are skipped without it). Screenshots in
   `test-results/shots/`.
 - **Tizen emulator**: Tizen Studio 6.1 CLI + TV Extension 10.0 in `~/tools/tizen-studio` (installed without root on
   this Arch host: a `dpkg` shim answers the package manager's Ubuntu prerequisite check; all emulator libraries
@@ -390,15 +421,17 @@ how), **not possible** (and why).
 | Sleep timer | planned |
 | Post-play page, CollectionNext | planned |
 | Surprise me | planned |
-| Sports: Games board, focused game panel, league/state rows | planned (Samsung 1) |
-| Sports: Channels grid | planned (Samsung 1) |
+| Sports: Games board, focused game panel (line score, situation, broadcasts), league/state rows incl. POSTPONED, hidden scores, followed teams, score roll | done |
+| Sports: Channels grid | done |
+| Sports: game actions menu (HOLD OK): watch, multiview, follow, hide scores, record | done |
 | Live player: plugin continuous playlist, score bug | done |
 | Live player: tune-in lamp | done |
-| Live player: event banners / switch alerts, game switcher, box score overlay | planned |
+| Live player: event banners, game switcher, box score overlay | done |
 | Corner view (picture in picture) | adapted: needs a second decoder (Tizen avplaystore / webOS dual <video> where the set has it), else the live card image |
-| Multiview 4-up | adapted: see section 6, degrades to one decoder + live cards |
-| Follow teams, favorites, hide scores (shared settings) | planned (API client done) |
-| DVR: record games, watch from start | planned (plugin API exists) |
+| Multiview 4-up | done in browsers; adapted on TVs: one decoder until probed, the other tiles show live cards (section 6) |
+| Follow teams, hide scores, "My channels only" (shared settings) | done |
+| Favorite channels | planned (the board reads them; no screen sets them on Android TV either) |
+| DVR: record a game, record every team game (keep last N), Recordings tab, watch from the start, stop/cancel/delete | done (recording itself unverified on the dev server: it keeps 10 GB free and has less) |
 | Watch parties (SyncPlay) | planned (Jellyfin SyncPlay over the SDK's websocket) |
 | Household row, Send to another screen | planned (Jellyfin sessions API) |
 | Play-on-TV target (phone pushes Play) | planned (Jellyfin websocket `Play` messages: same channel as Android) |

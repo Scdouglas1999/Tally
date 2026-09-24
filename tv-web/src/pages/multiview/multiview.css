@@ -1,0 +1,45 @@
+/* Multiview (TallyMultiviewPage.kt, MultiviewTileView.kt) on the 1920x1080 canvas: Android dp × 1.6. */
+.multiview-page { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: var(--ground); }
+.mv-main { position: absolute; left: 77px; top: 43px; right: 77px; bottom: 43px; display: flex; }
+.mv-main.with-hint { bottom: 94px; }
+.mv-stage-box { position: relative; flex: 1; min-width: 0; }
+.mv-stage { position: absolute; left: 5px; top: 5px; right: 5px; bottom: 5px; }
+.mv-empty { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+
+.mv-tile { position: absolute; background: var(--ground); }
+.mv-tile::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 3; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.mv-tile[data-focused] { z-index: 1; background: var(--ground-raised); }
+.mv-tile[data-focused]::after { border: var(--focus) solid var(--accent); }
+.mv-tile .picture { position: relative; overflow: hidden; background: var(--screen); }
+.mv-tile .video-host, .mv-tile .card-still, .mv-tile .engine-video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.mv-tile .card-still { object-fit: cover; }
+.mv-tile .engine-video { background: transparent; object-fit: contain; }
+.mv-tile .status {
+  position: absolute; left: 26px; right: 26px; top: 50%; transform: translateY(-50%); z-index: 2; text-align: center; color: var(--muted);
+}
+.mv-tile .status.failed { color: var(--live-text); }
+.mv-tile .label-bar .trailing { flex: none; margin-left: 13px; color: var(--accent); }
+.mv-tile .audio-tag {
+  position: absolute; left: 16px; top: 16px; z-index: 2; padding: 5px 13px; background: var(--label-bar); color: var(--muted);
+}
+.mv-tile .audio-tag.on { background: var(--accent); color: var(--on-accent); }
+
+.mv-rail { flex: none; display: flex; flex-direction: column; width: 512px; margin-left: 38px; padding-left: 38px; border-left: var(--hairline) solid var(--rule); }
+.mv-rail-list { position: relative; flex: 1; min-height: 0; margin-top: 22px; overflow: hidden; }
+.swap-row { position: relative; padding: 13px 16px; background: var(--ground); }
+.swap-row + .swap-row { margin-top: 16px; }
+.swap-row::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.swap-row[data-focused] { background: var(--ground-raised); }
+.swap-row[data-focused]::after { border: var(--focus) solid var(--accent); }
+.swap-row .muted { color: var(--muted); }
+.swap-row .strip { display: flex; justify-content: space-between; }
+.swap-row .strip .status { color: var(--accent); }
+.swap-row .channel-name { margin-top: 6px; font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text); }
+.swap-row .team { display: flex; align-items: center; margin-top: 6px; }
+.swap-row .team .name { flex: 1; min-width: 0; font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text); }
+.swap-row .team .score { margin-left: 16px; font-family: var(--mono); font-weight: 500; font-size: 26px; color: var(--text); }
+
+.mv-hint {
+  position: absolute; right: 77px; bottom: 43px; width: 512px; padding-left: 38px; overflow: hidden; white-space: pre;
+  font-family: var(--mono); font-weight: 500; font-size: 26px; line-height: 32px; color: var(--text-secondary);
+}
