@@ -1,0 +1,139 @@
+/*
+ * Libraries (media/library/TallyLibraryPage.kt, LibraryGrid.kt, LibraryControls.kt, GenreGrid.kt). Canvas px in the
+ * page area (the screen less the rail: x = screen x - 144). 1 Tally dp = 1.6 px.
+ */
+.lib { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+
+/* ---- backdrop: the focused item's, top right, fading to the ground left and down (image scrims) ---- */
+.lib-backdrop { position: absolute; z-index: 0; right: 0; top: 0; width: 1400px; height: 788px; overflow: hidden; }
+.lib-backdrop img { width: 100%; height: 100%; object-fit: cover; opacity: 0.55; }
+.lib-backdrop::before, .lib-backdrop::after { content: ''; position: absolute; z-index: 1; left: 0; top: 0; right: 0; bottom: 0; }
+.lib-backdrop::before { background: linear-gradient(to right, var(--ground) 0%, rgba(14, 15, 14, 0) 55%); }
+.lib-backdrop::after { background: linear-gradient(to top, var(--ground) 0%, rgba(14, 15, 14, 0) 50%); }
+
+/* ---- header: kicker + count, then the strip (tabs left, controls right, hairline under) ---- */
+.lib-head { position: absolute; left: var(--margin-x); right: 26px; top: 38px; z-index: 3; }
+.lib-kicker { display: flex; align-items: center; height: 28px; white-space: pre; letter-spacing: 2.8px; }
+.lib-kicker .name { color: var(--accent); flex: 0 1 auto; min-width: 0; }
+.lib-kicker .count { color: var(--muted); flex: none; }
+.lib-strip { display: flex; justify-content: space-between; margin-top: 16px; height: 66px; border-bottom: var(--hairline) solid var(--rule); }
+.lib-tabs-slot { flex: 1 1 auto; min-width: 0; overflow: hidden; margin-right: 19px; }
+.lib-tabs { display: flex; height: 64px; }
+.lib-tab {
+  position: relative; flex: none; display: flex; align-items: center; height: 64px; padding: 0 19px;
+  color: var(--muted); white-space: nowrap; letter-spacing: 2.8px;
+}
+.lib-tab.current { color: var(--text); }
+.lib-tab.current::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--focus); background: var(--accent); }
+.lib-tab[data-focused] { background: var(--ground-raised); color: var(--text); }
+.lib-tab[data-focused]::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--focus) solid var(--accent); }
+
+.lib-controls-slot { flex: none; display: flex; align-items: center; height: 64px; }
+.lib-controls { display: flex; align-items: center; height: 64px; }
+.lib-controls > * + * { margin-left: 10px; }
+.lib-control {
+  position: relative; display: flex; align-items: center; height: 64px; padding: 0 19px; color: var(--text);
+  font-family: var(--mono); font-weight: 500; font-size: 22px; letter-spacing: 2.4px; white-space: nowrap;
+}
+.lib-control .suffix { margin-left: 13px; }
+.lib-control::after, .lib-icon::after {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none;
+}
+.lib-control[data-focused], .lib-icon[data-focused] { background: var(--ground-raised); }
+.lib-control[data-focused]::after, .lib-icon[data-focused]::after { border: var(--focus) solid var(--accent); }
+.lib-icon-slot { position: relative; }
+.lib-icon { position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; color: var(--text); }
+.lib-icon .glyph { font-size: 26px; }
+.lib-icon.disabled { color: var(--muted); }
+.lib-icon.disabled::after { border-color: var(--rule); }
+.lib-caption { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); color: var(--muted); white-space: nowrap; }
+.lib-caption.end { left: auto; right: 0; transform: none; }
+
+.lib-clock { position: absolute; right: 49px; top: 24px; font-family: var(--sans); font-size: 38px; line-height: 63px; color: var(--text); z-index: 3; }
+
+/* ---- body under the strip ---- */
+.lib-body { position: absolute; left: 0; right: 0; top: 148px; bottom: 0; }
+.lib-loading { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); }
+.lib-empty-area { position: absolute; left: var(--margin-x); right: 96px; top: 38px; bottom: var(--margin-y); }
+.lib-empty {
+  position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 51px; border: var(--hairline) dashed var(--rule-strong); text-align: center;
+}
+.lib-empty[data-focused] { border: var(--focus) solid var(--accent); }
+.lib-empty .title { font-family: var(--sans); font-weight: 600; font-size: 35px; line-height: 45px; color: var(--text); }
+.lib-empty .subtitle { margin-top: 13px; font-size: 24px; line-height: 32px; color: var(--muted); }
+
+.lib-folder { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.lib-details { position: relative; height: 371px; }
+.lib-grid-area { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+
+/* the virtual grid: 6px of focus room on each side of the cells, so the grid's cells line up with the margin */
+.vgrid { position: absolute; left: 71px; width: 1615px; top: 0; bottom: 0; }
+.vgrid-scroller { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
+.vgrid-track { position: relative; }
+.vgrid-cell { position: absolute; }
+.vgrid-fade { position: absolute; left: 0; right: 0; top: 0; z-index: 2; pointer-events: none; background: linear-gradient(to bottom, var(--ground), rgba(14, 15, 14, 0)); }
+/* a card whose label bar names it shows an empty frame without a picture (as on Android), not the name twice */
+.lib-card.titled .art-fallback { visibility: hidden; }
+/* library and name cards: the label bar's lines centered (a title alone sits in the middle, as on Android) */
+.vgrid .card .bar { display: flex; flex-direction: column; justify-content: center; padding-top: 0; }
+
+/* ---- A-Z bar ---- */
+.lib-jump { position: absolute; left: 1699px; width: 58px; bottom: 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+/* centered while it fits, top-aligned and scrolled with the focused letter when it does not */
+.lib-jump .letters { position: relative; flex: none; margin: auto 0; padding: 6px; }
+.lib-letter {
+  position: relative; width: 45px; height: 29px; display: flex; align-items: center; justify-content: center; color: var(--muted);
+  font-family: var(--mono); font-weight: 500; font-size: 18px; line-height: 21px;
+}
+.lib-letter.lit { color: var(--text); }
+.lib-letter .sq { width: 6px; height: 6px; flex: none; display: flex; }
+.lib-letter .sq .indicator { width: 6px; height: 6px; }
+.lib-letter .ch { margin: 0 5px; }
+.lib-letter[data-focused] { background: var(--ground-raised); }
+.lib-letter[data-focused]::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--focus) solid var(--accent); }
+
+/* ---- list layouts ---- */
+.lib-list-row { position: relative; display: flex; align-items: center; height: 100%; padding: 0 16px; background: var(--ground); }
+.lib-list-row::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.lib-list-row[data-focused] { background: var(--ground-raised); }
+.lib-list-row[data-focused]::after { border: var(--focus) solid var(--accent); }
+.lib-list-row .thumb { width: 86px; height: 128px; flex: none; margin-right: 26px; background: var(--screen); overflow: hidden; }
+.lib-list-row .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.lib-list-row .text { flex: 1; min-width: 0; }
+.lib-list-row .title { font-family: var(--sans); font-weight: 500; font-size: 32px; line-height: 45px; color: var(--text); }
+.lib-list-row .meta { color: var(--muted); }
+.lib-list-row .seen { flex: none; margin-left: 26px; color: var(--muted); }
+.lib-list-row .indicator { margin-left: 16px; }
+.lib-list-row.dense .text { display: flex; align-items: baseline; }
+.lib-list-row.dense .title { flex: 0 1 auto; min-width: 0; font-size: 28px; }
+.lib-list-row.dense .meta { flex: none; margin-left: 26px; }
+
+/* ---- Recommended ---- */
+.lib-rec { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.lib-rec-rows { position: absolute; left: 0; right: 0; top: 371px; bottom: 0; }
+.lib-rec-rows .scroll-page { padding-bottom: 339px; }
+.lib-view-all { display: flex; align-items: center; justify-content: center; height: var(--poster-h); background: var(--ground-raised); color: var(--text); }
+
+/* ---- dialogs (the Quality dialog's panel family) ---- */
+.lib-panel-scrim {
+  position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 50;
+  display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6);
+}
+.lib-panel { width: 896px; display: flex; flex-direction: column; background: var(--ground); border: var(--hairline) solid var(--rule-strong); }
+.lib-panel .kicker { padding: 29px 32px 0; color: var(--accent); }
+.lib-panel .rule { margin: 19px 32px 13px; height: var(--hairline); background: var(--rule); }
+.lib-panel .message { margin: 6px 32px; min-height: 90px; display: flex; align-items: center; color: var(--muted); }
+.lib-panel .list { position: relative; margin: 0 26px 13px; max-height: 666px; overflow: hidden; }
+.lib-panel-slot { padding: 6px 0; }
+.lib-panel-row { position: relative; display: flex; align-items: center; min-height: 90px; padding: 0 26px; background: var(--ground); }
+.lib-panel-row::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.lib-panel-row[data-focused] { background: var(--ground-raised); }
+.lib-panel-row[data-focused]::after { border: var(--focus) solid var(--accent); }
+.lib-panel-row .label { flex: 1; min-width: 0; font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text); }
+.lib-panel-row .value { flex: 0 1 auto; max-width: 352px; margin-left: 26px; color: var(--muted); }
+.lib-panel-row .value.accent { color: var(--accent); }
+.lib-panel-row .mark { margin-left: 16px; }
+.lib-panel .keybar { display: flex; align-items: center; height: 64px; padding: 0 22px; background: var(--label-bar); border-top: var(--hairline) solid var(--rule); }
+.lib-panel .keycap { padding: 3px 13px; border: var(--hairline) solid var(--rule-strong); color: var(--text); }
+.lib-panel .hint { margin-left: 13px; font-size: 24px; color: var(--text-secondary); }

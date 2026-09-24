@@ -291,6 +291,9 @@ Scope, in this order; everything else follows through server updates (no reinsta
    the header describing the focused card, the backdrop. *Done* (Watch-live channels row, household and watch-party
    rows: later).
 3. **Libraries**: grid with tabs (Recommended, Library, Collections, Genres), sort/filter, the alphabet jump.
+   *Done in tvweb-library* (`pages/library/`: Movies, TV, music and other libraries, genre/studio pages, folders,
+   Recommended rows with Suggestions and VIEW ALL, the sort/filter/view dialogs, a windowed grid paged from the
+   server; verified in Chromium against the dev server).
 4. **Film, series (season tabs + episode list), season, episode pages**: DetailHeader, action row (Resume/Play, From
    the start, Watched, Favorite, More), cast row, extras. *Done in tvweb-details* (`pages/details/`, `pages/person/`):
    the `item` route opens films/videos, series, episodes and people by type, `season` is the rundown (season tabs,
@@ -415,7 +418,7 @@ how), **not possible** (and why).
 | Home: games row, header, library rows, backdrop, clock | done |
 | Home: Watch live channels row, household row, watch party row, row customization (Settings → Home) | planned |
 | Film / series / season / episode pages | done (tvweb-details); adapted: remote (YouTube) trailers open only in a browser (TVs: local trailers), extras of one kind are listed one by one (no grid page), no VERSION / audio / subtitle choice before playing (chosen in the player), no Delete (Android's media-management setting is off by default) |
-| Library grid, tabs, filter/sort, alphabet, genres, recommended | planned (Samsung 1) |
+| Library grid, tabs, filter/sort, alphabet, genres, recommended | done (play all / shuffle play one film until the player takes a list; no item long-press menu yet) |
 | Search (text) | planned; voice: adapted (the TV's own voice/IME input into the field) |
 | Collections, person, favorites, playlists | person done (tvweb-details); collections, favorites, playlists planned |
 | Music: albums, artists, now playing, lyrics | planned; background music: not possible (web apps stop when hidden) |

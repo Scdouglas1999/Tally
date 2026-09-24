@@ -1,0 +1,88 @@
+{
+  "Items": [
+    {
+      "Name": "Please Hold to My Hand",
+      "Id": "3d96ed7d7a1af4cab19e1fcd1fec1204",
+      "SeriesId": "274c7c4948f95f8e92bafc347f1be972",
+      "SeriesName": "The Last of Us",
+      "Type": "Episode"
+    },
+    {
+      "Name": "Infected",
+      "Id": "5919efadad5741b33c5a290718cd2b7f",
+      "SeriesId": "274c7c4948f95f8e92bafc347f1be972",
+      "SeriesName": "The Last of Us",
+      "Type": "Episode"
+    },
+    {
+      "Name": "When You're Lost in the Darkness",
+      "Id": "8b8b14276f72f098cbd8d9ccb22b611c",
+      "SeriesId": "274c7c4948f95f8e92bafc347f1be972",
+      "SeriesName": "The Last of Us",
+      "Type": "Episode"
+    },
+    {
+      "Name": "Long, Long Time",
+      "Id": "d0cb75cfad843aed500942604d5c0205",
+      "SeriesId": "274c7c4948f95f8e92bafc347f1be972",
+      "SeriesName": "The Last of Us",
+      "Type": "Episode"
+    },
+    {
+      "Name": "Goodbye, Mrs. Selvig",
+      "Id": "5f5fb5461490e400e685e8ad92595d72",
+      "SeriesId": "33e60e865132660eaf355c6fd0570697",
+      "SeriesName": "Severance",
+      "Type": "Episode"
+    },
+    {
+      "Name": "Who Is Alive?",
+      "Id": "b580a387729ce9b59c6e0402084f51e1",
+      "SeriesId": "33e60e865132660eaf355c6fd0570697",
+      "SeriesName": "Severance",
+      "Type": "Episode"
+    },
+    {
+      "Name": "Hello, Ms. Cobel",
+      "Id": "d166427fd043e759317808a0f33dedeb",
+      "SeriesId": "33e60e865132660eaf355c6fd0570697",
+      "SeriesName": "Severance",
+      "Type": "Episode"
+    },
+    {
+      "Name": "The You You Are",
+      "Id": "4f88543d9b4713904a72ccd154f7ec50",
+      "SeriesId": "33e60e865132660eaf355c6fd0570697",
+      "SeriesName": "Severance",
+      "Type": "Episode"
+    },
+    {
+      "Name": "In Perpetuity",
+      "Id": "cd09dfce07177dfb807edca25489de6a",
+      "SeriesId": "33e60e865132660eaf355c6fd0570697",
+      "SeriesName": "Severance",
+      "Type": "Episode"
+    },
+    {
+      "Name": "The Grim Barbarity of Optics and Design",
+      "Id": "e3e7450ab6472c319752ec411159a058",
+      "SeriesId": "33e60e865132660eaf355c6fd0570697",
+      "SeriesName": "Severance",
+      "Type": "Episode"
+    },
+    {
+      "Name": "Half Loop",
+      "Id": "4ff952d1b952e4bcaa297edc8380f9ef",
+      "SeriesId": "33e60e865132660eaf355c6fd0570697",
+      "SeriesName": "Severance",
+      "Type": "Episode"
+    },
+    {
+      "Name": "Good News About Hell",
+      "Id": "66f005090ead5adfe4b4d1e947de883e",
+      "SeriesId": "33e60e865132660eaf355c6fd0570697",
+      "SeriesName": "Severance",
+      "Type": "Episode"
+    }
+  ]
+}

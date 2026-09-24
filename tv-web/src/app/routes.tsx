@@ -7,6 +7,7 @@ import type { FunctionComponent } from 'preact';
 import type { Route } from '../router/router';
 import type { PageProps } from './page';
 import { HomePage } from '../pages/home/HomePage';
+import { LibraryPage } from '../pages/library/LibraryPage';
 import { PlayerPage } from '../pages/player/PlayerPage';
 import { LivePage } from '../pages/player/LivePage';
 import { PlaceholderPage } from '../pages/placeholder/PlaceholderPage';
@@ -22,7 +23,7 @@ type Pages = { [N in Route['name']]: { page: FunctionComponent<PageProps<Extract
 export const PAGES: Pages = {
   home: { page: HomePage, chrome: 'rail' },
   search: { page: PlaceholderPage, chrome: 'rail' },
-  library: { page: PlaceholderPage, chrome: 'rail' },
+  library: { page: LibraryPage, chrome: 'rail' },
   item: { page: ItemPage, chrome: 'rail' },
   season: { page: SeasonPage, chrome: 'rail' },
   sports: { page: SportsPage, chrome: 'rail' },

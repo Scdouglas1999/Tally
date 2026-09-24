@@ -7,6 +7,9 @@ import { useRowReveal } from './MediaRow';
 
 export type CardShape = 'poster' | 'landscape';
 
+/** How the picture fills the card (the Android content scales): crop by default. */
+export type CardFit = 'cover' | 'contain' | 'none' | 'fill-width' | 'fill-height';
+
 const SIZE: Record<CardShape, [number, number]> = { poster: [211, 317], landscape: [371, 209] };
 
 /** `S1 E3`, or null for anything that is not an episode. */
@@ -56,6 +59,15 @@ export function ItemCard(props: {
   onPress: () => void;
   onFocus?: (item: BaseItemDto) => void;
   focusKey?: string;
+  /** Card width in canvas px (default: the shape's width). */
+  width?: number;
+  /** Picture height in canvas px (default: the shape's height). */
+  artHeight?: number;
+  /** The picture to show instead of the shape's (null: none). */
+  imageUrl?: string | null;
+  /** The black label bar under the picture (default on). Without it an episode code / progress kicker becomes a tag. */
+  showLabel?: boolean;
+  fit?: CardFit;
 }) {
   const { item, shape } = props;
   const reveal = useRowReveal();
@@ -67,24 +79,35 @@ export function ItemCard(props: {
       props.onFocus?.(item);
     },
   });
-  const [w, h] = SIZE[shape];
-  const url = shape === 'poster' ? posterUrl(item, w, h) : wideUrl(item, w, h);
+  const [shapeW, shapeH] = SIZE[shape];
+  const w = props.width ?? shapeW;
+  const h = props.artHeight ?? shapeH;
+  const url = props.imageUrl !== undefined ? props.imageUrl : shape === 'poster' ? posterUrl(item, w, h) : wideUrl(item, w, h);
+  const showLabel = props.showLabel !== false;
+  const fit = props.fit ?? 'cover';
   const [failed, setFailed] = useState(false);
   const kicker = cardKicker(item, props.watchingRow === true);
   const detail = kicker === null ? posterDetail(item) : null;
   const percent = resumePercent(item.UserData?.PlaybackPositionTicks ?? 0, item.RunTimeTicks ?? 0);
   const played = item.UserData?.Played === true;
   const unplayed = item.UserData?.UnplayedItemCount ?? 0;
-  const tag = played ? 'SEEN' : unplayed > 0 && (item.Type === 'Series' || item.Type === 'Season') ? `${unplayed} NEW` : null;
+  const stateTag = played ? 'SEEN' : unplayed > 0 && (item.Type === 'Series' || item.Type === 'Season') ? `${unplayed} NEW` : null;
+  const kickerTag = !showLabel && kicker !== null;
+  const tag = kickerTag ? tallyUppercase(kicker) : stateTag;
   return (
-    <div ref={f.ref} class={'card ' + shape} onClick={props.onPress}>
-      <div class="art">
+    <div
+      ref={f.ref}
+      class={'card ' + shape}
+      style={props.width !== undefined ? { width: `${w}px` } : undefined}
+      onClick={props.onPress}
+    >
+      <div class="art" style={props.artHeight !== undefined ? { height: `${h}px` } : undefined}>
         {url !== null && !failed ? (
-          <img src={url} alt="" onError={() => setFailed(true)} />
+          <img class={fit === 'cover' ? undefined : 'fit-' + fit} src={url} alt="" onError={() => setFailed(true)} />
         ) : (
           <div class="art-fallback">{cardTitle(item)}</div>
         )}
-        {tag !== null ? <span class={'tag' + (tag === 'SEEN' ? '' : ' accent')}>{tag}</span> : null}
+        {tag !== null ? <span class={'tag' + (tag === 'SEEN' && !kickerTag ? '' : ' accent')}>{tag}</span> : null}
         {item.UserData?.IsFavorite === true ? <span class="favorite" /> : null}
         {percent > 0 && !played ? (
           <div class="progress">
@@ -92,11 +115,13 @@ export function ItemCard(props: {
           </div>
         ) : null}
       </div>
-      <div class="bar">
-        {kicker !== null ? <div class="kicker ellipsis">{tallyUppercase(kicker)}</div> : null}
-        <div class="title ellipsis">{kicker !== null && item.Type === 'Episode' ? (item.Name ?? '') : cardTitle(item)}</div>
-        {detail !== null ? <div class="detail ellipsis">{tallyUppercase(detail)}</div> : null}
-      </div>
+      {showLabel ? (
+        <div class="bar">
+          {kicker !== null ? <div class="kicker ellipsis">{tallyUppercase(kicker)}</div> : null}
+          <div class="title ellipsis">{kicker !== null && item.Type === 'Episode' ? (item.Name ?? '') : cardTitle(item)}</div>
+          {detail !== null ? <div class="detail ellipsis">{tallyUppercase(detail)}</div> : null}
+        </div>
+      ) : null}
     </div>
   );
 }
