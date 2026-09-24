@@ -68,6 +68,7 @@ public class TallyController : ControllerBase
             allowNonAdmin = Plugin.Instance?.Configuration.AllowNonAdminUsers ?? true,
             scoresEnabled = Plugin.Instance?.Configuration.ScoresEnabled ?? true,
             replaceLiveTv = Plugin.Instance?.Configuration.ReplaceLiveTv ?? true,
+            webLook = Plugin.Instance?.Configuration.WebLook ?? true,
             getUrl = GetController.ServerAddress(Request) + "/JellyTV/Get",
             // the headless browser web page sources use: idle (not needed yet), preparing, ready or failed
             browser = BrowserJson(_browser.Status)
