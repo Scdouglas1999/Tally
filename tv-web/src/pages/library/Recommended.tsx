@@ -107,6 +107,8 @@ export function Recommended(props: {
   onOpen: (item: BaseItemDto) => void;
   onViewAll: (row: RecommendedRowSpec) => void;
   refreshToken: number;
+  /** Filled with the rows' items by focus key (the page's item menu and PLAY key read it). */
+  cardItems?: Map<string, BaseItemDto>;
 }) {
   const specs = useMemo(() => recommendedRows(props.libraryId, props.collectionType), [props.libraryId, props.collectionType]);
   const [rows, setRows] = useState<Record<string, RowState>>({});
@@ -136,6 +138,14 @@ export function Recommended(props: {
   };
   const ready = firstReady(specs, rows);
   const cardKey = (row: string, i: number): string => `${props.pageKey}-rec-${row}-${i}`;
+  const cards = props.cardItems;
+  if (cards !== undefined) {
+    cards.clear();
+    for (const spec of specs) {
+      const state = rows[spec.key];
+      if (state?.kind === 'items') state.items.forEach((item, i) => cards.set(cardKey(spec.key, i), item));
+    }
+  }
   useEffect(() => {
     if (ready.settled) props.onReady(ready.key !== null ? cardKey(ready.key, 0) : null);
   }, [ready.settled]);

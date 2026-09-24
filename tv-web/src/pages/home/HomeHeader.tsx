@@ -24,13 +24,20 @@ export function itemMeta(item: BaseItemDto, now: Date = new Date()): MetaPart[] 
   }
   if (item.OfficialRating != null && item.OfficialRating !== '') parts.push({ text: item.OfficialRating, boxed: true });
   const runtime = item.RunTimeTicks ?? 0;
-  if (runtime > 0) parts.push({ text: formatRuntime(runtime) });
+  const timed = hasRuntime(item.Type);
+  if (runtime > 0 && timed) parts.push({ text: formatRuntime(runtime) });
   if (item.CommunityRating != null) parts.push({ text: `★ ${item.CommunityRating.toFixed(1)}` });
-  if (runtime > 0 && (item.Type === 'Movie' || item.Type === 'Episode')) {
-    const left = runtime - (item.UserData?.PlaybackPositionTicks ?? 0);
+  // as Android's homeMeta: no end time for something already watched (it would start over), or nothing left
+  const left = runtime - (item.UserData?.PlaybackPositionTicks ?? 0);
+  if (timed && item.UserData?.Played !== true && left > 0) {
     parts.push({ text: 'ENDS ' + formatTime(new Date(now.getTime() + left / 10_000)) });
   }
   return parts;
+}
+
+/** Kinds with a running time of their own (Android's BaseItemKind.hasRuntime). */
+function hasRuntime(type: BaseItemDto['Type']): boolean {
+  return type === 'Movie' || type === 'Episode' || type === 'Video' || type === 'MusicVideo' || type === 'Recording' || type === 'Audio';
 }
 
 function Meta(props: { parts: MetaPart[] }) {

@@ -144,7 +144,7 @@
 .pc-nextup .text > * { flex: none; }
 .pc-nextup .kicker { color: var(--accent); }
 .pc-nextup .line { font-family: var(--sans); font-weight: 500; font-size: 29px; line-height: 35px; color: var(--text); }
-.pc-nextup .buttons { display: flex; }
+.pc-nextup .buttons { position: relative; display: flex; align-items: center; margin-top: 20px; height: 104px; }
 .pc-nextup .buttons .btn + .btn { margin-left: 16px; }
 .pc-nextup .countdown { height: 3px; background: var(--rule); }
 .pc-nextup .countdown .fill { height: 100%; background: var(--accent); transition: width 1s linear; }

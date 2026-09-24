@@ -31,3 +31,20 @@ export async function shot(page: import('@playwright/test').Page, info: import('
   const body = await page.screenshot({ path: `test-results/shots/${name}.png` });
   await info.attach(name, { body, contentType: 'image/png' });
 }
+
+/** OK held past the hold threshold (the remote's long press). */
+export async function holdOk(page: import('@playwright/test').Page): Promise<void> {
+  await page.keyboard.down('Enter');
+  await page.waitForTimeout(700);
+  await page.keyboard.up('Enter');
+}
+
+/** The remote's STOP (Playwright has no MediaStop key). */
+export async function stopKey(page: import('@playwright/test').Page): Promise<void> {
+  await page.evaluate(() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'MediaStop', bubbles: true })));
+}
+
+/** Current time of the page's <video> (0 without one). */
+export async function videoTime(page: import('@playwright/test').Page): Promise<number> {
+  return page.evaluate(() => (document.querySelector('.player video') as HTMLVideoElement | null)?.currentTime ?? 0);
+}

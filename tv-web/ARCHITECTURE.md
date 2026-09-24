@@ -176,8 +176,10 @@ Performance rules (the reason a DOM app is quick on a TV):
 - **Reporting**: `/Sessions/Playing` on start, `/Progress` every 10 s, `/Stopped` on leave: resume points and
   Continue Watching stay right (verified in Chromium: start, progress and stopped reports with the real position, all
   answered 204; the dev films are 90 s, under Jellyfin's 5-minute minimum for a resume point).
-- **Trickplay** (planned with the player controls task): the item's `Trickplay` info (width, tile size, interval) and
+- **Trickplay** (done, tvweb-player): the item's `Trickplay` info (width, tile size, interval) and
   `/Videos/{id}/Trickplay/{width}/{index}.jpg` tiles, drawn as a background-position crop above the seek bar.
+- **Queue**: an episode plays on through its series (upstream's PlaylistCreator); a library's Play all / Shuffle
+  passes its list in the route (`player.queue`, at most 100 ids, the grid's order or a random one).
 - **Multiview** (`pages/multiview/`, tvweb-sports): the Android page (TallyMultiviewPage.kt) as it is: up to four
   tiles (equal grid / focus layout with the large tile at 68%, the same slot math and D-pad map, unit-tested), the
   swap-in rail, audio follows focus, OK toggles the layout, HOLD opens the tile's actions. Every tile is its own
@@ -240,7 +242,8 @@ Performance rules (the reason a DOM app is quick on a TV):
 - **Lifecycle**: `visibilitychange` (both platforms): AVPlay suspend/restore; the board poll stops with its screens.
   webOS relaunch (`webOSRelaunch`) and Tizen deep links: later (Play-on-TV arrives through Jellyfin's websocket
   instead, see parity).
-- **HOLD OK** (the Android TV long press: a game's actions, a channel into multiview; `pages/sports/useOkHold.ts`):
+- **HOLD OK** (the Android TV long press: a game's actions, a channel into multiview, a card's item menu on Home and
+  in the libraries; `pages/sports/useOkHold.ts`):
   on screens that have holds, OK is delivered on key-up; held for 500 ms it is a hold. The remote's auto-repeat while
   the key is down is swallowed (a key-down within 700 ms of the last counts as a repeat: Tizen does not flag repeats
   reliably), so a menu opening under the finger does not pick its first row; menus also ignore OK for their first
@@ -288,7 +291,9 @@ Scope, in this order; everything else follows through server updates (no reinsta
 1. **Sign-in**: server address (stamped by the installer, or typed) and Quick Connect; password as the fallback.
    *Done in tvweb-0* (Quick Connect with the lamp, password with errors; verified in Chromium).
 2. **Home**: games row (live / today) and the library rows (Continue Watching, Next Up, Recently added per library),
-   the header describing the focused card, the backdrop. *Done* (Watch-live channels row, household and watch-party
+   the header describing the focused card, the backdrop. *Done* (the games row is the Sports card with its game menu
+   on HOLD OK; the item menu on HOLD OK / MENU on any card; PLAY plays the focused item. Watch-live channels row,
+   household and watch-party
    rows: later).
 3. **Libraries**: grid with tabs (Recommended, Library, Collections, Genres), sort/filter, the alphabet jump.
    *Done in tvweb-library* (`pages/library/`: Movies, TV, music and other libraries, genre/studio pages, folders,
@@ -301,10 +306,12 @@ Scope, in this order; everything else follows through server updates (no reinsta
    chapters, extras, the collection's next film (TMDb collection order, as Android's CollectionNext), more like this,
    more from the season. Item menu (MORE, or MENU / INFO on a card), trailer list, full overview, series-watched
    confirmation and Add to playlist are Tally panels (`kit/Panel`). New kit: DetailHeader, EpisodeRow, FrameCard /
-   PersonCard, Panel. Home cards open these pages (`pages/details/navigate.ts`, Android's `destination()`).
+   PersonCard, Panel. Home and library cards open these pages (`pages/details/navigate.ts`, Android's
+   `destination()`; a box set opens the library grid of its items until tv-web has a collection page).
 5. **Player**: Tally controls (seek bar with trickplay, transport, chapters, next up, skip intro), subtitles, audio,
-   quality (*the engine layer, app-drawn subtitles, audio/quality switching and the ladder are done*; the full
-   controls are a task).
+   quality. *Done in tvweb-player* (`pages/player/`, `pages/postplay/`): the Android TV controls, chapters and queue
+   rows, the settings panel (audio, subtitles, speed, scale, subtitle delay, quality, sleep timer), media segments,
+   next up with its countdown, the post-play page.
 6. **Sports**: Games board (focused game panel + rows per league/state), Channels grid, and the **live player** with
    the score bug, event banners and the game switcher. *Done in tvweb-sports*: the Sports section (GAMES, CHANNELS,
    MULTIVIEW, RECORDINGS when the server records, SETTINGS), the game actions menu (watch, multiview, follow, hide
@@ -375,12 +382,16 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   scroll math, drawer order, and the AVPlay engine against a recording fake of `webapis.avplay` (call order,
   suspend/restore, tracks), and for Sports: the board rows (the Android BoardOrganizer cases), line score labels and
   column fitting, the score roll's offsets and restarts, the followed-team countdown, DVR models and words (the
-  Android DvrModelsTest payload), multiview slots, D-pad map and decoder allotment. 59 tests.
+  Android DvrModelsTest payload), multiview slots, D-pad map and decoder allotment; the player's formats, the Home
+  header's meta line. 123 tests.
 - **Lint** (`npm run lint`): ESLint (typescript-eslint + compat for Chromium 68), `tsc --noEmit` strict, CSS legacy
   check. **Build** adds the ES2019 parse of the bundle.
 - **End-to-end** (`npm run e2e`, Playwright 1.63, Chromium at 1920x1080, the production bundle through
-  `vite preview`, the dev server at `127.0.0.1:18200`): Quick Connect sign-in (approved with the admin token),
-  password error, Home (games row, library rows, header, drawer open/close), film playback with a subtitle and an
+  `vite preview` on `TALLY_PREVIEW_PORT`, never a preview already running there, the dev server at
+  `127.0.0.1:18200`; the board's games change through the day, so the Sports flows find the games they need on it): Quick Connect sign-in (approved with the admin token),
+  password error, Home (games row, library rows, header, drawer open/close; the game menu and the item menu on HOLD OK
+  / MENU, PLAY on a card), library cards (item menu, a box set's items, an episode to its rundown, Play all's queue),
+  film playback with a subtitle and an
   audio switch, live channel from the continuous playlist with the score bug; Sports (`e2e/sports.spec.ts`): the
   board and its tabs, HOLD menus, channels, the multiview queue, settings, recordings, four-tile multiview, the live
   overlays, a team recording rule end to end, the start-over page. Live states come from the score simulator
@@ -418,17 +429,17 @@ how), **not possible** (and why).
 | Home: games row, header, library rows, backdrop, clock | done |
 | Home: Watch live channels row, household row, watch party row, row customization (Settings → Home) | planned |
 | Film / series / season / episode pages | done (tvweb-details); adapted: remote (YouTube) trailers open only in a browser (TVs: local trailers), extras of one kind are listed one by one (no grid page), no VERSION / audio / subtitle choice before playing (chosen in the player), no Delete (Android's media-management setting is off by default) |
-| Library grid, tabs, filter/sort, alphabet, genres, recommended | done (play all / shuffle play one film until the player takes a list; no item long-press menu yet) |
+| Library grid, tabs, filter/sort, alphabet, genres, recommended | done (play all / shuffle queue the grid's first 100; the item menu on HOLD OK / MENU) |
 | Search (text) | planned; voice: adapted (the TV's own voice/IME input into the field) |
-| Collections, person, favorites, playlists | person done (tvweb-details); collections, favorites, playlists planned |
+| Collections, person, favorites, playlists | person done (tvweb-details); a collection opens as a grid of its items (the Android collection page: planned); favorites, playlists planned |
 | Music: albums, artists, now playing, lyrics | planned; background music: not possible (web apps stop when hidden) |
-| Player: transport, seek bar, chapters, queue, next up, skip intro/credits (media segments) | planned (engine done) |
+| Player: transport, seek bar, chapters, queue, next up, skip intro/credits (media segments) | done (tvweb-player) |
 | Player: subtitles (text + burned-in), audio tracks | done |
 | Player: quality ladder with MaxWidth/MaxHeight | done |
-| Player: trickplay | planned |
+| Player: trickplay | done |
 | Player: subtitle style settings | planned |
-| Sleep timer | planned |
-| Post-play page, CollectionNext | planned |
+| Sleep timer | done (in the player's settings) |
+| Post-play page, CollectionNext | done (post-play: tvweb-player; the collection's next film: on the film page) |
 | Surprise me | planned |
 | Sports: Games board, focused game panel (line score, situation, broadcasts), league/state rows incl. POSTPONED, hidden scores, followed teams, score roll | done |
 | Sports: Channels grid | done |

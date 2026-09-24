@@ -106,7 +106,7 @@ export function GameCard(props: {
   const soon = counting && !isNaN(soonStart) ? startsIn(soonStart, now) : null;
   const statusColor = soon !== null || isLive(game) ? 'var(--accent)' : isUpcoming(game) ? 'var(--text-secondary)' : 'var(--muted)';
   return (
-    <div ref={f.ref} class={'game-card' + (watchable ? '' : ' dark')} onClick={() => watchable && props.onWatch(game)}>
+    <div ref={f.ref} class={'game-card' + (watchable ? '' : ' dark')} data-game={game.id} onClick={() => watchable && props.onWatch(game)}>
       <div class="game-body">
         <div class="strip">
           <span class={'league mono-label ellipsis' + (props.favorite ? ' favorite' : '')}>{game.league.toUpperCase()}</span>

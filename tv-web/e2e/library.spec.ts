@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { APP, AUTH_STATE, shot } from './env';
+import { APP, AUTH_STATE, holdOk, shot, stopKey, videoTime } from './env';
 
 test.use({ storageState: AUTH_STATE });
 
@@ -67,6 +67,12 @@ test('Movies: Recommended, the Library grid, the A-Z bar, BACK to the top', asyn
   await expect(page.locator('.lib-details .home-header .kicker')).not.toHaveText('');
   const rowTitles = await page.locator('.lib-rec .row-header .title').allTextContents();
   expect(rowTitles).toContain('RECENTLY ADDED');
+  // a film already watched has no end time in the header (Android's homeMeta); one not watched yet has it
+  const header = page.locator('.lib-details .home-header .meta');
+  const tag = focused(page).locator('.tag');
+  const seen = (await tag.count()) > 0 && (await tag.textContent()) === 'SEEN';
+  if (seen) await expect(header).not.toContainText('ENDS');
+  else await expect(header).toContainText('ENDS');
   await settle(page);
   await shot(page, info, 'library-recommended');
 
@@ -239,7 +245,10 @@ test('Movies: Genres tab and a genre page; Collections tab', async ({ page }, in
   const title = (await lib(page).locator('.vgrid .card[data-focused] .title').textContent()) ?? '';
   await press(page, 'MediaPlayPause');
   await expect(page.locator('.player')).toBeVisible();
-  await expect(page.locator('.player .osd-top .title')).toHaveText(title, { timeout: 30_000 });
+  // the player opens on that film: once it plays, UP shows the controls with its title
+  await expect.poll(() => page.evaluate(() => (document.querySelector('.player video') as HTMLVideoElement | null)?.currentTime ?? 0), { timeout: 30_000 }).toBeGreaterThan(0.5);
+  await press(page, 'ArrowUp');
+  await expect(page.locator('.player .pc-top .title')).toHaveText(title);
   // the remote's STOP (Playwright has no MediaStop key)
   await page.evaluate(() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'MediaStop', bubbles: true })));
   await expect(lib(page).locator('.vgrid .card[data-focused] .title')).toHaveText(title);
@@ -341,4 +350,110 @@ test('Collections and Music libraries from the rail', async ({ page }, info) => 
   await expect(page.locator('.lib-kicker .count')).toHaveText(/ · \d+ ARTISTS?/);
   await settle(page);
   await shot(page, info, 'music-artists');
+});
+
+test('Library cards: HOLD OK / MENU open the item menu; a box set opens its films, an episode its rundown; Play all queues the grid', async ({ page }, info) => {
+  await page.route('**/Sessions/Playing**', (route) => route.fulfill({ status: 204 }));
+  await openFromRail(page, 'Movies');
+  // the Library tab's grid
+  await press(page, 'ArrowUp');
+  for (let i = 0; i < 4 && ((await focused(page).textContent()) ?? '') !== 'LIBRARY'; i++) await press(page, (await page.locator('.lib-tab.current').textContent()) === 'RECOMMENDED' ? 'ArrowRight' : 'ArrowLeft');
+  await press(page, 'Enter');
+  const card = lib(page).locator('.vgrid .card[data-focused]');
+  await expect(card).toBeVisible();
+  const first = (await card.locator('.title').textContent()) ?? '';
+
+  // HOLD OK: the item menu on the card (Go to first); BACK closes it on the same card
+  await holdOk(page);
+  const panel = page.locator('.panel-window');
+  await expect(panel).toBeVisible();
+  await expect(page.locator('.panel-row[data-focused] .headline')).toHaveText('Go to');
+  expect(await panel.locator('.panel-row .headline').allTextContents()).toEqual(expect.arrayContaining(['Go to', 'Add to playlist']));
+  await settle(page);
+  await shot(page, info, 'library-item-menu');
+  await press(page, 'Escape');
+  await expect(panel).toHaveCount(0);
+  await expect(card.locator('.title')).toHaveText(first);
+  // MENU opens it too; Go to opens the film's page, BACK returns to the card
+  await press(page, 'ContextMenu');
+  await expect(panel).toBeVisible();
+  await press(page, 'Enter');
+  await expect(page.locator('.page:not(.hidden) .detail-page .dh-kicker')).toHaveText('FILM');
+  await press(page, 'Escape');
+  await expect(card.locator('.title')).toHaveText(first);
+
+  // Play all: the grid's films in its order, one queue (the second is next)
+  const second = (await lib(page).locator('.vgrid .card').nth(1).locator('.title').textContent()) ?? '';
+  const caption = page.locator('.page:not(.hidden) .lib-caption');
+  const captionText = async (): Promise<string> => ((await caption.count()) > 0 ? ((await caption.textContent()) ?? '') : '');
+  await press(page, 'ArrowUp');
+  for (let i = 0; i < 10 && (await captionText()) !== 'PLAY'; i++) await press(page, 'ArrowRight');
+  await expect(caption).toHaveText('PLAY');
+  await shot(page, info, 'library-play-all');
+  await press(page, 'Enter');
+  await expect(page.locator('.player')).toBeVisible();
+  await expect.poll(() => videoTime(page), { timeout: 30_000 }).toBeGreaterThan(0.5);
+  await press(page, 'ArrowUp');
+  await expect(page.locator('.player .pc-top .title')).toHaveText(first);
+  const row = page.locator('.pc-cards .row-header .title');
+  for (let i = 0; i < 3 && ((await row.count()) === 0 || (await row.textContent()) !== 'QUEUE'); i++) {
+    await press(page, 'ArrowDown');
+    await page.waitForTimeout(150);
+  }
+  await expect(page.locator('.pc-cards .row-header .title')).toHaveText('QUEUE');
+  await expect(page.locator('.pc-card[data-focused] .title')).toHaveText(second);
+  await page.waitForTimeout(400);
+  await shot(page, info, 'library-play-all-queue');
+  await stopKey(page);
+  await expect(lib(page)).toBeVisible();
+
+  // Collections tab: a box set opens its films (Android's collection page), the rail keeps its light on Movies
+  await expect(caption).toHaveText('PLAY');
+  // LEFT along the controls into the tab strip (it takes focus on the current tab), then RIGHT to COLLECTIONS
+  const focusedTab = page.locator('.page:not(.hidden) .lib-tab[data-focused]');
+  for (let i = 0; i < 8 && (await focusedTab.count()) === 0; i++) await press(page, 'ArrowLeft');
+  await expect(focusedTab).toHaveText('LIBRARY');
+  await press(page, 'ArrowRight');
+  await expect(focusedTab).toHaveText('COLLECTIONS');
+  await press(page, 'Enter');
+  await expect(card).toBeVisible();
+  const boxSet = (await card.locator('.title').textContent()) ?? '';
+  await press(page, 'Enter');
+  await expect(lib(page).locator('.lib-kicker .name')).toHaveText(boxSet.toUpperCase());
+  await expect(lib(page).locator('.lib-kicker .count')).toHaveText(/ · \d+ FILMS?/);
+  await expect(card).toBeVisible();
+  await expect(page.locator('.rail .entry.selected .label')).toHaveText('Movies');
+  await settle(page);
+  await shot(page, info, 'library-box-set');
+  await press(page, 'Escape');
+  await expect(card.locator('.title')).toHaveText(boxSet);
+});
+
+test('Shows: an episode card opens its season rundown on that episode', async ({ page }, info) => {
+  await openFromRail(page, 'Shows');
+  await press(page, 'ArrowUp');
+  for (let i = 0; i < 4 && ((await focused(page).textContent()) ?? '') !== 'RECOMMENDED'; i++) await press(page, 'ArrowLeft');
+  if (((await page.locator('.lib-tab.current').textContent()) ?? '') !== 'RECOMMENDED') await press(page, 'Enter');
+  else await press(page, 'ArrowDown');
+  await expect(page.locator('.lib-rec .row-header .title').first()).toBeVisible({ timeout: 30_000 });
+  // the Recently added row lists episodes
+  for (let i = 0; i < 6; i++) {
+    const t = await focused(page).evaluate((el) => el.closest('.media-row')?.querySelector('.row-header .title')?.textContent ?? '');
+    if (t === 'RECENTLY ADDED') break;
+    await press(page, 'ArrowDown');
+  }
+  const kicker = lib(page).locator('.lib-details .home-header .kicker');
+  await expect(kicker).toHaveText('RECENTLY ADDED');
+  const header = lib(page).locator('.lib-details .home-header');
+  const episodeTitle = (await header.locator('.meta').textContent()) ?? '';
+  expect(episodeTitle).toMatch(/^S\d+ E\d+/);
+  await press(page, 'Enter');
+  await expect(page.locator('.page:not(.hidden) .rundown .episode-row[data-focused]')).toBeVisible({ timeout: 20_000 });
+  // the rundown opens on that episode: its number
+  const number = /^S\d+ E(\d+)/.exec(episodeTitle)?.[1] ?? '';
+  await expect(page.locator('.page:not(.hidden) .rundown .episode-row[data-focused] .number')).toHaveText('E' + number.padStart(2, '0'));
+  await page.waitForTimeout(500);
+  await shot(page, info, 'library-episode-to-rundown');
+  await press(page, 'Escape');
+  await expect(kicker).toHaveText('RECENTLY ADDED');
 });

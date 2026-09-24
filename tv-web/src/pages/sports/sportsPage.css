@@ -14,7 +14,7 @@
 .sports-tab[data-focused] { background: var(--ground-raised); color: var(--text); }
 .sports-tab.selected { color: var(--accent); }
 .sports-tab.selected::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: var(--accent); }
-.sports-clock { position: absolute; right: 50px; top: 30px; font-family: var(--sans); font-size: 45px; color: var(--text); }
+.sports-clock { position: absolute; right: 49px; top: 24px; font-family: var(--sans); font-size: 38px; line-height: 63px; color: var(--text); }
 
 .sports-body { position: absolute; left: 0; right: 0; top: 125px; bottom: 0; }
 

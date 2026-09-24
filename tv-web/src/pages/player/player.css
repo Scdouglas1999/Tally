@@ -12,48 +12,12 @@ html.native-video, body.native-video, body.native-video #tally-stage, body.nativ
   font-family: var(--sans); font-weight: 500; font-size: 46px; line-height: 60px; white-space: pre-line;
 }
 
-.player .osd-top { position: absolute; left: 0; right: 0; top: 0; height: 260px; padding: var(--margin-y) var(--margin-x); background: linear-gradient(to bottom, rgba(14, 15, 14, 0.85), rgba(14, 15, 14, 0)); }
-.player .osd-top .kicker { color: var(--accent); }
-.player .osd-top .title { margin-top: 8px; font-family: var(--sans); font-weight: 500; font-size: 51px; line-height: 64px; color: var(--text); }
-.player .osd-top .sub { margin-top: 8px; color: var(--muted); }
-.player .osd-top .clock { position: absolute; right: var(--margin-x); top: var(--margin-y); font-family: var(--mono); font-weight: 500; font-size: 38px; color: var(--text); }
-
-.player .osd-bottom { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; padding: 38px var(--margin-x) 0; background: rgba(14, 15, 14, 0.82); }
-.player .seek { position: relative; height: 26px; }
-.player .seek .track { position: absolute; left: 0; right: 0; top: 10px; height: 6px; background: rgba(227, 229, 222, 0.35); }
-.player .seek .done { position: absolute; left: 0; top: 10px; height: 6px; background: var(--text); }
-.player .seek .knob { position: absolute; top: 3px; width: 20px; height: 20px; margin-left: -10px; background: var(--accent); }
-.player .times { display: flex; justify-content: space-between; margin-top: 16px; font-family: var(--mono); font-weight: 500; font-size: 32px; letter-spacing: 2px; color: var(--text); }
-.player .times .right { color: var(--text-secondary); }
-.player .buttons { position: relative; display: flex; align-items: center; margin-top: 20px; height: 104px; }
-.player .buttons .group { display: flex; }
-.player .buttons .center { position: absolute; left: 50%; transform: translateX(-50%); }
-.player .buttons .right { margin-left: auto; }
-.player .icon-btn { position: relative; width: 104px; height: 104px; display: flex; align-items: center; justify-content: center; }
-.player .icon-btn + .icon-btn { margin-left: 16px; }
-.player .icon-btn::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
-.player .icon-btn .glyph { font-size: 38px; color: var(--text); }
-.player .icon-btn[data-focused] { background: var(--accent); }
-.player .icon-btn[data-focused] .glyph { color: var(--on-accent); }
-.player .icon-btn[data-focused]::after { border: var(--focus) solid var(--text); }
-.player .caption { position: absolute; left: 0; right: 0; bottom: 22px; text-align: center; color: var(--muted); }
-
 /* tune-in: the lamp sputters until the first frame, then catches and the group fades */
 .player .tune-in { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--ground); transition: opacity 250ms ease-out; }
 .player .tune-in.gone { opacity: 0; }
 .player .tune-in .label { margin-top: 38px; color: var(--muted); }
 .player .tune-in .what { margin-top: 20px; font-family: var(--sans); font-weight: 500; font-size: 29px; color: var(--text); }
 .player .tune-in .failed { margin-top: 20px; color: var(--live-text); font-size: 29px; }
-
-/* menu panel (audio, subtitles, quality) */
-.player .menu { position: absolute; right: var(--margin-x); bottom: 330px; width: 620px; max-height: 640px; overflow: hidden; background: var(--ground); border: var(--hairline) solid var(--rule-strong); padding: 16px 0; }
-.player .menu .menu-title { padding: 8px 32px 16px; color: var(--muted); }
-.player .menu .option { position: relative; display: flex; align-items: center; height: 72px; padding: 0 32px; font-size: 30px; color: var(--text-secondary); }
-.player .menu .option .slot { width: 13px; height: 13px; margin-right: 22px; flex: none; display: flex; }
-.player .menu .option .slot .indicator { display: block; }
-.player .menu .option.selected { color: var(--text); }
-.player .menu .option[data-focused] { background: var(--ground-raised); }
-.player .menu .option[data-focused]::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--focus) solid var(--accent); }
 
 /* live: the Tally live controls (placeholder until the live player task) */
 .player .live-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 32px var(--margin-x) 40px; background: rgba(14, 15, 14, 0.85); }

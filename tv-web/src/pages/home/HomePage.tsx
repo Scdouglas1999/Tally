@@ -1,14 +1,22 @@
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models/base-item-dto';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { backdropUrl } from '../../api/images';
 import { absolute } from '../../api/tally';
 import type { TallyGame } from '../../api/tallyModels';
 import { isFollowed, isLive } from '../../api/tallyModels';
 import { useArrivalFocus, type PageProps } from '../../app/page';
+import { currentFocusKey, focusExists, setFocus } from '../../focus/focus';
 import { ItemCard } from '../../kit/ItemCard';
 import { MediaRow } from '../../kit/MediaRow';
 import { ScrollPage } from '../../kit/ScrollPage';
-import { push, type Route } from '../../router/router';
-import { openDetails } from '../details/navigate';
+import { ToastHost } from '../../kit/Toast';
+import { useKeyHandler } from '../../platform/keyRouter';
+import type { Route } from '../../router/router';
+import { DetailDialogs, cardMenu, type Dialog } from '../details/DetailDialogs';
+import { isPlayable, openDetails, playItem } from '../details/navigate';
+import { GameActionsDialog } from '../sports/GameActionsDialog';
+import { addToMultiviewWithNotice, gameRoute, watchGame } from '../sports/sportsState';
+import { useOkHold } from '../sports/useOkHold';
 import { GameCard } from '../../sports/GameCard';
 import { selectHomeGames } from '../../sports/homeRow';
 import { libraries, tally } from '../../state/nav';
@@ -31,19 +39,8 @@ function Clock() {
   return <div class="home-clock">{formatTime(now)}</div>;
 }
 
-function watchGame(game: TallyGame): void {
-  if (game.watch === null) return;
-  const away = game.away.shortName !== '' ? game.away.shortName : game.away.abbr;
-  const home = game.home.shortName !== '' ? game.home.shortName : game.home.abbr;
-  const route: Route = {
-    name: 'live',
-    channelId: game.watch.channelId,
-    hlsPath: game.watch.hlsPath,
-    title: away !== '' ? `${away} at ${home}` : game.watch.channelName,
-    gameId: game.id,
-  };
-  push(route);
-}
+/** What a card on Home is, by focus key: the item menu, the game menu and the PLAY key look it up. */
+type HomeCard = { kind: 'item'; item: BaseItemDto } | { kind: 'game'; game: TallyGame };
 
 export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
   const views = useStore(libraries);
@@ -88,6 +85,47 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
   const target = games.length > 0 ? 'home-game-0' : firstRow !== undefined ? `home-${firstRow.key}-0` : null;
   useArrivalFocus(props, target, gamesSettled && (games.length > 0 || firstRowReady));
 
+  // --- the cards' menus (HOLD OK or MENU, as Android's long press) and the PLAY key ------------------------------
+  const cards = useRef(new Map<string, HomeCard>());
+  cards.current.clear();
+  games.forEach((game, i) => cards.current.set('home-game-' + String(i), { kind: 'game', game }));
+  for (const spec of visibleRows) {
+    const r = rows[spec.key];
+    if (r?.kind === 'items') r.items.forEach((item, i) => cards.current.set(`home-${spec.key}-${i}`, { kind: 'item', item }));
+  }
+  const [dialog, setDialog] = useState<Dialog | null>(null);
+  const [gameMenu, setGameMenu] = useState<{ gameId: string; returnKey: string } | null>(null);
+  const menuOpen = dialog !== null || gameMenu !== null;
+  useOkHold(
+    () => {
+      const key = currentFocusKey();
+      const card = cards.current.get(key);
+      if (card === undefined) return false;
+      if (card.kind === 'game') setGameMenu({ gameId: card.game.id, returnKey: key });
+      else setDialog(cardMenu(card.item, key));
+      return true;
+    },
+    !menuOpen,
+    props.active,
+  );
+  useKeyHandler((key) => {
+    if ((key !== 'play' && key !== 'playPause') || menuOpen) return false;
+    const card = cards.current.get(currentFocusKey());
+    if (card?.kind !== 'item' || !isPlayable(card.item)) return false;
+    playItem(card.item);
+    return true;
+  }, props.active);
+  const menuGame = gameMenu !== null ? (games.find((g) => g.id === gameMenu.gameId) ?? null) : null;
+  const closeGameMenu = (): void => {
+    const back = gameMenu?.returnKey;
+    setGameMenu(null);
+    if (back !== undefined && focusExists(back)) setFocus(back);
+  };
+  // the game left the row while its menu was open
+  useEffect(() => {
+    if (gameMenu !== null && menuGame === null) closeGameMenu();
+  }, [gameMenu !== null && menuGame === null]);
+
   const backdrop = focus?.kind === 'item' ? backdropUrl(focus.item) : focus?.kind === 'game' && focus.game.backdropPath !== null ? absolute(focus.game.backdropPath) : null;
 
   return (
@@ -111,7 +149,8 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
                   hideScores={hideScores}
                   favorite={(g.watch !== null && favorites.has(g.watch.channelId)) || isFollowed(g, teams)}
                   followed={isFollowed(g, teams)}
-                  onWatch={watchGame}
+                  sportsExtras={true}
+                  onWatch={(game) => watchGame(game)}
                   onFocus={(game) => setFocusInfo({ kind: 'game', game, hideScores })}
                 />
               ))}
@@ -146,6 +185,21 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
           })}
         </ScrollPage>
       </div>
+      {menuGame !== null ? (
+        <GameActionsDialog
+          game={menuGame}
+          actions={{
+            watch: gameRoute(menuGame) !== null ? () => watchGame(menuGame) : undefined,
+            addToMultiview: menuGame.watch !== null && menuGame.watch.channelId !== '' ? () => addToMultiviewWithNotice(menuGame.watch?.channelId ?? '') : undefined,
+            follow: true,
+          }}
+          hideScores={hideScores}
+          favoriteTeams={teams}
+          onDismiss={closeGameMenu}
+        />
+      ) : null}
+      <DetailDialogs dialog={dialog} setDialog={setDialog} pageKey={props.pageKey} onChanged={load} />
+      <ToastHost />
     </div>
   );
 }

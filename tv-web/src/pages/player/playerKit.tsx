@@ -1,10 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { app } from '../../app/context';
-import { FocusGroup, setFocus, useFocusable } from '../../focus/focus';
-import { GlyphIcon, IndicatorSquare } from '../../kit/Bits';
-import type { GlyphName } from '../../kit/glyphs';
 import { Lamp, type LampState } from '../../kit/Lamp';
-import { useKeyHandler } from '../../platform/keyRouter';
 import { createEngine } from '../../player/createEngine';
 import type { EngineEvents, EngineState, PlayerEngine } from '../../player/engine';
 import { activeCues, parseVtt, type Cue } from '../../player/subtitles';
@@ -68,55 +64,6 @@ export function TuneIn(props: { title: string; firstFrame: boolean; error: strin
       <div class="label mono-label">{tallyUppercase(props.label ?? 'Tuning in')}</div>
       {props.title !== '' ? <div class="what">{props.title}</div> : null}
       {props.error !== null ? <div class="failed">{props.error}</div> : null}
-    </div>
-  );
-}
-
-export function IconButton(props: { glyph: GlyphName; label: string; onPress: () => void; focusKey: string; onFocus?: (label: string) => void }) {
-  const f = useFocusable<HTMLDivElement>({ focusKey: props.focusKey, onEnter: props.onPress, onFocus: () => props.onFocus?.(props.label) });
-  return (
-    <div ref={f.ref} class="icon-btn" onClick={props.onPress}>
-      <GlyphIcon name={props.glyph} />
-    </div>
-  );
-}
-
-export interface MenuOption {
-  key: string;
-  label: string;
-  selected: boolean;
-}
-
-function MenuRow(props: { option: MenuOption; focusKey: string; onPick: () => void }) {
-  const f = useFocusable<HTMLDivElement>({ focusKey: props.focusKey, onEnter: props.onPick });
-  return (
-    <div ref={f.ref} class={'option' + (props.option.selected ? ' selected' : '')} onClick={props.onPick}>
-      <span class="slot">{props.option.selected ? <IndicatorSquare tone="accent" /> : null}</span>
-      <span class="ellipsis">{props.option.label}</span>
-    </div>
-  );
-}
-
-/** A choice list over the player (Audio, Subtitles, Quality). BACK closes it. */
-export function Menu(props: { title: string; options: MenuOption[]; onPick: (key: string) => void; onClose: () => void }) {
-  const group = useFocusable<HTMLDivElement>({ focusKey: 'player-menu', isFocusBoundary: true });
-  useKeyHandler((key) => {
-    if (key !== 'back') return false;
-    props.onClose();
-    return true;
-  });
-  useEffect(() => {
-    const selected = props.options.findIndex((o) => o.selected);
-    setFocus('player-menu-' + String(Math.max(0, selected)));
-  }, []);
-  return (
-    <div ref={group.ref} class="menu">
-      <div class="menu-title mono-label">{tallyUppercase(props.title)}</div>
-      <FocusGroup focusKey="player-menu">
-        {props.options.map((o, i) => (
-          <MenuRow key={o.key} option={o} focusKey={'player-menu-' + String(i)} onPick={() => props.onPick(o.key)} />
-        ))}
-      </FocusGroup>
     </div>
   );
 }
