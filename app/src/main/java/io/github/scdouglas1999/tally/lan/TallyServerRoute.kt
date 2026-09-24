@@ -28,7 +28,7 @@ object TallyServerRoute {
     val router: ServerRouter
         get() =
             instance ?: synchronized(this) {
-                instance ?: ServerRouter(store(), requestFilter = StaleLiveStop::filter).also { instance = it }
+                instance ?: ServerRouter(store()).also { instance = it }
             }
 
     val interceptor: Interceptor = Interceptor { chain -> router.interceptor.intercept(chain) }

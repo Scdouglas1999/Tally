@@ -109,7 +109,6 @@ class ServerRouter(
     private val probeClient: OkHttpClient = defaultProbeClient(),
     private val clock: () -> Long = System::currentTimeMillis,
     private val homeHost: (String) -> Boolean = ::isHomeHost,
-    private val requestFilter: (Request) -> Request = { it },
 ) {
     private class Address(
         val base: String,
@@ -279,7 +278,7 @@ class ServerRouter(
     val interceptor: Interceptor = Interceptor { chain -> intercept(chain) }
 
     private fun intercept(chain: Interceptor.Chain): Response {
-        val request = requestFilter(chain.request())
+        val request = chain.request()
         val (route, base) = match(request.url) ?: return chain.proceed(request)
         val active = route.active
         val activeUrl = route.address(active)?.url ?: return chain.proceed(request)
