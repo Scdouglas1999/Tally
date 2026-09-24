@@ -20,7 +20,7 @@ import timber.log.Timber
 import java.util.UUID
 
 /**
- * The hooks Wholphin's player and music service call (seams W56-W58, see TALLY.md) so a completed download plays
+ * The hooks Wholphin's player and music service call (seams W57-W59, see TALLY.md) so a completed download plays
  * from the device, online too. A download is used only when direct play is allowed (a forced transcode, a chosen
  * in-player quality or a fallback after a playback error goes to the server as before).
  */
