@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'preact/hooks';
+import { useLayoutEffect, useRef } from 'preact/hooks';
 import { FocusGroup, setFocus, useFocusable } from '../focus/focus';
 import { useKeyHandler } from '../platform/keyRouter';
 import { tallyUppercase } from '../util/format';
@@ -65,7 +65,9 @@ export function Panel(props: {
     props.onClose();
     return true;
   });
-  useEffect(() => {
+  // before the first paint (the rows registered in their own layout effects): an OK pressed the moment the panel
+  // shows must reach its row, not the card it was opened on
+  useLayoutEffect(() => {
     const start = Math.min(Math.max(0, props.initialIndex ?? 0), Math.max(0, props.entries.length - 1));
     setFocus(props.entries.length > 0 ? `${props.focusKey}-${start}` : props.focusKey);
   }, []);

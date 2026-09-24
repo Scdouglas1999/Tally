@@ -8,7 +8,7 @@
 .detail-backdrop::before { background: linear-gradient(to right, var(--ground) 0%, rgba(14, 15, 14, 0) 55%); }
 .detail-backdrop::after { background: linear-gradient(to top, var(--ground) 0%, rgba(14, 15, 14, 0) 50%); }
 
-.detail-clock { position: absolute; z-index: 3; right: 50px; top: 24px; font-family: var(--sans); font-size: 45px; line-height: 64px; color: var(--text); }
+.detail-clock { position: absolute; z-index: 3; right: 49px; top: 24px; font-family: var(--sans); font-size: 38px; line-height: 63px; color: var(--text); }
 
 .detail-scroll { position: absolute; z-index: 1; left: 0; top: 0; right: 0; bottom: 0; }
 /* sections under the header sit on opaque ground (Android RowGround); the page ends with the bottom margin */

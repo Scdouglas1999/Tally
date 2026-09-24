@@ -42,7 +42,7 @@ test('Sports: the games board, its tabs and the focused-game panel', async ({ pa
   await page.keyboard.press('ArrowRight');
   await page.waitForTimeout(200);
   const second = await page.locator('.hero-panel .hero-team .name').first().textContent();
-  if ((await page.locator('.media-row').first().locator('.game-card').count()) > 1) expect(second).not.toBe(firstName);
+  if ((await page.locator('.page:not(.hidden) .board-rows .media-row').first().locator('.game-card').count()) > 1) expect(second).not.toBe(firstName);
   // DOWN to the next row: its header moves to the top of the list
   await page.keyboard.press('ArrowDown');
   await page.waitForTimeout(200);
@@ -52,26 +52,71 @@ test('Sports: the games board, its tabs and the focused-game panel', async ({ pa
   await page.waitForTimeout(200);
   const firstRowTop = await page.locator('.board-rows .media-row').first().evaluate((el) => el.getBoundingClientRect().top);
   expect(firstRowTop).toBeGreaterThan(650);
-  // along a long row the focused card always stays on screen, whichever way focus moves
-  const onScreen = () => page.locator('.game-card[data-focused]').evaluate((el) => {
-    const r = el.getBoundingClientRect();
-    return r.left >= 144 && r.right <= 1920;
-  });
-  for (let i = 0; i < 5; i++) {
+  // along the longest row (the board's rows change through the day) the focused card always stays on screen and in
+  // its row, to the row's end and back to its start, whichever way focus moves
+  const counts = await page.locator('.board-rows .media-row').evaluateAll((rows) => rows.map((r) => r.querySelectorAll('.game-card').length));
+  const longest = counts.indexOf(Math.max(...counts));
+  await moveTo(page, 'ArrowDown', async () => (await focusedCard(page)).row === longest, counts.length);
+  const length = counts[longest] ?? 0;
+  const onScreen = async (): Promise<void> => {
+    const f = await focusedCard(page);
+    expect(f.row).toBe(longest);
+    expect(f.left >= 144 && f.right <= 1920).toBe(true);
+  };
+  for (let i = (await focusedCard(page)).index; i < length - 1; i++) {
     await page.keyboard.press('ArrowRight');
     await page.waitForTimeout(120);
-    expect(await onScreen()).toBe(true);
+    await onScreen();
   }
-  for (let i = 0; i < 4; i++) {
+  expect((await focusedCard(page)).index).toBe(length - 1);
+  await shot(page, info, 'sports-row-end');
+  for (let i = length - 1; i > 0; i--) {
     await page.keyboard.press('ArrowLeft');
     await page.waitForTimeout(120);
-    expect(await onScreen()).toBe(true);
+    await onScreen();
   }
-  // UP from the first row: the selected tab (not the nearest)
+  expect((await focusedCard(page)).index).toBe(0);
+  // back to the first row, on its last card: UP reaches the selected tab (not the nearest one)
+  await moveTo(page, 'ArrowUp', async () => (await focusedCard(page)).row === 0, counts.length);
+  await moveTo(page, 'ArrowRight', async () => (await focusedCard(page)).index === (counts[0] ?? 1) - 1, counts[0] ?? 1);
   await page.keyboard.press('ArrowUp');
   await expect(page.locator('.sports-tab.selected[data-focused]')).toBeVisible();
   await shot(page, info, 'sports-tab-focused');
 });
+
+/** Where the focused game card is: its row and place on the board, and its left and right edges on screen. */
+async function focusedCard(page: Page): Promise<{ row: number; index: number; left: number; right: number }> {
+  return page.evaluate(() => {
+    const card = document.querySelector('.page:not(.hidden) .board-rows .game-card[data-focused]');
+    const row = card?.closest('.media-row') ?? null;
+    if (card === null || row === null) return { row: -1, index: -1, left: 0, right: 0 };
+    const rows = Array.from(document.querySelectorAll('.page:not(.hidden) .board-rows .media-row'));
+    const r = card.getBoundingClientRect();
+    return { row: rows.indexOf(row), index: Array.from(row.querySelectorAll('.game-card')).indexOf(card), left: r.left, right: r.right };
+  });
+}
+
+/** Moves focus on the board to the card of game `id`: DOWN/UP to its row, then along the row. */
+async function focusGame(page: Page, id: string): Promise<void> {
+  for (let i = 0; i < 60; i++) {
+    const step = await page.evaluate((gameId) => {
+      const board = document.querySelector('.page:not(.hidden) .board-rows');
+      const focused = board?.querySelector('.game-card[data-focused]') ?? null;
+      const target = board?.querySelector(`.game-card[data-game="${gameId}"]`) ?? null;
+      if (focused === null || target === null) return 'missing';
+      if (focused === target) return 'here';
+      const fr = focused.closest('.media-row');
+      const tr = target.closest('.media-row');
+      if (fr !== tr) return (tr?.getBoundingClientRect().top ?? 0) > (fr?.getBoundingClientRect().top ?? 0) ? 'ArrowDown' : 'ArrowUp';
+      return target.getBoundingClientRect().left > focused.getBoundingClientRect().left ? 'ArrowRight' : 'ArrowLeft';
+    }, id);
+    if (step === 'here') return;
+    if (step === 'missing') throw new Error(`game ${id} is not on the board (or no card has focus)`);
+    await page.keyboard.press(step);
+    await page.waitForTimeout(120);
+  }
+  throw new Error(`could not reach game ${id}`);
+}
 
 /** Moves focus with `key` until `match` is focused (at most `max` presses). */
 async function moveTo(page: Page, key: string, match: () => Promise<boolean>, max = 12): Promise<void> {
@@ -86,9 +131,15 @@ async function moveTo(page: Page, key: string, match: () => Promise<boolean>, ma
 const focusedRowLabel = async (page: Page): Promise<string> => ((await page.locator('.menu-panel .tally-row[data-focused] .label').textContent()) ?? '').trim();
 
 test('Sports: HOLD OK opens the game menu; follow and hide scores toggle in place; BACK returns to the card', async ({ page }, info) => {
+  // a game on one of the channels: its menu offers Add to multiview (tally/dev/score-sim.py add … makes one)
+  const board = await api<{ games: BoardGame[] }>('/JellyTV/Client/v1/board');
+  const game = board.games.find((g) => g.watch != null && g.watch.channelId !== '');
+  test.skip(game === undefined, 'needs a game on one of the channels');
+  if (game === undefined) return;
   await openSports(page);
   const card = page.locator('.game-card[data-focused]');
   await expect(card).toBeVisible();
+  await focusGame(page, game.id);
   const cardId = await card.evaluate((el) => el.closest('.row-track') !== null);
   expect(cardId).toBe(true);
   await holdOk(page);
@@ -113,7 +164,7 @@ test('Sports: HOLD OK opens the game menu; follow and hide scores toggle in plac
   // BACK closes the menu and focus is back on the card it was opened on
   await page.keyboard.press('Escape');
   await expect(menu).toHaveCount(0);
-  await expect(page.locator('.game-card[data-focused]')).toBeVisible();
+  await expect(page.locator(`.game-card[data-focused][data-game="${game.id}"]`)).toBeVisible();
 
   // HOLD again, Add to multiview: a toast says so
   await holdOk(page);
@@ -326,7 +377,7 @@ test('DVR: record every game of a team; the game records (REC tag, watch from th
   try {
     await openSports(page);
     await expect(page.locator('.game-card[data-focused]')).toBeVisible();
-    await moveTo(page, 'ArrowRight', async () => ((await page.locator('.hero-panel .hero-team .name').first().textContent()) ?? '') === target.away.shortName);
+    await focusGame(page, target.id);
     await holdOk(page);
     const menu = page.locator('.menu-panel').first();
     await expect(menu).toBeVisible();

@@ -14,7 +14,7 @@ import { useStore } from '../../util/store';
 import { BottomBand, ControlsRow, DpadSeekMinimal, PausedLabel, SeekBar, SleepChip, Times, TopBlock } from './controls';
 import { NextUpCard, SkipPrompt } from './nextUp';
 import { NoticeDialog, QualityDialog, SidePanel, SleepDialog, type PanelRowModel } from './panels';
-import { defaultQuality, loadItem, loadQueue, loadSegments, saveDefaultQuality, trickplaySheetUrl } from './playerData';
+import { defaultQuality, loadItem, loadItems, loadQueue, loadSegments, saveDefaultQuality, trickplaySheetUrl } from './playerData';
 import * as F from './playerFormat';
 import { SubtitleLayer, TuneIn, useEngine } from './playerKit';
 import { ChapterRow, QueueRow } from './rows';
@@ -270,8 +270,10 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
         // resume: the position asked for, else where the viewer stopped last time
         const startMs = props.route.startMs ?? F.ticksToMs(it.UserData?.PlaybackPositionTicks);
         await startItem(it, startMs);
-        const q = await loadQueue(it).catch(() => [it]);
-        if (alive && q.length > 1) setQueue(q);
+        // a list chosen elsewhere (Play all, Shuffle) plays as given; an episode plays on through its series
+        const ids = props.route.queue;
+        const q = ids !== undefined && ids.length > 1 ? await loadItems(ids).catch(() => [it]) : await loadQueue(it).catch(() => [it]);
+        if (alive && q.length > 1) setQueue(q[0]?.Id === it.Id ? q : [it].concat(q.filter((x) => x.Id !== it.Id)));
       })
       .catch((e: unknown) => setLoadError(e instanceof Error ? e.message : 'Could not load this.'));
     const t = window.setInterval(() => {

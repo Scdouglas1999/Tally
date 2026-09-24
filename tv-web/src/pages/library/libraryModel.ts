@@ -660,6 +660,17 @@ export function singleSpec(itemId: string, collectionType: string | null): Folde
   };
 }
 
+/**
+ * A box set's items (Android's TallyCollectionPage lists them under the collection's header; here a poster grid until
+ * tv-web has that page): not recursive, the film sorts, Play all and Shuffle, no A-Z bar (a collection is short).
+ */
+export function collectionSpec(itemId: string): FolderSpec {
+  return {
+    ...base(itemId, null), key: `${itemId}_boxset`, displayKey: `${itemId}_boxset`, initialFilter: {}, recursive: false,
+    sortOptions: MOVIE_SORTS, filterOptions: DEFAULT_FILTERS, playEnabled: true, defaultView: VIEW_POSTER, click: 'destination', jumpBar: false,
+  };
+}
+
 /** The item types a library's genres and studios are counted over (films, shows, albums). */
 export function nameGridTypes(collectionType: string | null): BaseItemKind[] | undefined {
   switch (collectionType) {

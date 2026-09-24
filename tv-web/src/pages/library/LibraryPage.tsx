@@ -5,11 +5,15 @@ import type { PageProps } from '../../app/page';
 import { currentFocusKey, setFocus } from '../../focus/focus';
 import { useKeyHandler } from '../../platform/keyRouter';
 import { push, type LibraryView, type Route } from '../../router/router';
+import { DetailDialogs, cardMenu, type Dialog } from '../details/DetailDialogs';
+import { openDetails } from '../details/navigate';
+import { useOkHold } from '../sports/useOkHold';
 import { FolderBody } from './FolderBody';
 import { Clock, ControlButton, ControlsGroup, EmptyState, IconControl, LibraryHeader, LibraryTabs, LoadingMark } from './Header';
-import { fetchGenres, fetchPage, fetchStudios, genreImages, positionOfLetter, randomItem, recommendedRows, type NameCell, type RecommendedRowSpec } from './libraryData';
+import { fetchGenres, fetchPage, fetchStudios, genreImages, playAllItems, positionOfLetter, randomItem, recommendedRows, type NameCell, type RecommendedRowSpec } from './libraryData';
 import {
   TAB_LABELS,
+  collectionSpec,
   countFilters,
   countText,
   directionArrow,
@@ -58,19 +62,24 @@ function modeFor(r: LibraryRoute): Mode {
         return { kind: 'single', spec: singleSpec(view.id, view.collectionType === '' ? ct : view.collectionType), kicker: view.name };
       case 'row':
         return { kind: 'row', row: recommendedRows(r.libraryId, ct).find((x) => x.key === view.rowKey) ?? null, kicker: view.title };
+      case 'collection':
+        return { kind: 'single', spec: collectionSpec(view.id), kicker: view.name };
     }
   }
   const tabs = libraryTabs(ct);
   return tabs.length > 0 ? { kind: 'tabbed', tabs, kicker: r.title } : { kind: 'single', spec: singleSpec(r.libraryId, ct), kicker: r.title };
 }
 
-/** Opens an item from a library: a folder as a grid of its own, anything else its page. */
+/**
+ * Opens an item from a library: a folder as a grid of its own; anything else where the Android app sends it
+ * (details/navigate.ts: an episode or a season the rundown, a box set its items, a person the person page).
+ */
 function openItem(r: LibraryRoute, item: BaseItemDto): void {
   if (item.Id == null) return;
   if (isFolder(item.Type)) {
     push({ ...r, view: { kind: 'folder', id: item.Id, name: item.Name ?? '', collectionType: item.CollectionType ?? r.collectionType } });
   } else {
-    push({ name: 'item', itemId: item.Id });
+    openDetails(item, r);
   }
 }
 
@@ -79,10 +88,17 @@ function letterKeyPart(letter: string): string {
   return letter === '#' ? 'num' : letter;
 }
 
-function play(item: BaseItemDto | null): boolean {
+function play(item: BaseItemDto | null, queue?: string[]): boolean {
   if (item === null || item.Id == null || !isPlayable(item.Type)) return false;
-  push({ name: 'player', itemId: item.Id, startMs: Math.floor((item.UserData?.PlaybackPositionTicks ?? 0) / 10_000) });
+  push({ name: 'player', itemId: item.Id, startMs: Math.floor((item.UserData?.PlaybackPositionTicks ?? 0) / 10_000), queue });
   return true;
+}
+
+/** Play all (the grid's order) or Shuffle: the playable items as one queue (upstream's PlaybackList). */
+function playAll(items: BaseItemDto[]): void {
+  const playable = items.filter((i) => i.Id != null && isPlayable(i.Type));
+  const first = playable[0];
+  if (first !== undefined) play(first, playable.map((i) => i.Id as string));
 }
 
 type NamesState = { kind: 'loading' } | { kind: 'error'; tab: TabKind; message: string } | { kind: 'ready'; tab: TabKind; cells: NameCell[] };
@@ -220,6 +236,27 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
     setDialog(null);
   };
 
+  // --- the item menu: HOLD OK or MENU on a card (Android's long press: ContextMenu.ForBaseItem) --------------------
+  const [itemDialog, setItemDialog] = useState<Dialog | null>(null);
+  /** The Recommended tab's cards by focus key (filled by Recommended as its rows load). */
+  const recItems = useRef(new Map<string, BaseItemDto>());
+  const cardItem = (key: string): BaseItemDto | null => {
+    const grid = `${pk}-c-`;
+    if (key.indexOf(grid) === 0) return data.item(Number(key.substring(grid.length)));
+    return recItems.current.get(key) ?? null;
+  };
+  useOkHold(
+    () => {
+      const key = currentFocusKey();
+      const item = cardItem(key);
+      if (item === null || item.Id == null) return false;
+      setItemDialog(cardMenu(item, key, () => openItem(r, item)));
+      return true;
+    },
+    dialog === null && itemDialog === null,
+    props.active,
+  );
+
   // --- remote keys: BACK goes to the top of the grid first, PLAY plays, fast-forward / rewind page ------------------
   const inGrid = (): boolean => {
     const cur = currentFocusKey();
@@ -229,7 +266,7 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
     (key) => {
       // the user moved first: content arriving later does not take focus
       if (key === 'up' || key === 'down' || key === 'left' || key === 'right' || key === 'enter' || key === 'back') pending.current = null;
-      if (dialog !== null) return false;
+      if (dialog !== null || itemDialog !== null) return false;
       const g = grid.current;
       // RIGHT from the grid's last column enters the A-Z bar on the focused card's letter
       const bar = document.querySelector('.page:not(.hidden) .lib-jump') !== null;
@@ -248,7 +285,7 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
       }
       if (key === 'play' || key === 'playPause') {
         if (inGrid() && g !== null) return play(data.item(g.focusedIndex()));
-        if (tab === 'recommended') return play(recItem);
+        if (tab === 'recommended') return play(cardItem(currentFocusKey()));
         return false;
       }
       if ((key === 'fastForward' || key === 'next' || key === 'rewind' || key === 'previous') && inGrid() && g !== null && display !== null) {
@@ -267,7 +304,7 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
     if (names.kind === 'ready') count = countText(names.cells.length, tab === 'genres' ? 'genre' : 'studio');
   } else if (data.status.kind === 'ready' && tab !== 'recommended') {
     const noun =
-      mode.kind === 'row'
+      mode.kind === 'row' || r.view?.kind === 'collection'
         ? libraryNoun(data.item(0)?.Type != null ? [data.item(0)?.Type as string] : undefined, ct)
         : spec !== null && display !== null
           ? (spec.noun ?? libraryNoun(display.filter.includeItemTypes ?? spec.initialFilter.includeItemTypes, spec.collectionType))
@@ -307,7 +344,15 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
           }}
         />
         {spec.playEnabled ? (
-          <IconControl glyph="play" label="Play" focusKey={`${pk}-play`} enabled={notEmpty} onPress={() => play(data.item(0))} />
+          <IconControl
+            glyph="play"
+            label="Play"
+            focusKey={`${pk}-play`}
+            enabled={notEmpty}
+            onPress={() => {
+              void playAllItems(spec, display.sort, display.filter, false).then(playAll);
+            }}
+          />
         ) : null}
         {spec.playEnabled ? (
           <IconControl
@@ -317,8 +362,7 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
             enabled={notEmpty}
             captionAtEnd
             onPress={() => {
-              // one random film until the player plays a list (see the report: Needed elsewhere)
-              void randomItem(spec, display.filter).then((item) => play(item));
+              void playAllItems(spec, display.sort, display.filter, true).then(playAll);
             }}
           />
         ) : null}
@@ -336,6 +380,7 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
         refreshToken={refreshToken}
         onFocusItem={setRecItem}
         onReady={(key) => contentReady(key)}
+        cardItems={recItems.current}
         onOpen={(item) => openItem(r, item)}
         onViewAll={(row) => push({ ...r, view: { kind: 'row', rowKey: row.key, title: row.title } })}
       />
@@ -418,6 +463,15 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
           <ViewPanel pageKey={pk} current={display.view} defaults={spec.defaultView} onChange={(view) => updateDisplay({ ...display, view })} onClose={closeDialog} />
         )
       ) : null}
+      <DetailDialogs
+        dialog={itemDialog}
+        setDialog={setItemDialog}
+        pageKey={pk}
+        onChanged={() => {
+          data.refresh();
+          setRefreshToken((t) => t + 1);
+        }}
+      />
     </div>
   );
 }

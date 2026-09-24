@@ -7,6 +7,8 @@ import { defineConfig } from '@playwright/test';
  *   TALLY_TOKEN_FILE  an admin access token, used to approve the Quick Connect code the app shows
  *   CHROMIUM          browser binary (default /usr/bin/chromium; unset to use Playwright's own)
  *   TALLY_PREVIEW_PORT  port of the `vite preview` the tests start (default 4173; parallel worktrees use their own)
+ * The preview is always this checkout's own: a server already on the port (another worktree's bundle) is never reused,
+ * the run stops instead ("port already in use").
  */
 const PORT = process.env.TALLY_PREVIEW_PORT ?? '4173';
 export default defineConfig({
@@ -29,6 +31,6 @@ export default defineConfig({
   webServer: {
     command: `npx vite preview --port ${PORT} --strictPort --host 127.0.0.1`,
     url: `http://127.0.0.1:${PORT}/manifest.json`,
-    reuseExistingServer: true,
+    reuseExistingServer: false,
   },
 });

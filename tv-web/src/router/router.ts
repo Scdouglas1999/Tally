@@ -7,12 +7,14 @@ import { createStore } from '../util/store';
 
 /**
  * What a library route shows besides the library itself (pages/library): a genre or a studio of it, a folder inside
- * it, or every item of one of its Recommended rows ("view all"). `libraryId` stays the library's, so the rail keeps
+ * it, a box set, or every item of one of its Recommended rows ("view all"). `libraryId` stays the library's, so the rail keeps
  * its light on the library.
  */
 export type LibraryView =
   | { kind: 'genre' | 'studio'; id: string; name: string }
   | { kind: 'folder'; id: string; name: string; collectionType: string }
+  /** A box set's items (Android's collection page; a grid until tv-web has that page). */
+  | { kind: 'collection'; id: string; name: string }
   | { kind: 'row'; rowKey: string; title: string };
 
 export type Route =
@@ -20,7 +22,8 @@ export type Route =
   | { name: 'search' }
   | { name: 'library'; libraryId: string; title: string; collectionType: string; view?: LibraryView }
   | { name: 'item'; itemId: string }
-  | { name: 'player'; itemId: string; startMs?: number }
+  /** `queue`: the items to play in order, `itemId` first (a library's Play all / Shuffle); else the item's own queue. */
+  | { name: 'player'; itemId: string; startMs?: number; queue?: string[] }
   | { name: 'postplay'; itemId: string }
   | { name: 'live'; channelId: string; hlsPath: string; title: string; gameId?: string }
   | { name: 'sports' }

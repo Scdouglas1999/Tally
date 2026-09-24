@@ -17,7 +17,8 @@
 .home-header .meta .rating { padding: 0 8px; border: var(--hairline) solid var(--rule-strong); }
 .home-header .overview { margin-top: 14px; font-size: 32px; line-height: 45px; color: var(--text-secondary); max-width: 1100px; }
 
-.home-clock { position: absolute; right: var(--margin-x); top: 34px; font-family: var(--sans); font-size: 45px; color: var(--text); }
+/* the clock of every Android TV page (drawn by the drawer): the library's size and place */
+.home-clock { position: absolute; right: 49px; top: 24px; font-family: var(--sans); font-size: 38px; line-height: 63px; color: var(--text); z-index: 3; }
 
 .home-rows { position: absolute; left: 0; right: 0; top: 356px; bottom: 0; }
 .home-rows .scroll-page { padding-bottom: 60px; }

@@ -51,6 +51,23 @@ export async function loadQueue(item: BaseItemDto): Promise<BaseItemDto[]> {
   return start >= 0 ? episodes.slice(start) : [item].concat(episodes);
 }
 
+/**
+ * A queue given by id (a library's Play all / Shuffle, upstream's PlaybackList): the items in that order, at most
+ * QUEUE_MAX; ids the server no longer knows are left out.
+ */
+export async function loadItems(ids: readonly string[]): Promise<BaseItemDto[]> {
+  const wanted = ids.slice(0, QUEUE_MAX);
+  if (wanted.length === 0) return [];
+  const items = (await getLibraryApi(currentApi()).getItems({ userId: userId(), ids: wanted, fields: FIELDS, enableUserData: true })).data.Items ?? [];
+  const byId = new Map(items.map((i) => [i.Id ?? '', i]));
+  const out: BaseItemDto[] = [];
+  for (const id of wanted) {
+    const it = byId.get(id);
+    if (it !== undefined) out.push(it);
+  }
+  return out;
+}
+
 /** Intro, credits, recap… markers the server knows for the item (empty without a segment provider). */
 export async function loadSegments(itemId: string): Promise<MediaSegmentDto[]> {
   try {

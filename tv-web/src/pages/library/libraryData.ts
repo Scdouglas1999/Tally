@@ -134,6 +134,15 @@ export async function randomItem(spec: FolderSpec, filter: LibraryFilter): Promi
   return r.items[0] ?? null;
 }
 
+/** Upstream's Playlist.MAX_SIZE: Play all and Shuffle queue at most this many. */
+export const PLAY_ALL_MAX = 100;
+
+/** What Play all (the grid's order) or Shuffle (a random order) plays: the first PLAY_ALL_MAX items. */
+export async function playAllItems(spec: FolderSpec, sort: SortAndDirection, filter: LibraryFilter, shuffle: boolean): Promise<BaseItemDto[]> {
+  const order = shuffle ? { sort: ItemSortBy.Random, direction: SortOrder.Ascending } : sort;
+  return (await fetchPage(spec, order, filter, 0, PLAY_ALL_MAX)).items;
+}
+
 // ---------------------------------------------------------------------------------------------------------------
 // Filter values (upstream's FilterOptionCache: an hour)
 // ---------------------------------------------------------------------------------------------------------------

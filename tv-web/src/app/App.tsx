@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { session } from '../api/jellyfin';
-import { FocusGroup, setFocus, useFocusable } from '../focus/focus';
+import { currentFocusKey, FocusGroup, focusExists, setFocus, useFocusable } from '../focus/focus';
 import { back, stack, type Entry } from '../router/router';
 import { loadNav } from '../state/nav';
 import { useStore } from '../util/store';
@@ -23,7 +23,7 @@ function PageFrame(props: { entry: Entry; active: boolean }) {
   });
   const Page = PAGES[props.entry.route.name].page as (p: PageProps) => preact.JSX.Element;
   return (
-    <div ref={f.ref} class={'page' + (props.active ? '' : ' hidden')}>
+    <div ref={f.ref} class={'page' + (props.active ? '' : ' hidden')} data-entry={props.entry.id}>
       <FocusGroup focusKey={key}>
         <Page route={props.entry.route} active={props.active} pageKey={key} />
       </FocusGroup>
@@ -44,8 +44,21 @@ function Frame() {
 
   // a new top page (opened, or uncovered by BACK) takes focus: its last focus, or its arrival focus. After the
   // pages' own effects: the uncovered page must be focusable again before its saved focus can be restored.
+  // A page being covered remembers exactly what had focus in it (a group that does not keep its last child, such
+  // as a library's controls, would otherwise hand focus to its first one on the way back).
+  const covered = useRef(new Map<number, string>());
+  const shown = useRef(top.id);
   useEffect(() => {
-    const t = window.setTimeout(() => setFocus(pageFocusKey(top.id)), 0);
+    const previous = shown.current;
+    shown.current = top.id;
+    if (previous !== top.id && entries.some((e) => e.id === previous)) {
+      const el = document.querySelector('[data-focused]');
+      if (el !== null && el.closest(`.page[data-entry="${previous}"]`) !== null) covered.current.set(previous, currentFocusKey());
+    }
+    for (const id of Array.from(covered.current.keys())) if (!entries.some((e) => e.id === id)) covered.current.delete(id);
+    const saved = covered.current.get(top.id);
+    covered.current.delete(top.id);
+    const t = window.setTimeout(() => setFocus(saved !== undefined && focusExists(saved) ? saved : pageFocusKey(top.id)), 0);
     return () => window.clearTimeout(t);
   }, [top.id]);
 
