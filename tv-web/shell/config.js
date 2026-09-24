@@ -5,4 +5,6 @@ window.TALLY_SHELL_CONFIG = {
   platform: 'browser',
   // the Jellyfin address stamped in by the installer (--server); the viewer is asked when empty
   server: '',
+  // development only: load the bundle from here instead of the server's /JellyTV/TV/ (package --bundle)
+  bundle: '',
 };

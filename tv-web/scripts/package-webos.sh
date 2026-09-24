@@ -5,10 +5,11 @@
 # The webOS build is after the Samsung one (ARCHITECTURE.md): this packages and installs, the app code is shared.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-SERVER=""
+SERVER="" BUNDLE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --server) SERVER="$2"; shift 2 ;;
+    --bundle) BUNDLE="$2"; shift 2 ;;  # development: bundle from a dev machine (vite preview)
     *) echo "unknown option $1" >&2; exit 2 ;;
   esac
 done
@@ -24,8 +25,8 @@ cp shell/icons/icon-80.png shell/icons/icon-130.png "$STAGE/"
 sed "s/@VERSION@/$VERSION/" shell/webos/appinfo.json > "$STAGE/appinfo.json"
 sed 's#<!-- PLATFORM:.*-->##' shell/index.html > "$STAGE/index.html"
 node -e '
-const [server] = process.argv.slice(1);
-process.stdout.write("window.TALLY_SHELL_CONFIG = " + JSON.stringify({ platform: "webos", server }, null, 2) + ";\n");
-' "$SERVER" > "$STAGE/config.js"
+const [server, bundle] = process.argv.slice(1);
+process.stdout.write("window.TALLY_SHELL_CONFIG = " + JSON.stringify({ platform: "webos", server, bundle }, null, 2) + ";\n");
+' "$SERVER" "$BUNDLE" > "$STAGE/config.js"
 "$ARES/ares-package" --no-minify -o dist "$STAGE"
 ls -la dist/*.ipk

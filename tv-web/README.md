@@ -53,7 +53,8 @@ scripts/package-webos.sh [--server http://192.168.1.10:8096]   # dist/io.github.
 ```
 
 `--server` stamps the Jellyfin address into the package, so the TV opens straight to Quick Connect. Without it the
-TV asks for the address on first start. **Back up `~/.tally/tizen`**: every later install on a TV must be signed with
+TV asks for the address on first start. For development, `--bundle http://<this-pc>:4173/` makes the shell load the
+bundle from `npm run preview` instead of the server's plugin (an emulator reaches this PC at `10.0.2.2`). **Back up `~/.tally/tizen`**: every later install on a TV must be signed with
 the same author certificate.
 
 ## Install on a TV

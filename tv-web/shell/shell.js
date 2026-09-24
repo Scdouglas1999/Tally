@@ -205,7 +205,7 @@
       }
       try { JSON.parse(body); } catch (e) { problem('That address is not a Jellyfin server.', server); return; }
       store(SERVER_KEY, server);
-      var base = read(BUNDLE_KEY) || (server + '/JellyTV/TV/');
+      var base = read(BUNDLE_KEY) || config.bundle || (server + '/JellyTV/TV/');
       get(base + 'manifest.json?t=' + Date.now(), function (mStatus, mBody) {
         if (mStatus === 404) { problem('This server has no Tally TV app. Install or update the Tally plugin on the server.', server); return; }
         if (mStatus !== 200) { problem('The server could not send the TV app (HTTP ' + mStatus + ').', server); return; }

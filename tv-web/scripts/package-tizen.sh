@@ -6,10 +6,11 @@
 # of the `tizen` command (default ~/tools/tizen-studio/tools/ide/bin/tizen).
 set -euo pipefail
 cd "$(dirname "$0")/.."
-SERVER="" PROFILE="tally"
+SERVER="" PROFILE="tally" BUNDLE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --server) SERVER="$2"; shift 2 ;;
+    --bundle) BUNDLE="$2"; shift 2 ;;  # development: bundle from a dev machine (vite preview)
     --profile) PROFILE="$2"; shift 2 ;;
     *) echo "unknown option $1" >&2; exit 2 ;;
   esac
@@ -27,8 +28,8 @@ sed "s/@VERSION@/$VERSION/" shell/tizen/config.xml > "$STAGE/config.xml"
 # AVPlay and the other Samsung product APIs come from webapis.js, which the TV provides at $WEBAPIS
 sed 's#<!-- PLATFORM:.*-->#<script src="$WEBAPIS/webapis/webapis.js"></script>#' shell/index.html > "$STAGE/index.html"
 node -e '
-const [server] = process.argv.slice(1);
-process.stdout.write("window.TALLY_SHELL_CONFIG = " + JSON.stringify({ platform: "tizen", server }, null, 2) + ";\n");
-' "$SERVER" > "$STAGE/config.js"
+const [server, bundle] = process.argv.slice(1);
+process.stdout.write("window.TALLY_SHELL_CONFIG = " + JSON.stringify({ platform: "tizen", server, bundle }, null, 2) + ";\n");
+' "$SERVER" "$BUNDLE" > "$STAGE/config.js"
 "$TIZEN" package -t wgt -s "$PROFILE" -o "$PWD/dist" -- "$PWD/$STAGE"
 ls -la dist/*.wgt
