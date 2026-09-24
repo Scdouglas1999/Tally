@@ -366,6 +366,8 @@ html[data-tally-look] .defaultCardBackground5 { background-color: var(--tl-raise
 html[data-tally-look] .card:focus .cardBox.visualCardBox,
 html[data-tally-look] .card:focus .cardBox:not(.visualCardBox) .cardScalable { border-color: transparent !important; }
 html[data-tally-look] .card:focus-visible { outline: none; }
+/* on desktop the focusable part of a card is its picture link, which jellyfin-web strips of any outline */
+html[data-tally-look] .card:has(.cardContent:focus-visible, .cardOverlayContainer :focus-visible) .cardScalable::after,
 html[data-tally-look] .card:focus-visible .cardScalable::after,
 html[data-tally-look] .card.show-focus:focus .cardScalable::after { border: 3px solid var(--tl-accent); }
 html[data-tally-look] .card-hoverable:hover .cardScalable::after { border-color: var(--tl-accent); }
@@ -710,6 +712,8 @@ html[data-tally-look] .mainDetailButtons .btnMoreCommands::after { content: attr
 html[data-tally-look] .detailPagePrimaryContainer { align-items: flex-start; }
 html[data-tally-look].layout-desktop .detailRibbon { flex-wrap: wrap; height: auto; min-height: 0; padding-top: .6em; padding-bottom: .6em; }
 html[data-tally-look].layout-desktop .infoWrapper { flex: 1 1 100%; }
+html[data-tally-look].layout-desktop .nameContainer,
+html[data-tally-look].layout-desktop .nameContainer .itemName { text-align: left; }
 html[data-tally-look].layout-desktop .detailRibbon .mainDetailButtons { flex: 1 1 100%; justify-content: flex-start; }
 
 html[data-tally-look] .tagline { font: 400 18px/1.4 var(--tl-sans); color: var(--tl-text-2); }
@@ -961,6 +965,7 @@ html[data-tally-look] .tally-sports-link .tally-sports-lamp {
   html[data-tally-look] .mainDetailButtons .detailButton:not(.btnPlay):not(.btnResume)::after { content: none; }
   html[data-tally-look] .mainDetailButtons .btnPlay,
   html[data-tally-look] .mainDetailButtons .btnResume { flex: 1 1 100%; }
+  html[data-tally-look] .MuiButton-root:not(.MuiAppBar-root a.MuiButton-root) { font-size: 12px; letter-spacing: .05em; }
   html[data-tally-look] .itemMiscInfo { font-size: 12px; column-gap: 1.1em; row-gap: .3em; flex-wrap: wrap; }
   html[data-tally-look] .itemMiscInfo .mediaInfoItem::before,
   html[data-tally-look] .itemMiscInfo .mediaInfoItem::after { content: none !important; }
