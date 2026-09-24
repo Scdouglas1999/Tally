@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
     "versions": [
       {
+        "version": "2.0.2.12",
+        "changelog": "Tally 2.0.2: no plugin changes (the app's download files were renamed).\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.2/Tally-server-2.0.2-jf12.zip",
+        "checksum": "3750fa46d225a7878d7babba40924ce3",
+        "timestamp": "2026-09-24T15:13:34.0000000Z"
+      },
+      {
+        "version": "2.0.2.11",
+        "changelog": "Tally 2.0.2: no plugin changes (the app's download files were renamed).\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.2/Tally-server-2.0.2-jf10.11.zip",
+        "checksum": "c52cefd577f297b22b8abcdcabb4f6e3",
+        "timestamp": "2026-09-24T15:13:34.0000000Z"
+      },
+      {
+        "version": "2.0.2.10",
+        "changelog": "Tally 2.0.2: no plugin changes (the app's download files were renamed).\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.2/Tally-server-2.0.2-jf10.10.zip",
+        "checksum": "4c6dea0a66b9dd8e4c4a323a67aa1fa4",
+        "timestamp": "2026-09-24T15:13:34.0000000Z"
+      },
+      {
         "version": "2.0.1.12",
         "changelog": "Tally 2.0.1: the web page source downloads its headless browser on first use, so it works on fresh installs.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
