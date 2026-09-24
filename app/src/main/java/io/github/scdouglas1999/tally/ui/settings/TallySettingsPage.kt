@@ -100,10 +100,10 @@ private val PANEL_MIN_WIDTH = 240.dp
 private val PANEL_GAP = 40.dp
 
 /**
- * The panel's rule lines up with the first group's rule: the kicker (24dp above, a 17dp line, 4dp under), the
- * list's top padding and the group header's own 14dp.
+ * The panel's rule lines up with the first group's rule: the kicker (24dp above, a 17dp line, [SettingsKickerGap]
+ * under), the list's top padding and the group header's own 14dp.
  */
-private val PANEL_TOP = 24.dp + 17.dp + 4.dp + LIST_INSET + 14.dp
+private val PANEL_TOP = 24.dp + 17.dp + SettingsKickerGap + LIST_INSET + 14.dp
 
 private val SWATCH_SIZE = 20.dp
 private val SWATCH_GAP = 6.dp

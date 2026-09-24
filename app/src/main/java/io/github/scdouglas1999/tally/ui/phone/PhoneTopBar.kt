@@ -1,5 +1,6 @@
 package io.github.scdouglas1999.tally.ui.phone
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -114,6 +115,16 @@ fun PhoneTopBar(
             Spacer(Modifier.width(4.dp))
         }
     }
+}
+
+/**
+ * The top bar's back arrow for a page opened from the More sheet (Favorites, Surprise me, a library with tabs): the
+ * system back, so it goes where Back goes. Null when there is no back dispatcher.
+ */
+@Composable
+fun phoneSystemBack(): (() -> Unit)? {
+    val dispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher ?: return null
+    return { dispatcher.onBackPressed() }
 }
 
 /** A 48dp top-bar button: a 20dp Font Awesome [glyph] (a `fa_` string) in `text`; [label] is its accessibility name. */

@@ -40,8 +40,10 @@ import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
 import com.github.damontecres.wholphin.ui.logCoilError
+import io.github.scdouglas1999.tally.media.kit.DetailMetaPart
+import io.github.scdouglas1999.tally.media.kit.formatRuntime
+import io.github.scdouglas1999.tally.media.movie.phone.PhoneMetaLine
 import io.github.scdouglas1999.tally.postplay.FilmBackdrop
-import io.github.scdouglas1999.tally.postplay.metaLine
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.phone.phoneClickable
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
@@ -109,10 +111,12 @@ fun PhonePostPlay(
                 )
                 Spacer(Modifier.height(8.dp))
                 LogoOrTitle(film)
-                val meta = metaLine(film)
+                val meta = postPlayMetaParts(film)
                 if (meta.isNotEmpty()) {
                     Spacer(Modifier.height(8.dp))
-                    Text(text = meta, style = PhoneType.meta, color = TallyColors.textSecondary, maxLines = 1)
+                    // the film page's meta line, the official rating boxed; over the backdrop the box's frame is
+                    // `muted` (ruleStrong disappears into the picture)
+                    PhoneMetaLine(meta, boxColor = TallyColors.muted)
                 }
                 Spacer(Modifier.height(14.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -256,3 +260,16 @@ private fun SimilarPoster(
         )
     }
 }
+
+/**
+ * The film's meta line as the film page draws it (`2021 · [PG-13] · 1m 30s`): the parts of the TV's
+ * [io.github.scdouglas1999.tally.postplay.metaLine] with the official rating boxed.
+ */
+private fun postPlayMetaParts(film: BaseItemDto): List<DetailMetaPart> =
+    buildList {
+        film.productionYear?.let { add(DetailMetaPart.Plain(it.toString())) }
+        film.officialRating?.takeIf { it.isNotBlank() }?.let { add(DetailMetaPart.Boxed(it)) }
+        film.runTimeTicks
+            ?.takeIf { it > 0L }
+            ?.let { add(DetailMetaPart.Plain(formatRuntime(it))) }
+    }

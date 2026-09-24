@@ -1,7 +1,9 @@
 package io.github.scdouglas1999.tally.ui.phone
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,11 +17,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
+import io.github.scdouglas1999.tally.data.BoardOrganizer
 import io.github.scdouglas1999.tally.data.isFollowed
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneEmptyState
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneLoading
@@ -36,7 +40,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 
 /**
  * The games board on a phone: the TV board's rows in its order, stacked: each row's header as on the TV
- * (`MLB / LIVE 3`) over its games as full-width [PhoneGameCard]s. A tap or a long-press on a game opens its game sheet
+ * (`MLB / LIVE 3`) over its games as full-width [PhoneGameCard]s (two across on a tablet). A tap or a long-press on a game opens its game sheet
  * (the TV's focused-game panel and game menu in one). The TV's loading, failed, filtered and empty states, and the
  * one-line notice naming the leagues whose feeds failed.
  */
@@ -79,6 +83,7 @@ internal fun PhoneGamesBoard(
 
         else -> {
             val bottom = LocalPhoneContentPadding.current.calculateBottomPadding()
+            val columns = if (LocalConfiguration.current.screenWidthDp.dp >= PhoneDimens.twoColumnMinWidth) 2 else 1
             LazyColumn(
                 state = rememberLazyListState(),
                 contentPadding = PaddingValues(top = 12.dp, bottom = bottom + PhoneDimens.rowGap),
@@ -116,20 +121,30 @@ internal fun PhoneGamesBoard(
                         )
                         Spacer(Modifier.height(8.dp))
                     }
-                    items(row.games, key = { row.key + "|" + it.id }) { game ->
-                        PhoneGameCard(
-                            game = game,
-                            hideScores = state.hideScores,
-                            isFavorite = game.watch?.channelId in state.favorites || game.isFollowed(state.favoriteTeams),
-                            followed = game.isFollowed(state.favoriteTeams),
-                            onClick = { sheetGameId = game.id },
-                            onLongClick = { sheetGameId = game.id },
+                    // a tablet: two games side by side, so a card never stretches across the screen
+                    items(row.games.chunked(columns), key = { row.key + "|" + it.first().id }) { pair ->
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(PhoneDimens.cardGap),
                             modifier =
                                 Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = PhoneDimens.margin)
                                     .padding(bottom = PhoneDimens.cardGap),
-                        )
+                        ) {
+                            pair.forEach { game ->
+                                PhoneGameCard(
+                                    game = game,
+                                    hideScores = state.hideScores,
+                                    isFavorite =
+                                        game.watch?.channelId in state.favorites || game.isFollowed(state.favoriteTeams),
+                                    followed = game.isFollowed(state.favoriteTeams),
+                                    onClick = { sheetGameId = game.id },
+                                    onLongClick = { sheetGameId = game.id },
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                            repeat(columns - pair.size) { Spacer(Modifier.weight(1f)) }
+                        }
                     }
                 }
             }
@@ -161,5 +176,6 @@ private fun rowStateLabel(state: String): String =
         "in" -> stringResource(R.string.tally_state_live)
         "pre" -> stringResource(R.string.tally_state_upcoming)
         "post" -> stringResource(R.string.tally_final)
+        BoardOrganizer.POSTPONED -> stringResource(R.string.tally_polish2_state_postponed)
         else -> state
     }

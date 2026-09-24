@@ -92,6 +92,7 @@ import io.github.scdouglas1999.tally.ui.home.TallyHomeRow
 import io.github.scdouglas1999.tally.ui.home.TallyHomeRowViewModel
 import io.github.scdouglas1999.tally.ui.home.withoutPregameChannels
 import io.github.scdouglas1999.tally.ui.household.HouseholdRow
+import io.github.scdouglas1999.tally.ui.launch.TallyLaunchHold
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
@@ -155,6 +156,7 @@ private fun TvHomePage(
                     if (!rowsFocused) HomeFocusHolder()
                     when (val loading = state.loadingState) {
                         is LoadingState.Error -> {
+                            SideEffect { TallyLaunchHold.markHomeSettled() }
                             EmptyState(
                                 title = stringResource(R.string.tally_media_error_title),
                                 subtitle =
@@ -178,6 +180,8 @@ private fun TvHomePage(
                             if (!tallySettled) {
                                 LoadingMark(Modifier.fillMaxSize())
                             } else {
+                                // the launch card waits for this (TallyLaunchHold): home opens settled
+                                SideEffect { TallyLaunchHold.markHomeSettled() }
                                 Box(
                                     modifier =
                                         Modifier

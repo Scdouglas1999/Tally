@@ -100,6 +100,7 @@ import io.github.scdouglas1999.tally.media.library.sortLabel
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.phone.LocalPhoneContentPadding
+import io.github.scdouglas1999.tally.ui.phone.LocalPhoneMorePage
 import io.github.scdouglas1999.tally.ui.phone.PhoneSheet
 import io.github.scdouglas1999.tally.ui.phone.PhoneTopBar
 import io.github.scdouglas1999.tally.ui.phone.phoneClickable
@@ -115,7 +116,7 @@ import java.util.UUID
 
 /**
  * A library on a phone (`LibraryScaffold`'s phone branch): a top bar with the library's name and its count (a back
- * arrow on a library without tabs: a collection, genre or studio page), then the tabs as a horizontally scrolling mono
+ * arrow on a library without tabs: a collection, genre or studio page; and on any library the More sheet opened), then the tabs as a horizontally scrolling mono
  * strip pinned under it (the current tab `text` over a 2dp accent underline), then the tab's content.
  */
 @Composable
@@ -131,7 +132,12 @@ internal fun PhoneLibraryScaffold(
     Column(modifier = Modifier.fillMaxSize().background(TallyColors.ground)) {
         PhoneTopBar(
             title = kicker,
-            onBack = if (tabs.isEmpty()) ({ pageViewModel.navigationManager.goBack() }) else null,
+            onBack =
+                if (tabs.isEmpty() || LocalPhoneMorePage.current) {
+                    { pageViewModel.navigationManager.goBack() }
+                } else {
+                    null
+                },
             actions = {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 12.dp)) { count() }
             },

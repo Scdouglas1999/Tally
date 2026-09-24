@@ -36,7 +36,6 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Glow
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
-import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.ui.FontAwesome
 import com.github.damontecres.wholphin.ui.logCoilError
 import com.github.damontecres.wholphin.ui.playback.isPlayKeyUp
@@ -155,7 +154,7 @@ fun CardFrame(
                         .background(TallyColors.screen),
             ) {
                 if (imageUrl != null) {
-                    AsyncImage(
+                    RetryingAsyncImage(
                         model = imageUrl,
                         contentDescription = contentDescription,
                         contentScale = contentScale,

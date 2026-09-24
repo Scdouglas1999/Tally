@@ -40,6 +40,7 @@ import com.github.damontecres.wholphin.ui.rememberInt
 import com.github.damontecres.wholphin.ui.rememberPosition
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.api.TallyGame
+import io.github.scdouglas1999.tally.data.BoardOrganizer
 import io.github.scdouglas1999.tally.data.BoardRow
 import io.github.scdouglas1999.tally.data.isFollowed
 import io.github.scdouglas1999.tally.ui.components.EmptyState
@@ -313,6 +314,7 @@ private fun rowStateLabel(state: String): String =
         "in" -> stringResource(R.string.tally_state_live)
         "pre" -> stringResource(R.string.tally_state_upcoming)
         "post" -> stringResource(R.string.tally_final)
+        BoardOrganizer.POSTPONED -> stringResource(R.string.tally_polish2_state_postponed)
         else -> state
     }
 

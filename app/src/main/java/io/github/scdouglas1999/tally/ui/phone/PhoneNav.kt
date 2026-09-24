@@ -52,11 +52,11 @@ internal data class PhoneNavModel(
 
     companion object {
         fun from(state: NavDrawerItemState): PhoneNavModel {
-            // as the drawer: Live TV is left out while Sports is one of its entries
-            val hideLiveTv = NavDrawerItem.Sports in state.items
-            val visible = indexedDrawerItems(state.items, hideLiveTv)
+            // Unlike the TV drawer, which leaves Live TV out while Sports is one of its entries, the phone lists the
+            // server's Live TV library in the More sheet (on a phone it opens the channel grid).
+            val visible = indexedDrawerItems(state.items, hideLiveTv = false)
             val moreVisible =
-                indexedDrawerItems(state.moreItems, hideLiveTv).map { IndexedValue(it.index + state.items.size, it.value) }
+                indexedDrawerItems(state.moreItems, hideLiveTv = false).map { IndexedValue(it.index + state.items.size, it.value) }
             val all = visible + moreVisible
             val movies = all.firstOrNull { it.value.tallyPrimaryRank() == 0 }
             val shows = all.firstOrNull { it.value.tallyPrimaryRank() == 1 }

@@ -244,12 +244,16 @@ private fun PhoneLogoOrTitle(
     }
 }
 
-/** `2021 · [PG-13] · 2h 35m · ★ 7.8 · RT 83%`, wrapping between parts. */
+/**
+ * `2021 · [PG-13] · 2h 35m · ★ 7.8 · RT 83%`, wrapping between parts. [boxColor] frames the boxed part (the official
+ * rating): `ruleStrong` on the ground; a page that sets the line over a picture passes a lighter one.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PhoneMetaLine(
     parts: List<DetailMetaPart>,
     modifier: Modifier = Modifier,
+    boxColor: Color = TallyColors.ruleStrong,
 ) {
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -283,7 +287,7 @@ fun PhoneMetaLine(
                             softWrap = false,
                             modifier =
                                 Modifier
-                                    .border(PhoneDimens.hairline, TallyColors.ruleStrong)
+                                    .border(PhoneDimens.hairline, boxColor)
                                     .padding(start = 5.dp, end = 5.dp, top = 1.dp, bottom = 1.dp),
                         )
                     }

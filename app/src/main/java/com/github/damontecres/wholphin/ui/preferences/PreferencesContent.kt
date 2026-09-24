@@ -810,6 +810,13 @@ fun PreferencesContent(
             item {
                 when (val r = release) {
                     is DataLoadingState.Error -> {
+                        // TALLY: begin
+                        if (io.github.scdouglas1999.tally.ui.settings
+                                .TallyReleaseNotesMissing()
+                        ) {
+                            return@item
+                        }
+                        // TALLY: end
                         ErrorMessage(message = "Error", exception = r.exception)
                     }
 

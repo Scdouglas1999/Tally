@@ -49,19 +49,22 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
+import io.github.scdouglas1999.tally.media.kit.DetailMetaPart
+import io.github.scdouglas1999.tally.media.kit.formatRuntime
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneButton
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneEmptyState
+import io.github.scdouglas1999.tally.media.movie.phone.PhoneMetaLine
 import io.github.scdouglas1999.tally.surprise.PosterImage
 import io.github.scdouglas1999.tally.surprise.SurpriseKind
 import io.github.scdouglas1999.tally.surprise.SurpriseState
 import io.github.scdouglas1999.tally.surprise.SurpriseViewModel
-import io.github.scdouglas1999.tally.surprise.metaLine
 import io.github.scdouglas1999.tally.surprise.surpriseResumePercent
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.phone.LocalPhoneContentPadding
 import io.github.scdouglas1999.tally.ui.phone.PhoneTopBar
 import io.github.scdouglas1999.tally.ui.phone.phoneClickable
+import io.github.scdouglas1999.tally.ui.phone.phoneSystemBack
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.PhoneType
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
@@ -95,7 +98,7 @@ internal fun PhoneSurpriseContent(
     val bottom = LocalPhoneContentPadding.current.calculateBottomPadding()
     val filters = state.filters
     Column(modifier = modifier.fillMaxSize().background(TallyColors.ground)) {
-        PhoneTopBar(title = stringResource(R.string.tally_surprise_name))
+        PhoneTopBar(title = stringResource(R.string.tally_surprise_name), onBack = phoneSystemBack())
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -249,15 +252,10 @@ private fun PickColumn(
                     maxLines = 1,
                 )
                 PickTitle(pick)
-                val meta = metaLine(pick, state.filters.kind)
+                val meta = surpriseMetaParts(pick, state.filters.kind)
                 if (meta.isNotEmpty()) {
-                    Text(
-                        text = meta,
-                        style = PhoneType.meta,
-                        color = TallyColors.textSecondary,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    // the film page's meta line: the official rating boxed
+                    PhoneMetaLine(meta)
                 }
                 val genres =
                     pick.data.genres
@@ -299,9 +297,12 @@ private fun PickColumn(
                     primary = true,
                     progress = percent?.let { it / 100f },
                     onClick = onPlay,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.widthIn(max = PhoneDimens.buttonMaxWidth).fillMaxWidth(),
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(PhoneDimens.cardGap)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(PhoneDimens.cardGap),
+                    modifier = Modifier.widthIn(max = PhoneDimens.buttonMaxWidth),
+                ) {
                     PhoneButton(
                         label = stringResource(R.string.tally_surprise_shuffle),
                         glyph = stringResource(R.string.fa_shuffle),
@@ -393,4 +394,33 @@ private fun ChipText(
         color = color,
         maxLines = 1,
     )
+}
+
+/**
+ * The pick's meta line as the film page draws it (`2015 · [R] · 1m 30s · ★ 7.6`): the parts of the TV's [metaLine]
+ * ([io.github.scdouglas1999.tally.surprise.metaLine]) with the official rating boxed.
+ */
+@Composable
+private fun surpriseMetaParts(
+    item: BaseItem,
+    kind: SurpriseKind,
+): List<DetailMetaPart> {
+    val parts = mutableListOf<DetailMetaPart>()
+    item.data.productionYear?.let { parts += DetailMetaPart.Plain(it.toString()) }
+    item.data.officialRating
+        ?.takeIf { it.isNotBlank() }
+        ?.let { parts += DetailMetaPart.Boxed(it) }
+    if (kind == SurpriseKind.SHOWS) {
+        item.data.childCount?.takeIf { it > 0 }?.let { count ->
+            parts += DetailMetaPart.Plain(pluralStringResource(R.plurals.tally_surprise_seasons, count, count))
+        }
+    } else {
+        item.data.runTimeTicks?.takeIf { it > 0L }?.let { ticks ->
+            parts += DetailMetaPart.Plain(formatRuntime(ticks))
+        }
+    }
+    item.data.communityRating?.let { rating ->
+        parts += DetailMetaPart.Plain(stringResource(R.string.tally_surprise_rating, rating))
+    }
+    return parts
 }

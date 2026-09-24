@@ -43,6 +43,7 @@ import io.github.scdouglas1999.tally.media.search.typeTitle
 import io.github.scdouglas1999.tally.ui.phone.LocalPhoneContentPadding
 import io.github.scdouglas1999.tally.ui.phone.PhoneTopBar
 import io.github.scdouglas1999.tally.ui.phone.phoneScrolled
+import io.github.scdouglas1999.tally.ui.phone.phoneSystemBack
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -75,7 +76,11 @@ fun PhoneFavoritesPage(
     val bottom = LocalPhoneContentPadding.current.calculateBottomPadding()
 
     Column(modifier = modifier.fillMaxSize().background(TallyColors.ground)) {
-        PhoneTopBar(title = stringResource(R.string.tally_pages_favorites), scrolled = listState.phoneScrolled)
+        PhoneTopBar(
+            title = stringResource(R.string.tally_pages_favorites),
+            onBack = phoneSystemBack(),
+            scrolled = listState.phoneScrolled,
+        )
         when (val loading = state.loadingState) {
             is FavoritesLoadingState.Error -> {
                 PhoneEmptyState(

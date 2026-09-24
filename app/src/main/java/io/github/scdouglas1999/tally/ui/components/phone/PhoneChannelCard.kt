@@ -20,11 +20,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
-import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.R
 import io.github.scdouglas1999.tally.api.TallyChannel
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyProgramme
+import io.github.scdouglas1999.tally.media.kit.RetryingAsyncImage
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.phone.phoneClickable
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
@@ -64,7 +64,7 @@ fun PhoneChannelCard(
                     .clipToBounds(),
         ) {
             if (!imageUrl.isNullOrBlank()) {
-                AsyncImage(
+                RetryingAsyncImage(
                     model = imageUrl,
                     contentDescription = channel.name,
                     contentScale = ContentScale.Crop,

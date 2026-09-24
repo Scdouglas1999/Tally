@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > Installed version, when this build has no published release (no tally-v release) or its notes
+         cannot be fetched. -->
+    <string name="tally_polish2_no_release_notes">No release notes for this version</string>
+    <!-- The Sports board's section of postponed and canceled games, after the finals ("MLB / POSTPONED"). -->
+    <string name="tally_polish2_state_postponed">Postponed</string>
+</resources>

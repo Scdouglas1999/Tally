@@ -50,6 +50,9 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.data.model.BaseItem
 import com.github.damontecres.wholphin.ui.FontAwesome
 import com.github.damontecres.wholphin.ui.LocalImageUrlService
+import io.github.scdouglas1999.tally.media.kit.CardDetailStyle
+import io.github.scdouglas1999.tally.media.kit.CardFrame
+import io.github.scdouglas1999.tally.media.kit.CardTitleStyle
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
@@ -228,7 +231,7 @@ internal fun PhoneMusicActions(
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.widthIn(max = PhoneDimens.buttonMaxWidth).fillMaxWidth(),
     ) {
         PhoneButton(
             label = stringResource(R.string.tally_music_play),
@@ -390,8 +393,8 @@ internal fun PhoneRundownHeader(
 }
 
 /**
- * A row of square album cards on a phone (`ALBUMS`, `APPEARS ON`, `MORE LIKE THIS`): the heading, then 140dp covers
- * with the title and the year under them, scrolling sideways. Tap opens, long-press opens the menu.
+ * A row of square album cards on a phone (`ALBUMS`, `APPEARS ON`, `MORE LIKE THIS`): the heading, then 140dp kit cards
+ * (the cover over a black label bar with the title and the year), scrolling sideways. Tap opens, long-press opens the menu.
  */
 @Composable
 internal fun PhoneAlbumRow(
@@ -413,54 +416,34 @@ internal fun PhoneAlbumRow(
                 val imageUrl = LocalImageUrlService.current.rememberImageUrl(item)
                 val width = if (wide) PhoneDimens.landscapeCardWidth * 0.8f else PhoneAlbumCard
                 val height = if (wide) width * 9f / 16f else PhoneAlbumCard
-                Column(
-                    modifier =
-                        Modifier
-                            .width(width)
-                            .phoneTouch(
-                                onClick = { item?.let(onClick) },
-                                onLongClick = { item?.let { onLongClick(index, it) } },
-                            ),
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(width, height)
-                                .background(TallyColors.screen)
-                                .border(PhoneDimens.hairline, TallyColors.ruleStrong),
-                    ) {
-                        if (imageUrl != null) {
-                            AsyncImage(
-                                model = imageUrl,
-                                contentDescription = item?.name,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier.fillMaxSize().padding(PhoneDimens.hairline),
+                // the kit's card: the cover over a black label bar with the title and the year, as the other cards
+                CardFrame(
+                    imageUrl = imageUrl,
+                    width = width,
+                    height = height,
+                    contentDescription = item?.name,
+                    onClick = { item?.let(onClick) },
+                    onLongClick = { item?.let { onLongClick(index, it) } },
+                    favorite = item?.favorite == true,
+                    label = {
+                        Text(
+                            text = item?.name ?: "",
+                            style = CardTitleStyle,
+                            color = TallyColors.text,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        val year = item?.data?.productionYear ?: item?.data?.premiereDate?.year
+                        if (year != null) {
+                            Text(
+                                text = year.toString(),
+                                style = CardDetailStyle,
+                                color = TallyColors.muted,
+                                maxLines = 1,
                             )
                         }
-                        if (item?.favorite == true) {
-                            IndicatorSquare(
-                                color = TallyColors.accent,
-                                size = 8.dp,
-                                modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
-                            )
-                        }
-                    }
-                    Text(
-                        text = item?.name ?: "",
-                        style = PhoneType.bodySmall,
-                        color = TallyColors.text,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(top = 6.dp),
-                    )
-                    val year = item?.data?.productionYear ?: item?.data?.premiereDate?.year
-                    Text(
-                        text = year?.toString() ?: "",
-                        style = PhoneType.meta,
-                        color = TallyColors.muted,
-                        maxLines = 1,
-                    )
-                }
+                    },
+                )
             }
         }
     }

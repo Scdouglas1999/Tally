@@ -8,7 +8,10 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -36,6 +39,25 @@ fun PhonePlayerWindow() {
     }
 }
 
+/**
+ * Inside a dialog window shown over the phone player (a [io.github.scdouglas1999.tally.ui.phone.PhoneSheet], a menu):
+ * while the player's window is held ([PhonePlayerWindow]), the status and navigation bars stay hidden in the dialog's
+ * window too. A new window that takes the focus brings the bars back otherwise, until it closes. Nothing anywhere
+ * else (the player not shown, a TV).
+ */
+@Composable
+fun KeepPlayerBarsHidden() {
+    val view = LocalView.current
+    SideEffect {
+        if (!PlayerWindowHold.held) return@SideEffect
+        val window = (view.parent as? DialogWindowProvider)?.window ?: return@SideEffect
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            hide(WindowInsetsCompat.Type.systemBars())
+        }
+    }
+}
+
 private object PlayerWindowHold {
     /** How long the window stays as it is after the last holder leaves, in case another takes it straight away. */
     private const val RELEASE_DELAY_MS = 350L
@@ -44,6 +66,10 @@ private object PlayerWindowHold {
     private var holders = 0
     private var previousOrientation: Int? = null
     private var pendingRelease: Runnable? = null
+
+    /** The player's window is held (landscape, bars hidden), or is about to be let go. */
+    val held: Boolean
+        get() = holders > 0
 
     fun acquire(activity: Activity) {
         pendingRelease?.let { handler.removeCallbacks(it) }

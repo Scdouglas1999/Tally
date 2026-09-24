@@ -15,11 +15,13 @@ class BoardOrganizerTest {
         state: String = "in",
         start: String = "2026-09-21T00:00:00+00:00",
         channelId: String? = null,
+        detail: String = "",
     ) = TallyGame(
         id = id,
         league = league,
         state = state,
         start = start,
+        detail = detail,
         watch = channelId?.let { TallyWatch(channelId = it) },
     )
 
@@ -42,6 +44,31 @@ class BoardOrganizerTest {
         assertEquals(listOf("in", "pre", "post"), rows.map { it.state })
         assertEquals(listOf("in", "pre", "post"), rows.map { it.games.single().id })
         assertEquals(listOf("NFL|in", "NFL|pre", "NFL|post"), rows.map { it.key })
+    }
+
+    @Test
+    fun `postponed and canceled games get their own row after the finals`() {
+        val rows =
+            rows(
+                listOf(
+                    game("ppd", league = "MLB", state = "post", detail = "Postponed"),
+                    game("final", league = "MLB", state = "post", detail = "Final"),
+                    game("canceled", league = "MLB", state = "post", detail = "Canceled"),
+                    game("in", league = "NFL", state = "in"),
+                    game("extra", league = "MLB", state = "post", detail = "Final/10"),
+                ),
+            )
+        assertEquals(listOf("in", "post", BoardOrganizer.POSTPONED), rows.map { it.state })
+        assertEquals(listOf("NFL|in", "MLB|post", "MLB|postponed"), rows.map { it.key })
+        assertEquals(setOf("final", "extra"), rows[1].games.map { it.id }.toSet())
+        assertEquals(setOf("ppd", "canceled"), rows[2].games.map { it.id }.toSet())
+    }
+
+    @Test
+    fun `a postponed game that has not ended yet stays in its own state`() {
+        // Only finished (post) games move: an upcoming game whose detail mentions a delay is still upcoming.
+        assertEquals("pre", BoardOrganizer.rowState(game("pre", state = "pre", detail = "Postponed")))
+        assertEquals(BoardOrganizer.POSTPONED, BoardOrganizer.rowState(game("c", state = "post", detail = "Cancelled")))
     }
 
     @Test

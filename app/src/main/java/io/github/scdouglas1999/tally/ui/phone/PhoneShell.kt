@@ -53,6 +53,12 @@ fun phoneShellActive(): Boolean = LocalTallyFormFactor.current == TallyFormFacto
 val LocalPhoneContentPadding = compositionLocalOf { PaddingValues(0.dp) }
 
 /**
+ * True while the page on screen was opened from the More sheet rather than from one of the bar's tabs: a page that is
+ * a tab's root on the bar (a library with tabs) shows a back arrow then, as every other page the More sheet opens.
+ */
+val LocalPhoneMorePage = compositionLocalOf { false }
+
+/**
  * The status bar's height as top padding, for a page that does not run a picture under the status bar. The phone
  * shell leaves the top to each page: nothing may sit under the status bar except a backdrop or a top bar's ground.
  */
@@ -103,7 +109,10 @@ fun PhoneShell(
         )
 
     Box(modifier = modifier) {
-        CompositionLocalProvider(LocalPhoneContentPadding provides contentPadding) {
+        CompositionLocalProvider(
+            LocalPhoneContentPadding provides contentPadding,
+            LocalPhoneMorePage provides (current == PhoneTab.MORE),
+        ) {
             DestinationContent(
                 destination = destination,
                 preferences = preferences,

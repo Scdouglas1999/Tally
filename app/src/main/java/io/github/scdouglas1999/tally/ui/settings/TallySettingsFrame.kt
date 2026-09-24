@@ -33,8 +33,15 @@ object TallySettings {
 }
 
 /**
+ * Between the kicker and the settings list, as between the other Tally pages' kickers and their content (Favorites'
+ * 16dp): rows scrolled up leave the list this far under the kicker instead of running right under it.
+ */
+internal val SettingsKickerGap = 16.dp
+
+/**
  * The page's title as a kicker (`SETTINGS`, `ADVANCED`): mono label in accent, 24dp from the top, left-aligned
- * with the rows under it (the settings list pads its content by 16dp at the real density, 20dp at the Tally scale).
+ * with the rows under it (the settings list pads its content by 16dp at the real density, 20dp at the Tally scale),
+ * [SettingsKickerGap] above the list.
  */
 @Composable
 fun TallySettingsTitle(
@@ -57,7 +64,7 @@ fun TallySettingsTitle(
                 modifier
                     .fillMaxWidth()
                     .padding(horizontal = horizontalPadding)
-                    .padding(top = 24.dp, bottom = 4.dp),
+                    .padding(top = 24.dp, bottom = SettingsKickerGap),
         )
     }
 }

@@ -17,17 +17,29 @@ data class BoardRow(
 /**
  * Groups and orders board games. Pure logic, no Android dependencies.
  *
- * Board order: live before upcoming before final; within a state, rows that
+ * Board order: live before upcoming before final before postponed; within a state, rows that
  * contain a favorite game first, then leagues alphabetically. Within a row:
- * favorites first, then by start time (newest first for final games).
+ * favorites first, then by start time (newest first for final and postponed games).
+ * Postponed and canceled games (the feed reports them as `post`) get their own rows,
+ * state [POSTPONED] ("MLB / POSTPONED"), after the finals: they are not results.
  */
 object BoardOrganizer {
+    /** The row state of postponed and canceled games. */
+    const val POSTPONED = "postponed"
+
+    private val POSTPONED_DETAIL = Regex("postponed|canceled|cancelled", RegexOption.IGNORE_CASE)
+
+    /** The row [game] is listed in: its own state, or [POSTPONED] for a postponed or canceled game. */
+    fun rowState(game: TallyGame): String =
+        if (game.state == "post" && POSTPONED_DETAIL.containsMatchIn(game.detail)) POSTPONED else game.state
+
     private fun stateOrder(state: String): Int =
         when (state) {
             "in" -> 0
             "pre" -> 1
             "post" -> 2
-            else -> 3
+            POSTPONED -> 3
+            else -> 4
         }
 
     private fun compareStart(
@@ -50,14 +62,14 @@ object BoardOrganizer {
 
         val visible = if (onlyWatchable) games.filter { it.watch != null } else games
         return visible
-            .groupBy { it.league to it.state }
+            .groupBy { it.league to rowState(it) }
             .map { (leagueState, rowGames) ->
                 val (league, state) = leagueState
                 val sorted =
                     rowGames.sortedWith(
                         compareByDescending<TallyGame> { it.isFavorite() }.thenComparator { a, b ->
                             val byStart = compareStart(a.start, b.start)
-                            if (state == "post") -byStart else byStart
+                            if (state == "post" || state == POSTPONED) -byStart else byStart
                         },
                     )
                 BoardRow(

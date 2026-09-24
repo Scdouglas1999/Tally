@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
+import io.github.scdouglas1999.tally.ui.player.controls.phone.KeepPlayerBarsHidden
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 
@@ -28,7 +29,8 @@ private const val SCRIM_ALPHA = 0.6f
 /**
  * The phone's bottom sheet, the form every dialog and menu takes on a phone: square top corners, `groundRaised`,
  * a 1dp `ruleStrong` top edge and a 32x3dp `ruleStrong` grab bar; no elevation, no ripple. Swiping it down, tapping
- * the scrim or Back calls [onDismiss]. The content ends above the gesture bar.
+ * the scrim or Back calls [onDismiss]. The content ends above the gesture bar. Over the player the system bars stay
+ * hidden while it is open.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +52,8 @@ fun PhoneSheet(
         contentWindowInsets = { WindowInsets.navigationBars },
         modifier = modifier,
     ) {
+        // Over the landscape player the bars stay hidden while the sheet is open.
+        KeepPlayerBarsHidden()
         Column(modifier = Modifier.fillMaxWidth()) {
             Box(
                 Modifier

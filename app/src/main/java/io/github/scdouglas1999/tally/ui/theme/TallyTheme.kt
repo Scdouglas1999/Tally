@@ -306,6 +306,15 @@ object PhoneDimens {
 
     /** Focus border, drawn only while a keyboard or D-pad is in use. */
     val focusBorder = 2.dp
+
+    /**
+     * The widest a page's row of full-width buttons runs: on a phone they span the page, on a tablet they stop here
+     * instead of stretching across the screen.
+     */
+    val buttonMaxWidth = 480.dp
+
+    /** At or above this width (a tablet) the games list is laid out in two columns. */
+    val twoColumnMinWidth = 600.dp
 }
 
 /**

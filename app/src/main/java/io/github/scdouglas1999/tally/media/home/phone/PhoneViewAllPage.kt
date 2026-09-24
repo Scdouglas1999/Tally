@@ -53,7 +53,7 @@ import org.jellyfin.sdk.model.api.CollectionType
 /**
  * "View all" of a home row on a phone (`Destination.MoreHomeRow`, upstream's `HomeRowGrid` on the TV): the same
  * [HomeRowGridViewModel] (paged, loads as the grid scrolls) and item menu; a top bar with the row's title and a
- * back arrow, then a grid of the row's cards: three posters across, two landscape cards. Genre and studio rows show
+ * back arrow, then a grid of the row's cards from the top: three posters across, two landscape cards. Genre and studio rows show
  * the library page's genre tiles.
  */
 @Composable
@@ -70,7 +70,9 @@ fun PhoneViewAllPage(
     val state by viewModel.state.collectAsState()
     val contextMenu = rememberContextMenu(preferences, viewModel)
     val viewOptions = destination.config.viewOptions
-    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = destination.initialPosition.coerceAtLeast(0))
+    // The TV opens the grid at the card that was focused in the row; a phone starts at the top (coming back to the
+    // grid, the list keeps where it was: the state is saved).
+    val gridState = rememberLazyGridState()
     val bottom = LocalPhoneContentPadding.current.calculateBottomPadding()
     Column(modifier = modifier.fillMaxSize().background(TallyColors.ground)) {
         PhoneTopBar(
@@ -161,7 +163,9 @@ fun PhoneItemGridPage(
     val state by viewModel.state.collectAsState()
     val contextMenu = rememberContextMenu(preferences, viewModel)
     val viewOptions = destination.viewOptions
-    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = destination.initialPosition.coerceAtLeast(0))
+    // The TV opens the grid at the card that was focused in the row; a phone starts at the top (coming back to the
+    // grid, the list keeps where it was: the state is saved).
+    val gridState = rememberLazyGridState()
     val bottom = LocalPhoneContentPadding.current.calculateBottomPadding()
     Column(modifier = modifier.fillMaxSize().background(TallyColors.ground)) {
         PhoneTopBar(

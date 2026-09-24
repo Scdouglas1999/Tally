@@ -48,10 +48,12 @@ import androidx.lifecycle.ViewModel
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.data.ServerRepository
+import com.github.damontecres.wholphin.preferences.AppThemeColors
 import com.github.damontecres.wholphin.services.SetupDestination
 import com.github.damontecres.wholphin.services.SetupNavigationManager
 import com.github.damontecres.wholphin.services.hilt.IoDispatcher
 import com.github.damontecres.wholphin.ui.findActivity
+import com.github.damontecres.wholphin.ui.theme.LocalTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
@@ -64,6 +66,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jellyfin.sdk.model.serializer.toUUIDOrNull
 import timber.log.Timber
 import javax.inject.Inject
@@ -74,6 +77,20 @@ import javax.inject.Inject
  */
 private object TallyLaunchSession {
     var showing by mutableStateOf(true)
+}
+
+/**
+ * The TV home page tells the launch card it has settled: its rows are on screen (the games row's first board is in,
+ * or its own wait ran out) or it failed. On a TV the card holds until then after sign-in, [HOME_SETTLE_MAX_MS] at
+ * most, so the viewer goes from the lamp straight to a settled home instead of a moment of LOADING.
+ */
+object TallyLaunchHold {
+    internal var homeSettled by mutableStateOf(false)
+        private set
+
+    fun markHomeSettled() {
+        if (!homeSettled) homeSettled = true
+    }
 }
 
 @HiltViewModel
@@ -87,6 +104,10 @@ class TallyLaunchViewModel
         /** The app has left upstream's Loading step (home, the server list or the user list are all "ready"). */
         val ready: Boolean
             get() = setupNavigationManager.backStack.lastOrNull().let { it != null && it != SetupDestination.Loading }
+
+        /** Signed in: the app's pages (home) are what comes after the card, not the server or user list. */
+        val signedIn: Boolean
+            get() = setupNavigationManager.backStack.lastOrNull() is SetupDestination.AppContent
 
         /** The server being connected to, when this TV has one saved. */
         suspend fun serverName(): String? =
@@ -113,7 +134,7 @@ class TallyLaunchViewModel
 
 /**
  * The launch card: the tally lamp and the TALLY wordmark on an opaque ground, above everything. The lamp sputters
- * while the app gets ready and catches once it is; when the catch is complete the card crossfades away (no top
+ * while the app gets ready and catches once it is (on a TV, once home has settled: [TallyLaunchHold]); when the catch is complete the card crossfades away (no top
  * accent line: the user preferred the card without it). Keys are swallowed while it is up.
  */
 @Composable
@@ -126,10 +147,19 @@ fun TallyLaunch(modifier: Modifier = Modifier) {
     var serverName by remember { mutableStateOf<String?>(null) }
     val alpha = remember { Animatable(1f) }
 
+    // the Tally home page is the one that says it has settled
+    val tv = LocalTallyFormFactor.current == TallyFormFactor.TV && LocalTheme.current == AppThemeColors.TALLY
     LaunchedEffect(Unit) {
         delay(DARK_MS)
         lamp = LampState.Sputtering
         snapshotFlow { viewModel.ready }.first { it }
+        if (tv && viewModel.signedIn) {
+            // a TV: the lamp catches once home has settled under the card (or after HOME_SETTLE_MAX_MS)
+            val waitStart = System.currentTimeMillis()
+            val settled =
+                withTimeoutOrNull(HOME_SETTLE_MAX_MS) { snapshotFlow { TallyLaunchHold.homeSettled }.first { it } }
+            Timber.d("Tally launch: home settled=%s, held %d ms", settled != null, System.currentTimeMillis() - waitStart)
+        }
         lamp = LampState.Lit
     }
     LaunchedEffect(Unit) {
@@ -269,3 +299,6 @@ private val CONNECTING_TOP = 120.dp
 private const val DARK_MS = 120L
 private const val CONNECTING_AFTER_MS = 4_000L
 private const val FADE_MS = 250
+
+/** The longest the card waits for home to settle once the app is ready: the home page's own wait for its games row. */
+private const val HOME_SETTLE_MAX_MS = 6_000L

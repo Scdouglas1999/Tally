@@ -88,6 +88,7 @@ import io.github.scdouglas1999.tally.media.home.phoneHomeImageHeight
 import io.github.scdouglas1999.tally.media.home.rememberTallyRowSettled
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsHost
 import io.github.scdouglas1999.tally.media.kit.ItemDialogsState
+import io.github.scdouglas1999.tally.media.kit.RetryingAsyncImage
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneButton
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneCardRow
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneEmptyState
@@ -567,7 +568,7 @@ internal fun PhoneHeroPicture(
                 .clipToBounds(),
     ) {
         if (url != null) {
-            AsyncImage(
+            RetryingAsyncImage(
                 model = url,
                 contentDescription = description,
                 contentScale = ContentScale.Crop,
@@ -681,7 +682,7 @@ private fun ItemHero(
         val resumable = !item.played && position > 0L && percent in 1..99
         Row(
             horizontalArrangement = Arrangement.spacedBy(PhoneDimens.cardGap),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.widthIn(max = PhoneDimens.buttonMaxWidth).fillMaxWidth(),
         ) {
             if (item.type.playable) {
                 PhoneButton(
@@ -749,7 +750,7 @@ private fun GameHero(
         Spacer(Modifier.height(4.dp))
         Row(
             horizontalArrangement = Arrangement.spacedBy(PhoneDimens.cardGap),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.widthIn(max = PhoneDimens.buttonMaxWidth).fillMaxWidth(),
         ) {
             PhoneButton(
                 label =

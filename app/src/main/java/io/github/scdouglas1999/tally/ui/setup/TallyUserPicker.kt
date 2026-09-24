@@ -289,7 +289,11 @@ fun TallyUserPicker(
                 TallyPinEntry(
                     onTextChange = { if (it == current.user.pin) trySwitchUser(current.user) },
                     onClickServerAuth = { showSignIn(current.user) },
-                    modifier = Modifier.align(Alignment.Center),
+                    // a phone: the pad sits at the top of the step, under its title
+                    modifier =
+                        Modifier.align(
+                            if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) Alignment.TopCenter else Alignment.Center,
+                        ),
                 )
             }
         }

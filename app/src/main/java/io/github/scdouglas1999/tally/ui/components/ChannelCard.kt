@@ -20,10 +20,10 @@ import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Glow
 import androidx.tv.material3.Surface
-import coil3.compose.AsyncImage
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import io.github.scdouglas1999.tally.api.TallyChannel
 import io.github.scdouglas1999.tally.api.TallyGame
+import io.github.scdouglas1999.tally.media.kit.RetryingAsyncImage
 import io.github.scdouglas1999.tally.media.kit.tallyClickable
 import io.github.scdouglas1999.tally.ui.formfactor.tallyFocusVisible
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
@@ -110,7 +110,7 @@ fun ChannelCard(
                         .background(TallyColors.screen),
             ) {
                 if (!imageUrl.isNullOrBlank()) {
-                    AsyncImage(
+                    RetryingAsyncImage(
                         model = imageUrl,
                         contentDescription = channel.name,
                         contentScale = ContentScale.Crop,
