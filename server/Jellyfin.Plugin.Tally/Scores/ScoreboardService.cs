@@ -13,7 +13,7 @@ namespace Jellyfin.Plugin.Tally.Scores;
 
 /// <summary>
 /// Live game data from ESPN's public scoreboard feed. Pull-through cache, no background
-/// polling: nothing is fetched unless a client is actually looking at scores. Each league
+/// polling: nothing is fetched unless a client is actually looking at scores, or the DVR has a rule or a job. Each league
 /// refreshes on its own clock — seconds while a game is live, minutes otherwise.
 /// </summary>
 public sealed class ScoreboardService
@@ -38,6 +38,7 @@ public sealed class ScoreboardService
     private readonly ConcurrentDictionary<string, LeagueCache> _cache = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, string> _errors = new(StringComparer.OrdinalIgnoreCase);
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
+    private readonly ConcurrentDictionary<string, LeagueCache> _upcoming = new(StringComparer.OrdinalIgnoreCase);
 
     public ScoreboardService(IHttpClientFactory httpClientFactory, ILogger<ScoreboardService> logger)
     {
@@ -219,6 +220,50 @@ public sealed class ScoreboardService
         }
 
         throw failure ?? new HttpRequestException("no scoreboard host answered");
+    }
+
+    /// <summary>
+    /// Games of the next <paramref name="days"/> days in <paramref name="leagues"/>, for the DVR's team rules (the
+    /// regular board only covers today, or this week for weekly boards). One request per league and day, cached for
+    /// three hours; only called while a team rule exists.
+    /// </summary>
+    public async Task<List<GameInfo>> GetUpcomingAsync(IReadOnlyCollection<string> leagues, int days, CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var result = new List<GameInfo>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var league in leagues)
+        {
+            for (var d = 1; d <= days; d++)
+            {
+                var day = TimeZoneInfo.ConvertTime(now, Eastern).AddDays(d).ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+                var key = league + "@" + day;
+                if (!_upcoming.TryGetValue(key, out var cached) || now - cached.FetchedAt >= cached.Ttl)
+                {
+                    try
+                    {
+                        var json = await FetchBoardAsync(league, day, cancellationToken).ConfigureAwait(false);
+                        cached = new LeagueCache(EspnScoreboardParser.Parse(json, league), now, TimeSpan.FromHours(3));
+                    }
+                    catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+                    {
+                        _logger.LogInformation("JellyTV scores: {League} board for {Day} unavailable: {Message}", league, day, ex.Message);
+                        cached = new LeagueCache(cached?.Games ?? new List<GameInfo>(), now, TimeSpan.FromMinutes(20));
+                    }
+
+                    _upcoming[key] = cached;
+                }
+
+                result.AddRange(cached.Games.Where(g => seen.Add(g.Id)).Select(g => g.Clone()));
+            }
+        }
+
+        foreach (var stale in _upcoming.Where(kv => now - kv.Value.FetchedAt > TimeSpan.FromDays(2)).Select(kv => kv.Key).ToList())
+        {
+            _upcoming.TryRemove(stale, out _);
+        }
+
+        return result;
     }
 
     private sealed record LeagueCache(List<GameInfo> Games, DateTimeOffset FetchedAt, TimeSpan Ttl);

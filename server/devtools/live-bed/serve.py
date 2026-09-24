@@ -11,9 +11,12 @@ front of the best source (A) that can be told to slow down, stall or fail.
          /C/master.m3u8                1080p30 5 Mbps + 540p30 1.2 Mbps, full master attributes
          /SOLO/index.m3u8              720p30, a channel with one candidate
          /bed.m3u                      the M3U source (A via the proxy)
+         /games.m3u                    channels named after fictional games, listed once switched on (the DVR tests:
+                                       a game whose stream "appears" late)
   :8081  /A/..., /C/...                proxy to :8080 under control of /ctl (the M3U routes A and C through it)
          /ctl?mode=normal|slow|stall|fail|down[&kbps=N][&src=A|C]   (src defaults to A)
          /ctl                          current modes (JSON)
+         /ctl?game=<name>&on=1|0       list or unlist a game's channels in /games.m3u (see GAMES)
 
 Every request is logged to stdout as JSON lines (time, path, status, bytes, seconds), which is what the
 measurements in the README are computed from.
@@ -143,6 +146,20 @@ MASTERS = {
           "lo/index.m3u8\n"),
 }
 
+# Fictional games for /games.m3u: channel names that the plugin's matcher ties to the score simulator's games
+# (tally/dev/score-sim.py add ...). Entries sharing a tvg-id become one channel with several streams.
+GAMES = {
+    # three streams: the ladder, with the proxy in front of A and C for failovers
+    "otters": [("Riverton Otters at Lakeside Herons HD", "game.otters", 8081, "A/index.m3u8"),
+               ("Riverton Otters at Lakeside Herons", "game.otters", 8080, "B/master.m3u8"),
+               ("Riverton Otters at Lakeside Herons BACKUP", "game.otters", 8081, "C/master.m3u8")],
+    # one stream, one rendition: the plain pass-through path
+    "hawks": [("Harbor Hawks at Mesa Owls", "game.hawks", 8080, "SOLO/index.m3u8")],
+    "bears": [("Pine Bears at Dune Foxes", "game.bears", 8080, "B/master.m3u8?g=bears")],
+    "cranes": [("Delta Cranes at Summit Elks", "game.cranes", 8080, "SOLO/index.m3u8?g=cranes")],
+}
+GAMES_ON = set()
+
 ROUTE = re.compile(r"^/(A|B|C/hi|C/lo|SOLO)/(index\.m3u8|seg_(\d+)\.ts)$")
 LOG_LOCK = threading.Lock()
 
@@ -180,6 +197,15 @@ class Origin(BaseHTTPRequestHandler):
                         f'#EXTINF:-1 tvg-id="bed.game" group-title="Live Bed",Bed Game\nhttp://{host}:8080/B/master.m3u8\n'
                         f'#EXTINF:-1 tvg-id="bed.game" group-title="Live Bed",Bed Game BACKUP\nhttp://{host}:8081/C/master.m3u8\n'
                         f'#EXTINF:-1 tvg-id="bed.solo" group-title="Live Bed",Bed Solo\nhttp://{host}:8080/SOLO/index.m3u8\n').encode()
+            elif path == "/games.m3u":
+                host = self.headers.get("Host", "127.0.0.1:8080").split(":")[0]
+                code, ctype = 200, "audio/x-mpegurl"
+                lines = ["#EXTM3U"]
+                for game in sorted(GAMES_ON):
+                    for name, tvg, port, rel in GAMES[game]:
+                        lines.append(f'#EXTINF:-1 tvg-id="{tvg}" group-title="Games",{name}')
+                        lines.append(f"http://{host}:{port}/{rel}")
+                body = ("\n".join(lines) + "\n").encode()
             elif path in ("/B/master.m3u8", "/C/master.m3u8"):
                 code, body, ctype = 200, MASTERS[path[1]].encode(), "application/vnd.apple.mpegurl"
             else:
@@ -223,13 +249,18 @@ class Proxy(BaseHTTPRequestHandler):
         path, _, query = self.path.partition("?")
         if path == "/ctl":
             q = dict(kv.split("=", 1) for kv in query.split("&") if "=" in kv)
+            if q.get("game") in GAMES:
+                (GAMES_ON.add if q.get("on", "1") == "1" else GAMES_ON.discard)(q["game"])
+                log(srv="proxy", ctl="game", game=q["game"], on=q["game"] in GAMES_ON)
             if "mode" in q:
                 src = q.get("src", "A")
                 Control.modes[src] = (q["mode"], int(q.get("kbps", Control.modes.get(src, ("", 4000))[1])))
                 for k in [k for k in Control.frozen if k.startswith("/" + src + "/")]:
                     del Control.frozen[k]
                 log(srv="proxy", ctl=q["mode"], src=src, kbps=Control.modes[src][1])
-            self.send_simple(200, json.dumps({k: {"mode": m, "kbps": b} for k, (m, b) in Control.modes.items()}).encode(), "application/json")
+            status = {k: {"mode": m, "kbps": b} for k, (m, b) in Control.modes.items()}
+            status["games"] = sorted(GAMES_ON)
+            self.send_simple(200, json.dumps(status).encode(), "application/json")
             return
         src = path.split("/")[1] if path.count("/") >= 2 else ""
         mode, kbps = Control.modes.get(src, ("normal", 4000))

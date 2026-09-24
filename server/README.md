@@ -132,7 +132,7 @@ XMLTV endpoints served by the plugin). Once registered:
 
 - The built-in **Live TV** home-screen card and native **Guide** show Tally
   channels on every client (web, Android TV, Roku, Swiftfin…).
-- Jellyfin's own DVR/record features work on the streams.
+- Jellyfin's own DVR/record features work on the streams (Tally's own DVR, below, records by the game instead).
 - If you don't see the Live TV row on the home screen, enable it under
   *user icon → Display → Home screen sections → Live TV*, and make sure
   Dashboard → Live TV is enabled.
@@ -158,12 +158,64 @@ mode.
 
 Data comes from ESPN's public scoreboard feed, fetched **by the server** (one
 cached request per league, every ~12 s while a game is live and only while
-someone has Tally open). The default leagues are **NFL and MLB**; admins can
+someone has Tally open or a recording is scheduled). The default leagues are **NFL and MLB**; admins can
 add others (`basketball/nba`, `hockey/nhl`, `football/college-football`,
 `soccer/eng.1`…) or switch the
 whole feature off under **Settings → Live scores**; off means the server makes
 no third-party requests of its own. Team logos are loaded by the browser from
 ESPN's CDN.
+
+## Recording games (DVR)
+
+The server records games itself, in the background, from the channels Tally already matches to each game. Jellyfin's
+own Live TV DVR works from guide times and a fixed end; Tally knows when the game really starts and ends (the
+scoreboard), which channel carries it (found late, too: web page sources often list a game's stream only near game
+time) and follows the live ladder's continuous playlist through source switches.
+
+- **What to record**: one game, or every game of a team (in its league; college teams can be followed across
+  sports). Anyone with Jellyfin's *Allow Live TV recording management* permission can record (admins always can);
+  recordings are shared by the whole server and remember who asked for them. In the web UI: **Settings →
+  Recordings**; for apps: the API below.
+- **Start**: when the game goes live, or up to 15 minutes before the listed start once a channel carries it. No
+  channel an hour after the listed start: the job fails with "No stream found for this game". Postponed and
+  canceled games cancel their job.
+- **While recording**: segments of the channel's `/JellyTV/Live/{id}.m3u8` playlist (the same fetch viewers share, so
+  a recording does not double the upstream traffic) are written to `<recordings>/.tally-work/<job>/` as they
+  arrive. Breaks the ladder does not already hide (a restart, a gap, a new channel) are spliced so the recording stays
+  one continuous timeline. `/JellyTV/Recordings/{job}/playlist.m3u8` (signed, EVENT type) plays everything recorded
+  so far and keeps growing: start from the first minute and catch up (**Watch from start** in Settings → Recordings).
+- **Stop**: final plus the post-roll (5 minutes by default), the maximum length (6 hours), the free-space reserve, or
+  cancel (what was recorded is kept).
+- **Finish**: Jellyfin's own ffmpeg remuxes the segments (stream copy, no transcode) into
+  `<recordings>/<League>/<Away> at <Home> - <yyyy-MM-dd>.mp4`, with an NFO (title "Away at Home", date, league,
+  teams, never the score) and poster, backdrop and thumb art drawn from the game, then Jellyfin scans the folder.
+  MP4 because Jellyfin web direct-plays it in every browser (no server remux), and the Tally app's players
+  direct-play it too; MKV is the fallback for codecs MP4 cannot hold. When the drive has no room for a second copy
+  the segments are joined in place into a `.ts` instead. The work folder is deleted once the file is verified.
+- **Restart**: a recording resumes after a Jellyfin restart (the time the server was down is missing, joined without
+  a jump); if the game ended while it was down, the recording is finished with what it has.
+- **Space**: the folder defaults to `Tally Recordings` next to Jellyfin's data folder; pick a drive with room in
+  Settings → Recordings (the page shows its free space). A recording starts only if the estimate (the stream's
+  measured bitrate × the rest of a typical game: MLB 3 h, NFL and college football 3.5 h, NBA and NHL 2.5 h, soccer
+  2 h, others 3 h) leaves the reserve free (10 GB by default), and stops, keeping what it has, if the drive falls
+  below the reserve. At most 3 recordings run at once (settable).
+- **Retention**: per team "keep the last N games", and "delete recordings after N days" (default: keep everything).
+  A recording someone is watching is never deleted.
+- **Library**: Settings → Recordings offers **Create a Sports Recordings library** when no library covers the folder
+  (a Movies library with every internet metadata and image fetcher off, so the NFO and art stay). Nothing is created
+  without that click.
+
+Client API v1 (authenticated): `GET /JellyTV/Client/v1/recordings` (rules and jobs, and whether the caller may
+record), `POST /JellyTV/Client/v1/recordings` with `{"gameId": "…"}` or `{"teamId": "…", "league": "baseball/mlb"
+| "*", "keepLast": 0}`, `DELETE …/recordings/jobs/{id}` (cancel; a recording stops and keeps what it has),
+`DELETE …/recordings/jobs/{id}/recording` (delete a finished recording, its file and library item),
+`DELETE …/recordings/rules/{id}`, `GET …/recordings/storage[?gameId=…]` (folder, free, used, reserve, estimate).
+Changes without the permission answer 403 with `{"error": "…"}`. On the board each game with a job gains
+`recording: {state, jobId, startOverPath?, itemId?, reason?}`, and `/info` lists the `dvr` feature. Admin:
+`GET/POST /JellyTV/Recordings/Settings`, `GET /JellyTV/Recordings/Folder?path=`, `POST /JellyTV/Recordings/Library`.
+
+While a recording rule or job exists, the server reads the scoreboard itself (the same cached requests the Games
+board makes, plus the next week's boards of the leagues team rules follow, every three hours).
 
 ## TVs and native apps
 

@@ -84,6 +84,15 @@ public sealed class GameArtService
         }
     }
 
+    /// <summary>The backdrop for a game the caller already has (the DVR's fanart for a finished recording, whose game
+    /// may have left the board). Not cached.</summary>
+    public async Task<byte[]> RenderGameAsync(GameInfo game, CancellationToken ct)
+    {
+        var away = await GetLogoAsync(game.Away?.Logo, ct).ConfigureAwait(false);
+        var home = await GetLogoAsync(game.Home?.Logo, ct).ConfigureAwait(false);
+        return Render(game, away, home);
+    }
+
     /// <summary>A flat ground-colored frame (unknown game, or no logos and no colors).</summary>
     public static byte[] RenderPlain()
     {

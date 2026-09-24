@@ -66,6 +66,9 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         services.AddSingleton<EventFeed>();
         services.AddSingleton<LiveTvItemIndex>();
         services.AddSingleton<IBoardEnricher, ScoresEnricher>();
+        services.AddSingleton<Dvr.DvrService>();
+        services.AddSingleton<IBoardEnricher, Dvr.DvrEnricher>();
+        services.AddHostedService(sp => sp.GetRequiredService<Dvr.DvrService>());
         services.AddHostedService(sp => sp.GetRequiredService<Live.LiveLadderService>());
         services.AddHostedService<RefreshService>();
         services.AddHostedService<LiveTvRegistrationService>();

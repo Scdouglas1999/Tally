@@ -33,7 +33,7 @@ public static class EspnScoreboardParser
         {
             try
             {
-                var game = ParseEvent(ev, sport, league);
+                var game = ParseEvent(ev, sport, league, leaguePath);
                 if (game != null)
                 {
                     games.Add(game);
@@ -48,7 +48,7 @@ public static class EspnScoreboardParser
         return games;
     }
 
-    private static GameInfo? ParseEvent(JsonElement ev, string sport, string league)
+    private static GameInfo? ParseEvent(JsonElement ev, string sport, string league, string leaguePath)
     {
         if (!ev.TryGetProperty("competitions", out var comps) || comps.GetArrayLength() == 0)
         {
@@ -61,7 +61,8 @@ public static class EspnScoreboardParser
             Id = Str(ev, "id") ?? string.Empty,
             Sport = sport,
             League = league,
-            Name = Str(ev, "shortName") ?? Str(ev, "name") ?? string.Empty
+            Name = Str(ev, "shortName") ?? Str(ev, "name") ?? string.Empty,
+            LeaguePath = leaguePath
         };
 
         if (DateTimeOffset.TryParse(Str(ev, "date"), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var start))
@@ -78,6 +79,7 @@ public static class EspnScoreboardParser
             {
                 game.State = Str(type, "state") ?? "pre";
                 game.Detail = Str(type, "shortDetail") ?? Str(type, "detail") ?? string.Empty;
+                game.StatusName = Str(type, "name") ?? string.Empty;
             }
         }
 

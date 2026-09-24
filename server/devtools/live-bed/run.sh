@@ -6,7 +6,7 @@
 #   ./ctl.sh slow 4000 | stall | fail | down | normal     steer the proxy in front of source A
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
-NAME=tally-live-bed
+NAME=${BED_NAME:-tally-live-bed}   # BED_NAME: run a second bed next to another one
 if [ "${1:-}" = stop ]; then docker rm -f $NAME >/dev/null 2>&1 || true; echo stopped; exit 0; fi
 MEDIA="${1:-$HOME/.cache/tally-live-bed}"
 [ -d "$MEDIA/A" ] || { echo "no media in $MEDIA - run make-media.sh first" >&2; exit 1; }
