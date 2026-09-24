@@ -112,6 +112,8 @@ data class TallyGame(
     val backdropPath: String? = null,
     /** Per-module additions keyed by module name. Feature modules read their own key; everything else ignores it. */
     val extras: Map<String, JsonElement> = emptyMap(),
+    /** The server DVR's job for this game (feature `dvr`); null when there is none. Never carries a score. */
+    val recording: TallyGameRecording? = null,
 ) {
     val isLive: Boolean get() = state == "in"
 
@@ -121,6 +123,20 @@ data class TallyGame(
     val isUpcoming: Boolean get() = state == "pre"
     val isFinal: Boolean get() = state == "post"
 }
+
+/** A game's recording as the board shows it (the DVR's most relevant job for the game). */
+@Serializable
+data class TallyGameRecording(
+    /** scheduled | waiting | recording | finishing | done | failed | canceled */
+    val state: String = "",
+    val jobId: String = "",
+    /** Root-relative, signed HLS of everything recorded so far (an EVENT playlist that keeps growing), while recording. */
+    val startOverPath: String? = null,
+    /** The Jellyfin library item of the finished recording, once the server has scanned it. */
+    val itemId: String? = null,
+    /** Why it is waiting, why it failed, or why it stopped early. */
+    val reason: String? = null,
+)
 
 @Serializable
 data class TallyProgramme(

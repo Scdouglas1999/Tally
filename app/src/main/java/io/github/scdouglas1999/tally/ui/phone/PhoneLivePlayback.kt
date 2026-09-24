@@ -44,6 +44,7 @@ import dagger.hilt.android.EntryPointAccessors
 import io.github.scdouglas1999.tally.api.TallyEvent
 import io.github.scdouglas1999.tally.api.TallyTeam
 import io.github.scdouglas1999.tally.data.isFollowed
+import io.github.scdouglas1999.tally.dvr.ui.rememberStartOverAction
 import io.github.scdouglas1999.tally.ui.CornerBoardEntryPoint
 import io.github.scdouglas1999.tally.ui.TuneIn
 import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
@@ -135,9 +136,15 @@ fun PhoneLivePlayback(
 
     val gamesLabel = stringResource(R.string.tally_phone_sports_games)
     val boxLabel = stringResource(R.string.tally_phone_sports_box_score)
+    val startOverLabel = stringResource(R.string.tally_dvr_watch_from_start)
+    // While the game on screen is being recorded: WATCH FROM THE START, first in the controls' top bar.
+    val startOver = rememberStartOverAction(game)
     val topBar = remember { LiveTopBarActions() }
     topBar.actions =
         buildList {
+            if (startOver != null) {
+                add(LiveTopBarAction(R.string.tally_dvr_fa_start_over, startOverLabel, startOver))
+            }
             if (switcherGames.isNotEmpty()) {
                 add(LiveTopBarAction(R.string.tally_phone_sports_fa_trophy, gamesLabel) { panel = LivePanel.GAMES })
             }

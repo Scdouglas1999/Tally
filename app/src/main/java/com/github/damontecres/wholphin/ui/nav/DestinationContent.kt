@@ -497,6 +497,16 @@ fun DestinationContent(
                 modifier = modifier,
             )
         }
+
+        // TALLY: end
+
+        // TALLY: begin
+        is Destination.TallyStartOver -> {
+            io.github.scdouglas1999.tally.dvr.ui.StartOverPage(
+                destination = destination,
+                modifier = modifier,
+            )
+        }
         // TALLY: end
     }
 }

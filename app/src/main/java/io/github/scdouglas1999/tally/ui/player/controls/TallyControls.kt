@@ -328,6 +328,16 @@ fun TallyControlsRow(
             horizontalArrangement = Arrangement.spacedBy(ButtonGap),
             modifier = Modifier.align(Alignment.TopEnd).focusGroup(),
         ) {
+            // The live player of a game that is being recorded: WATCH FROM THE START.
+            io.github.scdouglas1999.tally.dvr.ui.LocalStartOverAction.current?.let { startOver ->
+                TallyButton(
+                    label = stringResource(R.string.tally_dvr_from_start_short),
+                    glyph = stringResource(R.string.tally_dvr_fa_start_over),
+                    onClick = startOver,
+                    onFocused = interaction,
+                    modifier = down.padding(end = 14.dp),
+                )
+            }
             currentSegment?.let { segment ->
                 TallyButton(
                     label = stringResource(segment.type.skipStringRes),

@@ -50,8 +50,14 @@ enum class TallyTab(
     GAMES(R.string.tally_tab_games),
     CHANNELS(R.string.tally_tab_channels),
     MULTIVIEW(R.string.tally_tab_multiview),
+
+    /** Only when the server records (the plugin's `dvr` feature): [tallyTabs]. */
+    RECORDINGS(R.string.tally_tab_recordings),
     SETTINGS(R.string.tally_tab_settings),
 }
+
+/** The Sports tabs this server offers: RECORDINGS only when it records. */
+fun tallyTabs(dvr: Boolean): List<TallyTab> = TallyTab.entries.filter { dvr || it != TallyTab.RECORDINGS }
 
 /**
  * Tally top bar: the wordmark, focusable tabs, and the clock.
