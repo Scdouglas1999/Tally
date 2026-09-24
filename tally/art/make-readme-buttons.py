@@ -46,6 +46,6 @@ def button(name, label, fill, ink, frame):
     print(OUT + name, width, "x", HEIGHT)
 
 
-button("button-download.svg", "DOWNLOAD FOR ANDROID TV", AMBER, GROUND, AMBER)
+button("button-download.svg", "DOWNLOAD FOR ANDROID", AMBER, GROUND, AMBER)
 button("button-install.svg", "HOW TO INSTALL", GROUND, TEXT, FRAME)
 button("button-releases.svg", "WHAT'S NEW", GROUND, TEXT, FRAME)

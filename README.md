@@ -1,7 +1,7 @@
 <p align="center"><img src="tally/readme/header.png" alt="Tally" width="100%"/></p>
 
 <p align="center">
-  <a href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk"><img src="tally/readme/button-download.svg" alt="Download for Android TV" height="44"/></a>
+  <a href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk"><img src="tally/readme/button-download.svg" alt="Download for Android" height="44"/></a>
   <a href="#install"><img src="tally/readme/button-install.svg" alt="How to install" height="44"/></a>
   <a href="https://github.com/Scdouglas1999/Tally/releases/latest"><img src="tally/readme/button-releases.svg" alt="What's new" height="44"/></a>
 </p>
@@ -10,8 +10,8 @@
 
 ## Why it looks like this
 
-Tally is a Jellyfin app for Android TV. It plays your films, shows and music, and tonight's games if your server
-has live TV.
+Tally is a Jellyfin app for Android TV and Android phones. It plays your films, shows and music, and tonight's games
+if your server has live TV.
 
 A tally light is the small lamp on top of a studio camera. When it's lit, that camera is on air. Tally borrows the
 whole feel of a control room: a dark screen, square edges, clear type, and a single amber light for whatever has
@@ -19,8 +19,8 @@ your attention, the thing you've selected or the game that's live right now. Eve
 
 When the app starts, its light sputters for a moment and catches once your server answers.
 
-The type is IBM Plex, set large enough to read from across the room. Focus is always a solid frame around the thing
-you've selected, so you never have to hunt for it.
+The type is IBM Plex, set large enough to read from across the room. On a TV, focus is always a solid frame around
+the thing you've selected, so you never have to hunt for it.
 
 ## Your library
 
@@ -65,6 +65,11 @@ the clock. When a team scores, the numbers roll over like an old stadium scorebo
 The games come from a public scoreboard feed. The video comes from your own live TV sources (M3U playlists, XMLTV
 guides, HLS streams), added in the plugin's settings. Tally doesn't provide any channels.
 
+When your sources have more than one stream of the same game, the plugin keeps them all and plays the best one:
+the highest frame rate and resolution that your server can download fast enough. If that stream starts to
+stall, the next part of the game comes from the next stream in line, and the picture keeps going without a
+reload. After a few steady minutes it goes back to the better stream, if that one has recovered.
+
 ## Watching together
 
 <p align="center">
@@ -72,8 +77,9 @@ guides, HLS streams), added in the plugin's settings. Tally doesn't provide any 
   <img src="tally/readme/surprise.jpg" alt="Surprise me picking tonight's film" width="49%"/>
 </p>
 
-Start a watch party from the home screen and friends on the same server can join from their own TVs. Play, pause
-and skip happen for everyone at once. It runs on Jellyfin's SyncPlay, so nothing extra is needed on the server.
+Start a watch party from the home screen and friends on the same server can join from their own TVs or phones.
+Play, pause and skip happen for everyone at once. It runs on Jellyfin's SyncPlay, so nothing extra is needed on the
+server.
 
 If you're watching in the same house, Tally shows what's playing on the other TVs, and you can send what you're
 watching to another one and pick it up there.
@@ -81,11 +87,28 @@ watching to another one and pick it up there.
 And for the nights nobody can decide, **Surprise me** picks a film or a show from your library. Narrow it to
 something under two hours, kid-friendly or unwatched, or a genre, and shuffle until something sticks.
 
+## On your phone
+
+<p align="center"><img src="tally/readme/phone.webp" alt="Tally on a phone: the home screen, a film's page, a game's sheet, and now playing with synced lyrics" width="100%"/></p>
+<p align="center"><img src="tally/readme/phone-live.webp" alt="The Sports list on a phone, and a live game in the landscape player with the score bug" width="100%"/></p>
+
+The same app runs on Android phones. On a TV nothing changes; on a phone, every page is laid out for one hand:
+
+- **A bar along the bottom** for Home, Movies, Shows, Sports and More.
+- **Touch.** Tap to open or play. Press and hold anything for the menu that a long press of OK opens on the TV.
+  Menus and dialogs slide up from the bottom of the screen.
+- **Portrait pages, a landscape player.** Browsing stays upright; the player turns sideways and fills the screen,
+  with the score bug on live games.
+- **Music in the background.** Leave the app or lock the phone and the album keeps playing, with controls in the
+  notification and on the lock screen.
+
+Sports, multiview and watch parties work on the phone too, from the same server.
+
 ## Everything else
 
 Under the new look, Tally is built on [Wholphin](https://github.com/damontecres/Wholphin), so it plays nearly
-anything Jellyfin can serve. It direct plays when your TV can handle the file and transcodes when it can't. You
-also get subtitle styling, ExoPlayer or MPV playback, profiles with PINs, a customizable home screen and
+anything Jellyfin can serve. It direct plays when your TV or phone can handle the file and transcodes when it
+can't. You also get subtitle styling, ExoPlayer or MPV playback, profiles with PINs, a customizable home screen and
 [Seerr](https://github.com/seerr-team/seerr) requests.
 
 When a film in a collection ends, Tally offers the next one. Otherwise it suggests something like it. And when a
@@ -93,14 +116,19 @@ new version of Tally comes out, the app offers to update itself the next time yo
 
 ## Install
 
-Tally runs on Android TV, Google TV, Fire TV and the Nvidia Shield (Android 6 or newer). It isn't in an app store
-yet, so you install it with **Downloader**, a free app most TVs have in their store:
+Tally runs on Android TV, Google TV, Fire TV and the Nvidia Shield, and on Android phones (Android 6 or newer). One
+download covers all of them. It isn't in an app store yet.
+
+**On a TV,** you install it with **Downloader**, a free app most TVs have in their store:
 
 1. Install **Downloader** on your TV and open it.
 2. Type in this address and let it download:
    `https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk`
 3. Install it when Downloader asks, then open Tally and sign in to your Jellyfin server. You can delete Downloader
    afterward.
+
+**On a phone,** open [the same address](https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk)
+in the phone's browser, open the downloaded file, and let the browser install apps when Android asks.
 
 Tally installs next to the official Jellyfin app and Wholphin, and doesn't replace either.
 
@@ -114,6 +142,7 @@ Tally is a complete Jellyfin app on its own. The server plugin adds the parts th
 
 - live scores and the game-to-channel matching behind the Sports section
 - live TV channels from your sources, with a guide, for Jellyfin and every app that uses it
+- several streams per game, with the switch to a working one when a stream struggles
 - the install page and the short Downloader code
 - **Play on TV**: start something on your TV from Jellyfin in your phone's browser
 
@@ -156,13 +185,27 @@ contributors and translators. If you like Tally, give Wholphin a star too.
 Thanks also to [Jellyfin](https://jellyfin.org), the free media server Tally talks to, and to IBM for the Plex
 typefaces.
 
-The teams in these screenshots are made up. The live video is *Big Buck Bunny*, © Blender Foundation, licensed
-under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+The teams and scores in these screenshots are made up. The video under them is real game footage from Wikimedia
+Commons, cropped and looped:
+
+- [Boys Varsity Baseball v. U-32, May 19, 2026](https://commons.wikimedia.org/wiki/File:Boys_Varsity_Baseball_v._U-32_-_MAY_19,_2026.webm)
+  by Hardwick Community Television (HCTV), [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- [Matthew Dipasupil Summer 2014 Baseball Video](https://commons.wikimedia.org/wiki/File:Matthew_Dipasupil_Summer_2014_Baseball_Video.webm)
+  by Keen Eye Sports, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)
+- [Milton Touchdown Pass to Davis](https://commons.wikimedia.org/wiki/File:Milton_Touchdown_Pass_to_Davis.webm)
+  by [elisfkc](https://www.flickr.com/photos/127662106@N04/), [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/);
+  the two screenshots that show it (`multiview.jpg`, `phone-live.webp`) are shared under the same license.
+
+The film behind the watch-party dialog is *Big Buck Bunny*, © Blender Foundation, licensed under
+[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Other film and album artwork in the screenshots belongs to
+its owners.
 
 ## License
 
 Tally is free software under the [GNU General Public License, version 2](LICENSE), the same license as Wholphin.
-[NOTICE.md](NOTICE.md) sets out what Tally changed and when, and the third-party material it includes.
+[NOTICE.md](NOTICE.md) sets out what Tally changed and when, and the third-party material it includes. The
+screenshots in `tally/readme/` show footage and artwork that aren't Tally's; [Credits](#credits) lists the footage and
+its licenses.
 
 Tally isn't affiliated with or endorsed by the Wholphin project, Jellyfin, or any league, team or data provider.
 Jellyfin is a trademark of the Jellyfin project. League and team names and logos belong to their owners.
