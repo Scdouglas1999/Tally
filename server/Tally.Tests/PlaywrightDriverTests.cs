@@ -169,3 +169,43 @@ public class PlaywrightDriverTests
         }
     }
 }
+
+public class BrowserRuntimeTests
+{
+    [Fact]
+    public async Task Without_Web_Page_Sources_Nothing_Is_Downloaded()
+    {
+        var data = Path.Combine(Path.GetTempPath(), "tally-rt-" + Guid.NewGuid().ToString("N"));
+        var factory = new NoNetwork();
+        var runtime = new BrowserRuntime(factory, NullLogger<BrowserRuntime>.Instance, data);
+        try
+        {
+            // the relay's last resort on an M3U-only server: allowDownloads is false there
+            Assert.False(await runtime.ReadyAsync(allowDownloads: false, TimeSpan.FromSeconds(30), CancellationToken.None));
+
+            Assert.Equal("failed", runtime.Status.State);
+            Assert.Equal(0, factory.Clients);
+            Assert.False(Directory.Exists(Path.Combine(data, "browser", "driver-" + PlaywrightDriver.Version)));
+            Assert.False(runtime.EnsureStarted(allowDownloads: false)); // and it does not keep retrying
+            Assert.Equal("failed", runtime.Status.State);
+        }
+        finally
+        {
+            if (Directory.Exists(data))
+            {
+                Directory.Delete(data, recursive: true);
+            }
+        }
+    }
+
+    private sealed class NoNetwork : IHttpClientFactory
+    {
+        public int Clients { get; private set; }
+
+        public HttpClient CreateClient(string name)
+        {
+            Clients++;
+            throw new InvalidOperationException("no downloads expected");
+        }
+    }
+}

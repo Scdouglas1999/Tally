@@ -11,6 +11,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
+    <!-- like the plugin: no build-machine Playwright driver next to the assemblies (BrowserRuntime would pick it up) -->
+    <PlaywrightPlatform>none</PlaywrightPlatform>
   </PropertyGroup>
 
   <ItemGroup>
