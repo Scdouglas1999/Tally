@@ -18,14 +18,14 @@ case "${1:-}" in
   start)
     avail="$(free -g | awk '/Mem:/{print $7}')"
     (( avail >= 7 )) || { echo "only ${avail} GB available; the emulator needs 7" >&2; exit 1; }
-    if [[ ! -f "$RUN/xvfb.pid" ]] || ! kill -0 "$(cat "$RUN/xvfb.pid")" 2>/dev/null; then
+    if [[ ! -e "/tmp/.X${DISPLAY_NUM}-lock" ]]; then
       Xvfb ":$DISPLAY_NUM" -screen 0 1920x1080x24 -nolisten tcp >"$RUN/xvfb.log" 2>&1 &
       echo $! >"$RUN/xvfb.pid"
       sleep 1
     fi
     # GL stays on: with it off the TV image's tuner decoder fails ("winsys interface 'vigs_wsi' not found") and the VM
     # exits at once (seen on this host). Under Xvfb the GL is Mesa's software renderer.
-    "$EM" modify -n "$VM" -g yes >/dev/null
+    "$EM" modify -n "$VM" -g yes >/dev/null || true  # exits non-zero when nothing changes
     DISPLAY=":$DISPLAY_NUM" "$EM" launch -n "$VM" >"$RUN/emulator.log" 2>&1 &
     echo $! >"$RUN/emulator.pid"
     for _ in $(seq 1 90); do
@@ -47,6 +47,7 @@ case "${1:-}" in
     pkill -f "emulator-x86_64.*$VM" 2>/dev/null || true
     [[ -f "$RUN/emulator.pid" ]] && kill "$(cat "$RUN/emulator.pid")" 2>/dev/null || true
     [[ -f "$RUN/xvfb.pid" ]] && kill "$(cat "$RUN/xvfb.pid")" 2>/dev/null || true
+    pkill -f "^Xvfb :$DISPLAY_NUM " 2>/dev/null || true
     rm -f "$RUN"/*.pid
     ;;
   *)

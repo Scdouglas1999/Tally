@@ -350,8 +350,12 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   this Arch host: a `dpkg` shim answers the package manager's Ubuntu prerequisite check; all emulator libraries
   resolve). Only the **Tizen 10.0 (2026) TV image** is published now (Chromium M130), not 5.5/6.x: it verifies the
   shell, AVPlay and keys, not the Chromium 68 floor (that is what the legacy checks are for). VM `tally-tv`
-  (1080p, 1 GB) is created. Since TV Extension 7.0.1 **the emulator only installs Samsung-certificate-signed apps**,
-  so running Tally in it needs the owner's Samsung account (open question). Run only with ≥ 7 GB free on this host.
+  (1080p, 1 GB) boots headless on Xvfb (`scripts/tizen-emulator.sh`; GL must stay on, the TV image's tuner device
+  needs it) to Smart Hub, reports `platform_version:10.0` over sdb, and **refuses Tally signed with the plain Tizen
+  certificate**: `install failed[118, -12], reason: Check certificate error : :Invalid certificate chain with
+  certificate in signature.` (the same error Tizen 8+ TVs give). Since TV Extension 7.0.1 the emulator installs only
+  Samsung-certificate-signed apps, so running Tally in it (and verifying AVPlay and `webapis` from the server-loaded
+  script) needs the owner's Samsung account (open question). Run only with ≥ 7 GB free on this host.
 - **webOS**: the webOS TV emulator is a VirtualBox image (needs VirtualBox, i.e. root on this host). The webOS TV
   Simulator (a Chromium shell, not LG's media pipeline) is offered for webOS 6.0 and 22-26 on LG's developer site
   behind a license dialog (no webOS 5 build); neither is installed yet: webOS follows Samsung.
