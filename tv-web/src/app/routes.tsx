@@ -11,6 +11,9 @@ import { PlayerPage } from '../pages/player/PlayerPage';
 import { LivePage } from '../pages/player/LivePage';
 import { PlaceholderPage } from '../pages/placeholder/PlaceholderPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
+import { SportsPage } from '../pages/sports/SportsPage';
+import { StartOverPage } from '../pages/sports/StartOverPage';
+import { MultiviewPage } from '../pages/multiview/MultiviewPage';
 
 type Pages = { [N in Route['name']]: { page: FunctionComponent<PageProps<Extract<Route, { name: N }>>>; chrome: 'rail' | 'full' } };
 
@@ -19,11 +22,13 @@ export const PAGES: Pages = {
   search: { page: PlaceholderPage, chrome: 'rail' },
   library: { page: PlaceholderPage, chrome: 'rail' },
   item: { page: PlaceholderPage, chrome: 'rail' },
-  sports: { page: PlaceholderPage, chrome: 'rail' },
+  sports: { page: SportsPage, chrome: 'rail' },
   settings: { page: SettingsPage, chrome: 'rail' },
   placeholder: { page: PlaceholderPage, chrome: 'rail' },
   player: { page: PlayerPage, chrome: 'full' },
   live: { page: LivePage, chrome: 'full' },
+  multiview: { page: MultiviewPage, chrome: 'full' },
+  startover: { page: StartOverPage, chrome: 'full' },
 };
 
 export function chromeOf(route: Route): 'rail' | 'full' {

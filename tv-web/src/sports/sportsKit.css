@@ -1,0 +1,76 @@
+/* Sports kit additions (tally/ui/components/*): key hints, REC tag, line score, empty state, rows, switch, rolling
+   digits. Sizes at 1080p: Android dp × 1.6. */
+
+/* ---- Key hint (KeyHint.kt): bordered mono cap + Sans label ---- */
+.key-hint { display: inline-flex; align-items: center; white-space: nowrap; }
+.key-hint .cap {
+  display: inline-block; padding: 1px 13px; border: var(--hairline) solid var(--rule-strong);
+  font-family: var(--mono); font-weight: 500; font-size: 22px; letter-spacing: 3.2px; line-height: 30px; color: var(--text);
+}
+.key-hint .what { margin-left: 13px; font-family: var(--sans); font-size: 24px; color: var(--text-secondary); }
+.key-hint + .key-hint { margin-left: 38px; }
+
+/* ---- REC tag (RecTag.kt) ---- */
+.rec-tag {
+  display: inline-flex; align-items: center; flex: none; padding: 0 8px; border: var(--hairline) solid var(--rule-strong);
+  font-family: var(--mono); font-weight: 500; font-size: 19px; letter-spacing: 3.2px; line-height: 26px; color: var(--text-secondary);
+}
+.rec-tag.live { border-color: var(--live); color: var(--live-text); }
+.rec-tag .indicator { width: 10px; height: 10px; margin-right: 6px; }
+
+/* ---- Rolling scoreboard digits (RollingText.kt) ---- */
+.rolling { display: inline-flex; white-space: nowrap; }
+.roll-cell { position: relative; display: inline-block; overflow: hidden; vertical-align: top; }
+.roll-cell .roll-in { display: inline-block; }
+.roll-cell .roll-out { position: absolute; left: 0; top: 0; visibility: hidden; }
+.score-digits { transition: color 400ms ease-out; }
+.score-digits.score-hot { color: var(--accent) !important; transition: none; }
+
+/* ---- Line score (LineScore.kt) ---- */
+.line-score { font-family: var(--mono); line-height: 1.15; }
+.line-score .ls-head, .line-score .ls-row { display: flex; align-items: center; white-space: nowrap; }
+.line-score .ls-cell { flex: none; text-align: right; overflow: hidden; }
+.line-score .ls-cell.head { font-weight: 500; letter-spacing: 1.6px; color: var(--muted); }
+.line-score.full .ls-cell.head { letter-spacing: 2.4px; }
+.line-score .ls-cell.played { color: var(--text-secondary); }
+.line-score .ls-cell.unplayed { color: var(--muted); }
+.line-score .ls-cell.total { font-weight: 500; color: var(--text); }
+.line-score .ls-cell.total.leading { color: var(--accent); }
+.line-score .ls-rule { height: var(--hairline); background: var(--rule); }
+.line-score .ls-abbr { flex: none; overflow: hidden; color: var(--text); }
+.line-score .team-mark.fallback { border-width: var(--hairline); }
+
+/* ---- Empty state (EmptyState.kt): dashed hairline; focused = the amber frame ---- */
+.empty-state {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 51px; border: var(--hairline) dashed var(--rule-strong); text-align: center;
+}
+.empty-state[data-focused] { border-color: transparent; }
+.empty-state[data-focused]::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--focus) solid var(--accent); pointer-events: none; }
+.empty-state .title { font-family: var(--sans); font-weight: 600; font-size: 32px; line-height: 42px; color: var(--text); }
+.empty-state .subtitle { margin-top: 13px; font-family: var(--sans); font-size: 24px; line-height: 32px; color: var(--muted); max-width: 1100px; }
+
+/* ---- Row (TallyRow.kt) ---- */
+.tally-row {
+  position: relative; display: flex; align-items: center; min-height: 90px; padding: 19px 26px; background: var(--ground);
+}
+.tally-row::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--hairline) solid var(--rule-strong); pointer-events: none; }
+.tally-row[data-focused] { background: var(--ground-raised); }
+.tally-row[data-focused]::after { border: var(--focus) solid var(--accent); }
+.tally-row.disabled::after { border-color: var(--rule); }
+.tally-row .text { flex: 1; min-width: 0; }
+.tally-row .label { font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text); }
+.tally-row.primary .label { color: var(--accent); }
+.tally-row.disabled .label { color: var(--muted); }
+.tally-row .description { font-family: var(--sans); font-size: 24px; line-height: 32px; color: var(--muted); }
+.tally-row > * + * { margin-left: 26px; }
+
+/* ---- Square switch ---- */
+.tally-switch {
+  display: inline-flex; align-items: center; justify-content: center; flex: none; width: 42px; height: 42px;
+  border: var(--hairline) solid var(--rule-strong);
+}
+.tally-switch.on { border-color: var(--accent); }
+.tally-switch .dot { width: 22px; height: 22px; background: var(--accent); }
+
+.diamond { display: block; flex: none; }

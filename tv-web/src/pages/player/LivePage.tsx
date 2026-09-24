@@ -1,56 +1,111 @@
-import { useEffect, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { absolute } from '../../api/tally';
-import type { TallyGame } from '../../api/tallyModels';
+import { DvrState } from '../../api/tallyDvr';
+import { isLive, type TallyBoard, type TallyEvent, type TallyGame } from '../../api/tallyModels';
 import type { PageProps } from '../../app/page';
+import { currentFocusKey, setFocus } from '../../focus/focus';
 import { IndicatorSquare } from '../../kit/Bits';
+import { ToastHost } from '../../kit/Toast';
 import { useKeyHandler } from '../../platform/keyRouter';
 import { back, replace, type Route } from '../../router/router';
-import { board, useBoardPolling } from '../../state/sportsData';
-import { gameStatusLabel, tallyUppercase } from '../../util/format';
+import { boardRows, gameForChannel } from '../../sports/boardOrganizer';
+import { KeyHint, matchupTitle } from '../../sports/SportsBits';
+import { board, onBoardEvent, tallyUserSettings, useBoardPolling } from '../../state/sportsData';
+import { formatTime, tallyUppercase } from '../../util/format';
 import { useStore } from '../../util/store';
+import { GameActionsDialog } from '../sports/GameActionsDialog';
+import { addToMultiviewWithNotice, channelRoute, gameRoute, watchGame } from '../sports/sportsState';
+import { useOkHold } from '../sports/useOkHold';
+import { BoxScoreOverlay, EventBanner, GameSwitcher, ScoreBug, switcherKey } from './liveOverlays';
 import { TuneIn, useEngine } from './playerKit';
 
 const BAR_MS = 5000;
+/** The score bug stays this long after it was brought back (a change, a key). */
+const BUG_LINGER_MS = 8000;
+/** The box score closes itself after this long without a key. */
+const BOX_SCORE_LINGER_MS = 12_000;
+/** An event banner stays this long. */
+const BANNER_MS = 8000;
+/** The switcher lists at most this many other games. */
+const MAX_OTHERS = 12;
 
-/** `RDG 3 · HCG 4` over `BOT 7TH · 0-0 · 1 OUT` (ScoreBug.kt). */
-function ScoreBug(props: { game: TallyGame }) {
-  const g = props.game;
-  if (g.state === 'pre') return null;
-  const situation = [gameStatusLabel(g)];
-  if (g.sport === 'baseball' && g.state === 'in') {
-    if (g.balls !== null && g.strikes !== null) situation.push(`${g.balls}-${g.strikes}`);
-    if (g.outs !== null) situation.push(`${g.outs} OUT`);
-  } else if (g.downDistance !== null && g.state === 'in') {
-    situation.push(g.downDistance);
-  }
-  return (
-    <div class="score-bug">
-      <div class="line1">
-        {g.away.abbr} {g.away.score ?? 0} · {g.home.abbr} {g.home.score ?? 0}
-      </div>
-      <div class="line2">{tallyUppercase(situation.join(' · '))}</div>
-    </div>
-  );
+/** Other live games on real channels (not this one), in board order: followed teams and favorite channels first. */
+function otherGames(current: TallyBoard | null, channelId: string, favorites: ReadonlySet<string>, teams: ReadonlySet<string>): TallyGame[] {
+  const games = (current?.games ?? []).filter((g) => isLive(g) && g.watch !== null && g.watch.channelId !== channelId);
+  return boardRows(games, favorites, true, teams)
+    .reduce<TallyGame[]>((acc, r) => acc.concat(r.games), [])
+    .slice(0, MAX_OTHERS);
+}
+
+/**
+ * With no other game live, the looping channels (no game) are listed instead, as cards named after the channel
+ * (CornerView.kt gamelessChannelGames: the same TallyGame with blank teams the Android app builds).
+ */
+function gamelessChannelGames(current: TallyBoard | null, channelId: string): TallyGame[] {
+  if (current === null) return [];
+  const blank = { id: '', abbr: '', name: '', shortName: '', location: '', logo: '', score: null, record: null, possession: false, winner: false, periods: [], color: '', altColor: '' };
+  return current.channels
+    .filter((c) => (c.gameId === null || c.gameId === '') && c.id !== channelId && c.hlsPath !== '')
+    .sort((a, b) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() > b.name.toLowerCase() ? 1 : 0))
+    .map((c) => ({
+      id: c.id,
+      sport: '',
+      league: '',
+      name: c.name,
+      start: '',
+      state: 'pre',
+      detail: '',
+      period: 0,
+      clock: '',
+      home: blank,
+      away: blank,
+      lastPlay: null,
+      downDistance: null,
+      redZone: false,
+      balls: null,
+      strikes: null,
+      outs: null,
+      onFirst: false,
+      onSecond: false,
+      onThird: false,
+      broadcasts: [],
+      watch: { channelId: c.id, channelName: c.name, liveTvItemId: c.liveTvItemId, hlsPath: c.hlsPath, cardPath: c.cardPath, confidence: '' },
+      backdropPath: null,
+      recording: null,
+    }));
 }
 
 /**
  * A live channel from the Tally plugin: its continuous playlist (/JellyTV/Live/{id}.m3u8, signed, anonymous: the
- * same address multiview uses; the live ladder keeps it going when a source struggles). The score bug is live;
- * the bar below is a placeholder for the Tally live controls (game switcher, multiview, box score) of a later task.
- * CH+/CH- step through the board's channels.
+ * same address multiview uses; the live ladder keeps it going when a source struggles), with the Android TV live
+ * player's Tally overlays (TallyPlaybackPage.kt): the score bug; UP opens the box score, DOWN the "also on now" game
+ * switcher (OK switches, HOLD for the game's actions); banners for scoring plays in other games. CH+/CH- step
+ * through the board's channels; REWIND watches a game being recorded from the start.
  */
 export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   const host = useRef<HTMLDivElement>(null);
   const player = useEngine(host);
   const current = useStore(board);
+  const settings = useStore(tallyUserSettings);
   useBoardPolling(props.active);
+  const hideScores = settings?.hideScores === true;
+  const favorites = useMemo(() => new Set(settings?.favorites ?? []), [settings]);
+  const teams = useMemo(() => new Set((settings?.favoriteTeams ?? []).map((t) => t.toUpperCase())), [settings]);
+
   const [bar, setBar] = useState(true);
-  const timer = useRef(0);
+  const barTimer = useRef(0);
+  const [boxScore, setBoxScore] = useState(false);
+  const [switcher, setSwitcher] = useState(false);
+  const [actionsGameId, setActionsGameId] = useState<string | null>(null);
+  const [bugShownAt, setBugShownAt] = useState(Date.now());
+  const [bugVisible, setBugVisible] = useState(true);
+  const [banner, setBanner] = useState<TallyEvent | null>(null);
+  const [bannerOn, setBannerOn] = useState(false);
 
   const showBar = (): void => {
     setBar(true);
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setBar(false), BAR_MS);
+    window.clearTimeout(barTimer.current);
+    barTimer.current = window.setTimeout(() => setBar(false), BAR_MS);
   };
 
   useEffect(() => {
@@ -59,21 +114,121 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
     engine.stop();
     void engine.load({ url: absolute(props.route.hlsPath), kind: 'hls', live: true, startMs: 0 }).catch(() => undefined);
     showBar();
-    return () => window.clearTimeout(timer.current);
+    setBugShownAt(Date.now());
+    return () => window.clearTimeout(barTimer.current);
   }, [props.route.hlsPath]);
 
-  const game = current?.games.find((g) => g.id === props.route.gameId) ?? null;
+  const games = current?.games ?? [];
+  const byRoute = games.find((g) => g.id === props.route.gameId) ?? null;
+  const game = gameForChannel(props.route.channelId, games) ?? (byRoute !== null && isLive(byRoute) ? byRoute : null);
+  const others = otherGames(current, props.route.channelId, favorites, teams);
+  const switcherGames = others.length > 0 ? others : gamelessChannelGames(current, props.route.channelId);
   const channels = current?.channels ?? [];
+  const channelName = channels.find((c) => c.id === props.route.channelId)?.name ?? '';
+  const recording = game?.recording ?? null;
+  const startOver = recording !== null && recording.state === DvrState.RECORDING && recording.startOverPath !== null && recording.startOverPath !== '' ? recording.startOverPath : null;
+
+  // the bug: back when the game opens, when the score, period or situation changes, while the switcher is up, and
+  // for a moment after any key
+  const bugKey = game !== null ? `${game.away.score}-${game.home.score}|${game.detail}|${game.downDistance ?? ''}` : '';
+  useEffect(() => setBugShownAt(Date.now()), [bugKey]);
+  useEffect(() => {
+    setBugVisible(!boxScore);
+    if (switcher || boxScore) return undefined;
+    const t = window.setTimeout(() => setBugVisible(false), BUG_LINGER_MS);
+    return () => window.clearTimeout(t);
+  }, [bugShownAt, switcher, boxScore]);
+
+  useEffect(() => {
+    if (!boxScore) return undefined;
+    const t = window.setTimeout(() => setBoxScore(false), BOX_SCORE_LINGER_MS);
+    return () => window.clearTimeout(t);
+  }, [boxScore]);
+
+  // if every other picture leaves the air while the switcher is up, close it
+  useEffect(() => {
+    if (switcher && switcherGames.length === 0) closeSwitcher();
+  }, [switcher, switcherGames.length]);
+
+  // scoring plays in other games (not this one, never while scores are hidden)
+  const gameIdRef = useRef<string | null>(null);
+  gameIdRef.current = game?.id ?? null;
+  const hideRef = useRef(hideScores);
+  hideRef.current = hideScores;
+  useEffect(() => {
+    if (!props.active) return undefined;
+    return onBoardEvent((event) => {
+      if (event.watch === null || event.gameId === gameIdRef.current || hideRef.current) return;
+      setBanner(event);
+      setBannerOn(true);
+    });
+  }, [props.active]);
+  useEffect(() => {
+    if (!bannerOn) return undefined;
+    const t = window.setTimeout(() => setBannerOn(false), BANNER_MS);
+    return () => window.clearTimeout(t);
+  }, [bannerOn, banner?.id]);
+  useEffect(() => {
+    if (hideScores) setBannerOn(false);
+  }, [hideScores]);
+
+  const openSwitcher = (): void => {
+    setSwitcher(true);
+    setBar(false);
+    setBugShownAt(Date.now());
+    window.setTimeout(() => {
+      const first = switcherGames[0];
+      if (first !== undefined) setFocus(switcherKey(first));
+    }, 0);
+  };
+  function closeSwitcher(): void {
+    setSwitcher(false);
+    setFocus(props.pageKey);
+  }
+
+  const switchTo = (g: TallyGame): void => {
+    setSwitcher(false);
+    setActionsGameId(null);
+    watchGame(g, true);
+  };
 
   const step = (delta: number): void => {
     if (channels.length === 0) return;
     const i = channels.findIndex((c) => c.id === props.route.channelId);
     const next = channels[(i + delta + channels.length) % channels.length];
-    if (next === undefined) return;
-    replace({ name: 'live', channelId: next.id, hlsPath: next.hlsPath, title: next.now?.title ?? next.name, gameId: next.gameId ?? undefined });
+    const route = next !== undefined ? channelRoute(next) : null;
+    if (route !== null) replace(route);
   };
 
+  // HOLD OK on a switcher card: the game's actions
+  useOkHold(
+    () => {
+      const key = currentFocusKey();
+      if (!switcher || key.indexOf('lsw-') !== 0) return false;
+      const g = switcherGames.find((x) => switcherKey(x) === key);
+      if (g === undefined) return false;
+      setActionsGameId(g.id);
+      return true;
+    },
+    actionsGameId === null,
+    props.active,
+  );
+
   useKeyHandler((key) => {
+    if (actionsGameId !== null) return false; // the menu's own handler (registered later) runs first
+    setBugShownAt(Date.now());
+    if (boxScore) {
+      // any key closes the box score; UP and BACK stop there, everything else also reaches the player
+      setBoxScore(false);
+      if (key === 'up' || key === 'back') return true;
+    }
+    if (switcher) {
+      if (key === 'back' || key === 'up') {
+        closeSwitcher();
+        return true;
+      }
+      return false; // arrows and OK move through the cards
+    }
     switch (key) {
       case 'back':
         if (bar) {
@@ -85,13 +240,28 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
       case 'stop':
         back();
         return true;
-      case 'channelUp':
       case 'up':
+        if (game !== null) {
+          setBoxScore(true);
+          setBar(false);
+        } else showBar();
+        return true;
+      case 'down':
+        if (switcherGames.length > 0) openSwitcher();
+        else showBar();
+        return true;
+      case 'channelUp':
         step(-1);
         return true;
       case 'channelDown':
-      case 'down':
         step(1);
+        return true;
+      case 'rewind':
+        if (startOver !== null && game !== null) {
+          replace({ name: 'startover', path: startOver, title: matchupTitle(game) });
+          return true;
+        }
+        showBar();
         return true;
       default:
         showBar();
@@ -99,34 +269,62 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
     }
   }, props.active);
 
-  const channelName = channels.find((c) => c.id === props.route.channelId)?.name ?? '';
+  const actionsGame = actionsGameId !== null ? (switcherGames.find((g) => g.id === actionsGameId) ?? null) : null;
+  const actionsIsGame = actionsGame !== null && others.length > 0;
 
   return (
-    <div class="player">
+    <div class="player live">
       <div ref={host} />
-      {game !== null ? <ScoreBug game={game} /> : null}
       <TuneIn key={props.route.channelId} title={props.route.title} firstFrame={player.firstFrame} error={player.error} />
-      {bar ? (
-        <div class="live-bar">
-          <div class="row1">
-            <span class="live-tag mono-label">
-              <IndicatorSquare tone="live" />
-              LIVE
-            </span>
-            <span class="name ellipsis">{props.route.title}</span>
-            <span class="channel mono-label">{tallyUppercase(channelName)}</span>
+      <ScoreBug game={game} hideScores={hideScores} visible={bugVisible && !boxScore} />
+      {boxScore && game !== null ? <BoxScoreOverlay game={game} hideScores={hideScores} /> : null}
+      {banner !== null ? <EventBanner event={banner} visible={bannerOn} onGone={() => setBanner((b) => (bannerOn ? b : null))} /> : null}
+      {bar && !switcher && !boxScore ? (
+        <>
+          <div class="live-top">
+            <div class="kicker mono-label">LIVE</div>
+            <div class="title ellipsis">{props.route.title}</div>
+            <div class="clock">{formatTime(new Date())}</div>
           </div>
-          <div class="note">Live controls (game switcher, multiview, box score) come with the live player task.</div>
-          <div class="hints">
-            <span class="hint">
-              <span class="key">UP / DOWN</span>Change channel
-            </span>
-            <span class="hint">
-              <span class="key">BACK</span>Leave
-            </span>
+          <div class="live-bar">
+            <div class="row1">
+              <span class="live-tag mono-label">
+                <IndicatorSquare tone="accent" />
+                LIVE
+              </span>
+              <span class="channel mono-label ellipsis">{tallyUppercase(channelName)}</span>
+            </div>
+            <div class="hints">
+              {switcherGames.length > 0 ? <KeyHint keyName="DOWN" label="Games" /> : null}
+              {game !== null ? <KeyHint keyName="UP" label="Box score" /> : null}
+              {startOver !== null ? <KeyHint keyName="REW" label="Watch from the start" /> : null}
+              <KeyHint keyName="CH +/−" label="Change channel" />
+              <KeyHint keyName="BACK" label="Leave" />
+            </div>
           </div>
-        </div>
+        </>
       ) : null}
+      {switcher ? <GameSwitcher games={switcherGames} hideScores={hideScores} favorites={favorites} teams={teams} onSwitch={switchTo} /> : null}
+      {actionsGame !== null ? (
+        <GameActionsDialog
+          game={actionsIsGame ? actionsGame : null}
+          channelName={actionsGame.watch?.channelName ?? actionsGame.name}
+          actions={{
+            watch: gameRoute(actionsGame) !== null ? () => switchTo(actionsGame) : undefined,
+            addToMultiview: actionsGame.watch !== null ? () => addToMultiviewWithNotice(actionsGame.watch?.channelId ?? '') : undefined,
+            follow: actionsIsGame,
+          }}
+          hideScores={hideScores}
+          favoriteTeams={teams}
+          onDismiss={() => {
+            const id = actionsGameId;
+            setActionsGameId(null);
+            const g = switcherGames.find((x) => x.id === id);
+            if (g !== undefined && switcher) setFocus(switcherKey(g));
+          }}
+        />
+      ) : null}
+      <ToastHost />
     </div>
   );
 }

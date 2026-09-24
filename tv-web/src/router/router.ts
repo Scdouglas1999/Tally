@@ -13,6 +13,8 @@ export type Route =
   | { name: 'player'; itemId: string; startMs?: number }
   | { name: 'live'; channelId: string; hlsPath: string; title: string; gameId?: string }
   | { name: 'sports' }
+  | { name: 'multiview' }
+  | { name: 'startover'; path: string; title: string }
   | { name: 'settings' }
   | { name: 'placeholder'; title: string; note: string };
 

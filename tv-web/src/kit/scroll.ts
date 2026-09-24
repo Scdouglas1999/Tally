@@ -24,8 +24,10 @@ export function reveal(
 }
 
 /**
- * Offset of `el` relative to `ancestor` (offsetParent chain; unaffected by the stage's scale). `ancestor` must be
- * positioned (relative/absolute) so the chain reaches it.
+ * Offset of `el` relative to `ancestor` as it is on screen now: every scroll container on the way, the ancestor's own
+ * scroll included, moves it (callers add the ancestor's scroll back to get its place in the scrolled content).
+ * Offset-parent chain, so unaffected by the stage's scale. `ancestor` must be positioned (relative/absolute) so the
+ * chain reaches it.
  */
 export function offsetWithin(el: HTMLElement, ancestor: HTMLElement): { left: number; top: number } {
   let left = 0;
@@ -36,7 +38,7 @@ export function offsetWithin(el: HTMLElement, ancestor: HTMLElement): { left: nu
     top += node.offsetTop;
     const parent: Element | null = node.offsetParent;
     if (parent === null) break;
-    if (parent !== ancestor && ancestor.contains(parent)) {
+    if (ancestor.contains(parent)) {
       left -= (parent as HTMLElement).scrollLeft;
       top -= (parent as HTMLElement).scrollTop;
     }
