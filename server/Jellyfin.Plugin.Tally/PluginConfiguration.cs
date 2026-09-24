@@ -114,6 +114,10 @@ public class PluginConfiguration : BasePluginConfiguration
     /// user. Done by adding one script tag to index.html as it is served — no files are modified.</summary>
     public bool ReplaceLiveTv { get; set; } = true;
 
+    /// <summary>The Tally look for the Jellyfin web client, for every user: theme, Tally branding and a Sports entry in
+    /// the side menu. Added to index.html as it is served, like <see cref="ReplaceLiveTv"/>; off gives the stock client.</summary>
+    public bool WebLook { get; set; } = true;
+
     /// <summary>Fetch live scores / last play from ESPN's public scoreboard feed. The only
     /// third-party request the plugin makes on its own; off means the Games board is hidden.</summary>
     public bool ScoresEnabled { get; set; } = true;

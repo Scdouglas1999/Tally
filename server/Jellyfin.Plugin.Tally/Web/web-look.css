@@ -1,0 +1,969 @@
+/* ============================================================================
+   Tally look for the Jellyfin web client.
+
+   Loaded into jellyfin-web's index.html by the plugin (Services/WebInjection.cs) when "Tally look for Jellyfin
+   web" is on; the same request marks <html data-tally-look>, and every rule below hangs off that attribute so
+   it outranks jellyfin-web's own theme files (which load later) without touching anything else.
+
+   The language is the app's (tally/UI.md): flat near-black ground, raised panels, 1px hairlines, square
+   corners, no shadows, no glow, gradients only as image scrims. One accent, amber, for focus, selection and
+   "now"; red only for live and failure. IBM Plex Sans for reading, IBM Plex Mono (uppercase, tracked) for
+   labels, times, counts and anything instrument-like.
+
+   Targets jellyfin-web 10.10, 10.11 and 12.x by what is actually in their DOM: the long-lived emby-* / card* /
+   detail* / osd* class names, the --jf-palette-* variables of the newer MUI-based screens and the MUI class
+   names (Mui*-root) of the app bar, drawer and dashboard. A rule whose element does not exist simply matches
+   nothing.
+   ============================================================================ */
+
+/* Fonts ship with the plugin (SIL OFL, see plex-OFL.txt) and resolve next to this file — no third-party requests. */
+@font-face {
+  font-family: 'Tally Plex Sans'; font-style: normal; font-weight: 100 700; font-display: swap;
+  src: url(plex-sans.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Tally Plex Sans'; font-style: normal; font-weight: 100 700; font-display: swap;
+  src: url(plex-sans-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face { font-family: 'Tally Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url(plex-mono-400.woff2) format('woff2'); }
+@font-face { font-family: 'Tally Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(plex-mono-500.woff2) format('woff2'); }
+@font-face { font-family: 'Tally Plex Mono'; font-style: normal; font-weight: 600; font-display: swap; src: url(plex-mono-600.woff2) format('woff2'); }
+
+/* ---------- tokens (and the MUI palette jellyfin-web 10.11+ reads) ---------- */
+html[data-tally-look] {
+  --tl-ground: #0e0f0e;
+  --tl-ground-2: #121312;
+  --tl-raised: #1b1c1a;
+  --tl-raised-2: #242623;
+  --tl-screen: #050505;
+  --tl-rule: #2a2c2a;
+  --tl-rule-2: #3a3d38;
+  --tl-text: #e3e5de;
+  --tl-text-2: #a9ada3;
+  --tl-muted: #8b9084;
+  --tl-accent: #ffb000;
+  --tl-ink: #0e0f0e;
+  --tl-live: #ff3b30;
+  --tl-live-text: #ff6a61;
+  --tl-sans: 'Tally Plex Sans', 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --tl-mono: 'Tally Plex Mono', 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Menlo, monospace;
+
+  --jf-palette-primary-main: #ffb000;
+  --jf-palette-primary-light: #ffc440;
+  --jf-palette-primary-dark: #d99600;
+  --jf-palette-primary-mainChannel: 255 176 0;
+  --jf-palette-primary-contrastText: #0e0f0e;
+  --jf-palette-secondary-main: #ffb000;
+  --jf-palette-secondary-mainChannel: 255 176 0;
+  --jf-palette-secondary-contrastText: #0e0f0e;
+  --jf-palette-background-default: #0e0f0e;
+  --jf-palette-background-defaultChannel: 14 15 14;
+  --jf-palette-background-paper: #1b1c1a;
+  --jf-palette-background-paperChannel: 27 28 26;
+  --jf-palette-background-defaultImage: none;
+  --jf-palette-text-primary: #e3e5de;
+  --jf-palette-text-secondary: #a9ada3;
+  --jf-palette-text-disabled: #6a6e64;
+  --jf-palette-divider: #2a2c2a;
+  --jf-palette-action-hover: rgba(227, 229, 222, .06);
+  --jf-palette-action-focus: rgba(227, 229, 222, .10);
+  --jf-palette-action-selected: rgba(255, 176, 0, .12);
+  --jf-palette-action-selectedOpacity: .12;
+  --jf-palette-AppBar-defaultBg: #0e0f0e;
+  --jf-palette-AppBar-darkBg: #0e0f0e;
+  --jf-palette-AppBar-transparentBg: transparent;
+  --jf-palette-AppBar-gradient: none;
+  --jf-palette-FilledInput-bg: #121312;
+  --jf-palette-FilledInput-hoverBg: #1b1c1a;
+  --jf-palette-FilledInput-borderColor: #3a3d38;
+  --jf-palette-Button-inheritContainedBg: #1b1c1a;
+  --jf-palette-Button-inheritContainedHoverBg: #242623;
+  --jf-palette-SnackbarContent-bg: #1b1c1a;
+  --jf-palette-SnackbarContent-color: #e3e5de;
+  --jf-palette-Alert-infoFilledBg: #1b1c1a;
+  --jf-palette-Alert-infoFilledColor: #e3e5de;
+  --jf-palette-error-main: #ff3b30;
+  --jf-palette-error-light: #ff6a61;
+  --jf-palette-error-contrastText: #0e0f0e;
+  --jf-palette-common-white: #e3e5de;
+  --jf-card-borderRadius: 0;
+
+  background: var(--tl-ground) !important;
+  color: var(--tl-text-2);
+  font-family: var(--tl-sans) !important;
+  scrollbar-color: var(--tl-rule-2) var(--tl-ground);
+}
+
+/* ---------- global: ground, type, square corners, no shadows ---------- */
+html[data-tally-look] body,
+html[data-tally-look] .backgroundContainer,
+html[data-tally-look] .skinBody,
+html[data-tally-look] .nowPlayingPlaylist,
+html[data-tally-look] .noBackdropTransparency .detailPageWrapperContainer {
+  background-color: var(--tl-ground);
+  background-image: none;
+}
+html[data-tally-look] .backgroundContainer.withBackdrop { background-color: rgba(14, 15, 14, .9); opacity: 1; }
+html[data-tally-look] body,
+html[data-tally-look] button,
+html[data-tally-look] input,
+html[data-tally-look] select,
+html[data-tally-look] textarea,
+html[data-tally-look] h1, html[data-tally-look] h2, html[data-tally-look] h3,
+html[data-tally-look] .MuiTypography-root,
+html[data-tally-look] .MuiButtonBase-root,
+html[data-tally-look] .MuiInputBase-root,
+html[data-tally-look] .MuiFormLabel-root,
+html[data-tally-look] .MuiTableCell-root,
+html[data-tally-look] .MuiChip-root,
+html[data-tally-look] .MuiMenuItem-root,
+html[data-tally-look] .MuiListItemText-primary,
+html[data-tally-look] .MuiDataGrid-root {
+  font-family: var(--tl-sans);
+}
+html[data-tally-look] ::selection { background: var(--tl-accent); color: var(--tl-ink); }
+
+/* Square corners and no shadows everywhere in jellyfin-web; spinners keep their round track. */
+html[data-tally-look] *:not(.mdl-spinner__circle):not(.progressring-spiner):not(.spinner):not(.MuiCircularProgress-root):not(.MuiCircularProgress-svg),
+html[data-tally-look] *::before,
+html[data-tally-look] *::after {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+html[data-tally-look] .material-icons,
+html[data-tally-look] .material-icons::before { border-radius: 0; }
+html[data-tally-look] .skinHeader-blurred,
+html[data-tally-look] .skinHeader.semiTransparent,
+html[data-tally-look] .MuiAppBar-root,
+html[data-tally-look] .MuiBackdrop-root,
+html[data-tally-look] .dialogBackdropOpened { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+html[data-tally-look] ::-webkit-scrollbar { width: 8px; height: 8px; background: var(--tl-ground); }
+html[data-tally-look] ::-webkit-scrollbar-track,
+html[data-tally-look] ::-webkit-scrollbar-track-piece { background: var(--tl-ground); }
+html[data-tally-look] ::-webkit-scrollbar-thumb:vertical,
+html[data-tally-look] ::-webkit-scrollbar-thumb:horizontal { background: var(--tl-rule-2); border-radius: 0; }
+
+/* Keyboard focus: a solid amber frame drawn inside the element; nothing moves. Pointer clicks show nothing. */
+html[data-tally-look] :focus-visible { outline: 2px solid var(--tl-accent); outline-offset: -2px; }
+html[data-tally-look] .emby-button.show-focus:focus,
+html[data-tally-look] .paper-icon-button-light.show-focus:focus,
+html[data-tally-look] .emby-tab-button.show-focus:focus {
+  background: transparent; color: var(--tl-text);
+  outline: 3px solid var(--tl-accent); outline-offset: -3px;
+}
+
+/* small mono caps: the Tally label style */
+html[data-tally-look] .sectionTitle,
+html[data-tally-look] .sidebarHeader,
+html[data-tally-look] .actionSheetTitle,
+html[data-tally-look] .emby-tab-button,
+html[data-tally-look] .fieldDescription.tally-mono,
+html[data-tally-look] .listGroupHeader,
+html[data-tally-look] .detailsGroupItem .label,
+html[data-tally-look] .MuiListSubheader-root {
+  font-family: var(--tl-mono);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+
+/* ============ header (legacy layout: 10.10, 10.11, 12 "desktop"/"mobile") ============ */
+html[data-tally-look] .skinHeader {
+  color: var(--tl-text-2);
+  background: var(--tl-ground);
+  border-bottom: 1px solid var(--tl-rule);
+}
+html[data-tally-look] .skinHeader.semiTransparent,
+html[data-tally-look].layout-tv .skinHeader.semiTransparent {
+  /* over a backdrop: a scrim, not a band */
+  background: linear-gradient(to bottom, rgba(14, 15, 14, .92), rgba(14, 15, 14, 0)) border-box !important;
+  border-bottom-color: transparent;
+}
+html[data-tally-look] .skinHeader.osdHeader { border-bottom: 0; background: transparent; }
+html[data-tally-look] .headerButton,
+html[data-tally-look] .skinHeader .paper-icon-button-light { color: var(--tl-text-2); }
+html[data-tally-look] .skinHeader .paper-icon-button-light:hover:not(:disabled) { color: var(--tl-text); background: var(--tl-raised); }
+html[data-tally-look] .headerUserButtonRound { border-radius: 0 !important; }
+html[data-tally-look] .headerUserButtonRound img,
+html[data-tally-look] .headerUserButton .headerUserButtonRound { border-radius: 0 !important; }
+
+/* Brand: the lit tally lamp and TALLY where jellyfin-web draws its own logo. */
+html[data-tally-look] .pageTitleWithDefaultLogo {
+  background-image: none !important;
+  display: inline-flex; align-items: center; gap: 14px;
+  width: auto !important; min-width: 0; height: 30px; margin-left: .6em;
+  overflow: visible;
+}
+html[data-tally-look] .pageTitleWithDefaultLogo::before {
+  content: ''; width: 14px; height: 14px; flex: none; background: var(--tl-accent);
+}
+html[data-tally-look] .pageTitleWithDefaultLogo::after {
+  content: 'TALLY';
+  font: 600 18px/1 var(--tl-sans); letter-spacing: .34em; color: var(--tl-text);
+}
+html[data-tally-look].layout-tv .pageTitleWithDefaultLogo { height: 30px; }
+/* A page title in the header ("Movies", "Dune"): a quiet mono label. */
+html[data-tally-look] .pageTitle:not(.pageTitleWithDefaultLogo) {
+  font: 500 14px/1.2 var(--tl-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--tl-text);
+}
+
+/* tabs in the header (Home / Favorites, Movies / Suggestions / Genres...) */
+html[data-tally-look] .emby-tab-button {
+  font-size: 13px; font-weight: 500; color: var(--tl-muted);
+  border-bottom: 2px solid transparent;
+}
+html[data-tally-look] .emby-tab-button:hover { color: var(--tl-text); background: transparent; }
+html[data-tally-look] .emby-tab-button-active,
+html[data-tally-look] .emby-tab-button-active:hover { color: var(--tl-text); border-bottom-color: var(--tl-accent); }
+html[data-tally-look] .emby-tab-button .emby-button-foreground { padding-bottom: 2px; }
+
+/* ============ side menu (legacy drawer) ============ */
+html[data-tally-look] .mainDrawer,
+html[data-tally-look] .drawer-open {
+  background: var(--tl-ground);
+  border-right: 1px solid var(--tl-rule);
+}
+html[data-tally-look] .mainDrawer-scrollContainer { padding-top: 8px; }
+html[data-tally-look] .sidebarHeader {
+  font-size: 11px; font-weight: 500; letter-spacing: .16em; color: var(--tl-muted);
+  padding: 18px 0 6px 20px; margin: 0;
+}
+html[data-tally-look] .sidebarDivider { background: var(--tl-rule); height: 1px; margin: 8px 0; }
+html[data-tally-look] .navMenuOption {
+  font-family: var(--tl-sans); font-size: 15px; color: var(--tl-text-2);
+  padding: .75em 0 .75em 20px; border-left: 3px solid transparent;
+}
+html[data-tally-look] .navMenuOption:hover { background: var(--tl-raised); color: var(--tl-text); }
+html[data-tally-look] .navMenuOption-selected,
+html[data-tally-look] .navMenuOption-selected:hover {
+  background: var(--tl-raised) !important; color: var(--tl-text) !important;
+  border-left-color: var(--tl-accent);
+}
+html[data-tally-look] .navMenuOptionIcon { color: var(--tl-muted); }
+html[data-tally-look] .navMenuOption-selected .navMenuOptionIcon { color: var(--tl-accent); }
+html[data-tally-look] .mainDrawerHandle { background: transparent; }
+
+/* ============ MUI app bar, drawer and menus (10.11 "experimental", 12.x) ============ */
+html[data-tally-look] .MuiAppBar-root {
+  background: var(--tl-ground) !important; color: var(--tl-text-2) !important;
+  border-bottom: 1px solid var(--tl-rule);
+}
+html[data-tally-look] .MuiAppBar-root a.MuiButton-root {
+  font: 500 13px/1 var(--tl-mono); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--tl-text-2); min-height: 44px; padding-left: 12px; padding-right: 12px;
+  border-bottom: 2px solid transparent;
+}
+html[data-tally-look] .MuiAppBar-root a.MuiButton-root:hover { background: var(--tl-raised); color: var(--tl-text); }
+html[data-tally-look] .MuiAppBar-root a.MuiButton-root.Mui-focusVisible { outline: 2px solid var(--tl-accent); outline-offset: -2px; }
+html[data-tally-look] .MuiAppBar-root a.MuiButton-root .MuiButton-startIcon { color: var(--tl-muted); }
+/* the current library in the bar: MUI paints it with the primary color */
+html[data-tally-look] .MuiAppBar-root a.MuiButton-root.MuiButton-colorPrimary,
+html[data-tally-look] .MuiAppBar-root a.MuiButton-root[aria-current] { color: var(--tl-text); border-bottom-color: var(--tl-accent); }
+html[data-tally-look] .MuiAppBar-root a.MuiButton-root.MuiButton-colorPrimary .MuiButton-startIcon { color: var(--tl-accent); }
+/* brand: the first link of the bar holds jellyfin's logo image and the server name; the server name stays */
+html[data-tally-look] .MuiAppBar-root .MuiToolbar-root > .MuiStack-root > a:first-child,
+html[data-tally-look] .MuiAppBar-root .MuiToolbar-root > a:first-of-type:has(img) {
+  font: 500 13px/1 var(--tl-mono); letter-spacing: .08em; text-transform: none; color: var(--tl-muted);
+}
+html[data-tally-look] .MuiAppBar-root .MuiButton-startIcon:has(> img) { width: auto; height: auto; margin-right: 14px; display: inline-flex; align-items: center; gap: 12px; }
+html[data-tally-look] .MuiAppBar-root .MuiButton-startIcon > img { display: none; }
+html[data-tally-look] .MuiAppBar-root .MuiButton-startIcon:has(> img)::before {
+  content: ''; width: 13px; height: 13px; background: var(--tl-accent);
+}
+html[data-tally-look] .MuiAppBar-root .MuiButton-startIcon:has(> img)::after {
+  content: 'TALLY'; font: 600 16px/1 var(--tl-sans); letter-spacing: .34em; color: var(--tl-text);
+}
+/* the phone bar has no logo of its own (menu button, then the icons): the brand goes after the menu button */
+html[data-tally-look] .MuiAppBar-positionFixed .MuiToolbar-root > button:first-child + .MuiBox-root::before {
+  content: 'TALLY'; margin-right: auto; align-self: center; padding-left: 24px;
+  font: 600 15px/13px var(--tl-sans); letter-spacing: .32em; color: var(--tl-text);
+  background: linear-gradient(var(--tl-accent), var(--tl-accent)) no-repeat 0 50% / 12px 12px;
+}
+html[data-tally-look] .MuiAppBar-root .MuiIconButton-root { color: var(--tl-text-2); }
+html[data-tally-look] .MuiAppBar-root .MuiIconButton-root:hover { background: var(--tl-raised); color: var(--tl-text); }
+html[data-tally-look] .MuiAvatar-root { background: var(--tl-raised-2); color: var(--tl-text-2); border: 1px solid var(--tl-rule-2); }
+
+/* the drawers' first item (jellyfin's logo, the server name and version): the lamp replaces the logo */
+html[data-tally-look] .MuiDrawer-paper .MuiListItemIcon-root > img { display: none; }
+html[data-tally-look] .MuiDrawer-paper .MuiListItemIcon-root:has(> img)::before {
+  content: ''; width: 16px; height: 16px; margin-left: 6px; background: var(--tl-accent);
+}
+html[data-tally-look] .MuiDrawer-paper .MuiListItemText-multiline .MuiTypography-h6 { font: 600 17px/1.3 var(--tl-sans); color: var(--tl-text); }
+html[data-tally-look] .MuiDrawer-paper .MuiListItemText-multiline .MuiListItemText-secondary { font: 400 12px/1.4 var(--tl-mono); letter-spacing: .08em; color: var(--tl-muted); }
+html[data-tally-look] .MuiDrawer-paper {
+  background: var(--tl-ground) !important; color: var(--tl-text-2);
+  border-right: 1px solid var(--tl-rule) !important;
+}
+html[data-tally-look] .MuiListSubheader-root {
+  background: transparent; color: var(--tl-muted); font-size: 11px; font-weight: 500; letter-spacing: .16em;
+}
+html[data-tally-look] .MuiListItemButton-root { border-left: 3px solid transparent; }
+html[data-tally-look] .MuiListItemButton-root:hover { background: var(--tl-raised); }
+html[data-tally-look] .MuiListItemButton-root.Mui-selected,
+html[data-tally-look] .MuiListItemButton-root.Mui-selected:hover {
+  background: var(--tl-raised) !important; border-left-color: var(--tl-accent); color: var(--tl-text);
+}
+html[data-tally-look] .MuiListItemButton-root.Mui-selected .MuiListItemIcon-root { color: var(--tl-accent); }
+html[data-tally-look] .MuiListItemIcon-root { color: var(--tl-muted); }
+html[data-tally-look] .MuiListItemText-primary { font-size: 15px; }
+html[data-tally-look] .MuiDivider-root { border-color: var(--tl-rule); }
+
+html[data-tally-look] .MuiPaper-root { background-image: none !important; }
+html[data-tally-look] .MuiMenu-paper,
+html[data-tally-look] .MuiPopover-paper,
+html[data-tally-look] .MuiDialog-paper,
+html[data-tally-look] .MuiAutocomplete-paper {
+  background: var(--tl-raised) !important; color: var(--tl-text) !important;
+  border: 1px solid var(--tl-rule-2);
+}
+html[data-tally-look] .MuiMenuItem-root { font-size: 15px; }
+html[data-tally-look] .MuiMenuItem-root:hover { background: var(--tl-raised-2); }
+html[data-tally-look] .MuiMenuItem-root.Mui-selected { background: rgba(255, 176, 0, .12); }
+html[data-tally-look] .MuiMenuItem-root .MuiListItemIcon-root { color: var(--tl-text-2); }
+html[data-tally-look] .MuiSnackbarContent-root {
+  background: var(--tl-raised) !important; color: var(--tl-text) !important; border: 1px solid var(--tl-rule-2);
+  font-family: var(--tl-sans);
+}
+
+/* ============ sections and cards ============ */
+html[data-tally-look] .sectionTitle {
+  font-size: 15px; font-weight: 500; color: var(--tl-text); letter-spacing: .14em;
+}
+html[data-tally-look] .sectionTitle-cards { padding-top: .6em; }
+html[data-tally-look] .sectionTitleTextButton,
+html[data-tally-look] .sectionTitleTextButton .sectionTitle { color: var(--tl-text); }
+html[data-tally-look] .sectionTitleTextButton:hover .sectionTitle { color: var(--tl-accent); }
+html[data-tally-look] .sectionTitleTextButton .material-icons { color: var(--tl-muted); font-size: 20px; }
+html[data-tally-look] .emby-scrollbuttons-button { color: var(--tl-text-2); }
+html[data-tally-look] .emby-scrollbuttons-button:hover:not(:disabled) { color: var(--tl-text); background: var(--tl-raised); }
+html[data-tally-look] .emby-scrollbuttons-button:disabled { color: var(--tl-rule-2); }
+
+/* The picture: a hairline frame on the screen color, square. */
+html[data-tally-look] .cardScalable,
+html[data-tally-look] .listItemImage,
+html[data-tally-look] .itemDetailImage {
+  background-color: var(--tl-screen);
+}
+html[data-tally-look] .cardScalable::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  border: 1px solid var(--tl-rule-2);
+}
+html[data-tally-look] .cardBox:not(.visualCardBox) .cardPadder,
+html[data-tally-look] .cardPadder { background-color: var(--tl-screen); }
+html[data-tally-look] .cardImageIcon,
+html[data-tally-look] .cardPadder .cardImageIcon { color: var(--tl-muted); }
+html[data-tally-look] .defaultCardBackground,
+html[data-tally-look] .defaultCardBackground0,
+html[data-tally-look] .defaultCardBackground1,
+html[data-tally-look] .defaultCardBackground2,
+html[data-tally-look] .defaultCardBackground3,
+html[data-tally-look] .defaultCardBackground4,
+html[data-tally-look] .defaultCardBackground5 { background-color: var(--tl-raised); }
+
+/* focus and hover: amber frame over the picture (keyboard: 3px, pointer: 1px) */
+html[data-tally-look] .card:focus .cardBox.visualCardBox,
+html[data-tally-look] .card:focus .cardBox:not(.visualCardBox) .cardScalable { border-color: transparent !important; }
+html[data-tally-look] .card:focus-visible { outline: none; }
+html[data-tally-look] .card:focus-visible .cardScalable::after,
+html[data-tally-look] .card.show-focus:focus .cardScalable::after { border: 3px solid var(--tl-accent); }
+html[data-tally-look] .card-hoverable:hover .cardScalable::after { border-color: var(--tl-accent); }
+html[data-tally-look] .card.show-focus:not(.show-animation) .cardBox.visualCardBox,
+html[data-tally-look] .card.show-focus:not(.show-animation) .cardBox:not(.visualCardBox) .cardScalable { border: 0 !important; }
+html[data-tally-look] .card.show-animation:focus > .cardBox { transform: none !important; }
+
+/* the hover overlay: darken less, square buttons */
+html[data-tally-look] .cardOverlayContainer { background: rgba(5, 5, 5, .55); }
+html[data-tally-look] .cardOverlayButton { color: var(--tl-text); }
+html[data-tally-look] .cardOverlayButton:hover { color: var(--tl-accent); background: transparent; }
+html[data-tally-look] .cardOverlayButton-br,
+html[data-tally-look] .cardOverlayFab-primary {
+  background: var(--tl-ground) !important; border: 1px solid var(--tl-rule-2);
+}
+html[data-tally-look] .cardOverlayFab-primary:hover { background: var(--tl-accent) !important; color: var(--tl-ink); }
+
+/* The label bar under the picture: a black bar, title in sans, detail in mono. */
+html[data-tally-look] .cardText {
+  font-family: var(--tl-sans); text-align: left; padding-left: 10px; padding-right: 10px;
+  color: var(--tl-text);
+}
+html[data-tally-look] .cardBox > .cardText,
+html[data-tally-look] .cardFooter { background: #000; }
+html[data-tally-look] .cardFooter { padding: 7px 0 8px; margin: 0; }
+html[data-tally-look] .cardBox > .cardText-first { padding-top: 7px; }
+html[data-tally-look] .cardBox > .cardText:last-child { padding-bottom: 8px; }
+html[data-tally-look] .cardText-first { font-size: 14px; font-weight: 500; }
+html[data-tally-look] .cardText-secondary,
+html[data-tally-look] .cardText-3 {
+  font: 400 12px/1.5 var(--tl-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--tl-muted);
+}
+html[data-tally-look] .cardTextCentered { text-align: left !important; }
+html[data-tally-look] .cardText-first a,
+html[data-tally-look] .cardText a.textActionButton { color: inherit; }
+html[data-tally-look] .cardText .textActionButton:hover { color: var(--tl-accent); text-decoration: none; }
+html[data-tally-look] .cardFooter .cardText { padding-top: 0; padding-bottom: 0; }
+html[data-tally-look] .cardFooter-transparent,
+html[data-tally-look] .cardFooter-vibrant { background: #000 !important; }
+html[data-tally-look] .cardFooter-vibrant .cardText-secondary { opacity: 1; }
+html[data-tally-look] .cardFooterButtons,
+html[data-tally-look] .cardText-flex .btnCardOptions,
+html[data-tally-look] .cardFooter .itemAction { color: var(--tl-muted); }
+html[data-tally-look] .visualCardBox { background: #000; border: 1px solid var(--tl-rule-2); }
+html[data-tally-look] .visualCardBox .cardScalable::after { border-width: 0 0 1px; }
+html[data-tally-look] .cardBox-bottompadded { padding-bottom: 0; margin-bottom: 1.2em; }
+
+/* progress: a 4px amber bar along the bottom of the picture */
+html[data-tally-look] .itemProgressBar { height: 4px; background: var(--tl-rule-2); }
+html[data-tally-look] .itemProgressBarForeground { background-color: var(--tl-accent); }
+html[data-tally-look] .itemProgressBarForeground-recording { background-color: var(--tl-live); }
+html[data-tally-look] .innerCardFooter { background: transparent !important; z-index: 3; }
+html[data-tally-look] .innerCardFooterClear { background: transparent !important; }
+
+/* indicators: SEEN / N NEW tags top-left, like the app */
+html[data-tally-look] .cardIndicators { top: 0; right: auto; left: 0; z-index: 3; }
+html[data-tally-look] .playedIndicator,
+html[data-tally-look] .countIndicator {
+  width: auto; height: auto; min-width: 0; margin: 0; padding: 4px 7px;
+  background: #000 !important; border-radius: 0 !important;
+  font: 500 11px/1 var(--tl-mono) !important; letter-spacing: .14em; text-transform: uppercase;
+}
+html[data-tally-look] .playedIndicator { color: var(--tl-muted) !important; }
+html[data-tally-look] .playedIndicator > .material-icons,
+html[data-tally-look] .playedIndicator > svg { display: none; }
+html[data-tally-look] .playedIndicator::after { content: 'SEEN'; }
+html[data-tally-look] .countIndicator { color: var(--tl-accent) !important; }
+html[data-tally-look] .countIndicator::after { content: 'NEW'; margin-left: .45em; }
+html[data-tally-look] .indicator.timerIndicator,
+html[data-tally-look] .timerIndicator { color: var(--tl-live); }
+html[data-tally-look] .mediaSourceIndicator,
+html[data-tally-look] .fullSyncIndicator {
+  background: #000 !important; color: var(--tl-text-2) !important; border-radius: 0 !important;
+  font: 500 11px/1 var(--tl-mono) !important;
+}
+html[data-tally-look] .cardImageContainer .cardText.cardDefaultText,
+html[data-tally-look] .cardDefaultText { font: 500 15px/1.3 var(--tl-sans); color: var(--tl-text-2); }
+
+/* ============ lists (episodes, tracks, settings rows) ============ */
+html[data-tally-look] .listItem { border-left: 3px solid transparent; }
+html[data-tally-look] .listItem-border { border-color: var(--tl-rule) !important; }
+html[data-tally-look] .listItem:hover { background: var(--tl-raised); }
+html[data-tally-look] .listItem:focus { background: var(--tl-raised); }
+html[data-tally-look] .listItem:focus-visible { outline: 3px solid var(--tl-accent); outline-offset: -3px; }
+html[data-tally-look] .listItemBodyText { color: var(--tl-text); font-family: var(--tl-sans); }
+html[data-tally-look] .listItemBodyText:first-child,
+html[data-tally-look] .listItemBody > .listItemBodyText:first-child { font-weight: 600; }
+html[data-tally-look] .listItem .secondary,
+html[data-tally-look] .listItemBodyText.secondary {
+  color: var(--tl-muted);
+}
+html[data-tally-look] .listItem-overview { color: var(--tl-muted); font-size: 14px; }
+html[data-tally-look] .listItemMediaInfo,
+html[data-tally-look] .listItem .mediaInfoItem { font: 400 12px/1.5 var(--tl-mono); letter-spacing: .06em; color: var(--tl-muted); }
+html[data-tally-look] .listItemIcon,
+html[data-tally-look] .listItemAside .material-icons { color: var(--tl-text-2); }
+html[data-tally-look] .listItemIcon:not(.listItemIcon-transparent) { background-color: var(--tl-raised-2); color: var(--tl-text); }
+html[data-tally-look] .listItemImage { border: 1px solid var(--tl-rule-2); }
+html[data-tally-look] .paperList { background: transparent; border: 1px solid var(--tl-rule); }
+html[data-tally-look] .listItem .listItemImage .itemProgressBar { height: 4px; }
+/* episode rows: a smaller 16:9 thumb, like the app's episode list */
+html[data-tally-look].layout-desktop .listItemImage-large { width: 16vw; height: 9vw; }
+html[data-tally-look] .listItem .listItemBodyText:first-child { font-size: 1.1em; }
+html[data-tally-look] .listItemIndicators .playedIndicator { position: static; }
+
+/* ============ buttons ============ */
+html[data-tally-look] .emby-button { font-family: var(--tl-sans); }
+html[data-tally-look] .raised,
+html[data-tally-look] .fab,
+html[data-tally-look] a[data-role=button],
+html[data-tally-look] .button-submit,
+html[data-tally-look] .button-delete,
+html[data-tally-look] .button-cancel {
+  font: 500 13px/1.2 var(--tl-mono) !important; letter-spacing: .12em; text-transform: uppercase;
+  min-height: 40px;
+}
+html[data-tally-look] .raised,
+html[data-tally-look] .fab,
+html[data-tally-look] a[data-role=button] {
+  background: transparent; color: var(--tl-text);
+  border: 1px solid var(--tl-rule-2);
+}
+html[data-tally-look] .raised:hover,
+html[data-tally-look] .fab:hover,
+html[data-tally-look] a[data-role=button]:hover { background: var(--tl-raised); }
+html[data-tally-look] .raised:focus,
+html[data-tally-look] .fab:focus,
+html[data-tally-look] a[data-role=button]:focus { background: transparent; }
+html[data-tally-look] .raised:focus-visible,
+html[data-tally-look] .fab:focus-visible { outline: 3px solid var(--tl-accent); outline-offset: -3px; }
+html[data-tally-look] .button-submit,
+html[data-tally-look] .button-submit:focus,
+html[data-tally-look] .raised.button-submit {
+  background: var(--tl-accent); color: var(--tl-ink); border: 1px solid var(--tl-accent); font-weight: 600 !important;
+}
+html[data-tally-look] .button-submit:hover { background: #ffc03a; }
+html[data-tally-look] .button-submit:focus-visible { outline: 3px solid var(--tl-text); outline-offset: -3px; }
+html[data-tally-look] .button-delete,
+html[data-tally-look] .button-delete:focus {
+  background: transparent; color: var(--tl-live-text); border: 1px solid var(--tl-live);
+}
+html[data-tally-look] .button-delete:hover { background: rgba(255, 59, 48, .12); }
+html[data-tally-look] .button-flat { color: var(--tl-text-2); }
+html[data-tally-look] .button-flat:hover { color: var(--tl-text); background: var(--tl-raised); }
+html[data-tally-look] .button-link { color: var(--tl-text); }
+html[data-tally-look] .button-link:hover { color: var(--tl-accent); text-decoration: none; }
+html[data-tally-look] .paper-icon-button-light:hover:not(:disabled) { background-color: var(--tl-raised); color: var(--tl-text); }
+html[data-tally-look] .paper-icon-button-light:active:not(:disabled) { background-color: var(--tl-raised-2); color: var(--tl-text); }
+html[data-tally-look] .paper-icon-button-light.show-focus:focus { color: var(--tl-text); }
+html[data-tally-look] .buttonActive { color: var(--tl-accent) !important; }
+html[data-tally-look] .playstatebutton-icon-played,
+html[data-tally-look] .ratingbutton-icon-withrating { color: var(--tl-accent); }
+
+/* MUI buttons (dashboard, new screens) */
+html[data-tally-look] .MuiButton-root:not(.MuiAppBar-root a.MuiButton-root) {
+  font: 500 13px/1.4 var(--tl-mono); letter-spacing: .1em; text-transform: uppercase;
+}
+html[data-tally-look] .MuiButton-contained { background-color: var(--tl-raised); color: var(--tl-text); border: 1px solid var(--tl-rule-2); }
+html[data-tally-look] .MuiButton-contained:hover { background-color: var(--tl-raised-2); }
+html[data-tally-look] .MuiButton-containedPrimary,
+html[data-tally-look] .MuiButton-containedSecondary { background-color: var(--tl-accent); color: var(--tl-ink); border-color: var(--tl-accent); }
+html[data-tally-look] .MuiButton-containedPrimary:hover,
+html[data-tally-look] .MuiButton-containedSecondary:hover { background-color: #ffc03a; }
+html[data-tally-look] .MuiButton-containedError { background-color: transparent; color: var(--tl-live-text); border-color: var(--tl-live); }
+html[data-tally-look] .MuiButton-containedError:hover { background-color: rgba(255, 59, 48, .12); }
+html[data-tally-look] .MuiButton-outlined { border-color: var(--tl-rule-2); }
+html[data-tally-look] .MuiButton-textPrimary,
+html[data-tally-look] .MuiButton-outlinedPrimary { color: var(--tl-accent); }
+html[data-tally-look] .MuiIconButton-root:hover { background-color: var(--tl-raised); }
+html[data-tally-look] .MuiButtonBase-root.Mui-focusVisible { outline: 2px solid var(--tl-accent); outline-offset: -2px; }
+html[data-tally-look] .MuiTouchRipple-root { display: none; }
+
+/* ============ inputs ============ */
+html[data-tally-look] .emby-input,
+html[data-tally-look] .emby-textarea,
+html[data-tally-look] .emby-select-withcolor,
+html[data-tally-look] .emby-select-withcolor > option {
+  background: var(--tl-ground-2); color: var(--tl-text);
+  border: 1px solid var(--tl-rule-2) !important; font-family: var(--tl-sans);
+}
+html[data-tally-look] .emby-input:focus,
+html[data-tally-look] .emby-textarea:focus,
+html[data-tally-look] .emby-select-withcolor:focus {
+  border-color: var(--tl-accent) !important; outline: 1px solid var(--tl-accent); outline-offset: -2px;
+}
+html[data-tally-look] .emby-select-tv-withcolor:focus { background-color: var(--tl-raised) !important; color: var(--tl-text) !important; }
+html[data-tally-look] .inputLabel,
+html[data-tally-look] .inputLabelUnfocused,
+html[data-tally-look] .selectLabel,
+html[data-tally-look] .textareaLabelUnfocused,
+html[data-tally-look] .checkboxListLabel,
+html[data-tally-look] .paperListLabel { color: var(--tl-text-2); }
+html[data-tally-look] .inputLabelFocused,
+html[data-tally-look] .selectLabelFocused,
+html[data-tally-look] .textareaLabelFocused { color: var(--tl-accent); }
+html[data-tally-look] .fieldDescription { color: var(--tl-muted); }
+html[data-tally-look] .selectArrowContainer { color: var(--tl-muted); }
+html[data-tally-look] .checkboxOutline { border: 1px solid var(--tl-rule-2) !important; border-radius: 0 !important; }
+html[data-tally-look] .emby-checkbox:checked + span + .checkboxOutline { background-color: var(--tl-accent); border-color: var(--tl-accent) !important; }
+html[data-tally-look] .emby-checkbox:checked + span + .checkboxOutline .checkboxIcon-checked { color: var(--tl-ink); }
+html[data-tally-look] .emby-checkbox:focus-visible + span + .checkboxOutline { outline: 2px solid var(--tl-accent); outline-offset: 1px; }
+html[data-tally-look] .emby-checkbox:focus:not(:checked) + span + .checkboxOutline { border-color: var(--tl-accent) !important; }
+html[data-tally-look] .emby-collapsible-button { border-color: var(--tl-rule); }
+html[data-tally-look] .collapseContent { background: var(--tl-ground-2); border: 1px solid var(--tl-rule); }
+html[data-tally-look] .mdl-switch__track { background: var(--tl-rule-2) !important; height: 16px; }
+html[data-tally-look] .mdl-switch__thumb { background: var(--tl-muted) !important; }
+html[data-tally-look] .mdl-switch.mdl-switch--checked .mdl-switch__track,
+html[data-tally-look] .mdl-switch__input:checked ~ .mdl-switch__track { background: rgba(255, 176, 0, .45) !important; }
+html[data-tally-look] .mdl-switch.mdl-switch--checked .mdl-switch__thumb,
+html[data-tally-look] .mdl-switch__input:checked ~ .mdl-switch__thumb { background: var(--tl-accent) !important; }
+html[data-tally-look] .mdl-radio__outer-circle,
+html[data-tally-look] .mdl-radio__inner-circle { color: var(--tl-accent); }
+
+/* MUI inputs */
+html[data-tally-look] .MuiFilledInput-root,
+html[data-tally-look] .MuiOutlinedInput-root { background-color: var(--tl-ground-2); }
+html[data-tally-look] .MuiOutlinedInput-notchedOutline { border-color: var(--tl-rule-2) !important; }
+html[data-tally-look] .Mui-focused .MuiOutlinedInput-notchedOutline { border-color: var(--tl-accent) !important; border-width: 1px !important; }
+html[data-tally-look] .MuiFormLabel-root.Mui-focused { color: var(--tl-accent); }
+html[data-tally-look] .MuiSwitch-switchBase.Mui-checked { color: var(--tl-accent); }
+html[data-tally-look] .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track { background-color: var(--tl-accent); opacity: .45; }
+html[data-tally-look] .MuiCheckbox-root.Mui-checked,
+html[data-tally-look] .MuiRadio-root.Mui-checked { color: var(--tl-accent); }
+
+/* sliders (volume, the player's position bar, settings) */
+html[data-tally-look] .mdl-slider-background-flex { background: var(--tl-rule-2); height: 4px; margin-top: -2px; }
+html[data-tally-look] .mdl-slider-background-lower { background-color: var(--tl-accent) !important; }
+html[data-tally-look] .mdl-slider-background-upper { background-color: var(--tl-rule-2) !important; }
+html[data-tally-look] .sliderBufferedTrack,
+html[data-tally-look] .mdl-slider-background-buffered { background: rgba(227, 229, 222, .28) !important; }
+html[data-tally-look] .mdl-slider::-webkit-slider-thumb { background: var(--tl-accent) !important; border-radius: 0 !important; }
+html[data-tally-look] .mdl-slider::-moz-range-thumb { background: var(--tl-accent) !important; border-radius: 0 !important; }
+html[data-tally-look] .mdl-slider { color: var(--tl-accent); }
+html[data-tally-look] .sliderMarker { background-color: rgba(227, 229, 222, .55) !important; }
+html[data-tally-look] .sliderMarker.watched { background-color: var(--tl-ground) !important; }
+html[data-tally-look] .sliderBubble {
+  background: var(--tl-raised); color: var(--tl-text); border: 1px solid var(--tl-rule-2);
+  font: 500 13px/1.3 var(--tl-mono); letter-spacing: .06em;
+}
+html[data-tally-look] .chapterThumbTextContainer { background: var(--tl-ground); }
+html[data-tally-look] .chapterThumbText { font-family: var(--tl-mono); }
+html[data-tally-look] .MuiSlider-root { color: var(--tl-accent); }
+html[data-tally-look] .MuiLinearProgress-root { background-color: var(--tl-rule-2); }
+html[data-tally-look] .MuiLinearProgress-bar { background-color: var(--tl-accent); }
+
+/* ============ item detail pages ============ */
+/* Desktop: the page backdrop is jellyfin's full-window backdrop under .backgroundContainer; instead of a flat
+   veil it fades into the ground to the left and toward the bottom, so the picture stays top-right, like the app. */
+html[data-tally-look] .backgroundContainer.withBackdrop {
+  opacity: 1 !important;
+  background-color: transparent !important;
+  background-image:
+    linear-gradient(to right, #0e0f0e 0%, rgba(14, 15, 14, .72) 30%, rgba(14, 15, 14, .1) 65%, rgba(14, 15, 14, 0) 100%),
+    linear-gradient(to bottom, rgba(14, 15, 14, .15) 0%, rgba(14, 15, 14, .3) 30%, rgba(14, 15, 14, .7) 50%, #0e0f0e 68%) !important;
+}
+/* Phone: the picture is the page's own .itemBackdrop band; it fades into the ground at the bottom. */
+html[data-tally-look].layout-mobile .itemBackdrop { position: relative; }
+html[data-tally-look].layout-mobile .itemBackdrop::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(to top, #0e0f0e 0%, rgba(14, 15, 14, 0) 45%);
+}
+html[data-tally-look] .noBackdropTransparency .detailPageWrapperContainer {
+  background-color: transparent;
+  background-image: linear-gradient(to bottom, rgba(14, 15, 14, 0) 0, rgba(14, 15, 14, .8) 90px, #0e0f0e 200px);
+  background-attachment: scroll;
+}
+html[data-tally-look] .detailPageSecondaryContainer,
+html[data-tally-look] .detailPageContent { background: transparent; }
+html[data-tally-look] .detailRibbon,
+html[data-tally-look].layout-desktop .detailRibbon,
+html[data-tally-look].layout-mobile .detailRibbon { background: transparent !important; }
+html[data-tally-look] .detailImageContainer .card .cardScalable::after { border-color: var(--tl-rule-2); }
+html[data-tally-look] .itemName,
+html[data-tally-look] .nameContainer .itemName {
+  font-family: var(--tl-sans); font-weight: 600; color: var(--tl-text); letter-spacing: -.005em;
+}
+html[data-tally-look] .nameContainer .itemName.infoText { font-size: 2.2em; line-height: 1.15; margin: .1em 0 .2em; }
+html[data-tally-look].layout-mobile .nameContainer .itemName.infoText { font-size: 1.7em; }
+html[data-tally-look] .parentName,
+html[data-tally-look] .nameContainer .parentName {
+  font: 500 14px/1.4 var(--tl-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--tl-muted);
+}
+html[data-tally-look] .parentName a,
+html[data-tally-look] .itemName a { color: inherit; }
+html[data-tally-look] .parentName a:hover,
+html[data-tally-look] .itemName a:hover { color: var(--tl-accent); }
+html[data-tally-look] .itemName.originalTitle { font: 500 14px/1.4 var(--tl-mono); letter-spacing: .06em; color: var(--tl-muted); }
+
+/* the meta line: 2021 · [PG-13] · 2H 28M · ★ 7.8 · RT 83% · ENDS 9:41 PM */
+/* (natural case: jellyfin writes units as "2h 28m" and "1080p", which uppercase would garble) */
+html[data-tally-look] .itemMiscInfo { font: 400 14px/1.4 var(--tl-mono); letter-spacing: .04em; color: var(--tl-text-2); }
+html[data-tally-look] .itemMiscInfo .mediaInfoItem { margin-right: 0; display: inline-flex; align-items: center; }
+html[data-tally-look] .itemMiscInfo .mediaInfoItem + .mediaInfoItem:not(.mediaInfoText):not(.mediaInfoCriticRating)::before {
+  content: '·'; margin: 0 .7em; color: var(--tl-muted);
+}
+/* the boxed official rating and the critic score (whose ::before says RT) get their separator from the item before */
+html[data-tally-look] .itemMiscInfo .mediaInfoItem:has(+ .mediaInfoText, + .mediaInfoCriticRating)::after {
+  content: '·'; margin: 0 .7em; color: var(--tl-muted);
+}
+html[data-tally-look] .mediaInfoText,
+html[data-tally-look] .mediaInfoOfficialRating {
+  border: 1px solid var(--tl-rule-2) !important; background: transparent !important; color: var(--tl-text-2);
+  padding: 1px 6px; font: 400 13px/1.3 var(--tl-mono);
+}
+html[data-tally-look] .starIcon { color: var(--tl-text-2) !important; font-size: 1.1em; margin-right: .2em; }
+html[data-tally-look] .mediaInfoCriticRating { background-image: none !important; padding-left: 0 !important; min-height: 0 !important; }
+html[data-tally-look] .mediaInfoCriticRating::after { content: '%'; }
+html[data-tally-look] .mediaInfoCriticRating { font-family: var(--tl-mono); }
+html[data-tally-look] .itemMiscInfo .mediaInfoItem.mediaInfoCriticRating::before { content: 'RT\00a0'; margin: 0; color: inherit; }
+html[data-tally-look] .endsAt { color: var(--tl-text-2); }
+html[data-tally-look] .mediaInfoProgramAttribute,
+html[data-tally-look] .mediaInfoText-upcomingNewEpisode { background: var(--tl-live) !important; color: var(--tl-ink) !important; border-color: var(--tl-live) !important; }
+
+/* buttons: square, labeled (the label is the button's own localized title), amber primary */
+html[data-tally-look] .mainDetailButtons { gap: 8px; flex-wrap: wrap; margin-top: 1em; }
+html[data-tally-look] .mainDetailButtons .detailButton {
+  display: inline-flex; flex-direction: row; align-items: center; justify-content: center; gap: 10px;
+  height: 40px; margin: 0; padding: 0 16px; flex: none;
+  color: var(--tl-text); background: transparent; border: 1px solid var(--tl-rule-2);
+  font: 500 13px/1 var(--tl-mono); letter-spacing: .12em; text-transform: uppercase;
+}
+html[data-tally-look] .mainDetailButtons .detailButton.hide { display: none; }
+html[data-tally-look] .mainDetailButtons .detailButton::after { content: attr(title); white-space: nowrap; }
+html[data-tally-look] .mainDetailButtons .detailButton-content { display: contents; }
+html[data-tally-look] .mainDetailButtons .detailButton-icon { font-size: 18px; width: 18px; height: 18px; }
+html[data-tally-look] .mainDetailButtons .detailButton-text { display: none; }
+html[data-tally-look] .mainDetailButtons .detailButton:hover { background: var(--tl-raised); }
+html[data-tally-look] .mainDetailButtons .detailButton:focus-visible { outline: 3px solid var(--tl-accent); outline-offset: -3px; }
+html[data-tally-look] .mainDetailButtons .btnPlay,
+html[data-tally-look] .mainDetailButtons .btnResume,
+html[data-tally-look] .mainDetailButtons .btnPlay:hover,
+html[data-tally-look] .mainDetailButtons .btnResume:hover {
+  background: var(--tl-accent); color: var(--tl-ink); border-color: var(--tl-accent); font-weight: 600;
+}
+html[data-tally-look] .mainDetailButtons .btnPlay:hover,
+html[data-tally-look] .mainDetailButtons .btnResume:hover { background: #ffc03a; }
+html[data-tally-look] .mainDetailButtons .btnPlay:focus-visible,
+html[data-tally-look] .mainDetailButtons .btnResume:focus-visible { outline-color: var(--tl-text); }
+/* the more-commands button stays an icon; it has no title of its own in some versions */
+html[data-tally-look] .mainDetailButtons .btnMoreCommands::after { content: attr(title); }
+
+html[data-tally-look] .detailPagePrimaryContainer { align-items: flex-start; }
+html[data-tally-look].layout-desktop .detailRibbon { flex-wrap: wrap; height: auto; min-height: 0; padding-top: .6em; padding-bottom: .6em; }
+html[data-tally-look].layout-desktop .infoWrapper { flex: 1 1 100%; }
+html[data-tally-look].layout-desktop .detailRibbon .mainDetailButtons { flex: 1 1 100%; justify-content: flex-start; }
+
+html[data-tally-look] .tagline { font: 400 18px/1.4 var(--tl-sans); color: var(--tl-text-2); }
+html[data-tally-look] .overview,
+html[data-tally-look] .overview-controls { font-family: var(--tl-sans); color: var(--tl-text); font-size: 16px; line-height: 1.55; }
+html[data-tally-look] .itemGenres { color: var(--tl-muted); }
+html[data-tally-look] .itemTags,
+html[data-tally-look] .itemExternalLinks { color: var(--tl-muted); font-size: 14px; }
+html[data-tally-look] .itemTags a,
+html[data-tally-look] .itemExternalLinks a { color: var(--tl-text-2); font-weight: 400; }
+html[data-tally-look] .itemTags a:hover,
+html[data-tally-look] .itemExternalLinks a:hover { color: var(--tl-accent); }
+html[data-tally-look] .detailsGroupItem .label {
+  font-size: 12px; font-weight: 500; letter-spacing: .14em; color: var(--tl-muted); flex-basis: 8em;
+}
+html[data-tally-look] .detailsGroupItem .content,
+html[data-tally-look] .detailsGroupItem .content a { color: var(--tl-text); font-weight: 500; }
+html[data-tally-look] .detailsGroupItem .content a:hover { color: var(--tl-accent); }
+html[data-tally-look] .trackSelections .selectLabel { font: 500 12px/1.2 var(--tl-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--tl-muted); flex-basis: 8.5em; min-width: 8.5em; }
+html[data-tally-look] .trackSelections .detailTrackSelect,
+html[data-tally-look] .trackSelections .emby-select-withcolor { font-family: var(--tl-sans); padding-left: .5em; }
+html[data-tally-look] .detailLogo { filter: none; }
+html[data-tally-look] .detailSectionHeader,
+html[data-tally-look] .detailVerticalSection .sectionTitle { color: var(--tl-text); }
+html[data-tally-look] .nextUpSection,
+html[data-tally-look] .seriesTimerSchedule { color: var(--tl-text-2); }
+html[data-tally-look] .itemDetailPage .emby-scroller { scroll-padding-left: 4px; }
+
+/* ============ library pages: toolbar, alphabet, filters ============ */
+html[data-tally-look] .flex.align-items-center.justify-content-center.flex-wrap-wrap.padded-top.padded-left.padded-right.padded-bottom.focuscontainer-x,
+html[data-tally-look] .itemsViewSettingsContainer { color: var(--tl-text-2); }
+html[data-tally-look] .btnSort,
+html[data-tally-look] .btnFilter,
+html[data-tally-look] .btnShuffle,
+html[data-tally-look] .btnPlay.autoSize,
+html[data-tally-look] .btnSelectView,
+html[data-tally-look] .btnNewCollection,
+html[data-tally-look] .btnNewPlaylist,
+html[data-tally-look] .btnPreviousPage,
+html[data-tally-look] .btnNextPage { border: 1px solid var(--tl-rule-2); margin: 0 3px; color: var(--tl-text-2); }
+html[data-tally-look] .paging,
+html[data-tally-look] .listPaging,
+html[data-tally-look] .paging .pageCount { font: 400 13px/1.3 var(--tl-mono); letter-spacing: .08em; color: var(--tl-muted); }
+html[data-tally-look] .alphaPicker { font-family: var(--tl-mono); }
+html[data-tally-look] .alphaPickerButton { color: var(--tl-muted); background: transparent; font: 500 12px/1 var(--tl-mono); }
+html[data-tally-look] .alphaPickerButton:hover { color: var(--tl-text); background: transparent; }
+html[data-tally-look] .alphaPickerButton-selected { color: var(--tl-accent); }
+html[data-tally-look] .alphaPickerButton-tv:focus { background-color: var(--tl-accent); color: var(--tl-ink); }
+html[data-tally-look] .filterDialogContent .emby-collapsible-title,
+html[data-tally-look] .emby-collapsible-title { font: 500 13px/1.3 var(--tl-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--tl-text); }
+
+/* ============ dialogs, action sheets, toasts ============ */
+html[data-tally-look] .dialogBackdrop,
+html[data-tally-look] .dialogBackdropOpened { background: #000; }
+html[data-tally-look] .dialogBackdropOpened { opacity: .72; }
+html[data-tally-look] .dialog {
+  background: var(--tl-ground); color: var(--tl-text-2);
+  border: 1px solid var(--tl-rule-2);
+}
+html[data-tally-look] .dialog.dialog-fullscreen,
+html[data-tally-look].layout-mobile .dialog.formDialog { border: 0; }
+html[data-tally-look] .formDialogHeader:not(.formDialogHeader-clear),
+html[data-tally-look] .formDialogFooter:not(.formDialogFooter-clear) { background: var(--tl-ground); }
+html[data-tally-look] .formDialogHeader { border-bottom: 1px solid var(--tl-rule); }
+html[data-tally-look] .formDialogHeader-clear { border-bottom: 0; }
+html[data-tally-look] .formDialogFooter { border-top: 1px solid var(--tl-rule); }
+html[data-tally-look] .formDialogFooter-clear { border-top: 0; }
+html[data-tally-look] .formDialogHeaderTitle { font: 600 19px/1.3 var(--tl-sans); color: var(--tl-text); }
+html[data-tally-look] .dialogContentInner h1,
+html[data-tally-look] .dialogContentInner h2,
+html[data-tally-look] .dialog h2.sectionTitle { color: var(--tl-text); }
+
+html[data-tally-look] .actionSheet {
+  background: var(--tl-raised); color: var(--tl-text);
+  border: 1px solid var(--tl-rule-2);
+}
+html[data-tally-look] .actionSheet.dialog-fullscreen,
+html[data-tally-look] .actionsheet-not-fullscreen { background: var(--tl-raised); }
+html[data-tally-look] .actionSheetTitle {
+  font-size: 12px; font-weight: 500; color: var(--tl-muted); letter-spacing: .16em;
+  padding: .9em 1.1em .5em; margin: 0;
+}
+html[data-tally-look] .actionSheetText { color: var(--tl-text-2); }
+html[data-tally-look] .actionSheetMenuItem { font: 400 15px/1.3 var(--tl-sans); color: var(--tl-text); }
+html[data-tally-look] .actionSheetMenuItem:hover { background: var(--tl-raised-2); }
+html[data-tally-look] .actionSheetMenuItem:focus { background: var(--tl-raised-2); }
+html[data-tally-look] .actionSheetMenuItem:focus-visible { outline: 3px solid var(--tl-accent); outline-offset: -3px; }
+html[data-tally-look] .actionsheetMenuItemIcon { color: var(--tl-text-2); }
+html[data-tally-look] .actionSheetMenuItem .check,
+html[data-tally-look] .actionsheetMenuItemIcon.check { color: var(--tl-accent); }
+html[data-tally-look] .actionSheetItemAsideText,
+html[data-tally-look] .actionsheetListItemBody .secondary {
+  font: 400 12px/1.3 var(--tl-mono); letter-spacing: .04em; color: var(--tl-muted);
+}
+html[data-tally-look] .actionsheetDivider { background: var(--tl-rule); }
+html[data-tally-look] .actionSheetScroller { scrollbar-color: var(--tl-rule-2) var(--tl-raised); }
+
+html[data-tally-look] .toast {
+  background: var(--tl-raised); color: var(--tl-text); border: 1px solid var(--tl-rule-2); border-left: 3px solid var(--tl-accent);
+  font: 500 14px/1.4 var(--tl-sans); padding: .9em 1.2em;
+}
+
+html[data-tally-look] .infoBanner {
+  background: var(--tl-raised); color: var(--tl-text); border: 1px solid var(--tl-rule-2); border-left: 3px solid var(--tl-accent);
+}
+html[data-tally-look] .progressring-spiner,
+html[data-tally-look] .mdl-spinner__circle { border-color: var(--tl-accent) !important; }
+html[data-tally-look] .loading-spinner,
+html[data-tally-look] .docspinner { filter: none; }
+html[data-tally-look] .itemSelectionPanel { border-color: var(--tl-accent); }
+html[data-tally-look] .selectionCommandsPanel { background: var(--tl-accent); color: var(--tl-ink) !important; }
+html[data-tally-look] .upNextDialog-countdownText { color: var(--tl-accent); font-family: var(--tl-mono); }
+
+/* ============ search ============ */
+html[data-tally-look] .searchFieldsInner .searchfields-icon { color: var(--tl-muted); }
+html[data-tally-look] .searchFields .emby-input,
+html[data-tally-look] #searchTextInput,
+html[data-tally-look] .searchfields-txtSearch {
+  height: 48px; font: 400 18px/1.2 var(--tl-sans); padding: 0 .8em;
+  background: var(--tl-ground-2); border: 1px solid var(--tl-rule-2) !important;
+}
+html[data-tally-look] .searchfields-txtSearch::placeholder,
+html[data-tally-look] #searchTextInput::placeholder { font: 400 14px/1 var(--tl-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--tl-muted); }
+html[data-tally-look] .searchSuggestions .button-link,
+html[data-tally-look] .searchSuggestions a { color: var(--tl-text-2); }
+
+/* ============ the player's on-screen controls ============ */
+html[data-tally-look] .videoOsdBottom {
+  background: linear-gradient(to top, rgba(14, 15, 14, .94) 0%, rgba(14, 15, 14, .75) 55%, rgba(14, 15, 14, 0) 100%) !important;
+  color: var(--tl-text);
+}
+html[data-tally-look] .osdHeader,
+html[data-tally-look] .skinHeader.osdHeader {
+  background: linear-gradient(to bottom, rgba(14, 15, 14, .9) 0%, rgba(14, 15, 14, 0) 100%) !important;
+}
+html[data-tally-look] .osdTitle,
+html[data-tally-look] .osdTextContainer .osdTitle { font: 600 20px/1.3 var(--tl-sans); color: var(--tl-text); }
+html[data-tally-look] .osdSecondaryMediaInfo,
+html[data-tally-look] .osdMediaInfo,
+html[data-tally-look] .osdTimeText,
+html[data-tally-look] .osdPositionText,
+html[data-tally-look] .osdDurationText,
+html[data-tally-look] .osdEndsText,
+html[data-tally-look] .endsAtText {
+  font: 400 13px/1.3 var(--tl-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--tl-text-2);
+  font-variant-numeric: tabular-nums;
+}
+html[data-tally-look] .osdPositionText,
+html[data-tally-look] .osdDurationText { color: var(--tl-text); }
+html[data-tally-look] .videoOsdBottom .paper-icon-button-light,
+html[data-tally-look] .videoOsdBottom .osdIconButton,
+html[data-tally-look] .osdHeader .paper-icon-button-light { color: var(--tl-text); }
+html[data-tally-look] .videoOsdBottom .paper-icon-button-light:hover:not(:disabled),
+html[data-tally-look] .osdHeader .paper-icon-button-light:hover:not(:disabled) { background: rgba(227, 229, 222, .1); color: var(--tl-text); }
+html[data-tally-look] .videoOsdBottom .btnPause,
+html[data-tally-look] .videoOsdBottom .osdIconButton.btnPause { color: var(--tl-text); }
+html[data-tally-look] .videoOsdBottom .ratingbutton-icon-withrating { color: var(--tl-accent); }
+html[data-tally-look] .osdPositionSlider.mdl-slider::-webkit-slider-thumb { width: 12px; height: 12px; }
+html[data-tally-look] .videoOsdBottom .mdl-slider-background-flex { height: 4px; }
+html[data-tally-look] .videoOsdBottom .emby-slider-container,
+html[data-tally-look] .videoOsdBottom .sliderContainer { color: var(--tl-accent); }
+html[data-tally-look] .upNextContainer,
+html[data-tally-look] .upNextDialog { background: var(--tl-raised); border: 1px solid var(--tl-rule-2); }
+html[data-tally-look] .playerStats { background: rgba(14, 15, 14, .9) !important; border: 1px solid var(--tl-rule-2); font-family: var(--tl-mono); }
+html[data-tally-look] .playerStats-stat-label { color: var(--tl-muted); }
+
+/* the now-playing bar (audio, remote control) */
+html[data-tally-look] .nowPlayingBar {
+  background: var(--tl-ground) !important; border-top: 1px solid var(--tl-rule); color: var(--tl-text);
+}
+html[data-tally-look] .nowPlayingBarTop .nowPlayingBarPositionContainer .mdl-slider-background-flex { height: 3px; }
+html[data-tally-look] .nowPlayingBarText,
+html[data-tally-look] .nowPlayingBarSecondaryText { font-family: var(--tl-sans); }
+html[data-tally-look] .nowPlayingBarCurrentTime,
+html[data-tally-look] .nowPlayingBarSecondaryText { font-family: var(--tl-mono); color: var(--tl-muted); }
+
+/* ============ login, user select, wizard ============ */
+html[data-tally-look] #loginPage > div:first-child::before {
+  /* the lamp and the name, above the form */
+  content: 'TALLY';
+  display: block; width: max-content; margin: 2.5em auto 1.4em; padding-left: 34px;
+  font: 600 26px/22px var(--tl-sans); letter-spacing: .36em; color: var(--tl-text);
+  background: linear-gradient(var(--tl-accent), var(--tl-accent)) no-repeat 0 50% / 20px 20px;
+}
+html[data-tally-look] #loginPage h1,
+html[data-tally-look] #loginPage .sectionTitle {
+  font: 500 13px/1.3 var(--tl-mono) !important; letter-spacing: .16em; text-transform: uppercase; color: var(--tl-muted);
+}
+html[data-tally-look] #loginPage .visualLoginForm h1 { margin-top: 0 !important; }
+html[data-tally-look] #loginPage .card .cardText { text-align: center; }
+html[data-tally-look] #loginPage .card .cardImageIcon { color: var(--tl-text-2); }
+html[data-tally-look] .loginDisclaimer { color: var(--tl-muted); }
+html[data-tally-look] #loginPage .manualLoginForm,
+html[data-tally-look] #loginPage .readOnlyContent { max-width: 26em; }
+html[data-tally-look] .quickConnectCode,
+html[data-tally-look] .quickConnectCodeLarge { font-family: var(--tl-mono); letter-spacing: .3em; color: var(--tl-accent); }
+html[data-tally-look] .wizardStartForm,
+html[data-tally-look] .ui-corner-all,
+html[data-tally-look] .ui-shadow { background-color: var(--tl-ground); }
+
+/* ============ settings and the dashboard: legible and consistent, not redesigned ============ */
+html[data-tally-look] .dashboardDocument .mainDrawer,
+html[data-tally-look] .dashboardDocument .skinBody { background: var(--tl-ground); }
+html[data-tally-look] .dashboardSection h3,
+html[data-tally-look] .dashboardSection .sectionTitle { color: var(--tl-text); }
+html[data-tally-look] .activityLogListWidget .listItem,
+html[data-tally-look] .activeSession .cardBox { background: var(--tl-ground-2); }
+html[data-tally-look] .sessionNowPlayingContent,
+html[data-tally-look] .activeSession .visualCardBox { background-color: var(--tl-raised); }
+html[data-tally-look] .activeSession .itemProgressBarForeground { background-color: var(--tl-accent); }
+html[data-tally-look] .activeSession .sessionNowPlayingInfo,
+html[data-tally-look] .activeSession .sessionAppInfo { color: var(--tl-text); }
+html[data-tally-look] .MuiTableCell-root { border-color: var(--tl-rule); }
+html[data-tally-look] .MuiTableCell-head { font: 500 12px/1.3 var(--tl-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--tl-muted); }
+html[data-tally-look] .MuiDataGrid-root { border-color: var(--tl-rule) !important; }
+html[data-tally-look] .MuiDataGrid-columnHeaders { font-family: var(--tl-mono); text-transform: uppercase; letter-spacing: .1em; }
+html[data-tally-look] .MuiCard-root { background: var(--tl-raised) !important; border: 1px solid var(--tl-rule); }
+html[data-tally-look] .MuiCardActionArea-root:hover .MuiCardActionArea-focusHighlight { opacity: .04; }
+html[data-tally-look] .MuiAlert-standardInfo,
+html[data-tally-look] .MuiAlert-filledInfo { background: var(--tl-raised); color: var(--tl-text); border: 1px solid var(--tl-rule-2); }
+html[data-tally-look] .MuiAlert-icon { color: var(--tl-accent) !important; }
+html[data-tally-look] .MuiChip-root { border: 1px solid var(--tl-rule-2); }
+html[data-tally-look] .MuiTab-root { font: 500 13px/1 var(--tl-mono); letter-spacing: .12em; text-transform: uppercase; }
+html[data-tally-look] .MuiTab-root.Mui-selected { color: var(--tl-text); }
+html[data-tally-look] .MuiTabs-indicator { background-color: var(--tl-accent); }
+
+/* ============ guide, recordings (Live TV settings pages that stay jellyfin's) ============ */
+html[data-tally-look] .programCell-sports,
+html[data-tally-look] .programCell-movie,
+html[data-tally-look] .programCell-kids,
+html[data-tally-look] .programCell-news { background: var(--tl-raised) !important; }
+html[data-tally-look] .programCell-active { background: #1f1b0e !important; }
+html[data-tally-look] .guide-channelHeaderCell:focus,
+html[data-tally-look] .programCell:focus { background-color: var(--tl-accent) !important; color: var(--tl-ink) !important; }
+
+/* ============ the Sports entry the script adds to menus ============ */
+html[data-tally-look] .tally-sports-link .tally-sports-lamp {
+  display: inline-block; width: 10px; height: 10px; background: var(--tl-accent); margin: 0 .55em 0 .35em;
+}
+
+/* ============ phone ============ */
+@media (max-width: 600px) {
+  html[data-tally-look] .sectionTitle { font-size: 13px; }
+  html[data-tally-look] .pageTitleWithDefaultLogo::after { font-size: 16px; }
+  html[data-tally-look] .cardText-first { font-size: 13px; }
+  html[data-tally-look] .cardText-secondary { font-size: 11px; }
+  html[data-tally-look] .mainDetailButtons { gap: 6px; }
+  html[data-tally-look] .mainDetailButtons .detailButton { flex: 1 1 auto; padding: 0 10px; }
+  html[data-tally-look] .mainDetailButtons .detailButton:not(.btnPlay):not(.btnResume)::after { content: none; }
+  html[data-tally-look] .mainDetailButtons .btnPlay,
+  html[data-tally-look] .mainDetailButtons .btnResume { flex: 1 1 100%; }
+  html[data-tally-look] .itemMiscInfo { font-size: 12px; column-gap: 1.1em; row-gap: .3em; flex-wrap: wrap; }
+  html[data-tally-look] .itemMiscInfo .mediaInfoItem::before,
+  html[data-tally-look] .itemMiscInfo .mediaInfoItem::after { content: none !important; }
+  html[data-tally-look] .itemMiscInfo .mediaInfoItem.mediaInfoCriticRating::before { content: 'RT\00a0' !important; }
+  html[data-tally-look] .itemMiscInfo .mediaInfoItem.mediaInfoCriticRating::after { content: '%' !important; }
+}

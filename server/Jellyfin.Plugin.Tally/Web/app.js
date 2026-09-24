@@ -1401,10 +1401,12 @@ async function renderAdmin(container, fresh) {
     </div>
 
     <div class="set-card">
-      <h3>Live TV takeover <span class="jtv-k">Admin</span></h3>
-      <div class="hint">Open Tally whenever anyone clicks Live TV in the Jellyfin web client — the home screen card, the side menu, a bookmark. Works for every user, not just admins. The plugin adds one script tag to the web page as it is served; no Jellyfin files are changed. Native TV and mobile apps keep Jellyfin's own Live TV screen.</div>
+      <h3>Jellyfin web client <span class="jtv-k">Admin</span></h3>
+      <div class="hint">For everyone who uses Jellyfin in a browser, not just admins. The plugin adds a few tags to the web page as it is served; no Jellyfin files are changed, and switching both off gives the stock web client back. Native TV and mobile apps are not affected.</div>
+      <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.WebLook !== false ? ' on' : ''}" id="set-weblook" role="switch" aria-checked="${!!(cfg && cfg.WebLook !== false)}"></button>
+        Tally look for Jellyfin web — the Tally theme and name, and a Sports entry in the menu <span class="jtv-k">Save, then reload the browser tab</span></label></div>
       <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.ReplaceLiveTv !== false ? ' on' : ''}" id="set-takeover" role="switch" aria-checked="${!!(cfg && cfg.ReplaceLiveTv !== false)}"></button>
-        Replace Jellyfin's Live TV page with Tally <span class="jtv-k">Save, then reload the browser tab</span></label></div>
+        Replace Jellyfin's Live TV page with Tally — the home screen card, the side menu, a bookmark <span class="jtv-k">Save, then reload the browser tab</span></label></div>
     </div>
 
     <div class="set-card">
@@ -1440,6 +1442,7 @@ async function renderAdmin(container, fresh) {
   $('#set-public-url', container).oninput = (e) => { cfg.PublicUrl = e.target.value.trim().replace(/\/+$/, ''); };
   $('#set-dl-code', container).oninput = (e) => { cfg.DownloaderCode = e.target.value.trim(); };
 
+  $('#set-weblook', container).onclick = () => { cfg.WebLook = cfg.WebLook === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
   $('#set-takeover', container).onclick = () => { cfg.ReplaceLiveTv = cfg.ReplaceLiveTv === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
   $('#set-livecards', container).onclick = () => { cfg.LiveCardsEnabled = cfg.LiveCardsEnabled === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
   $('#set-scores', container).onclick = () => { cfg.ScoresEnabled = cfg.ScoresEnabled === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
