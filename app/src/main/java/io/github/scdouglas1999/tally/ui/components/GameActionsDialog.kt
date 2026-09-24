@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -42,6 +45,12 @@ import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
+import io.github.scdouglas1999.tally.dvr.ui.DvrKeepLastTvDialog
+import io.github.scdouglas1999.tally.dvr.ui.DvrMenuLine
+import io.github.scdouglas1999.tally.dvr.ui.DvrTvMenuRows
+import io.github.scdouglas1999.tally.dvr.ui.dvrGameMenuLines
+import io.github.scdouglas1999.tally.dvr.ui.dvrTeamMenuLine
+import io.github.scdouglas1999.tally.dvr.ui.rememberGameDvr
 import io.github.scdouglas1999.tally.ui.components.phone.PhoneGameSheet
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
@@ -103,7 +112,13 @@ private data class ActionLine(
     val label: String,
     val dismissOnClick: Boolean,
     val onClick: () -> Unit,
-)
+    val dvr: DvrMenuLine? = null,
+) {
+    val menuLine: DvrMenuLine get() = dvr ?: DvrMenuLine(label = label, dismiss = dismissOnClick, onClick = onClick)
+}
+
+private fun DvrMenuLine.toActionLine(): ActionLine =
+    ActionLine(label = label.orEmpty(), dismissOnClick = dismiss, onClick = onClick ?: {}, dvr = this)
 
 /**
  * The long-press menu for a game: a centered Tally panel over a 60% black scrim.
@@ -120,15 +135,38 @@ fun GameActionsDialog(
     onDismiss: () -> Unit,
     channelName: String = "",
 ) {
+    // The server DVR's part of the menu (null when the server does not record).
+    val dvr = rememberGameDvr(game)
     if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
         // The game sheet: the game's panel, WATCH, then these actions (no corner view on a phone).
-        PhoneGameSheet(game = game, actions = actions.copy(watchInCorner = null), onDismiss = onDismiss, channelName = channelName)
+        PhoneGameSheet(
+            game = game,
+            actions = actions.copy(watchInCorner = null),
+            onDismiss = onDismiss,
+            channelName = channelName,
+            dvr = dvr,
+        )
         return
     }
     val away = game?.away?.menuName().orEmpty()
     val home = game?.home?.menuName().orEmpty()
+    // No spoilers: a finished game with a recording shows its score only when asked.
+    var scoreShown by remember(game?.id) { mutableStateOf(false) }
+    var keepTeam by remember { mutableStateOf<TallyTeam?>(null) }
+    val dvrLines = dvr?.let { dvrGameMenuLines(it) }.orEmpty()
+    val awayRuleLine = dvr?.let { dvrTeamMenuLine(it, it.game.away) { team -> keepTeam = team } }
+    val homeRuleLine = dvr?.let { dvrTeamMenuLine(it, it.game.home) { team -> keepTeam = team } }
     val lines =
         buildList {
+            dvr?.watchableItemId?.takeIf { dvr.guarded }?.let {
+                add(
+                    ActionLine(
+                        stringResource(R.string.tally_dvr_watch_recording),
+                        dismissOnClick = true,
+                        onClick = dvr::watchRecording,
+                    ),
+                )
+            }
             actions.watch?.let { watch ->
                 add(ActionLine(stringResource(actions.watchLabel), dismissOnClick = true, onClick = watch))
             }
@@ -150,6 +188,7 @@ fun GameActionsDialog(
                     ),
                 )
             }
+            dvrLines.forEach { add(it.toActionLine()) }
             if (game != null) {
                 actions.followAway?.let { followAway ->
                     add(
@@ -164,6 +203,7 @@ fun GameActionsDialog(
                         ),
                     )
                 }
+                awayRuleLine?.let { add(it.toActionLine()) }
                 actions.followHome?.let { followHome ->
                     add(
                         ActionLine(
@@ -177,6 +217,7 @@ fun GameActionsDialog(
                         ),
                     )
                 }
+                homeRuleLine?.let { add(it.toActionLine()) }
             }
             add(
                 ActionLine(
@@ -188,6 +229,18 @@ fun GameActionsDialog(
                     onClick = actions.toggleHideScores,
                 ),
             )
+            if (dvr?.guarded == true) {
+                add(
+                    ActionLine(
+                        label =
+                            stringResource(
+                                if (scoreShown) R.string.tally_dvr_hide_the_score else R.string.tally_dvr_show_the_score,
+                            ),
+                        dismissOnClick = false,
+                        onClick = { scoreShown = !scoreShown },
+                    ),
+                )
+            }
             actions.removeFromMultiview?.let { remove ->
                 add(
                     ActionLine(
@@ -241,6 +294,7 @@ fun GameActionsDialog(
                 modifier =
                     Modifier
                         .width(560.dp)
+                        .heightIn(max = MENU_MAX_HEIGHT)
                         .background(TallyColors.ground)
                         .border(TallyDimens.hairline, TallyColors.rule)
                         .padding(20.dp),
@@ -262,43 +316,42 @@ fun GameActionsDialog(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
-                }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    lines.forEachIndexed { index, line ->
-                        TallyRow(
-                            label = line.label,
-                            onClick = {
-                                if (!acceptClicks) return@TallyRow
-                                line.onClick()
-                                if (line.dismissOnClick) onDismiss()
-                            },
-                            trailing = {
-                                KeyHint(
-                                    key = stringResource(R.string.tally_key_ok),
-                                    label = "",
-                                )
-                            },
-                            modifier =
-                                Modifier
-                                    .then(if (index == 0) Modifier.focusRequester(firstRow) else Modifier)
-                                    .focusProperties {
-                                        if (index == 0) up = FocusRequester.Cancel
-                                        if (index == lines.lastIndex) down = FocusRequester.Cancel
-                                        left = FocusRequester.Cancel
-                                        right = FocusRequester.Cancel
-                                    },
+                    if (game != null && scoreShown) {
+                        Text(
+                            text = "${game.away.menuName()} ${game.away.score ?: 0}  ·  ${game.home.menuName()} ${game.home.score ?: 0}",
+                            style = TallyType.label,
+                            color = TallyColors.textSecondary,
+                            maxLines = 1,
                         )
                     }
                 }
+                // DVR lines carry an info line above their row (a job's state, the estimate) and can be disabled or
+                // info only; the rows scroll when the menu is taller than the screen.
+                DvrTvMenuRows(
+                    lines = lines.map { it.menuLine },
+                    firstRowFocus = firstRow,
+                    acceptClicks = { acceptClicks },
+                    onDismiss = onDismiss,
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                )
             }
         }
+    }
+    val keepFor = keepTeam
+    if (dvr != null && keepFor != null) {
+        DvrKeepLastTvDialog(
+            team = keepFor,
+            rule = dvr.ruleFor(keepFor),
+            onChoose = { keepLast -> dvr.recordTeam(keepFor, keepLast) },
+            onDelete = { dvr.ruleFor(keepFor)?.let(dvr::deleteRule) },
+            onDismiss = { keepTeam = null },
+        )
     }
 }
 
 private fun TallyTeam.menuName(): String = shortName.ifBlank { abbr.ifBlank { name } }
+
+private val MENU_MAX_HEIGHT = 500.dp
 
 private const val CLICK_ARM_MS = 400L
 

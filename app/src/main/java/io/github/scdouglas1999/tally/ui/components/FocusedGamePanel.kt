@@ -26,6 +26,7 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
+import io.github.scdouglas1999.tally.dvr.spoilerGuarded
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -43,6 +44,8 @@ fun FocusedGamePanel(
     hideScores: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    // No spoilers: a finished game with a recording keeps its score and result out of sight.
+    val scoresHidden = hideScores || game?.spoilerGuarded == true
     Box(
         modifier =
             modifier
@@ -70,14 +73,14 @@ fun FocusedGamePanel(
                             team = game.away,
                             game = game,
                             home = false,
-                            hideScores = hideScores,
+                            hideScores = scoresHidden,
                             modifier = Modifier.weight(1f),
                         )
                         HeroTeamLine(
                             team = game.home,
                             game = game,
                             home = true,
-                            hideScores = hideScores,
+                            hideScores = scoresHidden,
                             modifier = Modifier.weight(1f),
                         )
                     }
@@ -106,7 +109,7 @@ fun FocusedGamePanel(
                             maxLines = 1,
                         )
                         Spacer(Modifier.height(8.dp))
-                        if (hideScores) {
+                        if (scoresHidden) {
                             Text(
                                 text = stringResource(R.string.tally_scores_hidden),
                                 style = TallyType.body,
@@ -143,7 +146,7 @@ fun FocusedGamePanel(
                                 )
                             }
                         }
-                        if (!hideScores && (game.isLive || game.isFinal)) {
+                        if (!scoresHidden && (game.isLive || game.isFinal)) {
                             Spacer(Modifier.height(10.dp))
                             LineScore(
                                 game = game,

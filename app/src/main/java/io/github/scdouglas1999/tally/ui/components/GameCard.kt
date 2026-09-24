@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.Glow
@@ -37,6 +38,8 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
+import io.github.scdouglas1999.tally.dvr.spoilerGuarded
+import io.github.scdouglas1999.tally.dvr.ui.RecTag
 import io.github.scdouglas1999.tally.media.kit.tallyClickable
 import io.github.scdouglas1999.tally.ui.components.phone.PhoneGameCard
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
@@ -94,6 +97,8 @@ fun GameCard(
         if (focused) onFocused()
     }
     val watchable = game.watch != null
+    // No spoilers: a finished game with a recording keeps its score and result out of sight.
+    val scoresHidden = hideScores || game.spoilerGuarded
     val showFocus = tallyFocusVisible()
     val idleBorder =
         Border(
@@ -184,6 +189,7 @@ fun GameCard(
                         maxLines = 1,
                     )
                 }
+                RecTag(recording = game.recording, style = TallyType.label.copy(fontSize = 12.sp), dot = 6.dp)
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = statusText,
@@ -216,13 +222,13 @@ fun GameCard(
                     GameCardTeamLine(
                         team = game.away,
                         game = game,
-                        hideScores = hideScores,
+                        hideScores = scoresHidden,
                         modifier = Modifier.weight(1f),
                     )
                     GameCardTeamLine(
                         team = game.home,
                         game = game,
-                        hideScores = hideScores,
+                        hideScores = scoresHidden,
                         modifier = Modifier.weight(1f),
                     )
                 }

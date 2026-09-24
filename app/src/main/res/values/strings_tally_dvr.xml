@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Recording games (the server DVR): game menu and sheet, Recordings tab, watch from the start. American English. -->
+<resources>
+    <string name="tally_tab_recordings">Recordings</string>
+
+    <!-- Game menu (TV) and game sheet (phone) -->
+    <string name="tally_dvr_record">Record</string>
+    <string name="tally_dvr_record_every">Record every %1$s game</string>
+    <string name="tally_dvr_recording_every">Recording every %1$s game</string>
+    <string name="tally_dvr_stop_every">Stop recording every %1$s game</string>
+    <string name="tally_dvr_keep_kicker">Keep</string>
+    <string name="tally_dvr_keep_all">Keep all</string>
+    <string name="tally_dvr_keep_last">Keep the last %1$d</string>
+    <string name="tally_dvr_watch_from_start">Watch from the start</string>
+    <string name="tally_dvr_from_start_short">From the start</string>
+    <string name="tally_dvr_watch_recording">Watch the recording</string>
+    <string name="tally_dvr_show_the_score">Show the score</string>
+    <string name="tally_dvr_hide_the_score">Hide the score</string>
+    <string name="tally_dvr_stop">Stop recording</string>
+    <string name="tally_dvr_stop_keeps">Stopping keeps what was recorded.</string>
+    <string name="tally_dvr_cancel">Cancel recording</string>
+    <string name="tally_dvr_free_on_server">%1$s free on the server</string>
+    <string name="tally_dvr_used_by_recordings">%1$s used by recordings</string>
+    <string name="tally_dvr_rec_tag" translatable="false">REC</string>
+    <string name="tally_dvr_fa_start_over" translatable="false">&#xf049;</string>
+
+    <!-- A job's state in words -->
+    <string name="tally_dvr_state_recording">Recording</string>
+    <string name="tally_dvr_state_recording_since">Recording since %1$s</string>
+    <string name="tally_dvr_state_waiting">Waiting for a stream</string>
+    <string name="tally_dvr_state_scheduled">Scheduled to record</string>
+    <string name="tally_dvr_state_finishing">Finishing the recording</string>
+    <string name="tally_dvr_state_done">Recorded</string>
+    <string name="tally_dvr_state_failed">Failed: %1$s</string>
+    <string name="tally_dvr_state_canceled">Canceled</string>
+    <string name="tally_dvr_today_at">Today %1$s</string>
+
+    <!-- Recordings tab -->
+    <string name="tally_dvr_section_now">Recording now</string>
+    <string name="tally_dvr_section_scheduled">Scheduled</string>
+    <string name="tally_dvr_section_recorded">Recorded</string>
+    <string name="tally_dvr_section_failed">Failed</string>
+    <string name="tally_dvr_section_rules">Team rules</string>
+    <string name="tally_dvr_all_leagues">All leagues</string>
+    <string name="tally_dvr_play">Play</string>
+    <string name="tally_dvr_delete">Delete</string>
+    <string name="tally_dvr_dismiss">Dismiss</string>
+    <string name="tally_dvr_change">Change</string>
+    <string name="tally_dvr_loading">Loading recordings…</string>
+    <string name="tally_dvr_list_failed">Can\'t load the recordings</string>
+    <string name="tally_dvr_empty_title">No recordings yet</string>
+    <string name="tally_dvr_empty_sub">Hold OK on a game and choose Record, or Record every game of a team.</string>
+    <string name="tally_dvr_empty_sub_phone">Tap a game and choose Record, or Record every game of a team.</string>
+    <string name="tally_dvr_empty_sub_viewer">Recordings made on this server show up here.</string>
+    <string name="tally_dvr_not_in_library_yet">This recording is still being added to the library.</string>
+
+    <!-- Watch from the start -->
+    <string name="tally_dvr_start_over_kicker">Rec · From the start</string>
+    <string name="tally_dvr_live">Live</string>
+    <string name="tally_dvr_behind_live">%1$s behind live</string>
+    <string name="tally_dvr_back_10">Back 10 seconds</string>
+    <string name="tally_dvr_forward_30">Forward 30 seconds</string>
+    <string name="tally_dvr_start_over_failed">This recording can\'t be played right now. If the game has ended, it is under Recorded.</string>
+
+    <!-- Errors -->
+    <string name="tally_dvr_error_watching">Someone is watching this recording right now.</string>
+    <string name="tally_dvr_error_unreachable">Can\'t reach the server.</string>
+    <string name="tally_dvr_error_generic">The server could not do that.</string>
+</resources>

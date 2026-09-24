@@ -29,11 +29,13 @@ import com.github.damontecres.wholphin.ui.showToast
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.api.TallyChannel
 import io.github.scdouglas1999.tally.data.TallyRepository
+import io.github.scdouglas1999.tally.dvr.ui.RecordingsTab
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.KeyHint
 import io.github.scdouglas1999.tally.ui.components.TallyRow
 import io.github.scdouglas1999.tally.ui.components.TallyTab
 import io.github.scdouglas1999.tally.ui.components.TallyTopBar
+import io.github.scdouglas1999.tally.ui.components.tallyTabs
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.phone.PhoneSportsPage
@@ -56,6 +58,7 @@ fun TallyPage(
     }
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val clock by viewModel.clock.collectAsStateWithLifecycle()
+    val dvr = state.hasDvr
     val context = LocalContext.current
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { resId ->
@@ -68,7 +71,7 @@ fun TallyPage(
     TallySurface(modifier = modifier) {
         Column(Modifier.fillMaxSize()) {
             TallyTopBar(
-                tabs = TallyTab.entries,
+                tabs = tallyTabs(dvr),
                 selected = state.selectedTab,
                 onSelect = viewModel::selectTab,
                 selectedTabFocus = selectedTabFocus,
@@ -118,6 +121,10 @@ fun TallyPage(
                                 onOpen = viewModel::openMultiview,
                                 modifier = Modifier.fillMaxSize(),
                             )
+                        }
+
+                        TallyTab.RECORDINGS -> {
+                            RecordingsTab(modifier = Modifier.fillMaxSize())
                         }
 
                         TallyTab.SETTINGS -> {

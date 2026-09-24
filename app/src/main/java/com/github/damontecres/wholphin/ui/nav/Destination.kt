@@ -205,4 +205,13 @@ sealed class Destination(
     @Serializable
     data object TallyDownloads : Destination()
     // TALLY: end
+
+    // TALLY: begin
+    @Serializable
+    data class TallyStartOver(
+        val jobId: String,
+        val path: String,
+        val title: String,
+    ) : Destination(true)
+    // TALLY: end
 }

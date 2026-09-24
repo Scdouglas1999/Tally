@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -71,6 +72,8 @@ import io.github.scdouglas1999.tally.api.TallyEvent
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
 import io.github.scdouglas1999.tally.data.TallyRepository
+import io.github.scdouglas1999.tally.dvr.ui.LocalStartOverAction
+import io.github.scdouglas1999.tally.dvr.ui.rememberStartOverAction
 import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
@@ -349,12 +352,15 @@ fun TallyPlaybackPage(
             hiltViewModel<PlaybackViewModel, PlaybackViewModel.Factory>(
                 creationCallback = { it.create(playbackDestination) },
             )
-        PlaybackPage(
-            preferences = preferences,
-            destination = playbackDestination,
-            modifier = Modifier.fillMaxSize(),
-            viewModel = playbackViewModel,
-        )
+        // While the game on screen is being recorded, the controls offer WATCH FROM THE START.
+        CompositionLocalProvider(LocalStartOverAction provides rememberStartOverAction(game)) {
+            PlaybackPage(
+                preferences = preferences,
+                destination = playbackDestination,
+                modifier = Modifier.fillMaxSize(),
+                viewModel = playbackViewModel,
+            )
+        }
 
         // Overlays share the Tally canvas scale; the upstream player above must not.
         TallyScale {

@@ -53,7 +53,11 @@ data class TallyUiState(
     val loading: Boolean = true,
     val selectedTab: TallyTab = TallyTab.GAMES,
     val multiview: List<String> = emptyList(),
-)
+) {
+    /** The server records games (the plugin's `dvr` feature): Sports shows RECORDINGS. */
+    val hasDvr: Boolean
+        get() = (availability as? TallyRepository.Availability.Available)?.info?.features?.contains("dvr") == true
+}
 
 /**
  * Drives the Tally section: starts/stops the board poll with the page, merges the

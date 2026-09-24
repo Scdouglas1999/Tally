@@ -91,6 +91,7 @@ file is a future merge conflict.** Therefore:
 | W61 | `data/ServerRepository.kt` (after `closeSession`) | `tallyRestoreOffline`: the saved session without asking the server (offline start) |
 | W62 | `ui/nav/Destination.kt`, `ui/nav/DestinationContent.kt` (the TALLY blocks at the end) | `Destination.TallyDownloads` and its page |
 | W63 | `AndroidManifest.xml` | downloads: FOREGROUND_SERVICE_DATA_SYNC, `TallyDownloadService` (Media3 download service), Media3's `PlatformSchedulerService` |
+| W64 | `ui/nav/Destination.kt`, `ui/nav/DestinationContent.kt` (a second TALLY block after W62's) | `Destination.TallyStartOver` and its page: WATCH FROM THE START of a game the server is recording (`dvr/ui/StartOverPage.kt`, its own ExoPlayer on the job's start-over playlist) |
 | (database) | `downloads/db/TallyDownloadsDatabase.kt`, `app/schemas/io.github.scdouglas1999.tally.downloads.db.TallyDownloadsDatabase/` | Tally's own Room database (`tally_downloads.db`) for download records and offline progress. Rule 4 still holds: upstream's `AppDatabase` gets nothing; this one is versioned by Tally |
 | (resource) | `res/values-v31/themes_tally.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 

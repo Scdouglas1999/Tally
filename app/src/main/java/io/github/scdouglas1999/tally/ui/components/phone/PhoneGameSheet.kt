@@ -11,6 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -21,6 +25,10 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
+import io.github.scdouglas1999.tally.dvr.ui.GameDvr
+import io.github.scdouglas1999.tally.dvr.ui.phone.PhoneGameDvrBlock
+import io.github.scdouglas1999.tally.dvr.ui.phone.PhoneKeepLastSheet
+import io.github.scdouglas1999.tally.dvr.ui.phone.PhoneTeamRuleRow
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneButton
 import io.github.scdouglas1999.tally.ui.components.BaseballDiamond
 import io.github.scdouglas1999.tally.ui.components.GameActions
@@ -54,7 +62,13 @@ fun PhoneGameSheet(
     actions: GameActions,
     onDismiss: () -> Unit,
     channelName: String = "",
+    dvr: GameDvr? = null,
 ) {
+    // No spoilers: a finished game with a recording shows its score only behind SHOW THE SCORE.
+    var scoreShown by remember(game?.id) { mutableStateOf(false) }
+    var keepTeam by remember { mutableStateOf<TallyTeam?>(null) }
+    val guarded = dvr?.guarded == true
+    val recordingItem = dvr?.watchableItemId?.takeIf { guarded }
     PhoneSheet(onDismiss = onDismiss) {
         Column(
             modifier =
@@ -66,7 +80,7 @@ fun PhoneGameSheet(
             if (game != null) {
                 PhoneGamePanel(
                     game = game,
-                    hideScores = actions.hideScores,
+                    hideScores = actions.hideScores || (guarded && !scoreShown),
                     modifier = Modifier.padding(horizontal = PhoneDimens.margin),
                 )
                 Spacer(Modifier.height(16.dp))
@@ -86,12 +100,29 @@ fun PhoneGameSheet(
                     modifier = Modifier.padding(horizontal = PhoneDimens.margin),
                 )
             }
+            if (dvr != null && recordingItem != null) {
+                Spacer(Modifier.height(12.dp))
+                PhoneButton(
+                    label = stringResource(R.string.tally_dvr_watch_recording),
+                    glyph = stringResource(R.string.fa_play),
+                    primary = true,
+                    onClick = {
+                        dvr.watchRecording()
+                        onDismiss()
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = PhoneDimens.margin),
+                )
+            }
             actions.watch?.let { watch ->
                 Spacer(Modifier.height(12.dp))
                 PhoneButton(
                     label = stringResource(actions.watchLabel),
                     glyph = stringResource(R.string.fa_play),
-                    primary = true,
+                    // The recording leads for a finished game that has one.
+                    primary = recordingItem == null,
                     onClick = {
                         watch()
                         onDismiss()
@@ -102,6 +133,7 @@ fun PhoneGameSheet(
                             .padding(horizontal = PhoneDimens.margin),
                 )
             }
+            dvr?.let { PhoneGameDvrBlock(dvr = it, onDismiss = onDismiss) }
             Spacer(Modifier.height(8.dp))
             actions.addToMultiview?.let { add ->
                 SheetActionRow(
@@ -120,6 +152,7 @@ fun PhoneGameSheet(
                         onClick = follow,
                     )
                 }
+                dvr?.let { PhoneTeamRuleRow(dvr = it, team = game.away, onOpen = { team -> keepTeam = team }) }
                 actions.followHome?.let { follow ->
                     SheetActionRow(
                         label = followLabel(actions.followedHome, game.home),
@@ -127,6 +160,7 @@ fun PhoneGameSheet(
                         onClick = follow,
                     )
                 }
+                dvr?.let { PhoneTeamRuleRow(dvr = it, team = game.home, onOpen = { team -> keepTeam = team }) }
             }
             SheetActionRow(
                 label =
@@ -135,6 +169,15 @@ fun PhoneGameSheet(
                     ),
                 onClick = actions.toggleHideScores,
             )
+            if (guarded) {
+                SheetActionRow(
+                    label =
+                        stringResource(
+                            if (scoreShown) R.string.tally_dvr_hide_the_score else R.string.tally_dvr_show_the_score,
+                        ),
+                    onClick = { scoreShown = !scoreShown },
+                )
+            }
             actions.removeFromMultiview?.let { remove ->
                 SheetActionRow(
                     label = stringResource(R.string.tally_actions_remove_multiview),
@@ -145,6 +188,16 @@ fun PhoneGameSheet(
                 )
             }
         }
+    }
+    val keepFor = keepTeam
+    if (dvr != null && keepFor != null) {
+        PhoneKeepLastSheet(
+            team = keepFor,
+            rule = dvr.ruleFor(keepFor),
+            onChoose = { keepLast -> dvr.recordTeam(keepFor, keepLast) },
+            onDelete = { dvr.ruleFor(keepFor)?.let(dvr::deleteRule) },
+            onDismiss = { keepTeam = null },
+        )
     }
 }
 

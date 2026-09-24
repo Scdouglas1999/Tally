@@ -37,12 +37,14 @@ import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.showToast
 import io.github.scdouglas1999.tally.api.TallyChannel
 import io.github.scdouglas1999.tally.data.TallyRepository
+import io.github.scdouglas1999.tally.dvr.ui.phone.PhoneRecordingsTab
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneButton
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneEmptyState
 import io.github.scdouglas1999.tally.ui.TallySettingsContent
 import io.github.scdouglas1999.tally.ui.TallyViewModel
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.TallyTab
+import io.github.scdouglas1999.tally.ui.components.tallyTabs
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.PhoneType
@@ -95,7 +97,7 @@ fun PhoneSportsPage(
                 )
             }
             PhoneTabStrip(
-                tabs = TallyTab.entries,
+                tabs = tallyTabs(state.hasDvr),
                 selected = state.selectedTab,
                 onSelect = viewModel::selectTab,
             )
@@ -131,6 +133,10 @@ fun PhoneSportsPage(
                         onOpen = viewModel::openMultiview,
                         modifier = Modifier.fillMaxSize(),
                     )
+                }
+
+                TallyTab.RECORDINGS -> {
+                    PhoneRecordingsTab(modifier = Modifier.fillMaxSize())
                 }
 
                 TallyTab.SETTINGS -> {

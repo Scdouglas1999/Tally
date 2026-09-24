@@ -24,6 +24,8 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
+import io.github.scdouglas1999.tally.dvr.spoilerGuarded
+import io.github.scdouglas1999.tally.dvr.ui.RecTag
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.ScoreDigits
 import io.github.scdouglas1999.tally.ui.components.StartsIn
@@ -64,6 +66,8 @@ fun PhoneGameCard(
     followed: Boolean = false,
 ) {
     val watchable = game.watch != null
+    // No spoilers: a finished game with a recording keeps its score and result out of sight.
+    val scoresHidden = hideScores || game.spoilerGuarded
     Column(
         modifier =
             modifier
@@ -102,8 +106,8 @@ fun PhoneGameCard(
                     )
                 }
             } else {
-                PhoneTeamLine(team = game.away, game = game, hideScores = hideScores)
-                PhoneTeamLine(team = game.home, game = game, hideScores = hideScores)
+                PhoneTeamLine(team = game.away, game = game, hideScores = scoresHidden)
+                PhoneTeamLine(team = game.home, game = game, hideScores = scoresHidden)
             }
             PhoneGameFooter(
                 text = game.watch?.channelName ?: stringResource(R.string.tally_not_on_your_channels),
@@ -150,6 +154,7 @@ internal fun PhoneGameStatusLine(
                 maxLines = 1,
             )
         }
+        RecTag(recording = game.recording, style = PhoneType.label, dot = 5.dp)
         Spacer(Modifier.weight(1f))
         if (game.isLive) {
             IndicatorSquare(color = TallyColors.live, size = 6.dp)
