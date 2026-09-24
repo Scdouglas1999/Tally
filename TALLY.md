@@ -84,6 +84,14 @@ file is a future merge conflict.** Therefore:
 | W54 | `services/HomeSettingsService.kt` (RecentlyReleased request) | on servers before 10.11, leave out the aired-episode-order sort key (10.10 answers it with HTTP 500, so the row failed) |
 | W55 | `services/UpdateChecker.kt` (`getDownloadUrl`) | Tally's asset names first (`Tally-<abi>.apk`, `Tally.apk`), Wholphin's as the fallback |
 | W56 | `MainActivity.kt` (update toast), `WholphinApplication.kt` (crash dialog), `ui/main/settings/HomeRowPresets.kt` (preset names) | Tally's name instead of "Wholphin" in text people see (`strings_tally_branding.xml`) |
+| W57 | `ui/playback/PlaybackViewModel.kt` (`init` item and cinema-mode intros, `createPlayer` backend, `play` media source, `changeStreams` playback info) | downloads: a completed download plays from the device, online too, in ExoPlayer (`TallyDownloadPlayback`, `downloads/`); offline the stored item and no intros. Not used when direct play is off (forced transcode, a chosen Quality, the fallback after an error) |
+| W58 | `services/PlayerFactory.kt` (video and audio players) | the players' data source reads downloads first (`tallydl://` URIs, downloaded subtitle files), then what upstream used |
+| W59 | `services/MusicService.kt` (`convert`) | a downloaded track plays from the device |
+| W60 | `MainActivity.kt` (`onCreate` after W42; `appStart`: before the upgrade step and in its `catch`) | `TallyOfflineStart`: starts downloads; no network or the server unreachable with completed downloads → offline mode on the downloads page instead of the server list |
+| W61 | `data/ServerRepository.kt` (after `closeSession`) | `tallyRestoreOffline`: the saved session without asking the server (offline start) |
+| W62 | `ui/nav/Destination.kt`, `ui/nav/DestinationContent.kt` (the TALLY blocks at the end) | `Destination.TallyDownloads` and its page |
+| W63 | `AndroidManifest.xml` | downloads: FOREGROUND_SERVICE_DATA_SYNC, `TallyDownloadService` (Media3 download service), Media3's `PlatformSchedulerService` |
+| (database) | `downloads/db/TallyDownloadsDatabase.kt`, `app/schemas/io.github.scdouglas1999.tally.downloads.db.TallyDownloadsDatabase/` | Tally's own Room database (`tally_downloads.db`) for download records and offline progress. Rule 4 still holds: upstream's `AppDatabase` gets nothing; this one is versioned by Tally |
 | (resource) | `res/values-v31/themes_tally.xml` (new file) | redefines `Theme.Wholphin` for Android 12+ with a plain ground splash (no icon) so the launch lamp is not preceded by a lit icon. It shadows upstream's `res/values/themes.xml` on v31+: if upstream changes that style, copy the change here |
 
 ## Releases and self-update

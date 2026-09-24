@@ -179,6 +179,10 @@ class MainActivity : AppCompatActivity() {
         io.github.scdouglas1999.tally.ui.formfactor.TallyPhoneWindow
             .setUp(this)
         // TALLY: end
+        // TALLY: begin
+        io.github.scdouglas1999.tally.downloads.TallyOfflineStart
+            .onAppStart(this)
+        // TALLY: end
         Timber.i("MainActivity.onCreate: savedInstanceState is null=${savedInstanceState == null}")
         lifecycle.addObserver(playbackLifecycleObserver)
 
@@ -512,6 +516,13 @@ class MainActivityViewModel
                     }
 
                     try {
+                        // TALLY: begin
+                        if (io.github.scdouglas1999.tally.downloads.TallyOfflineStart
+                                .enterIfOffline(context)
+                        ) {
+                            return@withLock
+                        }
+                        // TALLY: end
                         val needUpgrade = appUpgradeHandler.needUpgrade()
                         if (needUpgrade) {
                             showToast(
@@ -579,6 +590,13 @@ class MainActivityViewModel
                         }
                     } catch (ex: Exception) {
                         Timber.e(ex, "Error during appStart")
+                        // TALLY: begin
+                        if (io.github.scdouglas1999.tally.downloads.TallyOfflineStart
+                                .enter(context, ex)
+                        ) {
+                            return@withLock
+                        }
+                        // TALLY: end
                         setupNavigationManager.navigateTo(SetupDestination.ServerList)
                     }
                 }

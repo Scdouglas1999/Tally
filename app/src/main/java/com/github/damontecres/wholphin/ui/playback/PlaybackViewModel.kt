@@ -262,7 +262,11 @@ class PlaybackViewModel
             val softwareDecoding =
                 !preferences.appPreferences.playbackPreferences.mpvOptions.enableHardwareDecoding
             val requestBackend =
-                (destination as? Destination.Playback)?.backend
+                // TALLY: begin
+                io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
+                    .backendFor(context, itemId)
+                    // TALLY: end
+                    ?: (destination as? Destination.Playback)?.backend
                     ?: preferences.appPreferences.playbackPreferences.playerBackend
             val playerBackend =
                 when (requestBackend) {
@@ -346,7 +350,12 @@ class PlaybackViewModel
                     }
                 }
             this.itemId = itemId
-            val queriedItem = api.userLibraryApi.getItem(itemId).content
+            val queriedItem =
+                // TALLY: begin
+                io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
+                    .offlineItem(context, itemId)
+                    // TALLY: end
+                    ?: api.userLibraryApi.getItem(itemId).content
             val playlistItem =
                 if (queriedItem.type.playable) {
                     PlaylistItem.Media(BaseItem(queriedItem, false))
@@ -399,7 +408,13 @@ class PlaybackViewModel
 
             val intros =
                 // If not resuming playback & cinema mode is enabled, get potential intros
-                if (positionMs == 0L && preferences.appPreferences.playbackPreferences.cinemaMode) {
+                if (positionMs == 0L &&
+                    preferences.appPreferences.playbackPreferences.cinemaMode &&
+                    // TALLY: begin
+                    !io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
+                        .isOffline(context)
+                    // TALLY: end
+                ) {
                     api.userLibraryApi
                         .getIntros(
                             itemId = playlistItem.id,
@@ -512,7 +527,11 @@ class PlaybackViewModel
                     }
                 val mediaSource =
                     if (!isLiveTv) {
-                        streamChoiceService.chooseSource(base, itemPlayback)
+                        // TALLY: begin
+                        io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
+                            .localSource(context, base.id, forceTranscoding)
+                            // TALLY: end
+                            ?: streamChoiceService.chooseSource(base, itemPlayback)
                     } else {
                         null
                     }
@@ -686,34 +705,38 @@ class PlaybackViewModel
                         ?: preferences.appPreferences.playbackPreferences.maxBitrate
                             .takeIf { it > 0 } ?: AppPreference.DEFAULT_BITRATE
                 val response by
-                    api.mediaInfoApi
-                        .getPostedPlaybackInfo(
-                            itemId,
-                            PlaybackInfoDto(
-                                startTimeTicks = null,
-                                deviceProfile =
-                                    if (currentPlayer.value!!.backend == PlayerBackend.EXO_PLAYER) {
-                                        deviceProfileService.getOrCreateDeviceProfile(
-                                            preferences.appPreferences,
-                                            serverRepository.currentServer?.serverVersion,
-                                        )
-                                    } else {
-                                        mpvDeviceProfile
-                                    },
-                                maxAudioChannels = null,
-                                audioStreamIndex = audioIndex,
-                                subtitleStreamIndex = subtitleIndex,
-                                mediaSourceId = sourceId,
-                                alwaysBurnInSubtitleWhenTranscoding = false,
-                                maxStreamingBitrate = maxBitrate.toInt(),
-                                enableDirectPlay = enableDirectPlay,
-                                enableDirectStream = enableDirectStream,
-                                allowVideoStreamCopy = enableDirectStream,
-                                allowAudioStreamCopy = enableDirectStream,
-                                enableTranscoding = true,
-                                autoOpenLiveStream = true,
-                            ),
-                        )
+                    // TALLY: begin
+                    io.github.scdouglas1999.tally.downloads.TallyDownloadPlayback
+                        .playbackInfo(context, itemId, enableDirectPlay)
+                        // TALLY: end
+                        ?: api.mediaInfoApi
+                            .getPostedPlaybackInfo(
+                                itemId,
+                                PlaybackInfoDto(
+                                    startTimeTicks = null,
+                                    deviceProfile =
+                                        if (currentPlayer.value!!.backend == PlayerBackend.EXO_PLAYER) {
+                                            deviceProfileService.getOrCreateDeviceProfile(
+                                                preferences.appPreferences,
+                                                serverRepository.currentServer?.serverVersion,
+                                            )
+                                        } else {
+                                            mpvDeviceProfile
+                                        },
+                                    maxAudioChannels = null,
+                                    audioStreamIndex = audioIndex,
+                                    subtitleStreamIndex = subtitleIndex,
+                                    mediaSourceId = sourceId,
+                                    alwaysBurnInSubtitleWhenTranscoding = false,
+                                    maxStreamingBitrate = maxBitrate.toInt(),
+                                    enableDirectPlay = enableDirectPlay,
+                                    enableDirectStream = enableDirectStream,
+                                    allowVideoStreamCopy = enableDirectStream,
+                                    allowAudioStreamCopy = enableDirectStream,
+                                    enableTranscoding = true,
+                                    autoOpenLiveStream = true,
+                                ),
+                            )
                 if (response.errorCode != null) {
                     Timber.e("Error in PostedPlaybackInfo: %s", response.errorCode)
                     _state.update { it.copy(loading = LoadingState.Error(response.errorCode?.serialName)) }

@@ -201,5 +201,8 @@ sealed class Destination(
     data class TallyPostPlay(
         val itemId: UUID,
     ) : Destination(true)
+
+    @Serializable
+    data object TallyDownloads : Destination()
     // TALLY: end
 }

@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.data
 
 import android.content.Context
@@ -179,6 +182,15 @@ class ServerRepository
         fun closeSession() {
             _current.value = null
         }
+
+        // TALLY: begin
+        // Offline start with downloads (io.github.scdouglas1999.tally.downloads.TallyOfflineStart): the saved session
+        // without asking the server, which cannot be reached. The server's user details stay unknown until it answers.
+        suspend fun tallyRestoreOffline(current: CurrentUser) {
+            apiClient.update(baseUrl = current.server.url, accessToken = current.user.accessToken)
+            withContext(WholphinDispatchers.Main) { _current.value = current }
+        }
+        // TALLY: end
 
         /**
          * Given a successful [AuthenticationResult], switch to the user that just authenticated
