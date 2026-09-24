@@ -1,0 +1,90 @@
+import { useEffect, useState } from 'preact/hooks';
+import { session } from '../api/jellyfin';
+import { FocusGroup, setFocus, useFocusable } from '../focus/focus';
+import { back, stack, type Entry } from '../router/router';
+import { loadNav } from '../state/nav';
+import { useStore } from '../util/store';
+import { SignInPage } from '../pages/signin/SignInPage';
+import { Rail, RAIL_KEY } from './Rail';
+import { chromeOf, PAGES } from './routes';
+import { pageFocusKey } from './pageKeys';
+import type { PageProps } from './page';
+
+function PageFrame(props: { entry: Entry; active: boolean }) {
+  const key = pageFocusKey(props.entry.id);
+  const full = chromeOf(props.entry.route) === 'full';
+  const f = useFocusable<HTMLDivElement>({
+    focusKey: key,
+    saveLastFocusedChild: true,
+    focusable: props.active,
+    isFocusBoundary: true,
+    // LEFT leaves a rail page for the rail; full-screen pages keep focus in every direction
+    focusBoundaryDirections: full ? ['left', 'right', 'up', 'down'] : ['right', 'up', 'down'],
+  });
+  const Page = PAGES[props.entry.route.name].page as (p: PageProps) => preact.JSX.Element;
+  return (
+    <div ref={f.ref} class={'page' + (props.active ? '' : ' hidden')}>
+      <FocusGroup focusKey={key}>
+        <Page route={props.entry.route} active={props.active} pageKey={key} />
+      </FocusGroup>
+    </div>
+  );
+}
+
+/** The signed-in app: the rail (on rail pages) and the stack of pages, the top one visible. */
+function Frame() {
+  const entries = useStore(stack);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const top = entries[entries.length - 1] as Entry;
+  const full = chromeOf(top.route) === 'full';
+
+  useEffect(() => {
+    void loadNav();
+  }, []);
+
+  // a new top page (opened, or uncovered by BACK) takes focus: its last focus, or its arrival focus. After the
+  // pages' own effects: the uncovered page must be focusable again before its saved focus can be restored.
+  useEffect(() => {
+    const t = window.setTimeout(() => setFocus(pageFocusKey(top.id)), 0);
+    return () => window.clearTimeout(t);
+  }, [top.id]);
+
+  return (
+    <>
+      {full ? null : <Rail onOpenChange={setDrawerOpen} />}
+      <div class={'page-area' + (full ? ' full' : '') + (drawerOpen && !full ? ' pushed' : '')}>
+        {entries.map((e) => (
+          <PageFrame key={e.id} entry={e} active={e.id === top.id} />
+        ))}
+        {drawerOpen && !full ? <div class="page-scrim" /> : null}
+      </div>
+    </>
+  );
+}
+
+/** BACK that nothing else used: the previous page; on Home the drawer opens; BACK in the open drawer leaves. */
+export function rootBack(exit: () => void): void {
+  if (session.get() === null) {
+    exit();
+    return;
+  }
+  const current = document.querySelector('.rail.open') !== null;
+  if (current) {
+    const s = stack.get();
+    if (s.length <= 1) {
+      exit();
+      return;
+    }
+    setFocus(pageFocusKey((s[s.length - 1] as Entry).id));
+    return;
+  }
+  if (!back()) setFocus(RAIL_KEY);
+}
+
+export function App(props: { onFirstScreen: () => void }) {
+  const s = useStore(session);
+  useEffect(() => {
+    props.onFirstScreen();
+  }, []);
+  return s === null ? <SignInPage /> : <Frame key={s.serverId + s.userId} />;
+}

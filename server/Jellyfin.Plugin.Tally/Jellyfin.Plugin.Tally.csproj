@@ -64,6 +64,9 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Web\**\*.js;Web\**\*.css;Web\**\*.html;Web\**\*.woff2;Web\**\*.svg;Assets\*.ttf" />
+    <!-- The Tally TV web app (tv-web/), copied here by build.sh; served at /JellyTV/TV/ (Api/TvAppController.cs).
+         Missing in a checkout that has not run build.sh: the plugin then answers 404 and the TV shell says so. -->
+    <EmbeddedResource Include="TvWeb\**\*" LogicalName="TallyTvWeb/%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

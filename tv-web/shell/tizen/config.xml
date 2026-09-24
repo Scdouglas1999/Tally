@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Tally for Samsung TVs (Tizen 5.5+, 2020 models on). The package is only the shell: the app itself is loaded from
+  the Tally plugin on the viewer's Jellyfin server (see tv-web/ARCHITECTURE.md). Version is filled in by
+  scripts/package-tizen.sh from package.json.
+  No <tizen:content-security-policy> / <tizen:allow-navigation> on purpose: either one switches the web runtime to
+  CSP mode, whose default blocks scripts from the server. <access origin="*"> lets the page reach any server
+  address (it is typed in, or stamped by the installer).
+-->
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="https://github.com/Scdouglas1999/Tally/tv" version="@VERSION@" viewmodes="maximized">
+  <tizen:application id="TallyTVapp.Tally" package="TallyTVapp" required_version="5.5"/>
+  <tizen:profile name="tv-samsung"/>
+  <name>Tally</name>
+  <description>Live sports and your Jellyfin library, in the Tally look.</description>
+  <author href="https://github.com/Scdouglas1999/Tally">Tally</author>
+  <license href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL-2.0</license>
+  <icon src="icon.png"/>
+  <content src="index.html"/>
+  <feature name="http://tizen.org/feature/screen.size.all"/>
+  <access origin="*" subdomains="true"/>
+  <tizen:privilege name="http://tizen.org/privilege/internet"/>
+  <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+  <tizen:privilege name="http://developer.samsung.com/privilege/productinfo"/>
+  <tizen:setting screen-orientation="landscape" context-menu="disable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
+</widget>

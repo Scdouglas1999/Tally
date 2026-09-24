@@ -1,0 +1,37 @@
+{
+  "name": "tally-tv-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tally TV (web): the Tally client for Samsung (Tizen), LG (webOS) and browsers",
+  "license": "GPL-2.0-only",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/check-legacy.mjs dist/bundle",
+    "typecheck": "tsc -p .",
+    "lint": "eslint . && tsc -p . && node scripts/check-legacy.mjs",
+    "test": "vitest run",
+    "e2e": "playwright test",
+    "preview": "vite preview --port 4173 --strictPort"
+  },
+  "dependencies": {
+    "@jellyfin/sdk": "1.0.0",
+    "@noriginmedia/norigin-spatial-navigation-core": "4.1.1",
+    "axios": "1.20.0",
+    "core-js": "3.50.0",
+    "hls.js": "1.7.3",
+    "preact": "10.29.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.13.2",
+    "acorn": "8.15.0",
+    "eslint": "10.11.0",
+    "eslint-plugin-compat": "7.0.2",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.70.1",
+    "vite": "8.3.1",
+    "vitest": "5.0.1"
+  }
+}

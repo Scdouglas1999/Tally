@@ -1,0 +1,15 @@
+{
+  "id": "io.github.scdouglas1999.tally",
+  "version": "@VERSION@",
+  "vendor": "Tally",
+  "type": "web",
+  "main": "index.html",
+  "title": "Tally",
+  "icon": "icon-80.png",
+  "largeIcon": "icon-130.png",
+  "bgColor": "#0e0f0e",
+  "iconColor": "#0e0f0e",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "requiredMemory": 250
+}

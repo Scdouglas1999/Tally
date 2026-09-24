@@ -1,0 +1,23 @@
+/* Home (media/home/TallyHomePage.kt): a fixed header describing the focused card, rows under it. */
+.home { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.home-backdrop { position: absolute; z-index: 0; right: 0; top: 0; width: 1400px; height: 788px; overflow: hidden; }
+.home-backdrop img { width: 100%; height: 100%; object-fit: cover; opacity: 0.55; }
+/* image scrims (allowed where text sits on pictures): ground → transparent, left and bottom */
+.home-backdrop::before, .home-backdrop::after { content: ''; position: absolute; z-index: 1; left: 0; top: 0; right: 0; bottom: 0; }
+.home-backdrop::before { background: linear-gradient(to right, var(--ground) 0%, rgba(14, 15, 14, 0) 55%); }
+.home-backdrop::after { background: linear-gradient(to top, var(--ground) 0%, rgba(14, 15, 14, 0) 50%); }
+
+.home-header { position: absolute; left: var(--margin-x); top: var(--margin-y); width: 1300px; height: 300px; }
+.home-header .kicker { color: var(--accent); height: 30px; }
+.home-header .title { margin-top: 6px; font-family: var(--sans); font-weight: 600; font-size: 72px; line-height: 88px; color: var(--text); }
+.home-header .logo { margin-top: 10px; height: 96px; }
+.home-header .logo img { max-width: 480px; max-height: 96px; }
+.home-header .meta { margin-top: 12px; display: flex; align-items: center; font-family: var(--mono); font-weight: 500; font-size: 22px; letter-spacing: 3.2px; color: var(--text-secondary); }
+.home-header .meta .sep { margin: 0 10px; color: var(--muted); }
+.home-header .meta .rating { padding: 0 8px; border: var(--hairline) solid var(--rule-strong); }
+.home-header .overview { margin-top: 14px; font-size: 32px; line-height: 45px; color: var(--text-secondary); max-width: 1100px; }
+
+.home-clock { position: absolute; right: var(--margin-x); top: 34px; font-family: var(--sans); font-size: 45px; color: var(--text); }
+
+.home-rows { position: absolute; left: 0; right: 0; top: 356px; bottom: 0; }
+.home-rows .scroll-page { padding-bottom: 60px; }

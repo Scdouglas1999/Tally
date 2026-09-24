@@ -1,0 +1,32 @@
+/* Game card (GameCard.kt): 300x176dp → 480x282 px; strip 34dp, two team lines, label bar 30dp. */
+.game-card {
+  position: relative; flex: none; display: flex; flex-direction: column;
+  width: var(--game-card-w); height: var(--game-card-h); background: var(--ground); white-space: normal;
+}
+.game-card::after {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  border: var(--hairline) solid var(--rule-strong); pointer-events: none;
+}
+.game-card[data-focused] { background: var(--ground-raised); }
+.game-card[data-focused]::after { border: var(--focus) solid var(--accent); }
+.game-card.dark .game-body { opacity: 0.6; }
+.game-card .strip { display: flex; align-items: center; height: 54px; padding: 0 16px; }
+.game-card .strip .league { flex: 0 1 auto; min-width: 0; color: var(--muted); }
+.game-card .strip .league.favorite { color: var(--accent); }
+.game-card .strip .following { color: var(--accent); margin-left: 13px; }
+.game-card .strip .following .indicator { margin-right: 10px; }
+.game-card .strip .status { margin-left: auto; padding-left: 13px; flex: none; }
+.game-card .game-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.game-card .team { flex: 1; display: flex; align-items: center; padding: 0 16px; min-height: 0; }
+.game-card .team .name {
+  flex: 1; min-width: 0; margin-left: 16px; font-family: var(--sans); font-weight: 600; font-size: 32px; color: var(--text);
+}
+.game-card .team.loser .name, .game-card .team.loser .score { color: var(--muted); }
+.game-card .team .possession { margin-left: 13px; }
+.game-card .team .score { margin-left: 16px; font-family: var(--mono); font-weight: 500; font-size: 48px; line-height: 1; color: var(--text); }
+.game-card .channel-only { flex: 1; display: flex; align-items: center; padding: 0 16px; font-family: var(--sans); font-weight: 600; font-size: 32px; }
+
+.team-mark { position: relative; flex: none; display: flex; align-items: center; justify-content: center; }
+.team-mark img { width: 100%; height: 100%; object-fit: contain; }
+.team-mark.fallback { border: 3px solid var(--rule-strong); }
+.team-mark.fallback span { font-family: var(--mono); font-weight: 600; font-size: 22px; letter-spacing: 1px; color: var(--text); }

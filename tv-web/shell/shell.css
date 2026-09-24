@@ -1,0 +1,26 @@
+/* The installed shell's own screens (loading, server address, errors), in the Tally look. Chromium 56+ safe. */
+@font-face { font-family: 'Tally Sans'; font-weight: 100 700; src: url(fonts/plex-sans.woff2) format('woff2'); }
+@font-face { font-family: 'Tally Mono'; font-weight: 500; src: url(fonts/plex-mono-500.woff2) format('woff2'); }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0e0f0e; }
+#shell { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; color: #e3e5de; font-family: 'Tally Sans', sans-serif; transform-origin: 0 0; }
+#shell.gone { display: none; }
+#shell-brand { position: absolute; left: 77px; top: 43px; display: flex; align-items: center; }
+.shell-lamp { display: inline-block; width: 23px; height: 23px; margin-right: 28px; background: #ffb000; box-shadow: 0 0 32px 5px rgba(255, 176, 0, 0.3); }
+.shell-name { font-weight: 700; font-size: 45px; letter-spacing: 13.5px; line-height: 1; }
+.shell-kicker { position: absolute; left: 77px; top: 110px; font-family: 'Tally Mono', monospace; font-weight: 500; font-size: 22px; letter-spacing: 3.2px; color: #ffb000; }
+#shell-body { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; }
+.shell-form { width: 960px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.shell-form > * { margin-top: 26px; }
+.shell-form > *:first-child { margin-top: 0; }
+.shell-text { font-size: 29px; line-height: 42px; color: #a9ada3; }
+.shell-muted { font-family: 'Tally Mono', monospace; font-weight: 500; font-size: 22px; letter-spacing: 3.2px; color: #8b9084; }
+.shell-error { font-size: 29px; line-height: 40px; color: #ff6a61; }
+.shell-field { position: relative; width: 832px; height: 77px; background: #1b1c1a; border: 2px solid #3a3d38; box-sizing: border-box; display: flex; align-items: center; padding: 0 26px; }
+.shell-field.focused { border: 4px solid #ffb000; padding: 0 24px; }
+.shell-field input { flex: 1; border: 0; background: transparent; color: #e3e5de; font-family: 'Tally Sans', sans-serif; font-size: 32px; outline: none; }
+.shell-field input::placeholder { color: #8b9084; font-family: 'Tally Mono', monospace; font-size: 24px; letter-spacing: 2.4px; }
+.shell-buttons { display: flex; }
+.shell-button { height: 64px; padding: 0 29px; margin: 0 8px; display: flex; align-items: center; box-sizing: border-box; border: 2px solid #3a3d38; font-family: 'Tally Mono', monospace; font-weight: 500; font-size: 22px; letter-spacing: 3.2px; color: #e3e5de; }
+.shell-button.primary { background: #ffb000; border-color: #ffb000; color: #0e0f0e; }
+.shell-button.focused { border: 4px solid #ffb000; padding: 0 27px; }
+.shell-button.primary.focused { border-color: #e3e5de; }

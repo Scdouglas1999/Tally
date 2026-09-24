@@ -1,0 +1,54 @@
+/*
+ * Tally design tokens (tally/UI.md, TALLY.md, TallyTheme.kt), on a 1920x1080 CSS-pixel canvas that the app scales
+ * to the screen (see src/platform/stage.ts).
+ *
+ * Units: the Android app authors Tally screens in dp/sp on a 1200x675 canvas (TallyScale), so 1 Tally dp = 1.6 px
+ * here. The navigation rail is not scaled on Android (upstream sizes at density 2), so there 1 dp = 2 px.
+ * Values below are those products, rounded to whole pixels where a half pixel would blur a hairline.
+ */
+:root {
+  --ground: #0e0f0e;
+  --ground-raised: #1b1c1a;
+  --screen: #050505;
+  --label-bar: #000000;
+  --rule: #2a2c2a;
+  --rule-strong: #3a3d38;
+  --text: #e3e5de;
+  --text-secondary: #a9ada3;
+  --muted: #8b9084;
+  --accent: #ffb000;
+  --on-accent: #0e0f0e;
+  --live: #ff3b30;
+  --live-text: #ff6a61;
+  --lamp-off: #28231a;
+
+  --sans: 'Plex Sans', sans-serif;
+  --mono: 'Plex Mono', monospace;
+  --glyph: 'FA Solid';
+
+  /* 1dp hairline and 3dp focus border, as measured on the Android app at 1080p (2px and 4px). */
+  --hairline: 2px;
+  --focus: 4px;
+
+  /* Safe margins: 48dp x 27dp. */
+  --margin-x: 77px;
+  --margin-y: 43px;
+
+  /* The rail: 64dp collapsed, 224dp open (upstream sizes, 2px per dp), plus the 8dp gap before the page. */
+  --rail: 128px;
+  --drawer: 448px;
+  --page-left: 144px;
+
+  /* Cards (dp x 1.6). */
+  --card-gap: 29px;
+  --game-card-w: 480px;
+  --game-card-h: 282px;
+  --poster-w: 211px;
+  --poster-h: 317px;
+  --landscape-w: 371px;
+  --landscape-h: 209px;
+  --label-bar-h: 64px;
+
+  /* Motion: focus and color changes at most 120ms, nothing bounces. */
+  --fast: 120ms;
+}

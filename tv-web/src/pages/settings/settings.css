@@ -1,0 +1,6 @@
+.settings-page { padding: var(--margin-y) var(--margin-x); }
+.settings-page .kicker { color: var(--accent); margin-top: 18px; }
+.settings-page .facts { margin-top: 32px; border-collapse: collapse; }
+.settings-page .facts td { padding: 10px 40px 10px 0; font-size: 30px; color: var(--text); }
+.settings-page .facts td.mono-label { color: var(--muted); font-size: 22px; }
+.settings-page .actions { margin-top: 48px; display: flex; }

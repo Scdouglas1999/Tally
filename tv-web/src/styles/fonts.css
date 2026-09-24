@@ -1,0 +1,12 @@
+/*
+ * IBM Plex (SIL OFL 1.1, IBM-PLEX-OFL.txt at the repository root) and Font Awesome 6 Free Solid (SIL OFL 1.1),
+ * the same files the Android app ships (app/src/main/res/font/). One source: Vite copies them into the bundle.
+ */
+@font-face { font-family: 'Plex Sans'; font-weight: 400; src: url('../../../app/src/main/res/font/ibm_plex_sans_regular.ttf') format('truetype'); }
+@font-face { font-family: 'Plex Sans'; font-weight: 500; src: url('../../../app/src/main/res/font/ibm_plex_sans_medium.ttf') format('truetype'); }
+@font-face { font-family: 'Plex Sans'; font-weight: 600; src: url('../../../app/src/main/res/font/ibm_plex_sans_semibold.ttf') format('truetype'); }
+@font-face { font-family: 'Plex Sans'; font-weight: 700; src: url('../../../app/src/main/res/font/ibm_plex_sans_bold.ttf') format('truetype'); }
+@font-face { font-family: 'Plex Mono'; font-weight: 400; src: url('../../../app/src/main/res/font/ibm_plex_mono_regular.ttf') format('truetype'); }
+@font-face { font-family: 'Plex Mono'; font-weight: 500; src: url('../../../app/src/main/res/font/ibm_plex_mono_medium.ttf') format('truetype'); }
+@font-face { font-family: 'Plex Mono'; font-weight: 600; src: url('../../../app/src/main/res/font/ibm_plex_mono_semibold.ttf') format('truetype'); }
+@font-face { font-family: 'FA Solid'; font-weight: 900; src: url('../../../app/src/main/res/font/fa_solid_900.ttf') format('truetype'); }

@@ -1,0 +1,65 @@
+/*
+ * The navigation rail / drawer (TallyNavDrawer.kt). Not scaled on Android (upstream sizes at density 2), so
+ * 1 dp = 2 px here: rail 64dp → 128px, open 224dp → 448px, rows 40dp → 80px (fewer px when many libraries).
+ */
+.rail {
+  position: absolute; left: 0; top: 0; bottom: 0; width: var(--rail); z-index: 20;
+  display: flex; flex-direction: column; background: var(--ground); overflow: hidden;
+}
+.rail::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: var(--hairline); background: var(--rule); }
+.rail.open { width: var(--drawer); }
+.rail.open::after { background: var(--rule-strong); }
+
+.rail .wordmark { display: flex; align-items: center; height: 32px; margin: 32px 0 16px 40px; }
+.rail .wordmark .indicator { width: 16px; height: 16px; margin-right: 16px; }
+.rail .wordmark span.name { font-family: var(--mono); font-weight: 500; font-size: 32px; letter-spacing: 4px; color: var(--text); }
+
+.rail .entry { position: relative; flex: none; display: flex; align-items: center; justify-content: center; }
+.rail .entry .light { position: absolute; left: 0; top: 50%; width: 6px; height: 40px; margin-top: -20px; background: var(--accent); }
+.rail .spot { position: relative; display: flex; align-items: center; justify-content: center; }
+.rail .spot::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none; }
+.rail .spot[data-focused] { background: var(--ground-raised); }
+.rail .spot[data-focused]::after { border: var(--focus) solid var(--accent); }
+.rail .spot .glyph { font-size: 40px; color: var(--muted); }
+.rail .entry.selected .spot .glyph { color: var(--text); }
+
+.rail.open .entry { justify-content: flex-start; }
+.rail.open .spot { width: calc(100% - var(--hairline)); height: 100%; justify-content: flex-start; padding: 0 24px; }
+.rail.open .spot .slot { width: 16px; height: 16px; flex: none; margin-right: 16px; }
+.rail.open .spot .glyph-box { width: 48px; flex: none; display: flex; justify-content: center; margin-right: 20px; }
+.rail.open .spot .glyph { font-size: 36px; }
+.rail .spot .label { display: none; }
+.rail.open .spot .label {
+  display: block; flex: 1; min-width: 0; font-family: var(--sans); font-weight: 500; font-size: 32px; color: var(--text-secondary);
+}
+.rail.open .entry.selected .spot .label { color: var(--text); }
+.rail .spot .slot, .rail .spot .glyph-box { display: none; }
+.rail.open .spot .slot, .rail.open .spot .glyph-box { display: flex; }
+.rail:not(.open) .spot > .glyph { display: inline-block; }
+.rail.open .spot > .glyph { display: none; }
+
+.rail .user .tile {
+  width: 64px; height: 64px; flex: none; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  background: var(--ground-raised); font-family: var(--mono); font-weight: 600; font-size: 32px; color: var(--text);
+}
+.rail .user .tile img { width: 100%; height: 100%; object-fit: cover; }
+.rail.open .user .spot { padding-left: 40px; }
+.rail .user .who { display: none; }
+.rail.open .user .who { display: block; flex: 1; min-width: 0; margin-left: 20px; }
+.rail .user .who .name { font-family: var(--sans); font-weight: 500; font-size: 30px; line-height: 36px; color: var(--text); }
+.rail .user .who .server { font-family: var(--mono); font-size: 22px; line-height: 28px; color: var(--muted); }
+
+.rail .divider { flex: none; margin: 12px 0; height: var(--hairline); background: var(--rule); }
+.rail .kicker { flex: none; height: 40px; margin-top: -12px; padding-left: 24px; display: flex; align-items: center; }
+.rail .kicker span { font-family: var(--mono); font-weight: 500; font-size: 22px; letter-spacing: 3px; color: var(--muted); }
+.rail:not(.open) .kicker span { visibility: hidden; }
+.rail .list { flex: 1; min-height: 0; overflow: hidden; padding: 7px 0; }
+.rail .footer { flex: none; padding-bottom: 16px; }
+
+/* The page beside the rail; while the drawer is open it moves right under a scrim, as upstream's drawer does. */
+.page-area { position: absolute; left: var(--page-left); top: 0; right: 0; bottom: 0; overflow: hidden; }
+.page-area.full { left: 0; }
+.page-area.pushed { transform: translateX(320px); }
+.page-scrim { position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 10; background: rgba(0, 0, 0, 0.55); }
+.page { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.page.hidden { display: none; }

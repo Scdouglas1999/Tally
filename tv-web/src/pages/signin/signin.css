@@ -1,0 +1,19 @@
+/* Sign-in (TallySignIn.kt): the lit lamp + TALLY top-left, the step as an accent kicker, content centered. */
+.signin { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: var(--ground); }
+.signin .brand { position: absolute; left: var(--margin-x); top: var(--margin-y); }
+.signin .wordmark { display: flex; align-items: center; }
+.signin .wordmark .lamp { margin-right: 28px; }
+.signin .wordmark .name { font-family: var(--sans); font-weight: 700; font-size: 45px; letter-spacing: 13.5px; line-height: 1; color: var(--text); }
+.signin .step { display: flex; align-items: center; margin-top: 22px; }
+.signin .step .lamp { margin-right: 16px; }
+.signin .step .kicker { color: var(--accent); }
+.signin .subtitle { margin-top: 6px; font-family: var(--mono); font-size: 21px; color: var(--muted); }
+.signin .center { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; }
+.signin .form { width: 960px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.signin .form > * + * { margin-top: 26px; }
+.signin .form .field { width: 832px; }
+.signin .code { font-family: var(--mono); font-weight: 600; font-size: 77px; letter-spacing: 13.9px; color: var(--text); line-height: 1.1; }
+.signin .help { font-size: 29px; line-height: 42px; color: var(--text-secondary); max-width: 900px; }
+.signin .waiting { color: var(--muted); }
+.signin .error { color: var(--live-text); font-size: 29px; line-height: 40px; max-width: 900px; }
+.signin .actions { display: flex; justify-content: center; }
