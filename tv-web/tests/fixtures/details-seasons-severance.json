@@ -1,0 +1,112 @@
+{
+ "Items": [
+  {
+   "Name": "Season 1",
+   "ServerId": "6cc26f6bbc534181a937364479f2910d",
+   "Id": "4fd2af9218506eced1d9ef710c6d0d73",
+   "PremiereDate": "2022-02-17T00:00:00.0000000Z",
+   "ChannelId": null,
+   "ProductionYear": 2022,
+   "IndexNumber": 1,
+   "IsFolder": true,
+   "Type": "Season",
+   "ParentLogoItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropImageTags": [
+    "2179e7d73653530acf30716d492fb0e9"
+   ],
+   "UserData": {
+    "UnplayedItemCount": 4,
+    "PlaybackPositionTicks": 0,
+    "PlayCount": 0,
+    "IsFavorite": false,
+    "Played": false,
+    "Key": "371980001",
+    "ItemId": "00000000000000000000000000000000"
+   },
+   "ChildCount": 5,
+   "SeriesName": "Severance",
+   "SeriesId": "33e60e865132660eaf355c6fd0570697",
+   "SeriesPrimaryImageTag": "92fe8feffe6bb43d4283025432c6d16b",
+   "ImageTags": {
+    "Primary": "39ee73012093cd72b5fd6c208ec85a2e"
+   },
+   "BackdropImageTags": [],
+   "ParentLogoImageTag": "de5c63f61a9b56c5ba14978250674ab0",
+   "ImageBlurHashes": {
+    "Primary": {
+     "39ee73012093cd72b5fd6c208ec85a2e": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe",
+     "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+    },
+    "Logo": {
+     "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+    },
+    "Thumb": {
+     "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+    },
+    "Backdrop": {
+     "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+    }
+   },
+   "ParentThumbItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentThumbImageTag": "04f5a71913aacbaf96cc31d7380d4c13",
+   "LocationType": "FileSystem",
+   "MediaType": "Unknown"
+  },
+  {
+   "Name": "Season 2",
+   "ServerId": "6cc26f6bbc534181a937364479f2910d",
+   "Id": "6cdbdc8f6921d1ae8072ee687e5c89c4",
+   "PremiereDate": "2025-01-16T00:00:00.0000000Z",
+   "ChannelId": null,
+   "ProductionYear": 2025,
+   "IndexNumber": 2,
+   "IsFolder": true,
+   "Type": "Season",
+   "ParentLogoItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentBackdropImageTags": [
+    "2179e7d73653530acf30716d492fb0e9"
+   ],
+   "UserData": {
+    "UnplayedItemCount": 3,
+    "PlaybackPositionTicks": 0,
+    "PlayCount": 0,
+    "IsFavorite": false,
+    "Played": false,
+    "Key": "371980002",
+    "ItemId": "00000000000000000000000000000000"
+   },
+   "ChildCount": 3,
+   "SeriesName": "Severance",
+   "SeriesId": "33e60e865132660eaf355c6fd0570697",
+   "SeriesPrimaryImageTag": "92fe8feffe6bb43d4283025432c6d16b",
+   "ImageTags": {
+    "Primary": "1ddad7e073f24f456b76ee68cb46cb63"
+   },
+   "BackdropImageTags": [],
+   "ParentLogoImageTag": "de5c63f61a9b56c5ba14978250674ab0",
+   "ImageBlurHashes": {
+    "Primary": {
+     "1ddad7e073f24f456b76ee68cb46cb63": "djENu9yDR$o#.TkCxutQxCWBjZf6-;ofM|W=%LjsV[kC",
+     "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+    },
+    "Logo": {
+     "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+    },
+    "Thumb": {
+     "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+    },
+    "Backdrop": {
+     "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+    }
+   },
+   "ParentThumbItemId": "33e60e865132660eaf355c6fd0570697",
+   "ParentThumbImageTag": "04f5a71913aacbaf96cc31d7380d4c13",
+   "LocationType": "FileSystem",
+   "MediaType": "Unknown"
+  }
+ ],
+ "TotalRecordCount": 2,
+ "StartIndex": 0
+}

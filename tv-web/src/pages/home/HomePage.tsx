@@ -1,4 +1,3 @@
-import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models/base-item-dto';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { backdropUrl } from '../../api/images';
 import { absolute } from '../../api/tally';
@@ -9,6 +8,7 @@ import { ItemCard } from '../../kit/ItemCard';
 import { MediaRow } from '../../kit/MediaRow';
 import { ScrollPage } from '../../kit/ScrollPage';
 import { push, type Route } from '../../router/router';
+import { openDetails } from '../details/navigate';
 import { GameCard } from '../../sports/GameCard';
 import { selectHomeGames } from '../../sports/homeRow';
 import { libraries, tally } from '../../state/nav';
@@ -29,17 +29,6 @@ function Clock() {
     return () => window.clearInterval(t);
   }, []);
   return <div class="home-clock">{formatTime(now)}</div>;
-}
-
-/** Where OK on a library card goes until the details pages exist: films and episodes play (resuming). */
-function openItem(item: BaseItemDto): void {
-  if (item.Id == null) return;
-  if (item.Type === 'Movie' || item.Type === 'Episode' || item.Type === 'Video') {
-    const ticks = item.UserData?.PlaybackPositionTicks ?? 0;
-    push({ name: 'player', itemId: item.Id, startMs: Math.floor(ticks / 10_000) });
-  } else {
-    push({ name: 'item', itemId: item.Id });
-  }
 }
 
 function watchGame(game: TallyGame): void {
@@ -147,7 +136,7 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
                         item={item}
                         shape={spec.shape}
                         watchingRow={spec.watching}
-                        onPress={() => openItem(item)}
+                        onPress={() => openDetails(item)}
                         onFocus={(it) => setFocusInfo({ kind: 'item', item: it, rowTitle: spec.title })}
                       />
                     ))

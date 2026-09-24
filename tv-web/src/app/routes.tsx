@@ -14,6 +14,8 @@ import { SettingsPage } from '../pages/settings/SettingsPage';
 import { SportsPage } from '../pages/sports/SportsPage';
 import { StartOverPage } from '../pages/sports/StartOverPage';
 import { MultiviewPage } from '../pages/multiview/MultiviewPage';
+import { ItemPage } from '../pages/details/ItemPage';
+import { SeasonPage } from '../pages/details/SeasonPage';
 
 type Pages = { [N in Route['name']]: { page: FunctionComponent<PageProps<Extract<Route, { name: N }>>>; chrome: 'rail' | 'full' } };
 
@@ -21,7 +23,8 @@ export const PAGES: Pages = {
   home: { page: HomePage, chrome: 'rail' },
   search: { page: PlaceholderPage, chrome: 'rail' },
   library: { page: PlaceholderPage, chrome: 'rail' },
-  item: { page: PlaceholderPage, chrome: 'rail' },
+  item: { page: ItemPage, chrome: 'rail' },
+  season: { page: SeasonPage, chrome: 'rail' },
   sports: { page: SportsPage, chrome: 'rail' },
   settings: { page: SettingsPage, chrome: 'rail' },
   placeholder: { page: PlaceholderPage, chrome: 'rail' },

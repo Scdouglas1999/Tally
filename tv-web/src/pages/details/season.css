@@ -1,0 +1,25 @@
+/* The season rundown (media/series/TallySeasonRundown.kt). 1 Tally dp = 1.6 px. */
+/* image scrim over the backdrop: ground 72% at the top, 94% a third of the way down, then solid */
+.rundown-scrim {
+  position: absolute; z-index: 1; left: 0; top: 0; right: 0; bottom: 0; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(14, 15, 14, 0.72) 0%, rgba(14, 15, 14, 0.94) 35%, var(--ground) 100%);
+}
+.rundown-head { position: absolute; z-index: 2; left: 0; top: 0; right: 0; padding: 38px var(--margin-x) 0; }
+.rundown-head .kicker { color: var(--accent); line-height: 29px; }
+.rundown-head .tab-line { display: flex; align-items: center; margin-top: 16px; border-bottom: var(--hairline) solid var(--rule); }
+.rundown-head .tabs { display: flex; }
+.season-tab { position: relative; display: flex; align-items: center; height: 64px; padding: 0 26px; color: var(--muted); white-space: nowrap; }
+.season-tab.current { color: var(--text); }
+.season-tab.current::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--focus); background: var(--accent); }
+.season-tab[data-focused] { color: var(--text); background: var(--ground-raised); }
+.season-tab[data-focused]::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border: var(--focus) solid var(--accent); pointer-events: none; }
+.rundown-head .summary { margin-left: auto; padding-left: 38px; color: var(--muted); white-space: nowrap; }
+
+.rundown-list { position: absolute; z-index: 2; left: 0; top: 149px; right: 0; bottom: 0; }
+.rundown-inner { padding: 19px 0 43px; }
+.rundown-rows { padding: 0 var(--margin-x); }
+.rundown-rows > div + div { margin-top: 13px; }
+.rundown-inner .media-row { margin-top: 26px; margin-bottom: 0; }
+.rundown-empty { padding: 120px 0; text-align: center; color: var(--muted); }
+.rundown-fade { position: absolute; left: 0; top: 0; right: 0; height: 45px; pointer-events: none; background: linear-gradient(to bottom, var(--ground), rgba(14, 15, 14, 0)); }
+.rundown .detail-message { position: relative; padding: 80px var(--margin-x); }

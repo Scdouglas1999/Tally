@@ -16,6 +16,8 @@ export type Route =
   | { name: 'multiview' }
   | { name: 'startover'; path: string; title: string }
   | { name: 'settings' }
+  /** A series' season rundown (season tabs over the numbered episode list), on `seasonId`, focusing `episodeId`. */
+  | { name: 'season'; seriesId: string; seasonId?: string; episodeId?: string }
   | { name: 'placeholder'; title: string; note: string };
 
 export interface Entry {

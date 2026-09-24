@@ -1,0 +1,472 @@
+{
+ "Name": "Severance",
+ "OriginalTitle": "Severance",
+ "ServerId": "6cc26f6bbc534181a937364479f2910d",
+ "Id": "33e60e865132660eaf355c6fd0570697",
+ "Etag": "f40fb3ef725c2c9ee8fbda9337093025",
+ "DateCreated": "2026-09-22T16:52:45.0000000Z",
+ "DateLastMediaAdded": "2026-09-22T16:53:16.0000000Z",
+ "CanDelete": true,
+ "CanDownload": false,
+ "SortName": "severance",
+ "PremiereDate": "2022-02-17T00:00:00.0000000Z",
+ "ExternalUrls": [
+  {
+   "Name": "IMDb",
+   "Url": "https://www.imdb.com/title/tt11280740"
+  },
+  {
+   "Name": "TheMovieDb",
+   "Url": "https://www.themoviedb.org/tv/95396"
+  }
+ ],
+ "Path": "/media/shows/Severance (2022)",
+ "EnableMediaSourceDisplay": true,
+ "OfficialRating": "TV-MA",
+ "ChannelId": null,
+ "Overview": "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
+ "Taglines": [],
+ "Genres": [
+  "Drama",
+  "Mystery",
+  "Sci-Fi & Fantasy"
+ ],
+ "CommunityRating": 8.394,
+ "CumulativeRunTimeTicks": 0,
+ "RunTimeTicks": 0,
+ "PlayAccess": "Full",
+ "ProductionYear": 2022,
+ "RemoteTrailers": [
+  {
+   "Url": "https://www.youtube.com/watch?v=xEQP4VVuyrY"
+  },
+  {
+   "Url": "https://www.youtube.com/watch?v=dTqlZkvbNVg"
+  }
+ ],
+ "ProviderIds": {
+  "Tmdb": "95396",
+  "Imdb": "tt11280740",
+  "Tvdb": "371980"
+ },
+ "IsFolder": true,
+ "ParentId": "4580dc8f6d27ce7af26b09d3e103412f",
+ "Type": "Series",
+ "People": [
+  {
+   "Name": "Adam Scott",
+   "Id": "4f68f02ab5f5160c0a5c98b61d8c2897",
+   "Role": "Mark Scout",
+   "Type": "Actor",
+   "PrimaryImageTag": "72c5c122cd228e253f68119d05c1f3c8",
+   "ImageBlurHashes": {
+    "Primary": {
+     "72c5c122cd228e253f68119d05c1f3c8": "dVG+msJ8AD_Mk;w{M{NG9GW=$%RPO?tR.7oyNGsoofWB"
+    }
+   }
+  },
+  {
+   "Name": "Britt Lower",
+   "Id": "b9e412c2dc17d55fcbc6c0877376e6a0",
+   "Role": "Helly Riggs",
+   "Type": "Actor",
+   "PrimaryImageTag": "f3dddf79ebf1c13d2997cbbe9c4bda64",
+   "ImageBlurHashes": {
+    "Primary": {
+     "f3dddf79ebf1c13d2997cbbe9c4bda64": "dbHU^7oy%z?a~pofx]xtIoofr?M{%foyWBbH?bjZV[t7"
+    }
+   }
+  },
+  {
+   "Name": "Tramell Tillman",
+   "Id": "a6f07b7712cb0f08da1af2edd42e6a8b",
+   "Role": "Seth Milchick",
+   "Type": "Actor",
+   "PrimaryImageTag": "bab3bfdf684fec4610f07aad7a68e1a5",
+   "ImageBlurHashes": {
+    "Primary": {
+     "bab3bfdf684fec4610f07aad7a68e1a5": "dbEWB]WAPXtmRjskW=V@?vWEs8t8tmbwtSkY-pt7jEof"
+    }
+   }
+  },
+  {
+   "Name": "Zach Cherry",
+   "Id": "019d7881764b94b1d833463fe0d8bf46",
+   "Role": "Dylan George",
+   "Type": "Actor",
+   "PrimaryImageTag": "0ca275edda9f2f71af2ae95d0cc1167f",
+   "ImageBlurHashes": {
+    "Primary": {
+     "0ca275edda9f2f71af2ae95d0cc1167f": "deGIfm$*Mzs;@XsAMyi_PBX8smflE2ae%LkCm,j[smjZ"
+    }
+   }
+  },
+  {
+   "Name": "Jen Tullock",
+   "Id": "962751e1747c9f14040c65346af2f442",
+   "Role": "Devon Scout-Hale",
+   "Type": "Actor",
+   "PrimaryImageTag": "f9be541a1b0fb120550679c0098fa539",
+   "ImageBlurHashes": {
+    "Primary": {
+     "f9be541a1b0fb120550679c0098fa539": "dYHK93xZ0yoIEMof%1R*I:R*$*s:9uR*bbs:j[ax$*xZ"
+    }
+   }
+  },
+  {
+   "Name": "Dichen Lachman",
+   "Id": "c62770fbfcc994dc7ed0beb86c85e407",
+   "Role": "Ms. Casey",
+   "Type": "Actor",
+   "PrimaryImageTag": "06d475df429bcd125fab37e1df664a30",
+   "ImageBlurHashes": {
+    "Primary": {
+     "06d475df429bcd125fab37e1df664a30": "dNH^u4~CAJIqGKX9%NkX?dR*%N%Mb|Wq%3t8JXR+xatR"
+    }
+   }
+  },
+  {
+   "Name": "Sarah Bock",
+   "Id": "5caf74bcd4d6d2d1cebfbd1bf917b71e",
+   "Role": "Eustice Huang",
+   "Type": "Actor",
+   "PrimaryImageTag": "320680fba6405c3935f37598dd6fceec",
+   "ImageBlurHashes": {
+    "Primary": {
+     "320680fba6405c3935f37598dd6fceec": "dMM6O?bJ0_kR?V?a^*%1_2IqxH%2xrozxuWCxUxaxuoe"
+    }
+   }
+  },
+  {
+   "Name": "John Turturro",
+   "Id": "b79193ec51d23f93cdf57faa44e30b93",
+   "Role": "Irving Bailiff",
+   "Type": "Actor",
+   "PrimaryImageTag": "09f6ebe2ae36d015b398cb4c9147977d",
+   "ImageBlurHashes": {
+    "Primary": {
+     "09f6ebe2ae36d015b398cb4c9147977d": "dzK-IHoe.8-;~qj[xvt7R*j[RPRj%NofjFt7%gj]t7t7"
+    }
+   }
+  },
+  {
+   "Name": "Christopher Walken",
+   "Id": "b187ccf4a2ea0aaf6b35bc44fa247433",
+   "Role": "Burt Goodman",
+   "Type": "Actor",
+   "PrimaryImageTag": "a105609e7933ebb8fcfec4280af9305d",
+   "ImageBlurHashes": {
+    "Primary": {
+     "a105609e7933ebb8fcfec4280af9305d": "dQCFef-p0z57?HxaIpNG9uNG-V%2E2NGxaxaR+WCs.of"
+    }
+   }
+  },
+  {
+   "Name": "Patricia Arquette",
+   "Id": "8fa306fe0ad73a8c60cca56a7b8dc68b",
+   "Role": "Harmony Cobel",
+   "Type": "Actor",
+   "PrimaryImageTag": "27f5757cfd0ade29956be515173204f6",
+   "ImageBlurHashes": {
+    "Primary": {
+     "27f5757cfd0ade29956be515173204f6": "dTF;vVIo0#=|XAs,NIbbI;bcRjNGkCs:s:WBNeWCs.WC"
+    }
+   }
+  },
+  {
+   "Name": "Mark Friedman",
+   "Id": "e4be4a64f4db171ac397e5415bbf1edc",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Beau Willimon",
+   "Id": "f7a4ec21c43514253502950a8eb131fa",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Adam Scott",
+   "Id": "4f68f02ab5f5160c0a5c98b61d8c2897",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "72c5c122cd228e253f68119d05c1f3c8",
+   "ImageBlurHashes": {
+    "Primary": {
+     "72c5c122cd228e253f68119d05c1f3c8": "dVG+msJ8AD_Mk;w{M{NG9GW=$%RPO?tR.7oyNGsoofWB"
+    }
+   }
+  },
+  {
+   "Name": "Jessica Lee Gagné",
+   "Id": "d42d2bf47a4f1d8126f7cc2035e4648e",
+   "Role": "Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Sean Fogel",
+   "Id": "e7a86b8ae57bb708b7bcc9a61c9da236",
+   "Role": "Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Diana Dekajlo",
+   "Id": "a34ecc666e02b386943a47a86174f2d4",
+   "Role": "Co-Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Geoffrey Richman",
+   "Id": "857bea797b9c9559f8c9bd0035243caa",
+   "Role": "Co-Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Mohamad El Masri",
+   "Id": "7e2ac16aaa98ec3f4f46e1e00ad50270",
+   "Role": "Co-Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Adam Countee",
+   "Id": "689c15cd0bd274c8e0aa12c64f72df0b",
+   "Role": "Co-Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Anna Ouyang Moench",
+   "Id": "9d3297d763b3a43d72e2c85a5005520b",
+   "Role": "Supervising Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Wei-Ning Yu",
+   "Id": "15572a867ac5775d11d88e0f16ebbcd7",
+   "Role": "Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Erin Wagoner",
+   "Id": "43ef5101b16a22a56fdc7553ef8f7c31",
+   "Role": "Consulting Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "K.C. Perry",
+   "Id": "bee049e77240f3796ec8d95665b61d00",
+   "Role": "Consulting Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Richard Schwartz",
+   "Id": "c77be4bb09acde8286a5e293a2700fff",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Sam Donovan",
+   "Id": "ac8f50924c7995b03a5d722dffc84a30",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "John Lesher",
+   "Id": "d27cc3a6ab5d93a9e3691e6f215b4e32",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Jordan Tappis",
+   "Id": "227704329ce0650911e1945ac06702f8",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Caroline Baron",
+   "Id": "5531cb71c46f404caf6496bac4db246c",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Patricia Arquette",
+   "Id": "8fa306fe0ad73a8c60cca56a7b8dc68b",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "27f5757cfd0ade29956be515173204f6",
+   "ImageBlurHashes": {
+    "Primary": {
+     "27f5757cfd0ade29956be515173204f6": "dTF;vVIo0#=|XAs,NIbbI;bcRjNGkCs:s:WBNeWCs.WC"
+    }
+   }
+  },
+  {
+   "Name": "Katie Pruitt",
+   "Id": "010316ca99c96087783e2760e40cb301",
+   "Role": "Co-Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Dan Erickson",
+   "Id": "2fcb9b025fbf105e25ee923e4b198faf",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Jackie Cohn",
+   "Id": "0bb2bf2e283ff3f96a88a2abcd263874",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Ben Stiller",
+   "Id": "6e5e375bf0ab34e73d91bfd03f05afa3",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Nicholas Weinstock",
+   "Id": "86762957c04dc0917c6feba76a89f7f8",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  }
+ ],
+ "Studios": [
+  {
+   "Name": "Apple TV",
+   "Id": "865e87e3544b4bcd5f1fcd3f7b8358e8"
+  }
+ ],
+ "GenreItems": [
+  {
+   "Name": "Drama",
+   "Id": "090eac6e9de4fe1fbc194e5b96691277"
+  },
+  {
+   "Name": "Mystery",
+   "Id": "d3a0ead52489743e5a68704142092c71"
+  },
+  {
+   "Name": "Sci-Fi & Fantasy",
+   "Id": "3d621c0b6dc1921bc93fa859f7512270"
+  }
+ ],
+ "LocalTrailerCount": 0,
+ "UserData": {
+  "PlayedPercentage": 12.5,
+  "UnplayedItemCount": 7,
+  "PlaybackPositionTicks": 0,
+  "PlayCount": 0,
+  "IsFavorite": true,
+  "Played": false,
+  "Key": "371980",
+  "ItemId": "00000000000000000000000000000000"
+ },
+ "RecursiveItemCount": 8,
+ "ChildCount": 2,
+ "SpecialFeatureCount": 0,
+ "DisplayPreferencesId": "f63033ff6886ecc7083a696cbeced1b0",
+ "Status": "Continuing",
+ "AirDays": [],
+ "Tags": [
+  "office",
+  "workplace",
+  "memory",
+  "office politics",
+  "brain surgery",
+  "thriller"
+ ],
+ "PrimaryImageAspectRatio": 0.6666666666666666,
+ "ImageTags": {
+  "Primary": "92fe8feffe6bb43d4283025432c6d16b",
+  "Logo": "de5c63f61a9b56c5ba14978250674ab0",
+  "Thumb": "04f5a71913aacbaf96cc31d7380d4c13"
+ },
+ "BackdropImageTags": [
+  "2179e7d73653530acf30716d492fb0e9"
+ ],
+ "ImageBlurHashes": {
+  "Backdrop": {
+   "2179e7d73653530acf30716d492fb0e9": "WOB;tYV?k?S7ROtS?^ozRkk9V@RjIUbIMxs8t7WCNfV?Rij^xat7"
+  },
+  "Primary": {
+   "92fe8feffe6bb43d4283025432c6d16b": "dSIF9ztRyD_2_Mt7-pof9[t7IAE1ISozELNFD$M{R*oe"
+  },
+  "Logo": {
+   "de5c63f61a9b56c5ba14978250674ab0": "HKJuAa%Mxut7xuWBxuWBM{00xut7xuxut7ofj[xu"
+  },
+  "Thumb": {
+   "04f5a71913aacbaf96cc31d7380d4c13": "WSCQ=H?HDiNyTKOt?^w[Mxbbo#bwNdWCxus.aeofT0WBoJfkbIt7"
+  }
+ },
+ "LocationType": "FileSystem",
+ "MediaType": "Unknown",
+ "EndDate": "2025-03-20T00:00:00.0000000Z",
+ "LockedFields": [],
+ "LockData": false
+}

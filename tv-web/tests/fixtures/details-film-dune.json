@@ -1,0 +1,950 @@
+{
+ "Name": "Dune",
+ "OriginalTitle": "Dune",
+ "ServerId": "6cc26f6bbc534181a937364479f2910d",
+ "Id": "ec240f20fb61ecc335c0ef480fb77a81",
+ "Etag": "17e423a4f48ebeaa3d16064bc7544cec",
+ "DateCreated": "2026-09-22T16:52:59.0000000Z",
+ "CanDelete": true,
+ "CanDownload": true,
+ "HasSubtitles": true,
+ "Container": "mkv",
+ "SortName": "dune",
+ "PremiereDate": "2021-09-15T00:00:00.0000000Z",
+ "ExternalUrls": [
+  {
+   "Name": "IMDb",
+   "Url": "https://www.imdb.com/title/tt1160419"
+  },
+  {
+   "Name": "TheMovieDb",
+   "Url": "https://www.themoviedb.org/movie/438631"
+  },
+  {
+   "Name": "TheMovieDb",
+   "Url": "https://www.themoviedb.org/collection/726871"
+  }
+ ],
+ "MediaSources": [
+  {
+   "Protocol": "File",
+   "Id": "ec240f20fb61ecc335c0ef480fb77a81",
+   "Path": "/media/movies/Dune (2021)/Dune (2021).mkv",
+   "Type": "Default",
+   "Container": "mkv",
+   "Size": 4191024,
+   "Name": "Dune (2021)",
+   "IsRemote": false,
+   "ETag": "0a54d68a1a0d402d2a7cbfa7572699fd",
+   "RunTimeTicks": 900230000,
+   "ReadAtNativeFramerate": false,
+   "IgnoreDts": false,
+   "IgnoreIndex": false,
+   "GenPtsInput": false,
+   "SupportsTranscoding": true,
+   "SupportsDirectStream": true,
+   "SupportsDirectPlay": true,
+   "IsInfiniteStream": false,
+   "UseMostCompatibleTranscodingProfile": false,
+   "RequiresOpening": false,
+   "RequiresClosing": false,
+   "RequiresLooping": false,
+   "SupportsProbing": true,
+   "VideoType": "VideoFile",
+   "MediaStreams": [
+    {
+     "Codec": "subrip",
+     "Language": "spa",
+     "TimeBase": "1/1000",
+     "VideoRange": "Unknown",
+     "VideoRangeType": "Unknown",
+     "AudioSpatialFormat": "None",
+     "LocalizedUndefined": "Undefined",
+     "LocalizedDefault": "Default",
+     "LocalizedForced": "Forced",
+     "LocalizedExternal": "External",
+     "LocalizedHearingImpaired": "Hearing Impaired",
+     "DisplayTitle": "Spanish - SUBRIP - External",
+     "IsInterlaced": false,
+     "IsAVC": false,
+     "IsDefault": false,
+     "IsForced": false,
+     "IsHearingImpaired": false,
+     "Height": 0,
+     "Width": 0,
+     "Type": "Subtitle",
+     "Index": 0,
+     "IsExternal": true,
+     "IsTextSubtitleStream": true,
+     "SupportsExternalStream": true,
+     "Path": "/media/movies/Dune (2021)/Dune (2021).es.srt",
+     "Level": 0
+    },
+    {
+     "Codec": "h264",
+     "TimeBase": "1/1000",
+     "VideoRange": "SDR",
+     "VideoRangeType": "SDR",
+     "AudioSpatialFormat": "None",
+     "DisplayTitle": "360p H264 SDR",
+     "NalLengthSize": "4",
+     "IsInterlaced": false,
+     "IsAVC": true,
+     "BitRate": 372440,
+     "BitDepth": 8,
+     "RefFrames": 1,
+     "IsDefault": false,
+     "IsForced": false,
+     "IsHearingImpaired": false,
+     "Height": 360,
+     "Width": 640,
+     "AverageFrameRate": 24,
+     "RealFrameRate": 24,
+     "ReferenceFrameRate": 24,
+     "Profile": "High",
+     "Type": "Video",
+     "AspectRatio": "16:9",
+     "Index": 1,
+     "IsExternal": false,
+     "IsTextSubtitleStream": false,
+     "SupportsExternalStream": false,
+     "PixelFormat": "yuv420p",
+     "Level": 30,
+     "IsAnamorphic": false
+    },
+    {
+     "Codec": "aac",
+     "Language": "eng",
+     "TimeBase": "1/1000",
+     "Title": "English Stereo",
+     "VideoRange": "Unknown",
+     "VideoRangeType": "Unknown",
+     "AudioSpatialFormat": "None",
+     "LocalizedDefault": "Default",
+     "LocalizedExternal": "External",
+     "DisplayTitle": "English Stereo - AAC - Default",
+     "IsInterlaced": false,
+     "IsAVC": false,
+     "ChannelLayout": "stereo",
+     "BitRate": 192000,
+     "Channels": 2,
+     "SampleRate": 44100,
+     "IsDefault": true,
+     "IsForced": false,
+     "IsHearingImpaired": false,
+     "Profile": "LC",
+     "Type": "Audio",
+     "Index": 2,
+     "IsExternal": false,
+     "IsTextSubtitleStream": false,
+     "SupportsExternalStream": false,
+     "Level": 0
+    },
+    {
+     "Codec": "aac",
+     "Language": "spa",
+     "TimeBase": "1/1000",
+     "Title": "Español Stereo",
+     "VideoRange": "Unknown",
+     "VideoRangeType": "Unknown",
+     "AudioSpatialFormat": "None",
+     "LocalizedDefault": "Default",
+     "LocalizedExternal": "External",
+     "DisplayTitle": "Español Stereo - Spanish - AAC",
+     "IsInterlaced": false,
+     "IsAVC": false,
+     "ChannelLayout": "stereo",
+     "BitRate": 192000,
+     "Channels": 2,
+     "SampleRate": 44100,
+     "IsDefault": false,
+     "IsForced": false,
+     "IsHearingImpaired": false,
+     "Profile": "LC",
+     "Type": "Audio",
+     "Index": 3,
+     "IsExternal": false,
+     "IsTextSubtitleStream": false,
+     "SupportsExternalStream": false,
+     "Level": 0
+    },
+    {
+     "Codec": "subrip",
+     "Language": "eng",
+     "TimeBase": "1/1000",
+     "Title": "English",
+     "VideoRange": "Unknown",
+     "VideoRangeType": "Unknown",
+     "AudioSpatialFormat": "None",
+     "LocalizedUndefined": "Undefined",
+     "LocalizedDefault": "Default",
+     "LocalizedForced": "Forced",
+     "LocalizedExternal": "External",
+     "LocalizedHearingImpaired": "Hearing Impaired",
+     "DisplayTitle": "English - SUBRIP",
+     "IsInterlaced": false,
+     "IsAVC": false,
+     "IsDefault": false,
+     "IsForced": false,
+     "IsHearingImpaired": false,
+     "Height": 0,
+     "Width": 0,
+     "Type": "Subtitle",
+     "Index": 4,
+     "IsExternal": false,
+     "IsTextSubtitleStream": true,
+     "SupportsExternalStream": true,
+     "Level": 0
+    }
+   ],
+   "MediaAttachments": [],
+   "Formats": [],
+   "Bitrate": 756440,
+   "RequiredHttpHeaders": {},
+   "TranscodingSubProtocol": "http",
+   "DefaultAudioStreamIndex": 2,
+   "DefaultSubtitleStreamIndex": 0,
+   "HasSegments": false
+  }
+ ],
+ "CriticRating": 83,
+ "ProductionLocations": [
+  "United States of America"
+ ],
+ "Path": "/media/movies/Dune (2021)/Dune (2021).mkv",
+ "EnableMediaSourceDisplay": true,
+ "OfficialRating": "PG-13",
+ "ChannelId": null,
+ "Overview": "Paul Atreides, a brilliant and gifted young man born into a great destiny beyond his understanding, must travel to the most dangerous planet in the universe to ensure the future of his family and his people. As malevolent forces explode into conflict over the planet's exclusive supply of the most precious resource in existence - a commodity capable of unlocking humanity's greatest potential - only those who can conquer their fear will survive.",
+ "Taglines": [
+  "It begins."
+ ],
+ "Genres": [
+  "Science Fiction",
+  "Adventure"
+ ],
+ "CommunityRating": 7.8,
+ "RunTimeTicks": 900230000,
+ "PlayAccess": "Full",
+ "ProductionYear": 2021,
+ "RemoteTrailers": [
+  {
+   "Url": "https://www.youtube.com/watch?v=FabyRquCEtY",
+   "Name": "Worm Promo"
+  },
+  {
+   "Url": "https://www.youtube.com/watch?v=tepmGelLeHY",
+   "Name": "Protect"
+  },
+  {
+   "Url": "https://www.youtube.com/watch?v=w0HgHet0sxg",
+   "Name": "Final Trailer"
+  },
+  {
+   "Url": "https://www.youtube.com/watch?v=8g18jFHCLXk",
+   "Name": "Official Main Trailer"
+  },
+  {
+   "Url": "https://www.youtube.com/watch?v=n9xhJrPXop4",
+   "Name": "Official Trailer"
+  }
+ ],
+ "ProviderIds": {
+  "Tmdb": "438631",
+  "Imdb": "tt1160419",
+  "TmdbCollection": "726871"
+ },
+ "IsFolder": false,
+ "ParentId": "ba9c5cad4ccd875366bf54fd50e04928",
+ "Type": "Movie",
+ "People": [
+  {
+   "Name": "Timothée Chalamet",
+   "Id": "da5aa3243db377e39fa6dcbab1bb1763",
+   "Role": "Paul Atreides",
+   "Type": "Actor",
+   "PrimaryImageTag": "078f4e8287ec4b0bab85abea0ff00d62",
+   "ImageBlurHashes": {
+    "Primary": {
+     "078f4e8287ec4b0bab85abea0ff00d62": "dWF}K7jF0L-pMwof%MRjAGa}nOR*aet6%2n%n$ofxas9"
+    }
+   }
+  },
+  {
+   "Name": "Rebecca Ferguson",
+   "Id": "efd4803986517026d7f8c7b87dd408d5",
+   "Role": "Lady Jessica Atreides",
+   "Type": "Actor",
+   "PrimaryImageTag": "92314a48d0c26a09b6f413dd9b1a5291",
+   "ImageBlurHashes": {
+    "Primary": {
+     "92314a48d0c26a09b6f413dd9b1a5291": "dYLpmms,lT-;~qxu-=tRkqxunhaeofWBoLjYyDRjsnt7"
+    }
+   }
+  },
+  {
+   "Name": "Oscar Isaac",
+   "Id": "bb577cc1c9c41b093dffce800e964227",
+   "Role": "Duke Leto Atreides",
+   "Type": "Actor",
+   "PrimaryImageTag": "7eb2a856849b86423cd27119e5aacaaf",
+   "ImageBlurHashes": {
+    "Primary": {
+     "7eb2a856849b86423cd27119e5aacaaf": "dPD90OWV5;%M~CWBJnxuE2j[xGWBEMof$%Rkbvj[xaof"
+    }
+   }
+  },
+  {
+   "Name": "Jason Momoa",
+   "Id": "180aa308f7177e57a6c7e30d246d5d8b",
+   "Role": "Duncan Idaho",
+   "Type": "Actor",
+   "PrimaryImageTag": "731535db69d1bcae2b7e49cc42992ee9",
+   "ImageBlurHashes": {
+    "Primary": {
+     "731535db69d1bcae2b7e49cc42992ee9": "dPDuxxxa12Ne.9f8t9ogOtR*%2s;JWWB$*WVJCR*$$xZ"
+    }
+   }
+  },
+  {
+   "Name": "Stellan Skarsgård",
+   "Id": "00b52e13358eca7cf81a2affb49ed245",
+   "Role": "Baron Vladimir Harkonnen",
+   "Type": "Actor",
+   "PrimaryImageTag": "74d5d83ecd102f7ee14a45432285f476",
+   "ImageBlurHashes": {
+    "Primary": {
+     "74d5d83ecd102f7ee14a45432285f476": "dIBMlR-p0eIo?bs:IoWB9ZRj%1s:IVWBxaofIpWBxut7"
+    }
+   }
+  },
+  {
+   "Name": "Stephen McKinley Henderson",
+   "Id": "848ebddb201c75535a3344e69fb123f3",
+   "Role": "Thufir Hawat",
+   "Type": "Actor",
+   "PrimaryImageTag": "528bb68d195656bf97e931287f0e466d",
+   "ImageBlurHashes": {
+    "Primary": {
+     "528bb68d195656bf97e931287f0e466d": "dRF#gm^k5655},xWXTbcN@NHRjs.SeR*V[ofoHjYt7s:"
+    }
+   }
+  },
+  {
+   "Name": "Josh Brolin",
+   "Id": "dcd0bfa7355be98d91cd4f8f70433516",
+   "Role": "Gurney Halleck",
+   "Type": "Actor",
+   "PrimaryImageTag": "dfcffa333bf18b3825a70a3bd2d87cff",
+   "ImageBlurHashes": {
+    "Primary": {
+     "dfcffa333bf18b3825a70a3bd2d87cff": "dIAcoFIo0z=|$|WBIos:ENs:-UNGELj[-VWBI:j[xZWB"
+    }
+   }
+  },
+  {
+   "Name": "Javier Bardem",
+   "Id": "f95e8fae768a51b018175eef4c5f8577",
+   "Role": "Stilgar",
+   "Type": "Actor",
+   "PrimaryImageTag": "65d9451c90f64d5c9d8c29145dd412c5",
+   "ImageBlurHashes": {
+    "Primary": {
+     "65d9451c90f64d5c9d8c29145dd412c5": "dQFq]@s:0fWXivo0tRj[57t7wcRjTJWCr=t7IURk%Moe"
+    }
+   }
+  },
+  {
+   "Name": "Sharon Duncan-Brewster",
+   "Id": "99a040c5da4cb9f3a7c5de0c840c1c16",
+   "Role": "Dr. Liet Kynes",
+   "Type": "Actor",
+   "PrimaryImageTag": "556607feee08619d0a14553d3fe6d7fb",
+   "ImageBlurHashes": {
+    "Primary": {
+     "556607feee08619d0a14553d3fe6d7fb": "dgJZxk%2~A%1~3$~-os:S7ogR*R+s,oJoIR*xWj[t7WC"
+    }
+   }
+  },
+  {
+   "Name": "Chang Chen",
+   "Id": "77edb09eb623fab65863a248ab26f497",
+   "Role": "Dr. Wellington Yueh",
+   "Type": "Actor",
+   "PrimaryImageTag": "25fac0a6f82f298ec4d0a6d8adf13979",
+   "ImageBlurHashes": {
+    "Primary": {
+     "25fac0a6f82f298ec4d0a6d8adf13979": "dOIEU@t79sE1~AIU_Ms.KPD%-o-VpJWAs:jEsos+%gxZ"
+    }
+   }
+  },
+  {
+   "Name": "Dave Bautista",
+   "Id": "458a6e0c0c621d3f663bec58cea190ad",
+   "Role": "Beast Rabban Harkonnen",
+   "Type": "Actor",
+   "PrimaryImageTag": "f06588a270672192471866da5d05cfae",
+   "ImageBlurHashes": {
+    "Primary": {
+     "f06588a270672192471866da5d05cfae": "drLDV3sp-~-+~js.-,xrxWk9Iroe%JoeWCk9%bbFt5t5"
+    }
+   }
+  },
+  {
+   "Name": "David Dastmalchian",
+   "Id": "5cc4929e9e0cc4120ceff51d68f2114a",
+   "Role": "Piter de Vries",
+   "Type": "Actor",
+   "PrimaryImageTag": "3bcf8b7ea8f017634e62e8c217353b84",
+   "ImageBlurHashes": {
+    "Primary": {
+     "3bcf8b7ea8f017634e62e8c217353b84": "dMFF8Ht9Kkks~XxakYX90hxpw|WBtlS6t7t7%MIq%1xu"
+    }
+   }
+  },
+  {
+   "Name": "Zendaya",
+   "Id": "f9e4b75df033876bae90b24c5a6ea7ac",
+   "Role": "Chani",
+   "Type": "Actor",
+   "PrimaryImageTag": "b9d4804e81905143dd54018f1c3cf411",
+   "ImageBlurHashes": {
+    "Primary": {
+     "b9d4804e81905143dd54018f1c3cf411": "dQMiZv?G%$^k.TRk?bof~qxF-As:.8ozxG%LtSoes,WC"
+    }
+   }
+  },
+  {
+   "Name": "Charlotte Rampling",
+   "Id": "018e278de5a264998ab56579411007c1",
+   "Role": "Reverend Mother Mohiam",
+   "Type": "Actor",
+   "PrimaryImageTag": "0ff951c1e15e5cdb8a275e8a0fa86a3c",
+   "ImageBlurHashes": {
+    "Primary": {
+     "0ff951c1e15e5cdb8a275e8a0fa86a3c": "dTF=2S-V0#EM-;oJt7oLEMR*-qogNxR*%MxuogbIWBt7"
+    }
+   }
+  },
+  {
+   "Name": "Babs Olusanmokun",
+   "Id": "e3179293b79520481d996c2335b74890",
+   "Role": "Jamis",
+   "Type": "Actor",
+   "PrimaryImageTag": "3527cd42ff4b914812bbcc48028e7d28",
+   "ImageBlurHashes": {
+    "Primary": {
+     "3527cd42ff4b914812bbcc48028e7d28": "d79?%mMxAa%g,o%L9tWV0zR*=yn$0#NH-Vo0Ioofs:Rk"
+    }
+   }
+  },
+  {
+   "Name": "Denis Villeneuve",
+   "Id": "8ca9a8640a55b0c2ca4a5b2d24526d66",
+   "Role": "Director",
+   "Type": "Director",
+   "PrimaryImageTag": "d9974f58e900002b30793506a75e4566",
+   "ImageBlurHashes": {
+    "Primary": {
+     "d9974f58e900002b30793506a75e4566": "dNKA=_%2F}.8j]V@-;NH0eRj8^RiXTtR%2xtS%WW-pxt"
+    }
+   }
+  },
+  {
+   "Name": "Frank Herbert",
+   "Id": "632b3e94bea8bdf155a223b1d2f93068",
+   "Role": "Novel",
+   "Type": "Writer",
+   "PrimaryImageTag": "ed48f64514768423cd54ed384aadc553",
+   "ImageBlurHashes": {
+    "Primary": {
+     "ed48f64514768423cd54ed384aadc553": "dRE-,j^*Oa9u=yn#kWR*0fE2xC-oJBR+M{aebIR*j@oL"
+    }
+   }
+  },
+  {
+   "Name": "Denis Villeneuve",
+   "Id": "8ca9a8640a55b0c2ca4a5b2d24526d66",
+   "Role": "Screenplay",
+   "Type": "Writer",
+   "PrimaryImageTag": "d9974f58e900002b30793506a75e4566",
+   "ImageBlurHashes": {
+    "Primary": {
+     "d9974f58e900002b30793506a75e4566": "dNKA=_%2F}.8j]V@-;NH0eRj8^RiXTtR%2xtS%WW-pxt"
+    }
+   }
+  },
+  {
+   "Name": "Eric Roth",
+   "Id": "795702a644198d93cff8930245ed809d",
+   "Role": "Screenplay",
+   "Type": "Writer",
+   "PrimaryImageTag": "e0b6d47b8cad21a543e77660ad86e057",
+   "ImageBlurHashes": {
+    "Primary": {
+     "e0b6d47b8cad21a543e77660ad86e057": "dJLD_e%1Td_N},-:?vD%b_D%DiV@x^M{Mdn%-oj[?at6"
+    }
+   }
+  },
+  {
+   "Name": "Jon Spaihts",
+   "Id": "a894f629a2b76e98b30f075e191b85e7",
+   "Role": "Screenplay",
+   "Type": "Writer",
+   "PrimaryImageTag": "de83ab63cb784f7ba70c7684bd7a66d2",
+   "ImageBlurHashes": {
+    "Primary": {
+     "de83ab63cb784f7ba70c7684bd7a66d2": "d{N0#exu%g-;~qoLt7tRIpWBRPV@x]t7f6oL-;ofayoe"
+    }
+   }
+  },
+  {
+   "Name": "Chris Carreras",
+   "Id": "d43aed581a473ddf8ddeeac7703e7eb6",
+   "Role": "Co-Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Vasco Xu",
+   "Id": "2ad4391fd6f8e0421200ddf132d6e21b",
+   "Role": "Associate Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Jessica Derhammer",
+   "Id": "7e1f8ccedaefc57e34d401dfdacea535",
+   "Role": "Co-Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Richard P. Rubinstein",
+   "Id": "55095ef1d70d9743fc5e48e377f42ecb",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "51232f57943b7cff39f20be9d74918a5",
+   "ImageBlurHashes": {
+    "Primary": {
+     "51232f57943b7cff39f20be9d74918a5": "dMH-cJnO0L?a;Ioeozn$EnkDi{Rlt7Rjt6t6xVj?%1s."
+    }
+   }
+  },
+  {
+   "Name": "John Harrison",
+   "Id": "d84d66adfb977d63e6e61791e3c8d7e2",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Cale Boyter",
+   "Id": "d4d03f2b71b198453d06c96a7146d6ef",
+   "Role": "Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "2ba9deb0c65295cdd812703c96e4f9da",
+   "ImageBlurHashes": {
+    "Primary": {
+     "2ba9deb0c65295cdd812703c96e4f9da": "daNw7h%L.Q%f~SRj_M%LEekWDiM{-:oJxutR-:bFxan~"
+    }
+   }
+  },
+  {
+   "Name": "Brian Herbert",
+   "Id": "e3da5c8438277a69dfa047cadca7ba9a",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "cdccbe444684dc31b57d9e2a1d643315",
+   "ImageBlurHashes": {
+    "Primary": {
+     "cdccbe444684dc31b57d9e2a1d643315": "dZE3C*IU00-;WBt7t7IUayofRjj[IUayxuofM{j[ofay"
+    }
+   }
+  },
+  {
+   "Name": "Kim Herbert",
+   "Id": "8a7906ef167ff6ea4717a01af36ddc01",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Byron Merritt",
+   "Id": "268df4f980e2f33f67f48824da6e6eab",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Mary Parent",
+   "Id": "3e956155598b6cbf78345ea79f929661",
+   "Role": "Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "4b804704b2de80c5b92652c3d00616b0",
+   "ImageBlurHashes": {
+    "Primary": {
+     "4b804704b2de80c5b92652c3d00616b0": "dRE1%3%10fIo={s:EMR*9]S2$*s.E2R*xtofV@afoyof"
+    }
+   }
+  },
+  {
+   "Name": "Thomas Tull",
+   "Id": "b92560f358af5aab144d525c4fdfe71d",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "aebe96adae7030b2090033218fc689d2",
+   "ImageBlurHashes": {
+    "Primary": {
+     "aebe96adae7030b2090033218fc689d2": "dDB{u?V?0eI:?c$~9ZE2OrRj={s+E2Ip%2xZIoWUxaxa"
+    }
+   }
+  },
+  {
+   "Name": "Denis Villeneuve",
+   "Id": "8ca9a8640a55b0c2ca4a5b2d24526d66",
+   "Role": "Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "d9974f58e900002b30793506a75e4566",
+   "ImageBlurHashes": {
+    "Primary": {
+     "d9974f58e900002b30793506a75e4566": "dNKA=_%2F}.8j]V@-;NH0eRj8^RiXTtR%2xtS%WW-pxt"
+    }
+   }
+  },
+  {
+   "Name": "Herb Gains",
+   "Id": "1f3cac49b93750946961c0bd118e785c",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Joseph M. Caracciolo Jr.",
+   "Id": "33b31233036ae2755180db7bb54fb2f5",
+   "Role": "Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  },
+  {
+   "Name": "Jon Spaihts",
+   "Id": "a894f629a2b76e98b30f075e191b85e7",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "de83ab63cb784f7ba70c7684bd7a66d2",
+   "ImageBlurHashes": {
+    "Primary": {
+     "de83ab63cb784f7ba70c7684bd7a66d2": "d{N0#exu%g-;~qoLt7tRIpWBRPV@x]t7f6oL-;ofayoe"
+    }
+   }
+  },
+  {
+   "Name": "Tanya Lapointe",
+   "Id": "f76fc6f82831a3b9d1a07c54c2f6eba5",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "PrimaryImageTag": "c4513476efb5038a3aeb19edf311dc8f",
+   "ImageBlurHashes": {
+    "Primary": {
+     "c4513476efb5038a3aeb19edf311dc8f": "drJ*Ct%29Zt74TWBR+RjkrR+xaofNGWXs.s:IUayt7ae"
+    }
+   }
+  },
+  {
+   "Name": "Joshua Grode",
+   "Id": "7a29f8fe2f97795fcae0f066c0032887",
+   "Role": "Executive Producer",
+   "Type": "Producer",
+   "ImageBlurHashes": {
+    "Primary": {}
+   }
+  }
+ ],
+ "Studios": [
+  {
+   "Name": "Legendary Pictures",
+   "Id": "5f83e77e3f465e528750d05c6d9cdb0c"
+  }
+ ],
+ "GenreItems": [
+  {
+   "Name": "Science Fiction",
+   "Id": "0430d514c35e1f158fa93f1eeb8361ea"
+  },
+  {
+   "Name": "Adventure",
+   "Id": "51cec9645b896084d12b259acd05ccb1"
+  }
+ ],
+ "LocalTrailerCount": 0,
+ "UserData": {
+  "PlaybackPositionTicks": 0,
+  "PlayCount": 38,
+  "IsFavorite": false,
+  "LastPlayedDate": "2026-09-24T19:37:52.9910483Z",
+  "Played": true,
+  "Key": "438631",
+  "ItemId": "00000000000000000000000000000000"
+ },
+ "SpecialFeatureCount": 0,
+ "DisplayPreferencesId": "dbf7709c41faaa746463d67978eb863d",
+ "Tags": [
+  "empire",
+  "future",
+  "army",
+  "based on novel or book",
+  "prophecy",
+  "dystopia",
+  "emperor",
+  "sand",
+  "spice",
+  "chosen one",
+  "hallucinogen",
+  "treason",
+  "baron",
+  "revenge",
+  "premonition",
+  "betrayal",
+  "space",
+  "water shortage",
+  "creature",
+  "desert",
+  "knife fight",
+  "destiny",
+  "giant worm",
+  "space opera",
+  "sand dune",
+  "messiah",
+  "complex",
+  "mother son relationship",
+  "giant creature"
+ ],
+ "PrimaryImageAspectRatio": 0.6666666666666666,
+ "MediaStreams": [
+  {
+   "Codec": "subrip",
+   "Language": "spa",
+   "TimeBase": "1/1000",
+   "VideoRange": "Unknown",
+   "VideoRangeType": "Unknown",
+   "AudioSpatialFormat": "None",
+   "LocalizedUndefined": "Undefined",
+   "LocalizedDefault": "Default",
+   "LocalizedForced": "Forced",
+   "LocalizedExternal": "External",
+   "LocalizedHearingImpaired": "Hearing Impaired",
+   "DisplayTitle": "Spanish - SUBRIP - External",
+   "IsInterlaced": false,
+   "IsAVC": false,
+   "IsDefault": false,
+   "IsForced": false,
+   "IsHearingImpaired": false,
+   "Height": 0,
+   "Width": 0,
+   "Type": "Subtitle",
+   "Index": 0,
+   "IsExternal": true,
+   "IsTextSubtitleStream": true,
+   "SupportsExternalStream": true,
+   "Path": "/media/movies/Dune (2021)/Dune (2021).es.srt",
+   "Level": 0
+  },
+  {
+   "Codec": "h264",
+   "TimeBase": "1/1000",
+   "VideoRange": "SDR",
+   "VideoRangeType": "SDR",
+   "AudioSpatialFormat": "None",
+   "DisplayTitle": "360p H264 SDR",
+   "NalLengthSize": "4",
+   "IsInterlaced": false,
+   "IsAVC": true,
+   "BitRate": 372440,
+   "BitDepth": 8,
+   "RefFrames": 1,
+   "IsDefault": false,
+   "IsForced": false,
+   "IsHearingImpaired": false,
+   "Height": 360,
+   "Width": 640,
+   "AverageFrameRate": 24,
+   "RealFrameRate": 24,
+   "ReferenceFrameRate": 24,
+   "Profile": "High",
+   "Type": "Video",
+   "AspectRatio": "16:9",
+   "Index": 1,
+   "IsExternal": false,
+   "IsTextSubtitleStream": false,
+   "SupportsExternalStream": false,
+   "PixelFormat": "yuv420p",
+   "Level": 30,
+   "IsAnamorphic": false
+  },
+  {
+   "Codec": "aac",
+   "Language": "eng",
+   "TimeBase": "1/1000",
+   "Title": "English Stereo",
+   "VideoRange": "Unknown",
+   "VideoRangeType": "Unknown",
+   "AudioSpatialFormat": "None",
+   "LocalizedDefault": "Default",
+   "LocalizedExternal": "External",
+   "DisplayTitle": "English Stereo - AAC - Default",
+   "IsInterlaced": false,
+   "IsAVC": false,
+   "ChannelLayout": "stereo",
+   "BitRate": 192000,
+   "Channels": 2,
+   "SampleRate": 44100,
+   "IsDefault": true,
+   "IsForced": false,
+   "IsHearingImpaired": false,
+   "Profile": "LC",
+   "Type": "Audio",
+   "Index": 2,
+   "IsExternal": false,
+   "IsTextSubtitleStream": false,
+   "SupportsExternalStream": false,
+   "Level": 0
+  },
+  {
+   "Codec": "aac",
+   "Language": "spa",
+   "TimeBase": "1/1000",
+   "Title": "Español Stereo",
+   "VideoRange": "Unknown",
+   "VideoRangeType": "Unknown",
+   "AudioSpatialFormat": "None",
+   "LocalizedDefault": "Default",
+   "LocalizedExternal": "External",
+   "DisplayTitle": "Español Stereo - Spanish - AAC",
+   "IsInterlaced": false,
+   "IsAVC": false,
+   "ChannelLayout": "stereo",
+   "BitRate": 192000,
+   "Channels": 2,
+   "SampleRate": 44100,
+   "IsDefault": false,
+   "IsForced": false,
+   "IsHearingImpaired": false,
+   "Profile": "LC",
+   "Type": "Audio",
+   "Index": 3,
+   "IsExternal": false,
+   "IsTextSubtitleStream": false,
+   "SupportsExternalStream": false,
+   "Level": 0
+  },
+  {
+   "Codec": "subrip",
+   "Language": "eng",
+   "TimeBase": "1/1000",
+   "Title": "English",
+   "VideoRange": "Unknown",
+   "VideoRangeType": "Unknown",
+   "AudioSpatialFormat": "None",
+   "LocalizedUndefined": "Undefined",
+   "LocalizedDefault": "Default",
+   "LocalizedForced": "Forced",
+   "LocalizedExternal": "External",
+   "LocalizedHearingImpaired": "Hearing Impaired",
+   "DisplayTitle": "English - SUBRIP",
+   "IsInterlaced": false,
+   "IsAVC": false,
+   "IsDefault": false,
+   "IsForced": false,
+   "IsHearingImpaired": false,
+   "Height": 0,
+   "Width": 0,
+   "Type": "Subtitle",
+   "Index": 4,
+   "IsExternal": false,
+   "IsTextSubtitleStream": true,
+   "SupportsExternalStream": true,
+   "Level": 0
+  }
+ ],
+ "VideoType": "VideoFile",
+ "ImageTags": {
+  "Primary": "70c8d0d6ec0de7a81854975897674b17",
+  "Logo": "72bbdb09154f4440757a7b90c4d82e43",
+  "Thumb": "946a7ed78e5826b59474bd0f08105dbd"
+ },
+ "BackdropImageTags": [
+  "73e63ac4df7836d3a14b87ce635f8593"
+ ],
+ "ImageBlurHashes": {
+  "Backdrop": {
+   "73e63ac4df7836d3a14b87ce635f8593": "WoIO-Cn#ITofITay_4WBM_f6WBWB%Mxuofa}bHWBozj[ofj]axfP"
+  },
+  "Primary": {
+   "70c8d0d6ec0de7a81854975897674b17": "d]Ka=FNcI=xE}pn*agoKxYw_w_j@-SjaR,j@xXazR,bG"
+  },
+  "Logo": {
+   "72bbdb09154f4440757a7b90c4d82e43": "HQQmCr-;D%M{ofD%D%00%M%Mj[WBj[j[WBWBWBj["
+  },
+  "Thumb": {
+   "946a7ed78e5826b59474bd0f08105dbd": "WOD1H9tRpJx]jFozTdfkX7fkaKWVRjWBV@ayVtae.mkCtRozjYt7"
+  }
+ },
+ "Chapters": [
+  {
+   "StartPositionTicks": 0,
+   "Name": "Chapter 1",
+   "ImagePath": "/config/metadata/library/ec/ec240f20fb61ecc335c0ef480fb77a81/chapters/639256927790000000_0.jpg",
+   "ImageDateModified": "2026-09-23T02:00:02.9801482Z",
+   "ImageTag": "3688a2719c67a8538a94ff8fa52d31a3"
+  },
+  {
+   "StartPositionTicks": 300000000,
+   "Name": "Chapter 2",
+   "ImagePath": "/config/metadata/library/ec/ec240f20fb61ecc335c0ef480fb77a81/chapters/639256927790000000_300000000.jpg",
+   "ImageDateModified": "2026-09-23T02:00:03.0279206Z",
+   "ImageTag": "3688a2719c67a8538a94ff8fa52d31a3"
+  },
+  {
+   "StartPositionTicks": 600000000,
+   "Name": "Chapter 3",
+   "ImagePath": "/config/metadata/library/ec/ec240f20fb61ecc335c0ef480fb77a81/chapters/639256927790000000_600000000.jpg",
+   "ImageDateModified": "2026-09-23T02:00:03.0784042Z",
+   "ImageTag": "3688a2719c67a8538a94ff8fa52d31a3"
+  }
+ ],
+ "Trickplay": {
+  "ec240f20fb61ecc335c0ef480fb77a81": {
+   "320": {
+    "Width": 320,
+    "Height": 180,
+    "TileWidth": 10,
+    "TileHeight": 10,
+    "ThumbnailCount": 9,
+    "Interval": 10000,
+    "Bandwidth": 964
+   }
+  }
+ },
+ "LocationType": "FileSystem",
+ "MediaType": "Video",
+ "LockedFields": [],
+ "LockData": false,
+ "Width": 640,
+ "Height": 360
+}
