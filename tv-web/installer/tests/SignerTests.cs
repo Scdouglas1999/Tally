@@ -134,7 +134,7 @@ public class SignerTests
     public void SignedShellVerifiesWithOpenStandards()
     {
         // what a TV checks, redone independently: every digest, the #prop digest and both signature values
-        var store = new CertificateStore(Directory.CreateTempSubdirectory().FullName);
+        var store = new CertificateStore(TestDirs.New());
         var wgt = ShellPackage.BuildSigned("http://192.0.2.10:8096", store.TizenAuthor(), store.TizenDistributor());
         var files = ShellPackage.Unzip(wgt);
         foreach (var sigFile in new[] { WidgetSigner.AuthorSignatureFile, WidgetSigner.DistributorSignatureFile })
