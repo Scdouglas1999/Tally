@@ -12,6 +12,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import io.github.scdouglas1999.tally.lan.ServerRouteMonitor
 import io.github.scdouglas1999.tally.ui.formfactor.isTallyPhone
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -42,8 +43,12 @@ internal interface OfflineStartEntryPoint {
  * server list; the server is retried in the background and offline mode ends when it answers.
  */
 object TallyOfflineStart {
-    /** Called at app start: starts downloads (idempotent). */
+    /**
+     * Called at app start: starts the server route (home network or internet, on a TV too) and downloads
+     * (idempotent).
+     */
     fun onAppStart(context: Context) {
+        ServerRouteMonitor.start(context)
         entryPointOrNull(context)?.downloads()?.start()
     }
 

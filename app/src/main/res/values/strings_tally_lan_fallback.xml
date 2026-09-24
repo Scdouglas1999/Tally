@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings > About: the server row and how the app reaches the server right now -->
+    <string name="tally_lan_server">Server</string>
+    <string name="tally_lan_server_summary">How this device reaches the server right now. Home network: directly, over your Wi-Fi or Ethernet. Internet: through the address it was set up with. Tally changes path by itself when one stops answering, so a TV at home keeps playing when the internet is down.</string>
+    <string name="tally_lan_home">Home network</string>
+    <string name="tally_lan_internet">Internet</string>
+    <string name="tally_lan_unreachable">Not reachable</string>
+</resources>

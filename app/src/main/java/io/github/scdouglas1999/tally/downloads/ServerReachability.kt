@@ -6,8 +6,8 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import com.github.damontecres.wholphin.data.ServerRepository
 import com.github.damontecres.wholphin.services.hilt.DefaultCoroutineScope
-import com.github.damontecres.wholphin.services.hilt.StandardOkHttpClient
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.scdouglas1999.tally.lan.TallyServerRoute
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,11 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import timber.log.Timber
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,7 +25,8 @@ import javax.inject.Singleton
 /**
  * Whether the signed-in server answers. It is checked when the network changes, when asked ([checkNow]), every
  * minute while someone watches [offline], and while offline on a backoff (5 s doubling to a minute) until it answers
- * again. The check is Jellyfin's unauthenticated `/System/Ping` with a short timeout.
+ * again. The check is the server route's ([TallyServerRoute]): the server counts as reachable when any of its
+ * addresses (the saved one, its home addresses) answers `/System/Info/Public` with its id.
  */
 @Singleton
 class ServerReachability
@@ -37,17 +34,8 @@ class ServerReachability
     constructor(
         @param:ApplicationContext private val context: Context,
         private val serverRepository: ServerRepository,
-        @param:StandardOkHttpClient client: OkHttpClient,
         @param:DefaultCoroutineScope private val scope: CoroutineScope,
     ) {
-        private val pingClient =
-            client
-                .newBuilder()
-                .connectTimeout(PING_TIMEOUT_S, TimeUnit.SECONDS)
-                .readTimeout(PING_TIMEOUT_S, TimeUnit.SECONDS)
-                .callTimeout(PING_TIMEOUT_S * 2, TimeUnit.SECONDS)
-                .build()
-
         private val _offline = MutableStateFlow(false)
         val offline: StateFlow<Boolean> = _offline.asStateFlow()
 
@@ -96,17 +84,23 @@ class ServerReachability
             scope.launch { check() }
         }
 
-        /** Pings the server; returns true when it answered. */
+        /**
+         * Asks every address of the server (the saved one and its home addresses, [TallyServerRoute]); returns true
+         * when one answered. Offline means neither answers.
+         */
         suspend fun check(): Boolean {
-            val base =
-                serverRepository.current.value
-                    ?.server
-                    ?.url
-            if (base == null) {
+            val server = serverRepository.current.value?.server
+            if (server == null) {
                 setOffline(false)
                 return false
             }
-            val reachable = hasNetwork() && ping(base)
+            val reachable =
+                hasNetwork() &&
+                    withContext(Dispatchers.IO) {
+                        val router = TallyServerRoute.router
+                        router.register(server.id.toString(), server.url)
+                        router.evaluate(server.id.toString())
+                    }
             setOffline(!reachable)
             return reachable
         }
@@ -139,24 +133,7 @@ class ServerReachability
             return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         }
 
-        private suspend fun ping(base: String): Boolean =
-            withContext(Dispatchers.IO) {
-                try {
-                    pingClient
-                        .newCall(Request.Builder().url(base.trimEnd('/') + "/System/Ping").build())
-                        .execute()
-                        .use { it.isSuccessful }
-                } catch (e: IOException) {
-                    Timber.d("Server ping failed: %s", e.message)
-                    false
-                } catch (e: IllegalArgumentException) {
-                    Timber.w(e, "Bad server URL")
-                    false
-                }
-            }
-
         private companion object {
-            const val PING_TIMEOUT_S = 5L
             const val FIRST_RETRY_MS = 5_000L
             const val MAX_RETRY_MS = 60_000L
             const val HEARTBEAT_MS = 60_000L

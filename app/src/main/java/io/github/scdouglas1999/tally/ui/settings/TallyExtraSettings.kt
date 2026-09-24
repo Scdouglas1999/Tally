@@ -24,6 +24,7 @@ import io.github.scdouglas1999.tally.downloads.StorageLocation
 import io.github.scdouglas1999.tally.downloads.ui.DownloadUiViewModel
 import io.github.scdouglas1999.tally.downloads.ui.downloadsEnabled
 import io.github.scdouglas1999.tally.downloads.ui.formatBytes
+import io.github.scdouglas1999.tally.lan.ServerRouteViewModel
 import io.github.scdouglas1999.tally.support.TallySupport
 import io.github.scdouglas1999.tally.support.TallySupportDialog
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
@@ -32,8 +33,8 @@ import kotlinx.coroutines.launch
 /**
  * Tally's own rows in Settings (seams in upstream's `PreferencesContent`): on a phone a Downloads section after Next
  * up (default quality, Wi-Fi only, simultaneous downloads, delete watched episodes, storage location when a card is
- * in, remove all downloads), and on every device the About group moved to the very bottom with Support Tally after
- * the version rows. The rows are markers in upstream's list; [Row] draws them with the Tally rows.
+ * in, remove all downloads), and on every device the About group moved to the very bottom, opened by the Server row
+ * (how the server is reached: Home network or Internet) and with Support Tally after the version rows. The rows are markers in upstream's list; [Row] draws them with the Tally rows.
  */
 object TallyExtraSettings {
     val DefaultQuality = AppClickablePreference<AppPreferences>(title = R.string.tally_dlui_set_quality)
@@ -44,6 +45,10 @@ object TallyExtraSettings {
     val RemoveAll = AppClickablePreference<AppPreferences>(title = R.string.tally_dlui_set_remove_all)
     val Support =
         AppClickablePreference<AppPreferences>(title = R.string.tally_support_title, summary = R.string.tally_support_summary)
+
+    /** The signed-in server and the path to it right now: Home network or Internet ([ServerRouteViewModel]). */
+    val Server =
+        AppClickablePreference<AppPreferences>(title = R.string.tally_lan_server, summary = R.string.tally_lan_server_summary)
 
     private val downloadsGroup =
         PreferenceGroup(
@@ -67,8 +72,8 @@ object TallyExtraSettings {
                 if (phone && group.title == R.string.next_up) add(downloadsGroup)
             }
             add(
-                about?.copy(preferences = about.preferences + Support)
-                    ?: PreferenceGroup(title = R.string.about, preferences = listOf(Support)),
+                about?.copy(preferences = listOf(Server) + about.preferences + Support)
+                    ?: PreferenceGroup(title = R.string.about, preferences = listOf(Server, Support)),
             )
         }
     }
@@ -83,6 +88,10 @@ object TallyExtraSettings {
         when (preference) {
             Support -> {
                 SupportRow(interactionSource, modifier)
+            }
+
+            Server -> {
+                ServerRow(interactionSource, modifier)
             }
 
             DefaultQuality, WifiOnly, Simultaneous, DeleteWatched, Location, RemoveAll -> {
@@ -119,6 +128,31 @@ private fun SupportRow(
         modifier = modifier,
     )
     if (showCode) TallySupportDialog(onDismiss = { showCode = false })
+}
+
+/** The server's name, and at the right how it is reached right now; pressing it checks again. */
+@Composable
+private fun ServerRow(
+    interactionSource: MutableInteractionSource,
+    modifier: Modifier,
+) {
+    val viewModel: ServerRouteViewModel = hiltViewModel()
+    val path by viewModel.path.collectAsStateWithLifecycle()
+    val status = path?.status
+    TallyValuePreference(
+        title = stringResource(R.string.tally_lan_server),
+        summary = path?.serverName,
+        value =
+            when {
+                status == null -> null
+                status.reachable == false -> stringResource(R.string.tally_lan_unreachable)
+                status.home -> stringResource(R.string.tally_lan_home)
+                else -> stringResource(R.string.tally_lan_internet)
+            },
+        onClick = viewModel::check,
+        interactionSource = interactionSource,
+        modifier = modifier,
+    )
 }
 
 private fun isPhoneContext(context: Context) = TallyFormFactor.of(context) == TallyFormFactor.PHONE

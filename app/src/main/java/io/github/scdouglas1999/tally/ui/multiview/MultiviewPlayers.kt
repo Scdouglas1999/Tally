@@ -21,6 +21,7 @@ import androidx.media3.exoplayer.ExoPlaybackException
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.mediacodec.MediaCodecRenderer
 import com.github.damontecres.wholphin.R
+import io.github.scdouglas1999.tally.lan.TallyServerRoute
 import timber.log.Timber
 
 /**
@@ -117,7 +118,12 @@ class MultiviewPlayers internal constructor(
         val channelId: String,
         url: String,
     ) {
-        val player: ExoPlayer = ExoPlayer.Builder(appContext).build()
+        val player: ExoPlayer =
+            ExoPlayer
+                .Builder(appContext)
+                // the server's address in use (home network or internet), see TallyServerRoute
+                .setMediaSourceFactory(TallyServerRoute.mediaSources(appContext))
+                .build()
 
         var retries = 0
         var errorMessage: String? = null

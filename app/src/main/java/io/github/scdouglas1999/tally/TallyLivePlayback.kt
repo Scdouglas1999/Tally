@@ -5,6 +5,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import io.github.scdouglas1999.tally.lan.RouteRecovery
 import timber.log.Timber
 
 /**
@@ -38,12 +39,15 @@ object TallyLivePlayback {
     /**
      * A live playlist is a sliding window; wait out one long stall and the position the player wants is gone.
      * ExoPlayer reports that as a fatal error, and upstream shows "Error during playback" for transcoded
-     * streams (which live TV always is). Re-sync to the live edge instead. Returns true when handled.
+     * streams (which live TV always is). Re-sync to the live edge instead. Returns true when handled. A stream
+     * lost because the server's address changed is requested again first ([RouteRecovery]).
      */
     fun recover(
         player: Player,
         error: PlaybackException,
     ): Boolean {
+        // the server's address changed under the stream (home network <-> internet): request it again
+        if (RouteRecovery.recover(player, error)) return true
         if (error.errorCode != PlaybackException.ERROR_CODE_BEHIND_LIVE_WINDOW) return false
         Timber.w("Fell behind the live window; re-syncing to the live edge")
         player.seekToDefaultPosition()
