@@ -77,7 +77,9 @@ bundle from `npm run preview` instead of the server's plugin (an emulator reache
 Samsung* (`Tally-Samsung-Installer-windows.exe`, `-macos-arm64`, `-macos-x64`, `-linux` on the release page), one
 program that finds the TV, signs Tally on the user's computer (a Tizen certificate for 2020-2022 TVs, a Samsung
 certificate for 2023 and newer) and installs it, without Tizen Studio. Its source and tests are in
-[`installer/`](installer/) (`installer/build.sh` builds all four; ARCHITECTURE.md §11 describes it).
+[`installer/`](installer/) (`installer/build.sh` builds all four; `dotnet test installer/tests` runs its tests;
+ARCHITECTURE.md §11 describes it). For development it also takes `--bundle http://<this-pc>:4173/` (the shell then
+loads the bundle from `npm run preview`) and `--data-dir <folder>` (a separate set of certificates).
 
 From a development machine with Tizen Studio, the script does the same:
 

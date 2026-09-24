@@ -362,7 +362,7 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   [INSTALL-SAMSUNG.md](INSTALL-SAMSUNG.md)): one self-contained program per desktop OS, published by
   `tally/release.sh` as `Tally-Samsung-Installer-windows.exe`, `-linux`, `-macos-arm64`, `-macos-x64`
   (`installer/build.sh`). No Tizen Studio, Java, Docker or Samsung binaries.
-  - **Stack**: .NET 10, self-contained single file, trimmed (≈ 20 MB), a console flow (four numbered steps, plain
+  - **Stack**: .NET 10, self-contained single file, trimmed (12-15 MB), a console flow (four numbered steps, plain
     sentences, every error says what to do). The server setup is already C#/.NET and cross-built from Linux the same
     way; a console instead of a window keeps one UI for Windows, macOS and Linux in this pass (WinForms is Windows
     only; a window can sit on the same `InstallerFlow` later).
@@ -470,6 +470,16 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   partner and platform distributors (tried September 24, 2026): only a Samsung chain installs. The emulator reaches
   the host at `10.0.2.2` (QEMU user networking) and the host's LAN address; its sdbd is `127.0.0.1:26101` and takes
   one client at a time (stop Tizen Studio's `sdb` server before another client connects).
+  **A 2020-2022 TV, simulated** (tvweb-installer, September 24, 2026): the refusal is the TV image's trust list,
+  `/usr/share/ca-certificates/fingerprint/fingerprint_list.xml`, whose `tizen-public` distributor domain lists only
+  Samsung's roots, not Tizen's "Tizen Public Distributor Root CA" (the Tizen Developers roots for authors are
+  there). On a *copy* of the image (`qemu-img` from Tizen Studio to raw, `debugfs` to add that root's SHA-1
+  `04:C5:A6:1D:…:44:AE` to `tizen-public`; the shared `tally-tv` VM untouched), Tally for Samsung's Linux build
+  installed Tally signed on this PC ("install completed"), started it, and the shell loaded the bundle and showed
+  Quick Connect against the dev server; the update path (same author) and another computer's author ("Author
+  certificate not match", uninstall, install) behaved as on a TV. So the signatures, the author chain, the
+  install and launch commands and the server-loaded bundle all work on a real Tizen web runtime (10.0); what
+  2020-2022 firmware trusts is taken from Tizen's upstream list, not measured.
 - **Tally for Samsung** (`installer/`, `dotnet test installer/tests`, xUnit): the signer against three golden
   packages from `tizen package` (byte for byte), the author certificate against Tizen Studio's (fields, the 2027
   rule), the sdb client against a fake sdbd that answers as the emulator's did (handshake, capability, DUID, push
