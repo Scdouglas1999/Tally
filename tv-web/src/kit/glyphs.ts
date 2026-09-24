@@ -1,0 +1,31 @@
+/** Font Awesome 6 Free Solid code points (the Android app's fa_strings.xml / tally_drawer_fa_*). */
+export const Glyph = {
+  search: '',
+  house: '',
+  film: '',
+  tv: '',
+  trophy: '',
+  gear: '',
+  heart: '',
+  dice: '',
+  music: '',
+  folderOpen: '',
+  listUl: '',
+  video: '',
+  ellipsis: '',
+  play: '',
+  pause: '',
+  captions: '',
+  volume: '',
+  check: '',
+  eye: '',
+  user: '',
+  rotateLeft: '',
+  caretDown: '',
+  caretRight: '',
+  forward: '',
+  backward: '',
+  sliders: '',
+} as const;
+
+export type GlyphName = keyof typeof Glyph;

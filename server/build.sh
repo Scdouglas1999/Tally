@@ -16,6 +16,23 @@ VERSION="${TALLY_VERSION:-$(sed -n 's:.*<TallyVersion[^>]*>\(.*\)</TallyVersion>
 STAMP="$(date -u +%Y-%m-%dT%H:%M:%S.0000000Z)"
 export CHANGELOG="${TALLY_CHANGELOG:-Tally $VERSION}"
 
+# The Tally TV web app (../tv-web) is built first and embedded in every build (served at /JellyTV/TV/, see
+# Api/TvAppController.cs): the Samsung/LG apps load it from the server, so each plugin release updates every TV.
+# Needs Node.js 20+ and npm. TALLY_SKIP_TV_WEB=1 skips it (the plugin then serves no TV app; never for a release).
+tv_web() {
+  local out="Jellyfin.Plugin.Tally/TvWeb"
+  rm -rf "$out"
+  if [[ "${TALLY_SKIP_TV_WEB:-}" == "1" ]]; then
+    echo "TALLY_SKIP_TV_WEB=1: building without the TV app" >&2
+    return
+  fi
+  (cd ../tv-web && npm ci --no-audit --no-fund && npm test && npm run build)
+  mkdir -p "$out"
+  cp -r ../tv-web/dist/bundle/. "$out/"
+  [[ -f "$out/manifest.json" ]] || { echo "tv-web build wrote no manifest.json" >&2; exit 1; }
+}
+tv_web
+
 # line: the -p:JellyfinLine value; abi: the name in the zip and folder; target: the lowest Jellyfin it installs on;
 # rev: the fourth part of the plugin version
 build() {
@@ -29,7 +46,8 @@ build() {
   # Only what the server does not already ship. 10.11 and 12 dropped Microsoft.Bcl.AsyncInterfaces, which Playwright
   # needs.
   for f in Jellyfin.Plugin.JellyTV.dll AngleSharp.dll Microsoft.Playwright.dll "$@"; do cp "$pub/$f" "$out/"; done
-  # licenses of the third-party files inside the plugin (hls.js is served to browsers; IBM Plex is in the DLL)
+  # licenses of the third-party files inside the plugin (hls.js is served to browsers; IBM Plex is in the DLL, and
+  # in the TV app's bundle with Font Awesome's font, both SIL OFL)
   cp Jellyfin.Plugin.Tally/Web/hls.js-LICENSE.txt Jellyfin.Plugin.Tally/Web/plex-OFL.txt "$out/"
   python3 - "$out/meta.json" "$VERSION.$rev" "$target" "$STAMP" <<'PY'
 import json, os, sys

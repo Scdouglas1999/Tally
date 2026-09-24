@@ -1,0 +1,3 @@
+.placeholder-page { padding: var(--margin-y) var(--margin-x); }
+.placeholder-page .kicker { color: var(--accent); margin-top: 18px; }
+.placeholder-page .note { margin-top: 24px; color: var(--text-secondary); font-size: 30px; display: inline-block; padding: 8px 0; }

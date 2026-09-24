@@ -3,3 +3,5 @@ obj/
 dist/
 preview/
 __pycache__/
+# The Tally TV web app, copied in by build.sh from ../tv-web/dist/bundle
+Jellyfin.Plugin.Tally/TvWeb/

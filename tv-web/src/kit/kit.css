@@ -1,0 +1,102 @@
+/* The kit (tally/UI.md section 3): shared pieces every screen is built from. Sizes at 1080p (1 dp = 1.6 px). */
+
+/* ---- Indicator square (8dp) ---- */
+.indicator { display: inline-block; width: 13px; height: 13px; flex: none; background: var(--rule-strong); }
+.indicator.accent { background: var(--accent); }
+.indicator.live { background: var(--live); }
+
+/* ---- Row header: mono uppercase title + muted count ---- */
+.row-header { display: flex; align-items: center; height: 40px; }
+.row-header .title { color: var(--text); }
+.row-header .count { color: var(--muted); margin-left: 16px; }
+
+/* ---- Label bar: black bar, 1dp top rule, indicator + mono channel name ---- */
+.label-bar {
+  display: flex; align-items: center; height: 48px; padding: 0 16px;
+  background: var(--label-bar); border-top: var(--hairline) solid var(--rule);
+}
+.label-bar .indicator { margin-right: 13px; }
+.label-bar .text { flex: 1; min-width: 0; color: var(--text); }
+
+/* ---- Focus frame: 3dp accent drawn inside the element; nothing moves ---- */
+.focus-frame { position: relative; }
+.focus-frame::after {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  border: var(--hairline) solid var(--rule-strong); pointer-events: none;
+}
+.focus-frame[data-focused]::after { border: var(--focus) solid var(--accent); }
+
+/* ---- Button (height 40dp, padding 18dp, mono 14sp label) ---- */
+.btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  height: 64px; padding: 0 29px; border: 0; background: transparent; color: var(--text);
+  font-family: var(--mono); font-weight: 500; font-size: 22px; letter-spacing: 3.2px;
+  white-space: nowrap; flex: none;
+}
+.btn::after {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  border: var(--hairline) solid var(--rule-strong); pointer-events: none;
+}
+.btn[data-focused]::after { border: var(--focus) solid var(--accent); }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.primary::after { border-color: var(--accent); }
+.btn.primary[data-focused]::after { border: var(--focus) solid var(--text); }
+.btn .glyph { font-size: 26px; margin-right: 16px; }
+.btn + .btn { margin-left: 16px; }
+
+/* ---- Text field (height 48dp) ---- */
+.field {
+  position: relative; display: flex; align-items: center; height: 77px; padding: 0 26px;
+  background: var(--ground-raised);
+}
+.field::after {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  border: var(--hairline) solid var(--rule-strong); pointer-events: none;
+}
+.field.focused::after { border: var(--focus) solid var(--accent); }
+.field input {
+  flex: 1; min-width: 0; height: 100%; border: 0; padding: 0; background: transparent;
+  font-family: var(--sans); font-size: 32px; color: var(--text);
+}
+.field input::placeholder {
+  color: var(--muted); font-family: var(--mono); font-weight: 500; font-size: 24px; letter-spacing: 2.4px;
+}
+
+/* ---- Horizontal row of cards ---- */
+.media-row { margin-bottom: 38px; }
+.media-row .row-header { margin-left: var(--margin-x); margin-bottom: 13px; }
+.row-scroller { position: relative; overflow: hidden; white-space: nowrap; }
+/* focusBorder + 1dp of room on every side a focused card touches, so the frame is never clipped */
+.row-track { display: inline-flex; padding: 7px var(--margin-x); vertical-align: top; }
+.row-track > * + * { margin-left: 14px; }
+.row-message { margin-left: var(--margin-x); color: var(--muted); }
+
+/* ---- Cards: frame, image, black label bar ---- */
+.card { position: relative; flex: none; background: var(--ground); white-space: normal; }
+.card .art { position: relative; overflow: hidden; background: var(--screen); }
+.card .art img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; }
+.card .bar { height: var(--label-bar-h); padding: 6px 13px 0; background: var(--label-bar); }
+.card .bar .title { font-family: var(--sans); font-weight: 500; font-size: 22px; line-height: 30px; color: var(--text); }
+.card .bar .detail { font-family: var(--mono); font-size: 18px; line-height: 22px; color: var(--muted); }
+.card .bar .kicker { font-family: var(--mono); font-weight: 500; font-size: 18px; line-height: 22px; letter-spacing: 1.6px; color: var(--accent); }
+.card .tag {
+  position: absolute; left: 0; top: 0; padding: 2px 10px; background: var(--label-bar);
+  font-family: var(--mono); font-weight: 500; font-size: 18px; letter-spacing: 1.6px; color: var(--muted);
+}
+.card .tag.accent { color: var(--accent); }
+.card .favorite { position: absolute; right: 13px; top: 13px; width: 13px; height: 13px; background: var(--accent); }
+.card .progress { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; background: var(--rule-strong); }
+.card .progress > div { height: 100%; background: var(--accent); }
+.card.poster { width: var(--poster-w); }
+.card.poster .art { height: var(--poster-h); }
+.card.landscape { width: var(--landscape-w); }
+.card.landscape .art { height: var(--landscape-h); }
+.card::after {
+  content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  border: var(--hairline) solid var(--rule-strong); pointer-events: none;
+}
+.card[data-focused]::after { border: var(--focus) solid var(--accent); }
+.card .art-fallback {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;
+  padding: 16px; text-align: center; color: var(--muted); font-family: var(--sans); font-size: 24px;
+}
