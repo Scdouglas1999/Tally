@@ -352,8 +352,9 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   shell, AVPlay and keys, not the Chromium 68 floor (that is what the legacy checks are for). VM `tally-tv`
   (1080p, 1 GB) is created. Since TV Extension 7.0.1 **the emulator only installs Samsung-certificate-signed apps**,
   so running Tally in it needs the owner's Samsung account (open question). Run only with ≥ 7 GB free on this host.
-- **webOS**: the webOS TV emulator is a VirtualBox image (needs VirtualBox, i.e. root on this host) and the webOS TV
-  Simulator is a separate download from LG's developer site (license acceptance); neither is installed yet.
+- **webOS**: the webOS TV emulator is a VirtualBox image (needs VirtualBox, i.e. root on this host). The webOS TV
+  Simulator (a Chromium shell, not LG's media pipeline) is offered for webOS 6.0 and 22-26 on LG's developer site
+  behind a license dialog (no webOS 5 build); neither is installed yet: webOS follows Samsung.
 
 ## 13. Feature parity with the Android TV app
 

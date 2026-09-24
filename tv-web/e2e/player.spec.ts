@@ -15,6 +15,34 @@ interface Item {
   MediaSources?: Array<{ MediaStreams: Stream[] }>;
 }
 
+/** Moves focus with DOWN/UP through the open menu until the focused option matches, then presses OK. */
+async function pickOption(page: Page, match: RegExp): Promise<void> {
+  const options = page.locator('.player .menu .option');
+  const count = await options.count();
+  for (let i = 0; i < count; i++) await page.keyboard.press('ArrowUp');
+  for (let i = 0; i < count; i++) {
+    const text = (await page.locator('.player .menu .option[data-focused]').textContent()) ?? '';
+    if (match.test(text)) {
+      await page.keyboard.press('Enter');
+      return;
+    }
+    await page.keyboard.press('ArrowDown');
+  }
+  throw new Error('no menu option matches ' + String(match));
+}
+
+/** Shows the controls and moves RIGHT from play/pause until the button with this caption is focused, then OK. */
+async function openControl(page: Page, caption: string): Promise<void> {
+  await page.keyboard.press('ArrowUp');
+  await expect(page.locator('.icon-btn[data-focused]')).toBeVisible();
+  for (let i = 0; i < 6; i++) {
+    if (((await page.locator('.player .caption').textContent()) ?? '') === caption) break;
+    await page.keyboard.press('ArrowRight');
+  }
+  await expect(page.locator('.player .caption')).toHaveText(caption);
+  await page.keyboard.press('Enter');
+}
+
 async function videoTime(page: Page): Promise<number> {
   return page.evaluate(() => document.querySelector('video')?.currentTime ?? 0);
 }
@@ -30,7 +58,6 @@ test('Film: plays (hls.js), subtitles drawn by the app, audio switch restarts wi
   test.skip(film === undefined, 'no film with two audio tracks and an external subtitle on this server');
   if (film === undefined) return;
   const streams = film.MediaSources?.[0]?.MediaStreams ?? [];
-  const external = streams.find((x) => x.Type === 'Subtitle' && x.IsExternal === true) as Stream;
   const secondAudio = streams.filter((x) => x.Type === 'Audio')[1] as Stream;
 
   const transcodingUrls: string[] = [];
@@ -47,17 +74,18 @@ test('Film: plays (hls.js), subtitles drawn by the app, audio switch restarts wi
   await shot(page, info, 'player-osd');
 
   // Subtitles: the external track, drawn by the app from the server's WebVTT
-  await page.locator('.icon-btn').nth(3).click();
+  await openControl(page, 'SUBTITLES');
   await expect(page.locator('.player .menu .menu-title')).toHaveText('SUBTITLES');
-  await page.locator('.player .menu .option', { hasText: new RegExp(external.Language ?? '', 'i') }).first().click();
+  await pickOption(page, /External/); // Jellyfin's display title of the external track
   await expect(page.locator('.player .subtitle-layer span')).toBeVisible({ timeout: 30_000 });
   await shot(page, info, 'player-subtitles');
 
   // Audio: the second track; the stream restarts at the same position with AudioStreamIndex set
   const before = await videoTime(page);
-  await page.locator('.icon-btn').nth(4).click();
+  await openControl(page, 'AUDIO');
   await expect(page.locator('.player .menu .menu-title')).toHaveText('AUDIO');
-  await page.locator('.player .menu .option').nth(1).click();
+  await page.keyboard.press('ArrowDown'); // from the current (first) track to the second
+  await page.keyboard.press('Enter');
   // the server's stream really carries the other track (not just our request)
   await expect.poll(() => transcodingUrls.some((u) => u.includes(`AudioStreamIndex=${secondAudio.Index}`)), { timeout: 20_000 }).toBe(true);
   // and it resumed where it was, not from the start
