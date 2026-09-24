@@ -791,6 +791,10 @@
 #jellytv-app .src-row .s-name { font-weight: 600; font-size: 14px; }
 #jellytv-app .src-row .s-meta { font: 400 11px/1.4 var(--jtv-mono); color: var(--jtv-muted); margin-top: 2px; word-break: break-all; }
 #jellytv-app .src-error { font-size: 12px; color: var(--jtv-live-text); margin-top: 5px; }
+#jellytv-app .src-browser { font-size: 12px; color: var(--jtv-text-2); margin-top: 5px; }
+#jellytv-app .src-browser:empty { display: none; }
+#jellytv-app .src-browser .ok { color: var(--jtv-ok); }
+#jellytv-app .src-browser .bad { color: var(--jtv-live-text); }
 
 /* two-position square switch */
 #jellytv-app .toggle {

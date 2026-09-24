@@ -38,6 +38,9 @@ meta.update(version=sys.argv[2], targetAbi=sys.argv[3], timestamp=sys.argv[4], c
 json.dump(meta, open(sys.argv[1], "w"), indent=2)
 PY
   (cd "$out" && python3 -m zipfile -c "../$(basename "$zip")" *)
+  # the zips never carry the Playwright driver (.playwright/, platform specific): the plugin downloads its host's
+  TALLY_REQUIRE_DIST=1 "$DOTNET" test Tally.Tests -c Release -p:JellyfinLine=$line -p:TallyVersion=$VERSION --no-build \
+    --filter "FullyQualifiedName~ReleaseZipTests" --nologo -v q
   echo "built $zip  ($(strings -e l "$out/Jellyfin.Plugin.JellyTV.dll" | grep -m1 -E "^$VERSION\+b[0-9]+"), md5 $(md5sum "$zip" | cut -d' ' -f1))"
 }
 

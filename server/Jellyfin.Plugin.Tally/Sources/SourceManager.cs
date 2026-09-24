@@ -15,6 +15,7 @@ public class SourceManager
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<SourceManager> _logger;
     private readonly Scores.ScoreboardService? _scoreboard;
+    private readonly Services.BrowserRuntime? _browser;
 
     // Grouping memory: which ids represented a group, and which entries were tied to a game by team names —
     // so a merged channel keeps its id and stays merged after the game leaves the scoreboard.
@@ -28,11 +29,17 @@ public class SourceManager
 
     private volatile Snapshot _snapshot = new();
 
-    public SourceManager(IHttpClientFactory httpClientFactory, ILogger<SourceManager> logger, Scores.ScoreboardService? scoreboard = null)
+    public SourceManager(IHttpClientFactory httpClientFactory, ILogger<SourceManager> logger, Scores.ScoreboardService? scoreboard = null, Services.BrowserRuntime? browser = null)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _scoreboard = scoreboard;
+        _browser = browser;
+        if (browser != null)
+        {
+            // a web page source waited for its first-time browser download: scan again now that it is there
+            browser.BecameReady += () => _ = RefreshAsync(CancellationToken.None);
+        }
 
         if (Plugin.Instance != null)
         {
@@ -268,7 +275,7 @@ public class SourceManager
         return def.Kind switch
         {
             SourceKind.Direct => new DirectSourceAdapter(def, _httpClientFactory, _logger),
-            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger),
+            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser),
             _ => new M3uSourceAdapter(def, _httpClientFactory, _logger)
         };
     }

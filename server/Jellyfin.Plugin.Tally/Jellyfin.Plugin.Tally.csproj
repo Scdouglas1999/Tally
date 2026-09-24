@@ -47,6 +47,10 @@
     <SourceRevisionId>b$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmm"))</SourceRevisionId>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- Microsoft.Playwright would copy the build machine's Playwright driver (.playwright/, 130 MB of Node.js for
+         linux-x64 here) into bin/ and publish/. The plugin never ships it: it fetches the driver for the server's own
+         platform the first time a web page source needs a browser (Services/PlaywrightDriver.cs). -->
+    <PlaywrightPlatform>none</PlaywrightPlatform>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1378,7 +1378,8 @@ async function renderAdmin(container, fresh) {
             <button class="toggle${s.Enabled ? ' on' : ''}" data-toggle="${i}" title="Enable/disable" role="switch" aria-checked="${!!s.Enabled}" aria-label="Enable ${esc(s.Name || 'source')}"></button>
             <div class="s-text"><div class="s-name">${esc(s.Name || 'Source')}</div>
             <div class="s-meta">${esc((s.Kind === 2 || s.Kind === 'Web') ? 'Web page' : (s.Kind === 0 || s.Kind === 'M3u' ? 'M3U' : 'Direct'))} · ${esc((s.Kind === 2 || s.Kind === 'Web') ? (s.PageUrl || '') : (s.Kind === 0 || s.Kind === 'M3u' ? (s.PlaylistUrl || '') : (s.Streams || []).length + ' stream(s)'))}${s.Include ? ' · only: ' + esc(s.Include) : ''}</div>
-            ${errors[s.Name] ? `<div class="src-error">${esc(errors[s.Name])}</div>` : ''}</div>
+            ${isWeb(s) ? `<div class="src-browser" data-browser>${browserLine()}</div>` : ''}
+            ${errors[s.Name] && !(isWeb(s) && browserOwns(errors[s.Name])) ? `<div class="src-error">${esc(errors[s.Name])}</div>` : ''}</div>
             <button class="btn btn-danger" data-del="${i}">Remove</button>
           </div>`).join('')}
       </div>
@@ -1427,6 +1428,7 @@ async function renderAdmin(container, fresh) {
     </div>`;
 
   if (!cfg) { $('#cfg-msg', container).textContent = 'Could not load plugin configuration.'; return; }
+  watchBrowser(container);
 
   $$('[data-toggle]', container).forEach(b => b.onclick = () => { const i = +b.dataset.toggle; cfg.Sources[i].Enabled = !cfg.Sources[i].Enabled; renderAdmin(container); });
   $$('[data-del]', container).forEach(b => b.onclick = () => { cfg.Sources.splice(+b.dataset.del, 1); renderAdmin(container); });
@@ -1527,12 +1529,13 @@ async function renderAdmin(container, fresh) {
         if (!pending || Object.keys(errs).length) break;
       }
       const errs = (state.status && state.status.sourceErrors) || {};
-      const errText = Object.entries(errs).map(([k, v]) => `${k}: ${v}`).join(' · ');
+      const errText = Object.entries(errs).filter(([, v]) => !browserOwns(v)).map(([k, v]) => `${k}: ${v}`).join(' · ');
       renderAdmin(container); // re-render list so per-source errors show inline
       const msg = $('#cfg-msg', container); // element was recreated by renderAdmin
       if (msg) msg.innerHTML = errText
         ? `<span class="bad">${esc(errText)}</span>`
-        : `<span class="ok">${state.channels.length} channels loaded</span>`;
+        : `<span class="ok">${state.channels.length} channels loaded</span>`
+          + (browserState().state === 'preparing' ? ' · web page sources follow once the browser is ready' : '');
     } catch (e) {
       $('#cfg-msg', container).textContent = 'Save failed: ' + e.message;
     }
@@ -1544,15 +1547,50 @@ async function renderAdmin(container, fresh) {
       const r = await api('Refresh', { method: 'POST' });
       await loadStatus(); await loadChannels();
       const errs = (r.errors) || (state.status && state.status.sourceErrors) || {};
-      const errText = Object.entries(errs).map(([k, v]) => `${k}: ${v}`).join(' · ');
+      const errText = Object.entries(errs).filter(([, v]) => !browserOwns(v)).map(([k, v]) => `${k}: ${v}`).join(' · ');
       renderAdmin(container);
       const msg = $('#cfg-msg', container); // recreated by renderAdmin
       if (msg) msg.innerHTML = errText
         ? `<span class="bad">${esc(errText)}</span>`
-        : `<span class="ok">${r.channelCount} channels</span>`;
+        : `<span class="ok">${r.channelCount} channels</span>`
+          + (browserState().state === 'preparing' ? ' · web page sources follow once the browser is ready' : '');
       toast(errText ? 'Done with errors — see below' : 'Refreshed — ' + r.channelCount + ' channels');
     } catch (e) { toast('Refresh failed: ' + e.message, true); }
   };
+}
+
+/* The headless browser web page sources need is set up on first use (a one-time download that can take minutes):
+   its state shows under every web page source, and the page follows it until it settles. */
+const isWeb = (s) => s.Kind === 2 || s.Kind === 'Web';
+const browserState = () => (state.status && state.status.browser) || { state: 'idle' };
+// the source error that only repeats the browser's own state is shown once, as the browser line
+const browserOwns = (err) => { const b = browserState(); return (b.state === 'preparing' || b.state === 'failed') && (err === b.message || /^Preparing the browser/.test(err)); };
+
+function browserLine() {
+  const b = browserState();
+  if (b.state === 'preparing') return `<span class="busy">${esc(b.message || 'Preparing the browser…')}</span>`;
+  if (b.state === 'ready') return `<span class="ok">Browser ready</span>${b.browser ? ' · ' + esc(b.browser) : ''}`;
+  if (b.state === 'failed') return `<span class="bad">${esc(b.message || 'The browser could not be set up')}</span>`;
+  return '';
+}
+
+let browserTimer = null;
+function watchBrowser(container) {
+  clearTimeout(browserTimer);
+  if (browserState().state !== 'preparing') return;
+  browserTimer = setTimeout(async () => {
+    if (!document.contains(container)) return;
+    try { await loadStatus(); } catch (e) { /* keep polling */ }
+    if (browserState().state === 'preparing') {
+      $$('[data-browser]', container).forEach(n => { n.innerHTML = browserLine(); });
+      watchBrowser(container);
+    } else {
+      // settled: the server rescans web page sources by itself once the browser is ready
+      if (browserState().state === 'ready') await new Promise(r => setTimeout(r, 1500));
+      try { await loadChannels(); } catch (e) { /* ignore */ }
+      $$('[data-browser]', container).forEach(n => { n.innerHTML = browserLine(); });
+    }
+  }, 3000);
 }
 
 /* ---------------- keyboard ---------------- */
@@ -1588,6 +1626,7 @@ async function boot() {
     clearInterval(clockTimer);
     clearInterval(refreshTimer);
     clearInterval(scoreTimer);
+    clearTimeout(browserTimer);
     setImmersive(false);
     $$('.jtv-alert').forEach(n => n.remove());
     closePlayer();

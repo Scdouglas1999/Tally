@@ -37,11 +37,29 @@ public sealed class UpstreamFetcher
     /// instead of burning the allowance and extending the throttle.</summary>
     private readonly ConcurrentDictionary<string, DateTimeOffset> _cooldown = new(StringComparer.OrdinalIgnoreCase);
 
-    public UpstreamFetcher(IHttpClientFactory httpClientFactory, BrowserFetchService browser, ILogger<UpstreamFetcher> logger)
+    public UpstreamFetcher(IHttpClientFactory httpClientFactory, BrowserFetchService browser, ILogger<UpstreamFetcher> logger, BrowserRuntime? runtime = null)
     {
         _httpClientFactory = httpClientFactory;
         _browser = browser;
         _logger = logger;
+        if (runtime != null)
+        {
+            // the browser finished its first-time setup after the start-up warm-up gave up waiting
+            runtime.BecameReady += () => _ = Task.Run(async () =>
+            {
+                try
+                {
+                    if (!_browser.IsLaunched)
+                    {
+                        await WarmAsync(CancellationToken.None).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "JellyTV: relay warm-up after browser setup failed");
+                }
+            });
+        }
     }
 
     public sealed class FetchOutcome : IDisposable

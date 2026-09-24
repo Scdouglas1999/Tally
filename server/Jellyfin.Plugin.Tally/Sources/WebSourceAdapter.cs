@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Tally.Models;
+using Jellyfin.Plugin.Tally.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Tally.Sources;
@@ -18,12 +19,14 @@ public class WebSourceAdapter : ISourceAdapter
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger;
+    private readonly BrowserRuntime? _browser;
 
-    public WebSourceAdapter(SourceDefinition definition, IHttpClientFactory httpClientFactory, ILogger logger)
+    public WebSourceAdapter(SourceDefinition definition, IHttpClientFactory httpClientFactory, ILogger logger, BrowserRuntime? browser = null)
     {
         Definition = definition;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
+        _browser = browser;
     }
 
     public SourceDefinition Definition { get; }
@@ -56,12 +59,25 @@ public class WebSourceAdapter : ISourceAdapter
             return snapshot;
         }
 
-        if (found.Count == 0 && Definition.UseBrowserFallback)
+        if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null
+            && !await _browser.ReadyAsync(allowDownloads: true, TimeSpan.FromSeconds(60), cancellationToken).ConfigureAwait(false))
+        {
+            // First use: the browser is still being downloaded (or failed). Keep the last channels; the refresh
+            // that follows readiness brings the new ones.
+            var status = _browser.Status;
+            _logger.LogInformation("JellyTV: HTTP scan found nothing on {Url}; the headless browser is not ready ({Message})", Definition.PageUrl, status.Message);
+            snapshot.Error = status.State == "failed" || status.Message.StartsWith("Preparing", StringComparison.Ordinal)
+                ? status.Message
+                : "Preparing the browser…";
+            return snapshot;
+        }
+
+        if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null)
         {
             _logger.LogInformation("JellyTV: HTTP scan found nothing on {Url}; trying headless browser", Definition.PageUrl);
             try
             {
-                found = await new BrowserExtractor(_logger, ua)
+                found = await new BrowserExtractor(_logger, ua, _browser)
                     .ExtractAsync(Definition.PageUrl, Definition.MaxPages, cancellationToken, extractor?.DiscoveredLinks)
                     .ConfigureAwait(false);
             }

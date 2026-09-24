@@ -24,15 +24,6 @@ public sealed class BrowserFetchService : IAsyncDisposable
     /// <summary>Max concurrent in-page fetches. Bounded so multiview can't wedge the pipe.</summary>
     private const int MaxConcurrent = 6;
 
-    private static readonly string[] ChromiumCandidates =
-    {
-        "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome",
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-        "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-        "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"
-    };
-
     private readonly ILogger<BrowserFetchService> _logger;
     private readonly SemaphoreSlim _gate = new(MaxConcurrent);
     private readonly SemaphoreSlim _launchLock = new(1, 1);
@@ -40,12 +31,17 @@ public sealed class BrowserFetchService : IAsyncDisposable
     private IPlaywright? _pw;
     private IBrowser? _browser;
     private IBrowserContext? _ctx;
-    private int _launched; // 0 = not tried, 1 = up, -1 = unavailable
+    private readonly BrowserRuntime _runtime;
+    private int _launched; // 0 = not up, 1 = up
 
-    public BrowserFetchService(ILogger<BrowserFetchService> logger)
+    public BrowserFetchService(BrowserRuntime runtime, ILogger<BrowserFetchService> logger)
     {
+        _runtime = runtime;
         _logger = logger;
     }
+
+    /// <summary>True while the relay browser is up.</summary>
+    public bool IsLaunched => Volatile.Read(ref _launched) == 1;
 
     public sealed record FetchResult(int Status, string? ContentType, byte[] Body);
 
@@ -158,8 +154,13 @@ public sealed class BrowserFetchService : IAsyncDisposable
         }
     }
 
-    /// <summary>Launch the relay browser ahead of the first request that needs it.</summary>
-    public Task<bool> WarmAsync(CancellationToken ct) => EnsureLaunchedAsync(ct);
+    /// <summary>Launch the relay browser ahead of the first request that needs it, waiting a while for a browser that
+    /// is still being prepared.</summary>
+    public async Task<bool> WarmAsync(CancellationToken ct)
+    {
+        await _runtime.ReadyAsync(BrowserRuntime.WebSourcesConfigured, TimeSpan.FromSeconds(60), ct).ConfigureAwait(false);
+        return await EnsureLaunchedAsync(ct).ConfigureAwait(false);
+    }
 
     private async Task<bool> EnsureLaunchedAsync(CancellationToken ct)
     {
@@ -168,7 +169,9 @@ public sealed class BrowserFetchService : IAsyncDisposable
             return true;
         }
 
-        if (Volatile.Read(ref _launched) == -1)
+        // Not ready yet: start getting it ready (downloads only when a web page source is configured) and let this
+        // request go on without the relay.
+        if (!_runtime.EnsureStarted(allowDownloads: BrowserRuntime.WebSourcesConfigured))
         {
             return false;
         }
@@ -176,52 +179,14 @@ public sealed class BrowserFetchService : IAsyncDisposable
         await _launchLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            if (_launched != 0)
+            if (_launched == 1)
             {
-                return _launched == 1;
+                return true;
             }
 
-            _pw = await Playwright.CreateAsync().ConfigureAwait(false);
-            var opts = new BrowserTypeLaunchOptions
-            {
-                Headless = true,
-                Args = new[] { "--no-sandbox", "--disable-dev-shm-usage", "--mute-audio" }
-            };
-
-            foreach (var channel in new[] { "chrome", "msedge" })
-            {
-                try
-                {
-                    opts.Channel = channel;
-                    _browser = await _pw.Chromium.LaunchAsync(opts).ConfigureAwait(false);
-                    _logger.LogInformation("JellyTV: segment relay browser via channel {Channel}", channel);
-                    break;
-                }
-                catch (PlaywrightException) { }
-            }
-
-            if (_browser == null)
-            {
-                foreach (var path in ChromiumCandidates.Where(System.IO.File.Exists))
-                {
-                    try
-                    {
-                        opts.Channel = null;
-                        opts.ExecutablePath = path;
-                        _browser = await _pw.Chromium.LaunchAsync(opts).ConfigureAwait(false);
-                        _logger.LogInformation("JellyTV: segment relay browser at {Path}", path);
-                        break;
-                    }
-                    catch (PlaywrightException) { }
-                }
-            }
-
-            if (_browser == null)
-            {
-                _logger.LogWarning("JellyTV: no browser available for fingerprinted-CDN relay");
-                _launched = -1;
-                return false;
-            }
+            _pw ??= await Playwright.CreateAsync().ConfigureAwait(false);
+            _browser = await _runtime.LaunchAsync(_pw, new[] { "--no-sandbox", "--disable-dev-shm-usage", "--mute-audio" }).ConfigureAwait(false);
+            _logger.LogInformation("JellyTV: segment relay browser: {Browser}", _runtime.Status.Browser);
 
             _ctx = await _browser.NewContextAsync(new BrowserNewContextOptions
             {
@@ -233,8 +198,12 @@ public sealed class BrowserFetchService : IAsyncDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "JellyTV: failed to launch segment relay browser");
-            _launched = -1;
+            _logger.LogWarning("JellyTV: failed to launch segment relay browser: {Msg}", ex.Message);
+            try { if (_browser != null) await _browser.CloseAsync().ConfigureAwait(false); } catch { }
+            _browser = null;
+            _ctx = null;
+            _pw?.Dispose();
+            _pw = null;
             return false;
         }
         finally

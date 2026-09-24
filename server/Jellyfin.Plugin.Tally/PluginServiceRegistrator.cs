@@ -42,9 +42,15 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             // a slow 6s segment must not be aborted mid-body.
             .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(120));
 
+        // First-time download of the headless browser for web page sources (Playwright driver ~60 MB, Chromium ~120 MB):
+        // no overall timeout, slow links just take longer; BrowserRuntime cancels after 30 minutes.
+        services.AddHttpClient("jellytv-download")
+            .ConfigureHttpClient(c => c.Timeout = System.Threading.Timeout.InfiniteTimeSpan);
+
         services.AddTransient<IStartupFilter, WebInjectionStartupFilter>();
 
         services.AddSingleton<StreamSigner>();
+        services.AddSingleton<BrowserRuntime>();
         services.AddSingleton<BrowserFetchService>();
         services.AddSingleton<UpstreamFetcher>();
         services.AddSingleton<ProxyCache>();

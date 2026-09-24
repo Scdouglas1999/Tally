@@ -8,8 +8,9 @@ channels that carry each game, a live-channel page in Jellyfin's web client, and
 - Jellyfin **10.10**, **10.11**, or **12.1** and later. There is one build for each line; the installers and
   Jellyfin's plugin catalog pick the right one.
 - Admin access to the Jellyfin dashboard.
-- Optional: **Chrome or Edge** on the server, for the headless-browser fallback of web page sources (plain HTTP
-  extraction works without it).
+- Web page sources only: the headless-browser fallback uses Chrome or Edge when the server has one, and otherwise
+  sets up its own Chromium the first time a web page source needs it (see [the headless browser](#the-headless-browser)).
+  M3U and direct sources need neither.
 
 ## Installing
 
@@ -55,9 +56,10 @@ In the app → **Settings → Sources → Add source**:
   for `.m3u8`/`.mpd` manifests, player configs (`file:`, `hlsUrl`, …),
   base64-encoded URLs, follows iframes and watch/play links (up to 2 levels,
   bounded page count), then validates each candidate is a live playlist.
-- **Headless-browser fallback**: if plain HTTP finds nothing, Tally launches
-  installed Chrome headless and sniffs network requests — catches streams that
-  only appear after JavaScript runs. Requires Chrome/Edge on the server.
+- **Headless-browser fallback**: if plain HTTP finds nothing, Tally opens the
+  page in a headless browser and sniffs network requests — catches streams that
+  only appear after JavaScript runs. See [the headless browser](#the-headless-browser)
+  for what it installs the first time.
 - Extracted streams are auto-named (from link text / page titles) and grouped
   into categories (NBA, NFL, soccer leagues, UFC, sports networks, …). Captured
   Referer/Origin headers are replayed through the proxy automatically.
@@ -67,6 +69,32 @@ In the app → **Settings → Sources → Add source**:
   can defeat extraction. If the scan finds nothing, the source shows an error
   in Settings → Sources — try the headless fallback, or fall back to a Direct
   stream (grab the `.m3u8` from browser devtools → Network → filter `m3u8`).
+
+### The headless browser
+Web page sources use a headless browser for the fallback above and, for the few CDNs that only answer real browsers,
+to fetch segments. Tally drives it with Microsoft Playwright, which needs a small driver (Node.js plus the
+playwright-core package) that differs per platform, so the plugin zips don't carry it. The first time a web page
+source needs the browser, Tally sets it up in the background, once, in its data folder
+(`plugins/Jellyfin.Plugin.JellyTV/browser/`, next to the settings, so plugin updates keep it):
+
+1. **The driver** for the server's platform (Windows x64, Linux x64 and arm64, macOS), matching the Playwright
+   version the plugin is built with: Node.js from nodejs.org and playwright-core from the npm registry, the same two
+   files the Microsoft.Playwright package is assembled from, each checked against a pinned hash. About 60 MB
+   (40 MB on Windows).
+2. **A browser**: an installed Chrome or Edge if there is one (Windows always has Edge). Otherwise Playwright's own
+   Chromium headless shell, installed by the driver's installer: about 120 MB more.
+3. **On Linux, Chromium's system libraries.** In a container running as root, which is how the official
+   `jellyfin/jellyfin` image runs, Tally installs them itself with the driver's `install-deps` (apt; about 80 MB,
+   again after the container is recreated from a new image). Elsewhere the source shows the one command to run as
+   root, for example in Docker with a non-root user:
+   `docker exec -u 0 <container> <data folder>/browser/driver-<version>/.playwright/node/linux-x64/node <data folder>/browser/driver-<version>/.playwright/package/cli.js install-deps chromium-headless-shell`
+   (on a Debian or Ubuntu server the same command with `sudo`), then press **Refresh now**.
+
+Settings → Sources shows the state under each web page source: "Preparing the browser (one-time download, ~NN MB)…",
+"Browser ready", or what went wrong. Jellyfin's startup never waits for it; the source is scanned again as soon as the
+browser is ready, and a failed setup is retried after ten minutes or on **Refresh now**. A server without a web page
+source downloads nothing. To pick the locations yourself, set `PLAYWRIGHT_DRIVER_SEARCH_PATH` (a folder holding
+`.playwright/`) or `PLAYWRIGHT_BROWSERS_PATH` for Jellyfin's process.
 
 ### How streaming works
 All playback goes through the plugin's **signed proxy** (`/JellyTV/Proxy`):
@@ -213,7 +241,10 @@ the plugin is versioned with the app, and the fourth part names the Jellyfin lin
 2.0.0.11 and 2.0.0.12. Each build having its own version is what lets Jellyfin's updater replace a build with the
 right one after Jellyfin itself is upgraded. 10.11 and 12 moved the user-permission
 types (the `JF12` symbol), use SkiaSharp 3 and no longer ship `Microsoft.Bcl.AsyncInterfaces`, which Playwright
-needs, so those zips carry it. The web UI authenticates with `Authorization: MediaBrowser Token=…`; Jellyfin 12 rejects
+needs, so those zips carry it. The zips never carry Playwright's `.playwright/` driver folder (the csproj sets
+`PlaywrightPlatform=none`, and `ReleaseZipTests` checks every zip build.sh writes); the plugin downloads the one for
+its host (`Services/PlaywrightDriver.cs`, whose pins a test compares with the referenced Microsoft.Playwright package
+after every upgrade). The web UI authenticates with `Authorization: MediaBrowser Token=…`; Jellyfin 12 rejects
 the older `X-Emby-Token` header.
 
 `install/` holds the installers (see [`install/README.md`](install/README.md)); `manifest.json` is the plugin
@@ -238,7 +269,8 @@ group. Streams play directly via the signed proxy URLs.
 Uninstall from **Dashboard → Plugins → Tally**, or stop Jellyfin and delete the `plugins/Tally_<version>/` folder
 (`plugins/Tally/` for a manual install). Plugin settings stay in
 `plugins/configurations/Jellyfin.Plugin.JellyTV.xml`; delete that too for a clean slate (it also removes the
-generated proxy secret, so old signed stream addresses stop working).
+generated proxy secret, so old signed stream addresses stop working). The headless browser for web page sources, if
+one was set up, is in `plugins/Jellyfin.Plugin.JellyTV/browser/` (about 400 MB with Chromium); delete that folder too.
 
 ## Troubleshooting
 
@@ -247,5 +279,6 @@ generated proxy secret, so old signed stream addresses stop working).
 | Plugin "Malfunctioned" | `log_*.log` for load errors; bad meta.json |
 | Page loads but is blank | Hard-refresh (Ctrl+F5) to drop cached web assets |
 | Channels list empty | Settings → Sources — check per-source error text |
+| Web page source: "Chromium needs system libraries" | Run the command it shows (as root), then Refresh now ([the headless browser](#the-headless-browser)) |
 | Stream 403s | Upstream rejected the request (or expired signed URL) |
 | Guide empty | Source needs an EPG URL + matching `tvg-id` values |

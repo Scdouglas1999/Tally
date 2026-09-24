@@ -29,6 +29,7 @@ public class TallyController : ControllerBase
     private readonly UserSettingsStore _settingsStore;
     private readonly ScoreboardService _scoreboard;
     private readonly IAuthorizationContext _authContext;
+    private readonly BrowserRuntime _browser;
     private readonly ILogger<TallyController> _logger;
 
     public TallyController(
@@ -37,6 +38,7 @@ public class TallyController : ControllerBase
         UserSettingsStore settingsStore,
         ScoreboardService scoreboard,
         IAuthorizationContext authContext,
+        BrowserRuntime browser,
         ILogger<TallyController> logger)
     {
         _sourceManager = sourceManager;
@@ -44,6 +46,7 @@ public class TallyController : ControllerBase
         _settingsStore = settingsStore;
         _scoreboard = scoreboard;
         _authContext = authContext;
+        _browser = browser;
         _logger = logger;
     }
 
@@ -65,9 +68,14 @@ public class TallyController : ControllerBase
             allowNonAdmin = Plugin.Instance?.Configuration.AllowNonAdminUsers ?? true,
             scoresEnabled = Plugin.Instance?.Configuration.ScoresEnabled ?? true,
             replaceLiveTv = Plugin.Instance?.Configuration.ReplaceLiveTv ?? true,
-            getUrl = GetController.ServerAddress(Request) + "/JellyTV/Get"
+            getUrl = GetController.ServerAddress(Request) + "/JellyTV/Get",
+            // the headless browser web page sources use: idle (not needed yet), preparing, ready or failed
+            browser = BrowserJson(_browser.Status)
         });
     }
+
+    private static object BrowserJson(BrowserRuntime.StatusInfo b)
+        => new { state = b.State, message = b.Message, browser = b.Browser, downloadMb = b.DownloadMb };
 
     [HttpGet("Channels")]
     [Authorize]
@@ -196,6 +204,7 @@ public class TallyController : ControllerBase
     [Authorize(Policy = "RequiresElevation")]
     public async Task<IActionResult> Refresh()
     {
+        _browser.RetryIfFailed();
         await _sourceManager.RefreshAsync(HttpContext.RequestAborted).ConfigureAwait(false);
         return Ok(new { channelCount = _sourceManager.GetChannels().Count, errors = _sourceManager.SourceErrors });
     }

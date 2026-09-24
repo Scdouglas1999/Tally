@@ -80,6 +80,17 @@ is older or built for another Jellyfin version.
 On other Linux systems, use the catalog or unpack the zip for your Jellyfin version into a `Tally_<version>` folder
 in Jellyfin's `plugins` folder, owned by the user Jellyfin runs as, and restart Jellyfin.
 
+## Web page sources: a one-time download
+
+Nothing here installs a browser. If you add a **web page** source (not needed for M3U playlists or direct streams),
+the plugin sets up what its headless browser needs the first time that source needs it: Playwright's driver for the
+server's platform (about 60 MB, 40 MB on Windows) and, when the server has no Chrome or Edge, Playwright's Chromium
+(about 120 MB). It goes into the plugin's data folder and survives plugin updates; Settings → Sources shows the
+progress. On Linux, Chromium also needs system libraries: in the Docker Compose setup above (the official image runs
+as root) the plugin installs them by itself; on a Debian or Ubuntu server, or in a container that runs Jellyfin as
+another user, the source shows the one command to run as root. Details: the server README's
+[headless browser](../README.md#the-headless-browser) section.
+
 ## Which build
 
 | Jellyfin | Plugin zip | Plugin version (Tally 2.0.0) |

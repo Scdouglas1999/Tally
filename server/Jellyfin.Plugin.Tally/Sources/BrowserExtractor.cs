@@ -5,29 +5,31 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Tally.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 
 namespace Jellyfin.Plugin.Tally.Sources;
 
 /// <summary>
-/// Stage-2 extractor: drives a real headless browser (system Chrome/Edge via
-/// Playwright — no bundled browser download), crawls promising links off the
+/// Stage-2 extractor: drives a real headless browser (installed Chrome/Edge, else
+/// Playwright's Chromium, see <see cref="BrowserRuntime"/>), crawls promising links off the
 /// start page, pokes play buttons inside every frame, and sniffs network
 /// requests for manifests. Used when plain HTTP extraction finds nothing —
 /// catches streams that only exist after JavaScript runs and user interaction.
 /// </summary>
 public partial class BrowserExtractor
 {
-    private static readonly string[] Channels = { "chrome", "msedge" };
-
     private readonly ILogger _logger;
     private readonly string _userAgent;
+    private readonly BrowserRuntime _runtime;
 
-    public BrowserExtractor(ILogger logger, string userAgent)
+    /// <param name="runtime">Must be ready (<see cref="BrowserRuntime.ReadyAsync"/>).</param>
+    public BrowserExtractor(ILogger logger, string userAgent, BrowserRuntime runtime)
     {
         _logger = logger;
         _userAgent = userAgent;
+        _runtime = runtime;
     }
 
     public async Task<List<ExtractedStream>> ExtractAsync(string url, int maxPages, CancellationToken ct, IEnumerable<string>? seedUrls = null)
@@ -37,78 +39,18 @@ public partial class BrowserExtractor
         {
             using var pw = await Playwright.CreateAsync().ConfigureAwait(false);
 
-            IBrowser? browser = null;
-            string? usedChannel = null;
-            foreach (var channel in Channels)
+            IBrowser browser;
+            try
             {
-                try
-                {
-                    browser = await pw.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-                    {
-                        Channel = channel,
-                        Headless = true,
-                        Args = new[] { "--autoplay-policy=no-user-gesture-required", "--mute-audio" }
-                    }).ConfigureAwait(false);
-                    usedChannel = channel;
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogDebug("JellyTV: browser channel {Ch} unavailable: {Msg}", channel, ex.Message);
-                }
+                browser = await _runtime.LaunchAsync(pw, new[] { "--autoplay-policy=no-user-gesture-required", "--mute-audio" }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("JellyTV: no usable browser for fallback extraction ({Msg})", ex.Message);
+                return new List<ExtractedStream>();
             }
 
-            // Fallback: common executable paths (system chromium, non-standard
-            // Chrome/Edge installs), then bundled chromium if present.
-            if (browser == null)
-            {
-                var candidates = new[]
-                {
-                    "/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome",
-                    "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-                    "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-                    "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
-                    "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"
-                };
-                foreach (var exe in candidates)
-                {
-                    if (!System.IO.File.Exists(exe))
-                    {
-                        continue;
-                    }
-
-                    try
-                    {
-                        browser = await pw.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-                        {
-                            ExecutablePath = exe,
-                            Headless = true,
-                            Args = new[] { "--autoplay-policy=no-user-gesture-required", "--mute-audio" }
-                        }).ConfigureAwait(false);
-                        usedChannel = exe;
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogDebug("JellyTV: browser at {Exe} failed: {Msg}", exe, ex.Message);
-                    }
-                }
-            }
-
-            if (browser == null)
-            {
-                try
-                {
-                    browser = await pw.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true }).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning("JellyTV: no usable browser for fallback extraction ({Msg})", ex.Message);
-                    return new List<ExtractedStream>();
-                }
-            }
-
-            _logger.LogInformation("JellyTV: browser extraction via channel {Ch}", usedChannel ?? "bundled");
+            _logger.LogInformation("JellyTV: browser extraction via {Browser}", _runtime.Status.Browser);
 
             await using (browser.ConfigureAwait(false))
             {
