@@ -30,7 +30,8 @@ namespace Jellyfin.Plugin.Tally.Dvr;
 /// The DVR. Rules (a game, or every game of a team) become jobs; a job waits for its game (the scoreboard) and a
 /// channel carrying it (the plugin's game↔channel matching), records the channel's continuous playlist into a work
 /// folder, stops when the game is final plus the post-roll (or at the maximum length, the free-space reserve, or on
-/// cancel), then remuxes the segments into one file with an NFO and art and asks Jellyfin to scan it.
+/// cancel), then remuxes the segments into one file with an NFO and art and adds it to the library that covers the
+/// recordings folder.
 /// A loop every few seconds drives it while there is anything to do; recordings resume after a restart.
 /// </summary>
 public sealed class DvrService : IHostedService, IDisposable
@@ -47,7 +48,6 @@ public sealed class DvrService : IHostedService, IDisposable
     private readonly CardArtService _cardArt;
     private readonly IMediaEncoder _encoder;
     private readonly ILibraryManager _library;
-    private readonly ILibraryMonitor _monitor;
     private readonly IFileSystem _fileSystem;
     private readonly ISessionManager _sessions;
     private readonly IApplicationPaths _paths;
@@ -64,6 +64,7 @@ public sealed class DvrService : IHostedService, IDisposable
     private CancellationTokenSource? _cts;
     private Task? _loop;
     private DateTimeOffset _lastRetention = DateTimeOffset.MinValue;
+    private DateTimeOffset _lastItemLookup = DateTimeOffset.MinValue;
     private bool _dirty;
 
     public DvrService(
@@ -75,7 +76,6 @@ public sealed class DvrService : IHostedService, IDisposable
         CardArtService cardArt,
         IMediaEncoder encoder,
         ILibraryManager library,
-        ILibraryMonitor monitor,
         IFileSystem fileSystem,
         ISessionManager sessions,
         IApplicationPaths paths,
@@ -89,7 +89,6 @@ public sealed class DvrService : IHostedService, IDisposable
         _cardArt = cardArt;
         _encoder = encoder;
         _library = library;
-        _monitor = monitor;
         _fileSystem = fileSystem;
         _sessions = sessions;
         _paths = paths;
@@ -120,6 +119,7 @@ public sealed class DvrService : IHostedService, IDisposable
             _state = _store.Load();
         }
 
+        _library.ItemAdded += OnItemAdded;
         _cts = new CancellationTokenSource();
         _loop = Task.Run(() => LoopAsync(_cts.Token), CancellationToken.None);
         return Task.CompletedTask;
@@ -127,6 +127,7 @@ public sealed class DvrService : IHostedService, IDisposable
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
+        _library.ItemAdded -= OnItemAdded;
         _cts?.Cancel();
         // recordings are left "recording" on purpose: they pick up where they were after the restart
         var tasks = _active.Values.Select(a => a.Task).Where(t => t != null).Cast<Task>().ToList();
@@ -259,6 +260,12 @@ public sealed class DvrService : IHostedService, IDisposable
             ApplyRetention();
         }
 
+        if (now - _lastItemLookup > TimeSpan.FromMinutes(5))
+        {
+            _lastItemLookup = now;
+            LookUpLibraryItems();
+        }
+
         if (rules.Count == 0 && open.Count == 0)
         {
             return false;
@@ -285,6 +292,7 @@ public sealed class DvrService : IHostedService, IDisposable
         }
 
         var running = open.Count(j => j.State == JobState.Recording);
+        var disk = open.Any(j => JobState.IsPending(j.State)) ? DiskSpace.For(RecordingsFolder(settings)) : null;
         foreach (var job in open)
         {
             byId.TryGetValue(job.Game.Id, out var game);
@@ -316,11 +324,12 @@ public sealed class DvrService : IHostedService, IDisposable
             }
 
             var channel = game == null ? null : CarryingChannel(game.Id);
-            var decision = DvrPolicy.Evaluate(job, game == null ? null : GameStatus.From(game), channel != null, running, settings, now);
+            var space = JobState.IsPending(job.State) && disk != null ? SpaceFor(job, game, channel, disk, settings, now) : null;
+            var decision = DvrPolicy.Evaluate(job, game == null ? null : GameStatus.From(game), channel != null, running, settings, now, space);
             switch (decision.Action)
             {
                 case DvrAction.StartRecording:
-                    if (StartRecording(job, game!, channel!, settings, ct))
+                    if (StartRecording(job, channel!, settings, ct))
                     {
                         running++;
                     }
@@ -433,6 +442,15 @@ public sealed class DvrService : IHostedService, IDisposable
         CreatedAt = now
     };
 
+    /// <summary>What a job not started yet would take, estimated for when it would start: the carrying channel's probed
+    /// bitrate (else a typical stream's, as a forecast only) × the rest of a typical game from the pre-roll on.</summary>
+    private SpaceCheck SpaceFor(RecordingJob job, GameInfo? game, SourceChannel? channel, DiskSpace.Info disk, DvrSettings settings, DateTimeOffset now)
+    {
+        var bitrate = channel == null ? null : KnownBitrate(channel);
+        var left = DvrSpace.TimeLeft(job.Game.LeaguePath, game?.Start ?? job.Game.Start, game?.State ?? "pre", now, TimeSpan.FromMinutes(settings.PostRollMinutes));
+        return new SpaceCheck(DvrSpace.Estimate(bitrate ?? DvrSpace.DefaultBitrate, left), disk.FreeBytes, settings.ReserveBytes, bitrate != null);
+    }
+
     /// <summary>Which channel carries each game right now (the same choice the board's Watch makes).</summary>
     private void MatchChannels(List<GameInfo> games)
     {
@@ -477,7 +495,9 @@ public sealed class DvrService : IHostedService, IDisposable
 
     // ------------------------------------------------------------------ recording
 
-    private bool StartRecording(RecordingJob job, GameInfo game, SourceChannel channel, DvrSettings settings, CancellationToken ct)
+    /// <summary>Starts recording a job the policy let start (space included: see <see cref="SpaceFor"/>). A stream
+    /// never probed is judged by its measured bitrate once the first segments are in.</summary>
+    private bool StartRecording(RecordingJob job, SourceChannel channel, DvrSettings settings, CancellationToken ct)
     {
         var folder = RecordingsFolder(settings);
         try
@@ -488,19 +508,6 @@ public sealed class DvrService : IHostedService, IDisposable
         {
             Fail(job, "The recordings folder cannot be created: " + ex.Message);
             return false;
-        }
-
-        // Before starting: the stream's bitrate as probed × the time left. A stream never probed is checked again
-        // once the first segments give a measured bitrate.
-        var bitrate = KnownBitrate(channel);
-        if (bitrate is { } bps && DiskSpace.For(folder) is { } space)
-        {
-            var estimate = DvrSpace.Estimate(bps, DvrSpace.TimeLeft(job.Game.LeaguePath, game.Start, game.State, DateTimeOffset.UtcNow, TimeSpan.FromMinutes(settings.PostRollMinutes)));
-            if (!DvrSpace.Fits(space.FreeBytes, estimate, settings.ReserveBytes))
-            {
-                Fail(job, DvrSpace.NotEnough(estimate, space.FreeBytes, settings.ReserveBytes));
-                return false;
-            }
         }
 
         var work = Path.Combine(WorkFolder.ParentFor(folder), job.Id.ToString("N"));
@@ -866,47 +873,143 @@ public sealed class DvrService : IHostedService, IDisposable
         }
     }
 
-    /// <summary>Asks Jellyfin to scan the recording's folder (the nearest folder it already knows) and notes the item.</summary>
+    /// <summary>
+    /// Adds a finished recording to the library and notes its item: validates the nearest folder Jellyfin already has
+    /// an item for (the league folder, else the library folder), within the library that covers the file. A library
+    /// folder that was empty when its library was made has no item at all (Jellyfin skips empty library folders, and
+    /// only a full library scan adds them later), so it is added first, the way Jellyfin does after a library change.
+    /// </summary>
     private async Task ScanAsync(RecordingJob job, string file, CancellationToken ct)
     {
         try
         {
-            Folder? folder = null;
-            for (var dir = Path.GetDirectoryName(file); !string.IsNullOrEmpty(dir); dir = Path.GetDirectoryName(dir))
+            var location = CoveringLocation(file);
+            if (location == null)
             {
-                if (_library.FindByPath(dir, true) is Folder f)
-                {
-                    folder = f;
-                    break;
-                }
+                _logger.LogInformation("JellyTV DVR: {Title}: no library covers {Folder}; the recording joins one once a library covers that folder",
+                    job.Game.Title, Path.GetDirectoryName(file));
+                return;
+            }
+
+            var folder = NearestFolderItem(file, location);
+            if (folder == null)
+            {
+                _logger.LogInformation("JellyTV DVR: adding the library folder {Folder} to Jellyfin", location);
+                await _library.ValidateTopLibraryFolders(ct).ConfigureAwait(false);
+                folder = NearestFolderItem(file, location);
             }
 
             if (folder == null)
             {
-                return; // no library covers the recordings folder
+                _logger.LogWarning("JellyTV DVR: {Title}: Jellyfin has no item for the library folder {Folder}; the recording appears after the next library scan",
+                    job.Game.Title, location);
+                return;
             }
 
             await folder.ValidateChildren(new Progress<double>(), new MetadataRefreshOptions(new DirectoryService(_fileSystem)), true, false, ct).ConfigureAwait(false);
-            for (var i = 0; i < 36 && !ct.IsCancellationRequested; i++)
+            for (var i = 0; i < 12 && !ct.IsCancellationRequested; i++)
             {
-                if (_library.FindByPath(file, false) is { } item)
+                if (NoteItem(job, file))
                 {
-                    Update(job, j => j.ItemId = item.Id.ToString("N"));
-                    _logger.LogInformation("JellyTV DVR: {Title}: in the library as {Item}", job.Game.Title, item.Id);
                     return;
-                }
-
-                if (i == 0)
-                {
-                    _monitor.ReportFileSystemChanged(file);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(5), ct).ConfigureAwait(false);
             }
+
+            _logger.LogWarning("JellyTV DVR: {Title}: {Folder} was scanned but {File} is not in the library", job.Game.Title, folder.Path, file);
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
             _logger.LogWarning("JellyTV DVR: {Title}: library scan failed: {Message}", job.Game.Title, ex.Message);
+        }
+    }
+
+    /// <summary>The folder item nearest to <paramref name="file"/>, never above the library folder.</summary>
+    private Folder? NearestFolderItem(string file, string location)
+    {
+        for (var dir = Path.GetDirectoryName(file); !string.IsNullOrEmpty(dir); dir = Path.GetDirectoryName(dir))
+        {
+            if (_library.FindByPath(dir, true) is Folder f)
+            {
+                return f;
+            }
+
+            if (Normalize(dir).Equals(location, PathComparison))
+            {
+                break;
+            }
+        }
+
+        return null;
+    }
+
+    private bool NoteItem(RecordingJob job, string file)
+    {
+        if (_library.FindByPath(file, false) is not { } item)
+        {
+            return false;
+        }
+
+        SetItem(job, item);
+        return true;
+    }
+
+    private void SetItem(RecordingJob job, BaseItem item)
+    {
+        var id = item.Id.ToString("N");
+        if (job.ItemId == id)
+        {
+            return;
+        }
+
+        Update(job, j => j.ItemId = id);
+        Save(force: true);
+        _logger.LogInformation("JellyTV DVR: {Title}: in the library as {Item}", job.Game.Title, id);
+    }
+
+    /// <summary>Jellyfin added an item: if it is a finished recording's file (added by our scan, the real-time monitor
+    /// or a library scan), the job notes it at once.</summary>
+    private void OnItemAdded(object? sender, ItemChangeEventArgs e)
+    {
+        try
+        {
+            var item = e.Item;
+            if (item == null || item.IsFolder || string.IsNullOrEmpty(item.Path))
+            {
+                return;
+            }
+
+            RecordingJob? job;
+            lock (_gate)
+            {
+                job = _state.Jobs.FirstOrDefault(j => j.ItemId == null && j.State is JobState.Done or JobState.Finishing
+                    && string.Equals(j.FilePath, item.Path, PathComparison));
+            }
+
+            if (job != null)
+            {
+                SetItem(job, item);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "JellyTV DVR: looking up an added item failed");
+        }
+    }
+
+    /// <summary>Finished recordings without a library item look for it again (a library made or a scan run since).</summary>
+    private void LookUpLibraryItems()
+    {
+        List<RecordingJob> missing;
+        lock (_gate)
+        {
+            missing = _state.Jobs.Where(j => j.State == JobState.Done && j.ItemId == null && !string.IsNullOrEmpty(j.FilePath)).ToList();
+        }
+
+        foreach (var job in missing)
+        {
+            ItemIdFor(job);
         }
     }
 
@@ -1363,22 +1466,30 @@ public sealed class DvrService : IHostedService, IDisposable
     }
 
     /// <summary>The Jellyfin library whose folders include the recordings folder, if any.</summary>
-    public string? CoveringLibrary()
+    public string? CoveringLibrary() => Covering(RecordingsFolder())?.Library;
+
+    /// <summary>The library folder (one of a library's locations) that holds <paramref name="path"/>, if any.</summary>
+    private string? CoveringLocation(string path) => Covering(path)?.Location;
+
+    /// <summary>The library and its folder holding <paramref name="path"/>: the deepest folder when several do.</summary>
+    private (string Library, string Location)? Covering(string path)
     {
-        var folder = Normalize(RecordingsFolder());
+        var p = Normalize(path);
+        (string Library, string Location)? best = null;
         foreach (var vf in _library.GetVirtualFolders())
         {
             foreach (var loc in vf.Locations ?? Array.Empty<string>())
             {
                 var l = Normalize(loc);
-                if (folder.Equals(l, PathComparison) || folder.StartsWith(l + Path.DirectorySeparatorChar, PathComparison))
+                if ((p.Equals(l, PathComparison) || p.StartsWith(l + Path.DirectorySeparatorChar, PathComparison))
+                    && (best == null || l.Length > best.Value.Location.Length))
                 {
-                    return vf.Name;
+                    best = (vf.Name, l);
                 }
             }
         }
 
-        return null;
+        return best;
     }
 
     private static StringComparison PathComparison => OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
@@ -1402,6 +1513,9 @@ public sealed class DvrService : IHostedService, IDisposable
     {
         var folder = RecordingsFolder();
         Directory.CreateDirectory(folder);
+        // Jellyfin skips a library folder that is empty and only adds it at the next full scan; the work folder (which
+        // its scanner ignores) keeps it from being empty, so the library is complete from the start
+        WorkFolder.EnsureParent(WorkFolder.ParentFor(folder));
         var name = LibraryName;
         var names = _library.GetVirtualFolders().Select(v => v.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
         for (var n = 2; names.Contains(name); n++)
