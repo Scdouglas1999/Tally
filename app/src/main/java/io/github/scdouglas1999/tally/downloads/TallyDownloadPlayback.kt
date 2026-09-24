@@ -25,11 +25,23 @@ import java.util.UUID
  * in-player quality or a fallback after a playback error goes to the server as before).
  */
 object TallyDownloadPlayback {
-    private fun engine(context: Context) = downloadsEntryPoint(context).engine()
+    /**
+     * The downloads, or null where the app's Hilt graph is not there (Wholphin's unit tests build the player with a
+     * plain context): every hook then answers "no download", which is exactly Wholphin's own behavior.
+     */
+    private fun entryPointOrNull(context: Context): DownloadsEntryPoint? =
+        try {
+            downloadsEntryPoint(context)
+        } catch (e: RuntimeException) {
+            // not a Hilt app (a test's plain or mocked context); in the app this lookup cannot fail
+            null
+        }
+
+    private fun engine(context: Context) = entryPointOrNull(context)?.engine()
 
     /** `PlaybackViewModel.init`: true while the server cannot be reached (no cinema-mode intros then). */
     fun isOffline(context: Context): Boolean {
-        val entryPoint = downloadsEntryPoint(context)
+        val entryPoint = entryPointOrNull(context) ?: return false
         return entryPoint.downloads().offlineMode.value || !entryPoint.engine().hasNetwork()
     }
 
@@ -42,7 +54,7 @@ object TallyDownloadPlayback {
         itemId: UUID,
     ): BaseItemDto? {
         if (!isOffline(context)) return null
-        val engine = engine(context)
+        val engine = engine(context) ?: return null
         val record = engine.completedRecord(itemId) ?: return null
         Timber.i("Offline: playing %s from its download", itemId)
         return storedItem(engine, record)
@@ -55,7 +67,7 @@ object TallyDownloadPlayback {
         forceTranscoding: Boolean,
     ): MediaSourceInfo? {
         if (forceTranscoding) return null
-        val engine = engine(context)
+        val engine = engine(context) ?: return null
         val record = engine.completedRecord(itemId) ?: return null
         return localSource(engine, record)
     }
@@ -67,7 +79,7 @@ object TallyDownloadPlayback {
         enableDirectPlay: Boolean,
     ): Response<PlaybackInfoResponse>? {
         if (!enableDirectPlay) return null
-        val engine = engine(context)
+        val engine = engine(context) ?: return null
         val record = engine.completedRecord(itemId) ?: return null
         val source = localSource(engine, record) ?: return null
         Timber.i("Playing %s from its download (%s)", itemId, record.quality)
@@ -82,7 +94,7 @@ object TallyDownloadPlayback {
     suspend fun backendFor(
         context: Context,
         itemId: UUID,
-    ): PlayerBackend? = engine(context).completedRecord(itemId)?.let { PlayerBackend.EXO_PLAYER }
+    ): PlayerBackend? = engine(context)?.completedRecord(itemId)?.let { PlayerBackend.EXO_PLAYER }
 
     /** `PlayerFactory`: the player's [factory] reads downloads first, then [upstream] (what it used before). */
     fun readLocalCopies(
@@ -90,14 +102,15 @@ object TallyDownloadPlayback {
         factory: DefaultMediaSourceFactory,
         upstream: DataSource.Factory,
     ) {
-        factory.setDataSourceFactory(LocalFirstDataSource.Factory(upstream, engine(context).lookup))
+        val engine = engine(context) ?: return
+        factory.setDataSourceFactory(LocalFirstDataSource.Factory(upstream, engine.lookup))
     }
 
     /** `MusicService.convert`: the download of a track to play instead of the server stream, or null. */
     fun localAudioUri(
         context: Context,
         itemId: UUID,
-    ): String? = engine(context).completed(itemId)?.mediaUri
+    ): String? = engine(context)?.completed(itemId)?.mediaUri
 
     internal fun storedItem(
         engine: DownloadEngine,

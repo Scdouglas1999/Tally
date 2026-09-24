@@ -43,8 +43,17 @@ internal interface OfflineStartEntryPoint {
 object TallyOfflineStart {
     /** Called at app start: starts downloads (idempotent). */
     fun onAppStart(context: Context) {
-        downloadsEntryPoint(context).downloads().start()
+        entryPointOrNull(context)?.downloads()?.start()
     }
+
+    /** Null where the app's Hilt graph is not there (Wholphin's unit tests): then startup is exactly Wholphin's. */
+    private fun entryPointOrNull(context: Context): DownloadsEntryPoint? =
+        try {
+            downloadsEntryPoint(context)
+        } catch (e: RuntimeException) {
+            // not a Hilt app (a test's plain or mocked context); in the app this lookup cannot fail
+            null
+        }
 
     /**
      * Called at app start before the session is restored: with no network, or the server already known to be
@@ -52,7 +61,7 @@ object TallyOfflineStart {
      * Returns true when it did (the caller stops).
      */
     suspend fun enterIfOffline(context: Context): Boolean {
-        val downloads = downloadsEntryPoint(context)
+        val downloads = entryPointOrNull(context) ?: return false
         val offline = downloads.downloads().offlineMode.value || !downloads.engine().hasNetwork()
         if (!offline) return false
         return try {
@@ -74,6 +83,7 @@ object TallyOfflineStart {
         error: Throwable,
     ): Boolean {
         if (!isUnreachable(error)) return false
+        if (entryPointOrNull(context) == null) return false
         return try {
             enterOffline(context)
         } catch (e: CancellationException) {
