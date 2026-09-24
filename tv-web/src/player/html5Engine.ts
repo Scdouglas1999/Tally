@@ -85,6 +85,12 @@ export function createHtml5Engine(host: HTMLElement, events: EngineEvents, bundl
     async load(source: Source) {
       events.state('loading');
       firstFrameSent = false;
+      // a reload (audio, subtitle burn-in or quality change) replaces the previous stream entirely
+      if (hls !== null) {
+        hls.destroy();
+        hls = null;
+      }
+      video.removeAttribute('src');
       if (source.kind === 'hls' && name === 'html5' && !nativeHls()) {
         const Hls = await loadHls(bundleBase);
         if (!Hls.isSupported()) throw new Error('This browser cannot play HLS.');

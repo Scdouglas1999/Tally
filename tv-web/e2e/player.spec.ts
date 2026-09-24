@@ -33,9 +33,11 @@ test('Film: plays (hls.js), subtitles drawn by the app, audio switch restarts wi
   const external = streams.find((x) => x.Type === 'Subtitle' && x.IsExternal === true) as Stream;
   const secondAudio = streams.filter((x) => x.Type === 'Audio')[1] as Stream;
 
-  const playbackInfo: string[] = [];
-  page.on('request', (r) => {
-    if (r.url().includes('/PlaybackInfo')) playbackInfo.push(r.postData() ?? '');
+  const transcodingUrls: string[] = [];
+  page.on('response', (r) => {
+    if (r.url().includes('/PlaybackInfo')) {
+      void r.json().then((b: { MediaSources?: Array<{ TranscodingUrl?: string }> }) => transcodingUrls.push(b.MediaSources?.[0]?.TranscodingUrl ?? ''));
+    }
   });
   await page.goto(APP);
   await expect(page.locator('.home')).toBeVisible();
@@ -56,8 +58,11 @@ test('Film: plays (hls.js), subtitles drawn by the app, audio switch restarts wi
   await page.locator('.icon-btn').nth(4).click();
   await expect(page.locator('.player .menu .menu-title')).toHaveText('AUDIO');
   await page.locator('.player .menu .option').nth(1).click();
-  await expect.poll(() => playbackInfo.some((b) => b.includes(`"AudioStreamIndex":${secondAudio.Index}`)), { timeout: 20_000 }).toBe(true);
-  await expect.poll(() => videoTime(page), { timeout: 30_000 }).toBeGreaterThan(before);
+  // the server's stream really carries the other track (not just our request)
+  await expect.poll(() => transcodingUrls.some((u) => u.includes(`AudioStreamIndex=${secondAudio.Index}`)), { timeout: 20_000 }).toBe(true);
+  // and it resumed where it was, not from the start
+  await expect.poll(() => videoTime(page), { timeout: 30_000 }).toBeGreaterThan(before + 0.5);
+  expect(await videoTime(page)).toBeLessThan(before + 20);
   await shot(page, info, 'player-audio-switched');
 });
 

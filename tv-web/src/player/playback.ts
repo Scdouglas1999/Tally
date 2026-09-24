@@ -17,6 +17,11 @@ export const ORIGINAL_MAX_BITRATE = 120_000_000;
 
 export interface PlayRequest {
   itemId: string;
+  /**
+   * The media source to play. Required for a track choice to take effect: Jellyfin 10.10 ignores AudioStreamIndex
+   * in PlaybackInfo unless the request names the source (measured on the dev server).
+   */
+  mediaSourceId?: string;
   startMs: number;
   audioIndex?: number;
   /** -1 = subtitles off. */
@@ -45,6 +50,8 @@ export interface Prepared {
   mediaSource: MediaSourceInfo;
   playSessionId: string;
   method: 'DirectPlay' | 'DirectStream' | 'Transcode';
+  /** What the viewer is told: the file as is, repackaged (remux: the only reason is the container), or converted. */
+  delivery: 'direct' | 'remux' | 'convert';
   audio: Track[];
   subtitles: SubtitleTrack[];
   audioIndex: number | null;
@@ -84,6 +91,7 @@ export async function preparePlayback(platform: Platform, req: PlayRequest): Pro
       itemId: req.itemId,
       playbackInfoDto: {
         UserId: s.userId,
+        MediaSourceId: req.mediaSourceId,
         DeviceProfile: deviceProfile(platform, maxBitrate),
         MaxStreamingBitrate: maxBitrate,
         StartTimeTicks: Math.floor(req.startMs * 10_000),
@@ -147,7 +155,10 @@ export async function preparePlayback(platform: Platform, req: PlayRequest): Pro
     .filter((x) => x.Type === 'Audio' && x.Index != null)
     .map((x) => ({ index: x.Index as number, label: label(x), language: x.Language ?? '', isDefault: x.IsDefault === true }));
 
+  const reasons = /[?&]TranscodeReasons=([^&]*)/i.exec(url)?.[1];
+  const remuxOnly = reasons !== undefined && decodeURIComponent(reasons).split(',').every((r) => r.trim() === 'ContainerNotSupported');
   return {
+    delivery: method === 'DirectPlay' ? 'direct' : remuxOnly || method === 'DirectStream' ? 'remux' : 'convert',
     source: { url, kind, live: ms.IsInfiniteStream === true, startMs: req.startMs },
     mediaSource: ms,
     playSessionId: info.PlaySessionId ?? '',

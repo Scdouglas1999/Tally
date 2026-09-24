@@ -152,8 +152,9 @@ Performance rules (the reason a DOM app is quick on a TV):
   server (the menu marks them). Verified: Spanish external and English embedded tracks on the dev films.
 - **Audio tracks**: a choice restarts the stream at the current position with `AudioStreamIndex` (works on every
   engine; the server remuxes or converts). AVPlay can also switch tracks itself on a direct-played file
-  (`nativeAudioTracks`/`selectNativeAudio`), to be used once verified. Verified in Chromium (PlaybackInfo request
-  carries the new index, playback continues).
+  (`nativeAudioTracks`/`selectNativeAudio`), to be used once verified. Jellyfin 10.10 ignores `AudioStreamIndex`
+  unless the request also names the `MediaSourceId` (measured), so restarts always send it. Verified in Chromium: the
+  server's new transcoding URL carries the chosen track and playback continues from 11.7 s at 12.4 s.
 - **Quality**: the Android ladder exactly (Original, 4K 120/80/60/40, 1080p 30/20/15/10/8, 720p 5/3, 480p 2,
   360p 1 Mbps); a rung sets `MaxStreamingBitrate`, disables direct play/stream and video copy, and adds
   `MaxWidth`/`MaxHeight` (16:9 box) to the transcoding URL, because live channels report ~0 video bitrate and a

@@ -56,11 +56,13 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
 
   /** (Re)starts the stream at `startMs` with the given choices. */
   const start = async (startMs: number, choice: { audio?: number; subtitle?: number; quality: QualityOption }): Promise<void> => {
+    // a restart names the source it had, so Jellyfin honors the track choice
     const engine = player.engine.current;
     if (engine === null) return;
     try {
       const p = await preparePlayback(app.platform, {
         itemId: props.route.itemId,
+        mediaSourceId: preparedRef.current?.mediaSource.Id ?? undefined,
         startMs,
         audioIndex: choice.audio,
         subtitleIndex: choice.subtitle,
@@ -225,7 +227,7 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
         <div class="osd-top">
           <div class="kicker mono-label">{tallyUppercase(kicker)}</div>
           <div class="title ellipsis">{item?.Name ?? ''}</div>
-          {prepared !== null ? <div class="sub mono-label">{tallyUppercase(prepared.method === 'DirectPlay' ? 'Direct play' : prepared.method === 'DirectStream' ? 'Direct stream' : 'Converting') + ' · ' + tallyUppercase(quality.label)}</div> : null}
+          {prepared !== null ? <div class="sub mono-label">{tallyUppercase(prepared.delivery === 'direct' ? 'Direct play' : prepared.delivery === 'remux' ? 'Remux' : 'Converting') + ' · ' + tallyUppercase(quality.label)}</div> : null}
           <div class="clock">{formatTime(new Date())}</div>
         </div>
         <div class="osd-bottom">
