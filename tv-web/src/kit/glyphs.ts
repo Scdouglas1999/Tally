@@ -28,6 +28,10 @@ export const Glyph = {
   backward: '',
   shuffle: '',
   sliders: '',
+  stepBackward: '',
+  stepForward: '',
+  bookmark: '',
+  list: '',
 } as const;
 
 export type GlyphName = keyof typeof Glyph;

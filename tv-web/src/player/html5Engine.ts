@@ -72,6 +72,11 @@ export function createHtml5Engine(host: HTMLElement, events: EngineEvents, bundl
       events.time(video.currentTime * 1000);
     }
   });
+  // a seek reports its new position at once (timeupdate is throttled above)
+  on('seeked', () => {
+    lastTimeEvent = Date.now();
+    events.time(video.currentTime * 1000);
+  });
   on('error', () => {
     const code = video.error?.code;
     events.error(code === 4 ? 'This video format is not supported here.' : 'Playback failed.');
@@ -141,5 +146,20 @@ export function createHtml5Engine(host: HTMLElement, events: EngineEvents, bundl
     duration: () => (isFinite(video.duration) ? video.duration * 1000 : 0),
     nativeAudioTracks: () => [],
     selectNativeAudio: () => undefined,
+    setSpeed: (rate) => {
+      video.playbackRate = rate;
+    },
+    setScale: (scale) => {
+      video.style.objectFit = scale === 'crop' ? 'cover' : scale === 'fill' ? 'fill' : 'contain';
+    },
+    scales: () => ['fit', 'crop', 'fill'],
+    bufferedMs: () => {
+      const now = video.currentTime;
+      const b = video.buffered;
+      for (let i = 0; i < b.length; i++) {
+        if (b.start(i) <= now + 0.5 && b.end(i) >= now) return b.end(i) * 1000;
+      }
+      return 0;
+    },
   };
 }

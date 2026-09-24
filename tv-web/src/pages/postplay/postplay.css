@@ -1,0 +1,24 @@
+/* Post-play (postplay/PostPlayPage.kt), Tally dp x 1.6 on the 1080p canvas. */
+.postplay { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: var(--ground); overflow: hidden; }
+.postplay-backdrop { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+.postplay-backdrop img { width: 100%; height: 100%; object-fit: cover; }
+/* ground at 78% over the picture, then ground rising from 42% down (image scrims where text sits on pictures) */
+.postplay-backdrop::before, .postplay-backdrop::after { content: ''; position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+.postplay-backdrop::before { background: rgba(14, 15, 14, 0.78); }
+.postplay-backdrop::after { background: linear-gradient(to bottom, rgba(14, 15, 14, 0) 0%, rgba(14, 15, 14, 0) 42%, var(--ground) 100%); }
+
+/* the column: margins + 24dp from the top, at most 520dp wide */
+.postplay-column { position: absolute; left: var(--margin-x); top: 81px; width: 832px; }
+.postplay-column .kicker { color: var(--muted); }
+.postplay-column .logo { margin-top: 19px; height: 154px; display: flex; align-items: center; }
+.postplay-column .logo img { max-width: 576px; max-height: 154px; }
+.postplay-column .title { margin-top: 19px; font-family: var(--sans); font-weight: 600; font-size: 64px; line-height: 77px; color: var(--text); }
+.postplay-column .meta { margin-top: 19px; color: var(--text-secondary); }
+.postplay-column .buttons { display: flex; margin-top: 32px; }
+.postplay-column .buttons .btn + .btn { margin-left: 19px; }
+
+/* More like this: posters 132dp wide, 18dp apart, on the bottom margin */
+.postplay-similar { position: absolute; left: 0; right: 0; bottom: 36px; }
+.postplay-similar .media-row { margin-bottom: 0; }
+.postplay-similar .row-track > * + * { margin-left: 29px; }
+.postplay-poster .label-bar { height: 48px; }

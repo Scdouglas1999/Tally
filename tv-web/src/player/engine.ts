@@ -54,6 +54,22 @@ export interface PlayerEngine {
    */
   nativeAudioTracks(): NativeAudioTrack[];
   selectNativeAudio(index: number): void;
+  /** Playback speed (1 = normal). Absent where the pipeline cannot change speed with sound (AVPlay). */
+  setSpeed?(rate: number): void;
+  /** How the picture fills the screen. Absent: always fit. */
+  setScale?(scale: VideoScale): void;
+  /** Scales this engine offers (the first is the default). */
+  scales?(): VideoScale[];
+  /** End of the buffered range around the current position, ms (0 when unknown). */
+  bufferedMs?(): number;
+  /**
+   * Where a picture drawn outside the page goes, in canvas pixels (AVPlay's hardware plane). Engines that draw in
+   * the page follow their host element instead and leave this out.
+   */
+  setDisplayArea?(x: number, y: number, width: number, height: number): void;
 }
+
+/** Fit: the whole picture, letterboxed. Crop: fill the screen, cutting edges. Fill: stretch. */
+export type VideoScale = 'fit' | 'crop' | 'fill';
 
 export type EngineFactory = (host: HTMLElement, events: EngineEvents) => PlayerEngine;

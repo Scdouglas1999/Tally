@@ -9,6 +9,7 @@ import type { PageProps } from './page';
 import { HomePage } from '../pages/home/HomePage';
 import { LibraryPage } from '../pages/library/LibraryPage';
 import { PlayerPage } from '../pages/player/PlayerPage';
+import { PostPlayPage } from '../pages/postplay/PostPlayPage';
 import { LivePage } from '../pages/player/LivePage';
 import { PlaceholderPage } from '../pages/placeholder/PlaceholderPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
@@ -30,6 +31,7 @@ export const PAGES: Pages = {
   settings: { page: SettingsPage, chrome: 'rail' },
   placeholder: { page: PlaceholderPage, chrome: 'rail' },
   player: { page: PlayerPage, chrome: 'full' },
+  postplay: { page: PostPlayPage, chrome: 'full' },
   live: { page: LivePage, chrome: 'full' },
   multiview: { page: MultiviewPage, chrome: 'full' },
   startover: { page: StartOverPage, chrome: 'full' },

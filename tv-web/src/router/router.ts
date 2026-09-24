@@ -21,6 +21,7 @@ export type Route =
   | { name: 'library'; libraryId: string; title: string; collectionType: string; view?: LibraryView }
   | { name: 'item'; itemId: string }
   | { name: 'player'; itemId: string; startMs?: number }
+  | { name: 'postplay'; itemId: string }
   | { name: 'live'; channelId: string; hlsPath: string; title: string; gameId?: string }
   | { name: 'sports' }
   | { name: 'multiview' }
