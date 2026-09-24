@@ -19,6 +19,8 @@ describe('remote keys', () => {
     expect(mapKey({ keyCode: 10252, key: 'MediaPlayPause' }, 'tizen')).toBe('playPause');
     expect(mapKey({ keyCode: 427, key: 'XF86RaiseChannel' }, 'tizen')).toBe('channelUp');
     expect(mapKey({ keyCode: 33, key: 'PageUp' }, 'webos')).toBe('channelUp');
+    expect(mapKey({ keyCode: 65376, key: '' }, 'tizen')).toBe('enter');
+    expect(mapKey({ keyCode: 65385, key: '' }, 'tizen')).toBe('back');
   });
 
   it('prefers the codes the TV reported for registered keys', () => {

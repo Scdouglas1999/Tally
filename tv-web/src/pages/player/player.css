@@ -3,7 +3,7 @@
 .player .engine-video { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: #000; }
 .player .engine-avplay { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
 /* AVPlay draws under the page: every layer above the video must be see-through */
-body.native-video, body.native-video #tally-stage, body.native-video .page, body.native-video .page-area, body.native-video .player { background: transparent; }
+html.native-video, body.native-video, body.native-video #tally-stage, body.native-video .page, body.native-video .page-area, body.native-video .player { background: transparent; }
 
 .player .subtitle-layer { position: absolute; left: 160px; right: 160px; bottom: 90px; text-align: center; pointer-events: none; }
 .player.osd-visible .subtitle-layer { bottom: 340px; }

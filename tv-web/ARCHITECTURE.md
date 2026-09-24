@@ -337,7 +337,8 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
 
 - **Unit** (`npm test`, Vitest): lamp timeline (Android numbers), quality ladder, key maps, formats, home-row
   selection on real boards (the Android fixture and one captured from the dev server), device profiles, subtitles,
-  scroll math, drawer order. 29 tests.
+  scroll math, drawer order, and the AVPlay engine against a recording fake of `webapis.avplay` (call order,
+  suspend/restore, tracks). 34 tests.
 - **Lint** (`npm run lint`): ESLint (typescript-eslint + compat for Chromium 68), `tsc --noEmit` strict, CSS legacy
   check. **Build** adds the ES2019 parse of the bundle.
 - **End-to-end** (`npm run e2e`, Playwright 1.63, Chromium at 1920x1080, the production bundle through

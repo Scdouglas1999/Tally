@@ -23,6 +23,8 @@ const COMMON: Record<number, Key> = {
 const TIZEN: Record<number, Key> = {
   10009: 'back', 10252: 'playPause', 427: 'channelUp', 428: 'channelDown',
   10232: 'previous', 10233: 'next',
+  // the on-screen keyboard's Done and Cancel
+  65376: 'enter', 65385: 'back',
 };
 
 const WEBOS: Record<number, Key> = {

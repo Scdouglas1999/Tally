@@ -5,7 +5,7 @@ import type { EngineEvents, NativeAudioTrack, PlayerEngine, Source } from './eng
 /**
  * Samsung AVPlay (developer.samsung.com AVPlay API). The decoder draws on a hardware plane behind the web page:
  * an <object type="application/avplayer"> marks where, and everything above it in the page must be transparent
- * (the player page sets `native-video` on <body>). Plays HLS (live and VOD), and MP4/MKV/TS files directly, with
+ * (this engine sets `native-video` on <html> and <body>; player.css clears their backgrounds). Plays HLS (live and VOD), and MP4/MKV/TS files directly, with
  * HEVC, AV1 (2020+ sets), HDR10 and Dolby/DTS passthrough as the TV allows.
  *
  * Lifecycle: a Tizen app sent to the background must release the decoder (suspend) and take it back (restore).
@@ -17,6 +17,7 @@ export function createAvPlayEngine(host: HTMLElement, events: EngineEvents): Pla
   object.setAttribute('type', 'application/avplayer');
   object.className = 'engine-avplay';
   host.appendChild(object);
+  document.documentElement.classList.add('native-video');
   document.body.classList.add('native-video');
 
   let source: Source | null = null;
@@ -128,6 +129,7 @@ export function createAvPlayEngine(host: HTMLElement, events: EngineEvents): Pla
         // closing an idle player throws on some firmware
       }
       object.remove();
+      document.documentElement.classList.remove('native-video');
       document.body.classList.remove('native-video');
     },
     currentTime: () => position,
