@@ -5,7 +5,7 @@
     <!-- The plugin is versioned with the Tally app: Tally 2.0.0 ships plugin 2.0.0.10, .11 and .12
          (one per Jellyfin line, see the plugin's csproj). tally/release.sh passes the
          release's version; this is the default for local builds. -->
-    <TallyVersion Condition="'$(TallyVersion)' == ''">2.0.2</TallyVersion>
+    <TallyVersion Condition="'$(TallyVersion)' == ''">2.0.3</TallyVersion>
     <BaseIntermediateOutputPath>obj/jf$(JellyfinLine)/</BaseIntermediateOutputPath>
     <BaseOutputPath>bin/jf$(JellyfinLine)/</BaseOutputPath>
     <DefaultItemExcludes>$(DefaultItemExcludes);obj/**;bin/**</DefaultItemExcludes>
