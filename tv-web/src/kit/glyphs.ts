@@ -25,6 +25,7 @@ export const Glyph = {
   caretRight: '',
   forward: '',
   backward: '',
+  shuffle: '',
   sliders: '',
 } as const;
 

@@ -100,3 +100,8 @@
   position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;
   padding: 16px; text-align: center; color: var(--muted); font-family: var(--sans); font-size: 24px;
 }
+/* picture fits other than the crop (the library's view options) */
+.card .art img.fit-contain { object-fit: contain; }
+.card .art img.fit-none { object-fit: none; }
+.card .art img.fit-fill-width { top: 50%; height: auto; transform: translateY(-50%); }
+.card .art img.fit-fill-height { left: 50%; width: auto; transform: translateX(-50%); }
