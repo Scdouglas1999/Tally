@@ -41,6 +41,9 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
   const [subtitleIndex, setSubtitleIndex] = useState<number | null>(null);
   const osdTimer = useRef(0);
   const report = useRef(reporter(props.route.itemId, () => preparedRef.current));
+  // the last position the engine reported: the engine is already gone when the page's cleanup sends "stopped"
+  const lastMs = useRef(props.route.startMs ?? 0);
+  if (player.timeMs > 0) lastMs.current = player.timeMs;
   const controls = useFocusable<HTMLDivElement>({ focusKey: 'player-controls' });
 
   const showOsd = (): void => {
@@ -94,7 +97,7 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
     return () => {
       window.clearInterval(t);
       window.clearTimeout(osdTimer.current);
-      report.current.stop(player.engine.current?.currentTime() ?? 0);
+      report.current.stop(lastMs.current);
     };
   }, []);
 

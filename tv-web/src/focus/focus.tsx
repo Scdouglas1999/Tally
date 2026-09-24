@@ -46,9 +46,9 @@ export function initFocus(): void {
   if (started) return;
   started = true;
   SpatialNavigation.init({
-    // one key press moves one step; a held key repeats at the TV's own repeat rate (throttled lightly)
-    throttle: 60,
-    throttleKeypresses: true,
+    // no throttle: Norigin cancels a throttled press on key-up, which dropped quick second presses; a held key
+    // repeats at the TV's own rate
+    throttle: 0,
     shouldFocusDOMNode: true,
     domNodeFocusOptions: { preventScroll: true },
     distanceCalculationMethod: 'center',

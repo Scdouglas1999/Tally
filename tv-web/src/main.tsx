@@ -12,6 +12,7 @@ import { initFocus } from './focus/focus';
 import { installKeyRouter } from './platform/keyRouter';
 import { createStage } from './platform/stage';
 import { App, rootBack } from './app/App';
+import { push, stack } from './router/router';
 
 // resolveShell reads document.currentScript: it must run while this script is first evaluated
 const shell = resolveShell();
@@ -23,3 +24,6 @@ initFocus();
 installKeyRouter(platform, () => rootBack(() => platform.exit()));
 const stage = createStage();
 render(<App onFirstScreen={() => shell.started()} />, stage);
+
+// For the end-to-end tests and for poking at a TV over the web inspector: open any route directly.
+(window as unknown as { TallyDebug: unknown }).TallyDebug = { push, stack };

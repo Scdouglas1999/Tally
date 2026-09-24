@@ -15,8 +15,20 @@ import './rail.css';
 export const RAIL_KEY = 'rail';
 const LIST_TOP = 'rail-top';
 
+/**
+ * RIGHT from anywhere in the drawer returns to the page. (Geometry cannot find it: the page is pushed right with a
+ * transform, which the focus system's offset measurements do not see.)
+ */
+function backToPage(direction: string): boolean {
+  if (direction !== 'right') return true;
+  const s = stack.get();
+  const top = s[s.length - 1];
+  if (top !== undefined) setFocus(pageFocusKey(top.id));
+  return false;
+}
+
 function Entry(props: { item: DrawerItem; selected: boolean; pitch: number; open: boolean; onPress: (item: DrawerItem) => void }) {
-  const f = useFocusable<HTMLDivElement>({ focusKey: 'rail-' + props.item.key, onEnter: () => props.onPress(props.item) });
+  const f = useFocusable<HTMLDivElement>({ focusKey: 'rail-' + props.item.key, onEnter: () => props.onPress(props.item), onArrow: backToPage });
   const square = { width: `${props.pitch}px`, height: `${props.pitch}px` };
   return (
     <div class={'entry' + (props.selected ? ' selected' : '')} style={{ height: `${props.pitch}px` }}>
@@ -35,7 +47,7 @@ function Entry(props: { item: DrawerItem; selected: boolean; pitch: number; open
 
 function UserRow(props: { open: boolean }) {
   const s = useStore(session);
-  const f = useFocusable<HTMLDivElement>({ focusKey: 'rail-user' });
+  const f = useFocusable<HTMLDivElement>({ focusKey: 'rail-user', onArrow: backToPage });
   if (s === null) return null;
   const image = s.userImageTag !== undefined ? itemImage(s.userId, ImageType.Primary, s.userImageTag, 64, 64) : null;
   return (
