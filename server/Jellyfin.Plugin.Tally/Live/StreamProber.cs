@@ -19,7 +19,8 @@ public sealed record VideoFacts(int Width, int Height, double? FrameRate, string
 /// Looks at one candidate: its master (renditions with BANDWIDTH, RESOLUTION, FRAME-RATE, CODECS), the media
 /// playlist of its best rendition (target duration, freshness) and one segment, timed — the throughput this server
 /// actually gets. When the master does not say resolution or frame rate, that segment goes through the server's own
-/// ffprobe.
+/// ffprobe. For a channel with several streams it also watches the media playlist for a while (playlist fetches only)
+/// to see how steadily new segments show up in it: a stream that publishes in bursts looks fine in one fetch.
 /// </summary>
 public sealed class StreamProber
 {
@@ -34,7 +35,10 @@ public sealed class StreamProber
         _logger = logger;
     }
 
-    public async Task<CandidateProbe> ProbeAsync(int index, StreamCandidate candidate, CandidateProbe? previous, bool withSegment, CancellationToken ct)
+    /// <summary>How long a probe watches the media playlist for its cadence.</summary>
+    public static readonly TimeSpan CadenceWatch = TimeSpan.FromSeconds(15);
+
+    public async Task<CandidateProbe> ProbeAsync(int index, StreamCandidate candidate, CandidateProbe? previous, bool withSegment, CancellationToken ct, TimeSpan? watchCadence = null)
     {
         var now = DateTimeOffset.UtcNow;
         if (!Uri.TryCreate(candidate.Url, UriKind.Absolute, out var uri))
@@ -56,6 +60,7 @@ public sealed class StreamProber
 
         var tiers = new List<Tier>();
         HlsMediaPlaylist media;
+        Uri mediaFinal;
         Tier probed;
         if (HlsParser.IsMaster(text))
         {
@@ -90,12 +95,14 @@ public sealed class StreamProber
             }
 
             media = HlsParser.ParseMedia(mp.Text, mp.FinalUri);
+            mediaFinal = mp.FinalUri;
         }
         else
         {
             probed = new Tier { Candidate = index, CandidateKey = candidate.Url, Variant = 0, MediaUri = top.FinalUri };
             tiers.Add(probed);
             media = HlsParser.ParseMedia(text, top.FinalUri);
+            mediaFinal = top.FinalUri;
         }
 
         if (media.Segments.Count == 0)
@@ -109,6 +116,12 @@ public sealed class StreamProber
         var isTs = media.Segments[^1].MapUri == null;
         var encrypted = media.Segments[^1].KeyMethod != null;
 
+        // The cadence watch runs alongside the segment download and ffprobe: the probe takes about as long as the watch.
+        using var watchCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        var cadenceTask = watchCadence is { } watch && watch > TimeSpan.Zero && !media.EndList
+            ? WatchCadenceAsync(mediaFinal, candidate.Headers, media, watch, watchCts.Token)
+            : Task.FromResult<CadenceSummary?>(null);
+
         double? throughput = previous?.Throughput;
         if (withSegment)
         {
@@ -117,6 +130,7 @@ public sealed class StreamProber
             var r = await _fetch.GetSegmentAsync(seg, candidate.Headers, TimeSpan.FromSeconds(Math.Max(10, seg.Duration * 3)), ct).ConfigureAwait(false);
             if (!r.Ok)
             {
+                watchCts.Cancel();
                 return Failed(now, "segment: " + r.Error, tiers);
             }
 
@@ -154,12 +168,14 @@ public sealed class StreamProber
             }
         }
 
+        var cadence = await cadenceTask.ConfigureAwait(false);
         return new CandidateProbe
         {
             At = now,
             Ok = true,
             Tiers = tiers,
             Throughput = throughput,
+            Cadence = cadence ?? previous?.Cadence,
             Fresh = fresh,
             TargetDuration = media.TargetDuration,
             NextSequence = media.NextSequence,
@@ -167,6 +183,36 @@ public sealed class StreamProber
             Encrypted = encrypted,
             IsLive = !media.EndList
         };
+    }
+
+    /// <summary>Fetches the media playlist every third of a target duration (1-3 s) for <paramref name="watch"/> and
+    /// reports how steadily it gained segments. Null when the watch saw nothing usable.</summary>
+    private async Task<CadenceSummary?> WatchCadenceAsync(Uri mediaUri, Dictionary<string, string> headers, HlsMediaPlaylist first, TimeSpan watch, CancellationToken ct)
+    {
+        try
+        {
+            var start = DateTimeOffset.UtcNow;
+            var meter = new CadenceMeter(start);
+            meter.OnPlaylist(start, first.Segments);
+            var interval = TimeSpan.FromSeconds(Math.Clamp(first.TargetDuration / 3, 1, 3));
+            while (DateTimeOffset.UtcNow - start < watch)
+            {
+                await Task.Delay(interval, ct).ConfigureAwait(false);
+                var r = await _fetch.GetAsync(mediaUri, headers, TimeSpan.FromSeconds(10), ct).ConfigureAwait(false);
+                if (r.Ok && r.Text.Contains("#EXTINF", StringComparison.Ordinal))
+                {
+                    meter.OnPlaylist(DateTimeOffset.UtcNow, HlsParser.ParseMedia(r.Text, r.FinalUri).Segments);
+                }
+            }
+
+            var now = DateTimeOffset.UtcNow;
+            return meter.Summarize(now, now - start);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogDebug(ex, "JellyTV ladder: cadence watch failed");
+            return null;
+        }
     }
 
     private static CandidateProbe Failed(DateTimeOffset at, string error, List<Tier>? tiers = null)

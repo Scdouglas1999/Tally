@@ -124,6 +124,15 @@ public sealed class OutputWindow
         }
     }
 
+    /// <summary>Seconds listed after <paramref name="sequence"/> (all of it when -1).</summary>
+    public double SecondsAfter(long sequence)
+    {
+        lock (_gate)
+        {
+            return _segments.Where(s => s.Sequence > sequence).Sum(s => s.Duration);
+        }
+    }
+
     public PublishedSegment? Get(long sequence)
     {
         lock (_gate)

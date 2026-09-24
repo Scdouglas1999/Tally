@@ -14,6 +14,10 @@ public sealed record SwitchDecision(Tier Target, string Reason, bool Hard, bool 
 /// after <see cref="StabilityWindow"/> without trouble, when a better rung downloads at 2× its bitrate. At least
 /// <see cref="MinSwitchInterval"/> between switches — except that a dead stream is left at once, since holding on
 /// to it would stall the viewer. A candidate that failed backs off, 2 minutes doubling to 16, before it is tried again.
+/// <para>A stream whose segments arrive in bursts is trouble too, even when each one downloads fast: after
+/// <see cref="LateUpdatesForTrouble"/> late playlist updates within <see cref="CadenceWindow"/> the policy moves to
+/// another stream of the channel that is healthy and arrives steadier (<see cref="WatchAlternates"/> asks the session
+/// to watch the others' playlists while there is trouble), and backs the bursty one off like a failed one.</para>
 /// </summary>
 public sealed class SwitchPolicy
 {
@@ -24,10 +28,21 @@ public sealed class SwitchPolicy
     public static readonly TimeSpan ProbeMaxAgeForStepUp = TimeSpan.FromSeconds(90);
     public const double SlowRatio = 0.8;
 
+    /// <summary>Late playlist updates (see <see cref="CadenceMeter.LateFactor"/>) within <see cref="CadenceWindow"/>
+    /// that make a bursty stream trouble.</summary>
+    public const int LateUpdatesForTrouble = 2;
+
+    public static readonly TimeSpan CadenceWindow = TimeSpan.FromSeconds(60);
+
+    /// <summary>Leaving a bursty stream for a steadier one waits this long after a switch (not the full
+    /// <see cref="MinSwitchInterval"/>: the viewer's cushion is draining in every gap).</summary>
+    public static readonly TimeSpan JitterSwitchInterval = TimeSpan.FromSeconds(20);
+
     private readonly Dictionary<string, (DateTimeOffset Until, int Level, DateTimeOffset At)> _backoff = new(StringComparer.Ordinal);
     private int _consecutiveSlow;
     private string? _hard;
     private double? _throughput;
+    private CadenceSummary? _cadence;
 
     public SwitchPolicy(Tier current, DateTimeOffset now)
     {
@@ -54,7 +69,24 @@ public sealed class SwitchPolicy
     /// <summary>Candidates the policy would like fresh probes of (to decide a step up).</summary>
     public HashSet<string> WantProbe { get; } = new(StringComparer.Ordinal);
 
+    /// <summary>The current rung's cadence over the last <see cref="CadenceWindow"/>.</summary>
+    public CadenceSummary? Cadence => _cadence;
+
+    /// <summary>A late update was seen lately: the session should watch the other streams' playlists, so a steadier
+    /// one is known when the policy wants to leave.</summary>
+    public bool WatchAlternates => _cadence is { Late: > 0 };
+
     public void OnNewSegmentListed(DateTimeOffset now) => LastNewSegmentAt = now;
+
+    /// <summary>The current rung's cadence over the last <see cref="CadenceWindow"/>, after every playlist fetch.</summary>
+    public void OnCadence(DateTimeOffset now, CadenceSummary lastMinute)
+    {
+        _cadence = lastMinute;
+        if (lastMinute.Late > 0)
+        {
+            LastTroubleAt = now; // not "stable": no stepping up while segments come late
+        }
+    }
 
     public void OnSegment(DateTimeOffset now, double seconds, double duration, long bytes)
     {
@@ -142,6 +174,22 @@ public sealed class SwitchPolicy
             }
         }
 
+        if (_cadence is { } cad && cad.Late >= LateUpdatesForTrouble && sinceSwitch >= JitterSwitchInterval)
+        {
+            var target = ChooseSteadier(ranked, cad, probes, now);
+            if (target != null)
+            {
+                var alt = probes(target.CandidateKey)!.Cadence!;
+                var reason = string.Format(CultureInfo.InvariantCulture,
+                    "segments arrive in bursts: {0} late updates in the last minute, every {1:0.0}s avg / {2:0.0}s max for {3:0.#}s segments (needs {4:0}s cushion); {5} arrives steadily (every {6:0.0}s avg / {7:0.0}s max)",
+                    cad.Late, cad.AvgGap, cad.MaxGap, cad.SegmentDuration, cad.NeededCushion, Describe(target), alt.AvgGap, alt.MaxGap);
+                BackOff(Current.CandidateKey, now);
+                var d = Commit(new SwitchDecision(target, reason, Hard: false, Up: IndexOf(ranked, target) < cur), now);
+                LastTroubleAt = now;
+                return d;
+            }
+        }
+
         if (cur > 0 && sinceSwitch >= StabilityWindow && now - LastTroubleAt >= StabilityWindow)
         {
             for (var i = 0; i < cur; i++)
@@ -195,6 +243,7 @@ public sealed class SwitchPolicy
         LastNewSegmentAt = now;
         _consecutiveSlow = 0;
         _hard = null;
+        _cadence = null;
         if (!d.Up)
         {
             LastTroubleAt = now;
@@ -230,6 +279,35 @@ public sealed class SwitchPolicy
         // Nothing provably fits: at least drop to the lightest rendition of this stream if it is much lighter.
         return ranked.Where(t => t.CandidateKey == Current.CandidateKey && t.Bitrate < 0.7 * Current.Bitrate)
             .OrderBy(t => t.Bitrate).FirstOrDefault();
+    }
+
+    /// <summary>The best-ranked rung of another stream that is healthy (fresh probe, fast enough, not bursty itself)
+    /// and has been seen arriving steadier than <paramref name="current"/>: no late update, watched long enough.
+    /// Candidates whose probe is too old to tell are asked for (<see cref="WantProbe"/>).</summary>
+    private Tier? ChooseSteadier(IReadOnlyList<Tier> ranked, CadenceSummary current, Func<string, CandidateProbe?> probes, DateTimeOffset now)
+    {
+        foreach (var t in ranked)
+        {
+            if (t.CandidateKey == Current.CandidateKey || IsBackedOff(t.CandidateKey, now))
+            {
+                continue;
+            }
+
+            var p = probes(t.CandidateKey);
+            if (p == null || now - p.At > ProbeMaxAgeForSwitch)
+            {
+                WantProbe.Add(t.CandidateKey);
+                continue;
+            }
+
+            if (LadderRanking.Healthy(t, p, now, ProbeMaxAgeForSwitch) && p.Cadence is { Enough: true, Late: 0 } alt
+                && CadenceSummary.CompareSteadiness(alt, current) < 0)
+            {
+                return t;
+            }
+        }
+
+        return null;
     }
 
     private Tier? ChooseAfterFailure(IReadOnlyList<Tier> ranked, int cur, Func<string, CandidateProbe?> probes, DateTimeOffset now)

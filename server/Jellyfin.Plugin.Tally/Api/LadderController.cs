@@ -44,7 +44,12 @@ public class LadderController : ControllerBase
                         index = i + 1,
                         name = x.Name,
                         host = Uri.TryCreate(x.Url, UriKind.Absolute, out var u) ? u.Host : string.Empty,
-                        probe = _ladder.Probe(x.Url) is { } p ? new { ageSeconds = (int)(now - p.At).TotalSeconds, summary = LiveLadderService.Summary(p) } : null
+                        probe = _ladder.Probe(x.Url) is { } p ? new
+                        {
+                            ageSeconds = (int)(now - p.At).TotalSeconds,
+                            summary = LiveLadderService.Summary(p),
+                            cadence = p.Cadence is { } cad ? LiveSession.CadenceJson(cad) : null
+                        } : null
                     }),
                     rungs = ranked.Select(t => new
                     {
@@ -63,7 +68,8 @@ public class LadderController : ControllerBase
                         current = session.CurrentTier?.Key,
                         throughputMbps = session.Throughput is { } bps ? Math.Round(bps / 1e6, 2) : (double?)null,
                         nextSequence = session.Window.NextSequence,
-                        switches = session.History
+                        switches = session.History,
+                        diagnostics = session.Running && !session.Passthrough ? session.Diagnostics() : null
                     }
                 };
             });

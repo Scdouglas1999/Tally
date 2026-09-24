@@ -188,8 +188,20 @@ public class SourceManager
                 }
             }
 
+            var games = await GamesAsync(channels, cancellationToken).ConfigureAwait(false);
+            if (channels.Any(c => c.NameFromTitle))
+            {
+                var (kept, dropped) = ChannelNaming.Resolve(channels, games);
+                if (dropped > 0)
+                {
+                    _logger.LogInformation("JellyTV: dropped {Count} web streams named only by their page's title (no game on the scoreboard matches it)", dropped);
+                }
+
+                channels = kept;
+            }
+
             ChannelIdentity.Assign(channels);
-            var grouped = await GroupAsync(channels, cancellationToken).ConfigureAwait(false);
+            var grouped = Group(channels, games);
             channels = grouped.Channels;
             next.Aliases = grouped.Aliases;
             channels.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
@@ -226,24 +238,30 @@ public class SourceManager
         }
     }
 
-    /// <summary>Folds duplicates into multi-stream channels (see <see cref="ChannelGrouper"/>).</summary>
-    private async Task<GroupResult> GroupAsync(List<SourceChannel> channels, CancellationToken ct)
+    /// <summary>Today's games, for naming and grouping; null without a scoreboard.</summary>
+    private async Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(List<SourceChannel> channels, CancellationToken ct)
     {
-        IReadOnlyList<Scores.GameInfo>? games = null;
-        if (_scoreboard != null && (Plugin.Instance?.Configuration.ScoresEnabled ?? true) && channels.Count > 0)
+        if (_scoreboard == null || !(Plugin.Instance?.Configuration.ScoresEnabled ?? true) || channels.Count == 0)
         {
-            try
-            {
-                using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-                cts.CancelAfter(TimeSpan.FromSeconds(15));
-                games = await _scoreboard.GetGamesAsync(cts.Token).ConfigureAwait(false);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
-            {
-                _logger.LogDebug(ex, "JellyTV: no scoreboard for grouping");
-            }
+            return null;
         }
 
+        try
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            cts.CancelAfter(TimeSpan.FromSeconds(15));
+            return await _scoreboard.GetGamesAsync(cts.Token).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
+        {
+            _logger.LogDebug(ex, "JellyTV: no scoreboard for grouping");
+            return null;
+        }
+    }
+
+    /// <summary>Folds duplicates into multi-stream channels (see <see cref="ChannelGrouper"/>).</summary>
+    private GroupResult Group(List<SourceChannel> channels, IReadOnlyList<Scores.GameInfo>? games)
+    {
         var now = DateTimeOffset.UtcNow;
         foreach (var dead in _stickyTeams.Where(kv => kv.Value.Until < now).Select(kv => kv.Key).ToList())
         {

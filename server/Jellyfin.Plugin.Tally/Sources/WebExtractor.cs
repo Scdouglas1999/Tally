@@ -24,6 +24,11 @@ public class ExtractedStream
     /// <summary>Nearest ancestor page that looks like an event — carries the
     /// matchup slug used for naming/grouping.</summary>
     public string Context { get; set; } = string.Empty;
+
+    /// <summary>The name is a page title (or an element's title attribute), not an event page's slug or the text of
+    /// a link to the event: page titles are mostly the site's own name and tagline, so such a name stands only if it
+    /// names a game (see <c>ChannelNaming</c>).</summary>
+    public bool NameFromTitle { get; set; } = true;
 }
 
 /// <summary>
@@ -67,6 +72,8 @@ public partial class WebExtractor
         var found = new List<ExtractedStream>();
         var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var titles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        // page → the matchup a link to it (or to the page embedding it) was labeled with ("Chiefs vs Bills")
+        var labels = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         // Two-tier queue: event pages and embeds are where streams live —
         // they jump ahead of generic "watch"-hint links (nav, blog posts) that
         // would otherwise burn the page budget.
@@ -132,6 +139,11 @@ public partial class WebExtractor
                         else if (f.LocalName is "iframe" or "frame" or "embed")
                         {
                             _discoveredLinks.Add(src);
+                            if (labels.TryGetValue(NormalizePage(url), out var parentLabel))
+                            {
+                                labels.TryAdd(NormalizePage(src), parentLabel);
+                            }
+
                             if (depth < 3)
                             {
                                 Enqueue(src, depth + 1, origin, true);
@@ -141,6 +153,11 @@ public partial class WebExtractor
                                 foreach (var sibling in SiblingEmbeds(src, html))
                                 {
                                     _discoveredLinks.Add(sibling);
+                                    if (labels.TryGetValue(NormalizePage(url), out var siblingLabel))
+                                    {
+                                        labels.TryAdd(NormalizePage(sibling), siblingLabel);
+                                    }
+
                                     Enqueue(sibling, depth + 1, origin, true);
                                 }
                             }
@@ -166,6 +183,11 @@ public partial class WebExtractor
                                 || StreamClassifier.LooksLikeEvent(text))
                             {
                                 _discoveredLinks.Add(href);
+                                if (LinkLabel(text) is { } label)
+                                {
+                                    labels.TryAdd(NormalizePage(href), label);
+                                }
+
                                 Enqueue(href, depth + 1, ev ? href : origin, ev || StreamClassifier.LooksLikeEvent(text));
                             }
                         }
@@ -180,19 +202,25 @@ public partial class WebExtractor
 
         _logger.LogInformation("JellyTV: HTTP crawl visited {Pages} pages, found {Streams} manifest candidates", visited.Count, found.Count);
 
-        // Name streams from the event page slug ("/mlb/yankees-diamondbacks/…"
-        // → "New York Yankees Arizona Diamondbacks"), then the event page title.
+        // Name streams from the event page slug ("/mlb/yankees-diamondbacks/…" → "New York Yankees Arizona
+        // Diamondbacks"), then the matchup a link to the page said ("Yankees vs Diamondbacks"). Failing both, the event
+        // page's title is kept only as a hint (NameFromTitle): a title is mostly the site's name and tagline.
         foreach (var s in found)
         {
             var named = NameFromUrl(s.Context);
-            if (named == null && titles.TryGetValue(NormalizePage(s.Context), out var t))
+            if (named == null && (labels.TryGetValue(NormalizePage(s.Context), out var label) || labels.TryGetValue(NormalizePage(s.Referer), out label)))
             {
-                named = StreamClassifier.CleanName(t);
+                named = label;
             }
 
             if (!string.IsNullOrEmpty(named))
             {
                 s.Name = named;
+                s.NameFromTitle = false;
+            }
+            else if (titles.TryGetValue(NormalizePage(s.Context), out var t) && StreamClassifier.CleanName(t) is { Length: > 0 } cleaned)
+            {
+                s.Name = cleaned;
             }
         }
 
@@ -315,6 +343,14 @@ public partial class WebExtractor
             Referer = referer,
             Context = context
         });
+    }
+
+    /// <summary>A link's text when it names a matchup ("Chiefs vs Bills", "KC @ BUF"); null for "Watch", "Link 2",
+    /// "NBA" and the like.</summary>
+    public static string? LinkLabel(string? text)
+    {
+        var cleaned = StreamClassifier.CleanName(text);
+        return cleaned.Length >= 5 && StreamClassifier.LooksLikeEvent(cleaned) && ChannelGrouper.KeyFor(cleaned).Length > 0 ? cleaned : null;
     }
 
     private static bool IsHtml(HttpResponseMessage resp)

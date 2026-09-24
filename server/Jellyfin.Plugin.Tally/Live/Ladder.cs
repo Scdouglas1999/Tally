@@ -57,6 +57,10 @@ public sealed class CandidateProbe
     /// <summary>Bytes/s × 8 this server achieved downloading one segment.</summary>
     public double? Throughput { get; init; }
 
+    /// <summary>How steadily the playlist gained segments while it was watched (the probe's watch, or later, a
+    /// session playing or watching it). Null when it was not watched (a channel with one stream).</summary>
+    public CadenceSummary? Cadence { get; init; }
+
     /// <summary>The playlist is live and moving (not ended, and advancing when seen before).</summary>
     public bool Fresh { get; init; }
 
@@ -129,7 +133,11 @@ public static class LadderRanking
         return f == null ? string.Empty : f + "fps";
     }
 
+    /// <summary>Healthy: probed recently, live and moving, downloaded at <paramref name="margin"/>× its bitrate or
+    /// better, and its segments arrive steadily (a stream seen publishing in bursts is not healthy, however fast it
+    /// downloads: a viewer behind it runs dry between the bursts).</summary>
     public static bool Healthy(Tier t, CandidateProbe? p, DateTimeOffset now, TimeSpan maxAge, double margin = HealthyMargin)
         => p != null && p.Ok && p.Fresh && now - p.At <= maxAge
-           && p.Throughput is { } bps && bps >= margin * t.Bitrate;
+           && p.Throughput is { } bps && bps >= margin * t.Bitrate
+           && p.Cadence is not { Irregular: true };
 }
