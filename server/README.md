@@ -62,7 +62,9 @@ In the app → **Settings → Sources → Add source**:
   page in a headless browser and sniffs network requests — catches streams that
   only appear after JavaScript runs. See [the headless browser](#the-headless-browser)
   for what it installs the first time.
-- Extracted streams are auto-named (from link text / page titles) and grouped
+- Extracted streams are auto-named (from the event page's address or the matchup a link to it names; a page's
+  title only counts when it names a game on the scoreboard, since titles are mostly the site's own name and
+  tagline — a stream with nothing better to go on is left out) and grouped
   into categories (NBA, NFL, soccer leagues, UFC, sports networks, …). Captured
   Referer/Origin headers are replayed through the proxy automatically.
 - Streams on web pages are usually ephemeral (rotating tokens) — the source is
@@ -115,16 +117,25 @@ All playback goes through the plugin's **signed proxy** (`/JellyTV/Proxy`):
   are ignored), and channels of one source that the Games board ties to the same game by team names. The channel
   keeps its id; merged entries disappear as separate channels (their old ids still resolve, so favorites follow).
 - Each candidate is probed once when it is found (its renditions, playlist freshness, one timed segment download;
-  Jellyfin's own ffprobe fills in resolution and frame rate when the playlist does not say), and the other candidates
-  of a channel someone is watching are re-probed every few minutes.
+  Jellyfin's own ffprobe fills in resolution and frame rate when the playlist does not say; its playlist watched for
+  15 seconds to see how steadily new segments show up), and the other candidates of a channel someone is watching are
+  re-probed every few minutes.
 - Ranking is quality first (50/60 fps above 25/30, then resolution, then bitrate), but a stream only counts when this
-  server downloads it at 1.5× its bitrate, its playlist is live, and it has not failed in the last five minutes.
+  server downloads it at 1.5× its bitrate, its playlist is live, its segments arrive steadily (not in bursts with
+  pauses between them), and it has not failed in the last five minutes.
 - The channel address (`/JellyTV/Live/{id}.m3u8`) then serves one continuous playlist of the plugin's own. When the
   stream in use struggles (a segment slower than real time or failing twice, two slow segments in a row, no new
   segment for two target durations) the next segments come from the next healthy stream, with their timestamps,
   PIDs and continuity counters rewritten to continue the old stream — players and Jellyfin's remux see no break.
-  After three stable minutes it steps back up if the better stream downloads at 2× its bitrate. Every switch is
-  logged (`JellyTV ladder:`), and admins can see the rungs, probes and switch history at `/JellyTV/Ladder`.
+  A stream whose new segments arrive late (twice in a minute more than 1.5 segment durations after the one before),
+  however fast they download, is left for another one that is seen arriving steadily: while there is trouble the
+  plugin watches the other streams' playlists (playlists only). A stream known to publish in bursts is started further
+  back from its live edge when its playlist is long enough, the extra segments held back and published at real-time
+  pace, so the channel keeps moving through the pauses. After three stable minutes it steps back up if the better
+  stream downloads at 2× its bitrate and arrives steadily. Every switch is logged (`JellyTV ladder:`), each watched
+  channel logs one line a minute (segments published, upstream update gaps, playlist and segment fetch times, how far
+  the plugin is ahead of the player and how long the player waited at the live edge), and admins can see the rungs,
+  probes, cadence, switch history and those numbers at `/JellyTV/Ladder`.
 - A channel with one stream and one rendition is proxied exactly as before.
 
 ## Jellyfin Live TV integration

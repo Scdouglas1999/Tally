@@ -13,8 +13,11 @@ front of the best source (A) that can be told to slow down, stall or fail.
          /bed.m3u                      the M3U source (A via the proxy)
          /games.m3u                    channels named after fictional games, listed once switched on (the DVR tests:
                                        a game whose stream "appears" late)
-  :8081  /A/..., /C/...                proxy to :8080 under control of /ctl (the M3U routes A and C through it)
-         /ctl?mode=normal|slow|stall|fail|down[&kbps=N][&src=A|C]   (src defaults to A)
+  :8081  /A/..., /C/..., /J/..., /K/... proxy to :8080 under control of /ctl
+         /ctl?mode=normal|slow|stall|fail|down|burst[&kbps=N][&pauses=8,12,15][&src=A|C|J|K]   (src defaults to A)
+                                       burst: the media playlist holds new segments back and releases them all at
+                                       once after each pause (cycling through the pauses, seconds), so they arrive
+                                       2-4 at a time with nothing in between — a source that publishes in bursts
          /ctl                          current modes (JSON)
          /ctl?game=<name>&on=1|0       list or unlist a game's channels in /games.m3u (see GAMES)
 
@@ -42,6 +45,8 @@ SOURCES = {
     "C_hi": ("C_hi", 3_000_000_000),
     "C_lo": ("C_lo", 3_000_000_000),  # renditions of one master share a timeline
     "SOLO": ("SOLO", 123 * 90000),
+    "J": ("A", 5_000_000_000),   # the burst channel: A's picture, another encoder's clock
+    "K": ("B", 1_500_000_000),   # and its clean alternative: B's picture
 }
 
 
@@ -139,6 +144,7 @@ def segment(name, n):
 MASTERS = {
     # B: only BANDWIDTH, like many scraped streams; C: everything
     "B": "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=3300000\nindex.m3u8\n",
+    "K": "#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=3300000\nindex.m3u8\n",
     "C": ("#EXTM3U\n"
           "#EXT-X-STREAM-INF:BANDWIDTH=5500000,AVERAGE-BANDWIDTH=5200000,RESOLUTION=1920x1080,FRAME-RATE=30.000,CODECS=\"avc1.640028,mp4a.40.2\"\n"
           "hi/index.m3u8\n"
@@ -160,7 +166,7 @@ GAMES = {
 }
 GAMES_ON = set()
 
-ROUTE = re.compile(r"^/(A|B|C/hi|C/lo|SOLO)/(index\.m3u8|seg_(\d+)\.ts)$")
+ROUTE = re.compile(r"^/(A|B|C/hi|C/lo|SOLO|J|K)/(index\.m3u8|seg_(\d+)\.ts)$")
 LOG_LOCK = threading.Lock()
 
 
@@ -196,7 +202,10 @@ class Origin(BaseHTTPRequestHandler):
                         f'#EXTINF:-1 tvg-id="bed.game" group-title="Live Bed",Bed Game HD\nhttp://{host}:8081/A/index.m3u8\n'
                         f'#EXTINF:-1 tvg-id="bed.game" group-title="Live Bed",Bed Game\nhttp://{host}:8080/B/master.m3u8\n'
                         f'#EXTINF:-1 tvg-id="bed.game" group-title="Live Bed",Bed Game BACKUP\nhttp://{host}:8081/C/master.m3u8\n'
-                        f'#EXTINF:-1 tvg-id="bed.solo" group-title="Live Bed",Bed Solo\nhttp://{host}:8080/SOLO/index.m3u8\n').encode()
+                        f'#EXTINF:-1 tvg-id="bed.solo" group-title="Live Bed",Bed Solo\nhttp://{host}:8080/SOLO/index.m3u8\n'
+                        # the burst channel: J (ranked first, 1080p60) and a clean K (720p30), both steerable
+                        f'#EXTINF:-1 tvg-id="bed.burst" group-title="Live Bed",Bed Burst HD\nhttp://{host}:8081/J/index.m3u8\n'
+                        f'#EXTINF:-1 tvg-id="bed.burst" group-title="Live Bed",Bed Burst\nhttp://{host}:8081/K/master.m3u8\n').encode()
             elif path == "/games.m3u":
                 host = self.headers.get("Host", "127.0.0.1:8080").split(":")[0]
                 code, ctype = 200, "audio/x-mpegurl"
@@ -206,7 +215,7 @@ class Origin(BaseHTTPRequestHandler):
                         lines.append(f'#EXTINF:-1 tvg-id="{tvg}" group-title="Games",{name}')
                         lines.append(f"http://{host}:{port}/{rel}")
                 body = ("\n".join(lines) + "\n").encode()
-            elif path in ("/B/master.m3u8", "/C/master.m3u8"):
+            elif path in ("/B/master.m3u8", "/C/master.m3u8", "/K/master.m3u8"):
                 code, body, ctype = 200, MASTERS[path[1]].encode(), "application/vnd.apple.mpegurl"
             else:
                 m = ROUTE.match(path)
@@ -225,9 +234,57 @@ class Origin(BaseHTTPRequestHandler):
 
 
 class Control:
-    """Per-source misbehavior, keyed by the first path element (A or C)."""
-    modes = {"A": ("normal", 4000), "C": ("normal", 4000)}
+    """Per-source misbehavior, keyed by the first path element (A, C, J or K)."""
+    modes = {"A": ("normal", 4000), "C": ("normal", 4000), "J": ("normal", 4000), "K": ("normal", 4000)}
     frozen = {}  # playlist path -> body served while stalled
+    pauses = {}  # source -> burst pauses, seconds
+    bursts = {}  # playlist path -> {"released": last listed sequence, "next": release time, "i": pause index}
+    lock = threading.Lock()
+
+
+DEFAULT_PAUSES = [8.0, 12.0, 15.0, 6.0, 11.0, 14.0]
+
+
+def burst_playlist(src, path, body):
+    """A media playlist as a bursty source would list it: new segments are held back and released all together
+    once the current pause is over. The window keeps sliding underneath, so nothing is lost for pauses shorter
+    than the window (six segments)."""
+    text = body.decode()
+    if "#EXTINF" not in text:
+        return body  # a master: passed on
+    lines = text.strip("\n").split("\n")
+    head, entries, pending = [], [], []
+    seq0 = 0
+    for line in lines:
+        if line.startswith("#EXT-X-MEDIA-SEQUENCE:"):
+            seq0 = int(line.split(":")[1])
+        if not entries and not pending and not line.startswith("#EXTINF") and (line.startswith("#") or not line):
+            head.append(line)
+            continue
+        pending.append(line)
+        if not line.startswith("#"):
+            entries.append(pending)
+            pending = []
+    last = seq0 + len(entries) - 1
+    now = time.time()
+    pauses = Control.pauses.get(src) or DEFAULT_PAUSES
+    with Control.lock:
+        st = Control.bursts.get(path)
+        if st is None:
+            st = {"released": last, "next": now + pauses[0], "i": 0, "at": now}
+            Control.bursts[path] = st
+        elif now >= st["next"]:
+            if last > st["released"]:
+                log(srv="proxy", path=path, burst=last - st["released"], after=round(now - st["at"], 1))
+            st["released"] = last
+            st["at"] = now
+            st["i"] += 1
+            st["next"] = now + pauses[st["i"] % len(pauses)]
+        released = st["released"]
+    keep = [e for k, e in enumerate(entries) if seq0 + k <= released]
+    if not keep:  # held longer than the window: list the oldest so the playlist is never empty
+        keep = entries[:1]
+    return ("\n".join(head + [x for e in keep for x in e]) + "\n").encode()
 
 
 class Proxy(BaseHTTPRequestHandler):
@@ -257,8 +314,16 @@ class Proxy(BaseHTTPRequestHandler):
                 Control.modes[src] = (q["mode"], int(q.get("kbps", Control.modes.get(src, ("", 4000))[1])))
                 for k in [k for k in Control.frozen if k.startswith("/" + src + "/")]:
                     del Control.frozen[k]
-                log(srv="proxy", ctl=q["mode"], src=src, kbps=Control.modes[src][1])
+                with Control.lock:
+                    for k in [k for k in Control.bursts if k.startswith("/" + src + "/")]:
+                        del Control.bursts[k]
+                if q.get("pauses"):
+                    Control.pauses[src] = [float(x) for x in q["pauses"].split(",") if x]
+                else:
+                    Control.pauses.pop(src, None)  # the default pauses
+                log(srv="proxy", ctl=q["mode"], src=src, kbps=Control.modes[src][1], pauses=Control.pauses.get(src))
             status = {k: {"mode": m, "kbps": b} for k, (m, b) in Control.modes.items()}
+            status["pauses"] = {k: v for k, v in Control.pauses.items()}
             status["games"] = sorted(GAMES_ON)
             self.send_simple(200, json.dumps(status).encode(), "application/json")
             return
@@ -285,6 +350,8 @@ class Proxy(BaseHTTPRequestHandler):
             body, code, ctype = e.read(), e.code, "text/plain"
         if playlist and mode == "stall" and path not in Control.frozen and code == 200:
             Control.frozen[path] = body
+        if playlist and mode == "burst" and code == 200:
+            body = burst_playlist(src, path, body)
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(body)))

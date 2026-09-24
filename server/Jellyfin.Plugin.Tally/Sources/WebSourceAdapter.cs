@@ -119,8 +119,9 @@ public class WebSourceAdapter : ISourceAdapter
             }
 
             // Disambiguate identical names ("Stream" repeated per page). Entries of one event share a group key,
-            // so the several links a page offers for a game end up as one channel with several candidates.
-            var groupKey = ChannelGrouper.KeyFor(s.Name);
+            // so the several links a page offers for a game end up as one channel with several candidates. A name
+            // taken from a page title gets its key once ChannelNaming has matched it to a game (or dropped it).
+            var groupKey = s.NameFromTitle ? string.Empty : ChannelGrouper.KeyFor(s.Name);
             var name = s.Name;
             if (counter.TryGetValue(name, out var n))
             {
@@ -141,7 +142,8 @@ public class WebSourceAdapter : ISourceAdapter
                 SourceId = sourceId,
                 SourceName = Definition.Name,
                 Headers = headers,
-                GroupKey = groupKey.Length > 0 ? "web:" + groupKey : string.Empty
+                GroupKey = groupKey.Length > 0 ? "web:" + groupKey : string.Empty,
+                NameFromTitle = s.NameFromTitle
             });
         }
 

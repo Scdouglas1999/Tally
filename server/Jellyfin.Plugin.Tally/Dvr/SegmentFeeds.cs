@@ -54,7 +54,7 @@ public sealed class LadderFeed : ISegmentFeed
     public async Task<List<FeedSegment>?> PollAsync(CancellationToken ct)
     {
         var session = _ladder.Session(_channel);
-        var text = await session.GetPlaylistAsync(_ => string.Empty, ct).ConfigureAwait(false);
+        var text = await session.GetPlaylistAsync(_ => string.Empty, ct, player: false).ConfigureAwait(false);
         if (text == null)
         {
             return null; // one stream, one rendition: the plain proxy path
