@@ -1,3 +1,6 @@
+// Modified for Tally (https://github.com/Scdouglas1999/Tally), a fork of Wholphin
+// (https://github.com/damontecres/Wholphin), from September 2026. Changes are marked TALLY: begin/end;
+// each change and its date is in the git history. See NOTICE.md.
 package com.github.damontecres.wholphin.services
 
 import android.content.Context
@@ -833,6 +836,21 @@ class HomeSettingsService
                             maxPremiereDate = LocalDateTime.now(),
                             isUnaired = false,
                         )
+                            // TALLY: begin
+                            // Jellyfin before 10.11 answers the aired-episode-order sort with HTTP 500, so the row failed on
+                            // 10.10 servers: leave that tiebreaker (and its sort order) out there.
+                            .let { r ->
+                                val version = serverRepository.currentServer?.serverVersion
+                                if (version != null && version <
+                                    org.jellyfin.sdk.model
+                                        .ServerVersion(10, 11, 0)
+                                ) {
+                                    r.copy(sortBy = r.sortBy?.take(2), sortOrder = r.sortOrder?.take(2))
+                                } else {
+                                    r
+                                }
+                            }
+                    // TALLY: end
                     if (usePaging) {
                         ApiRequestPager(
                             api,
