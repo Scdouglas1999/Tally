@@ -343,25 +343,95 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   | 2023 (original firmware) | 7.0 | unclear: treat as Samsung certificate needed |
   | 2023 upgraded, 2024, 2025 | 8.0, 9.0 | **Samsung certificate**: Samsung account, distributor certificate listing the TV's DUID (valid ~1 year) |
 
-  The Tizen author certificate chains to "Tizen Developers CA", which **expires 2027-01-01**; how TVs treat an
-  expired author certificate at install time is unknown (installed apps are expected to keep running). Keep the author
-  certificate forever: a reinstall/update signed by another one fails with "Author certificate not match" and needs
-  an uninstall first. `scripts/tizen-certificate.sh` creates it in `~/.tally/tizen` (with its password) and the
-  `tally` security profile.
+  The Tizen author certificate chains to "Tizen Developers CA", which **expires 2027-01-01**. What that means,
+  from Tizen's open validator (platform/core/security/cert-svc, identical on the tizen_5.5 and tizen_6.5 branches;
+  Samsung's TV firmware is closed, so this is the reference behavior, not a measurement on a TV):
+  `BaseValidator::preStep()` checks only the *signing* certificate's dates against the clock; when it is outside
+  them (expired or not yet valid) and its root is not in the strict test stores, the whole chain is checked at the
+  **middle of the signing certificate's validity** instead (xmlsec `certsVerificationTime`). That is why TVs still
+  take Tizen's public distributor signer, which expired in 2012. Consequences: an author certificate that **ends
+  when the CA ends** (as Tizen Studio makes them: notAfter hard-coded to 2027-01-01) keeps installing after 2027 (it
+  is then expired, the chain is checked at its midpoint, where the CA was valid); one that ends later would fail
+  from 2027 on (still in its dates, so the chain is checked now, against an expired CA). Tizen Studio itself
+  cannot make new author certificates after 2027 (it checks their validity); Tally for Samsung makes them for the
+  CA's last year then. Updates compare only the author's **public key** (app-installers `IsSameAuthor`), so the key
+  must be kept, a re-issued certificate for the same key updates fine. The emulator cannot confirm any of this: it
+  refuses the Tizen chain outright (section 12). `scripts/tizen-certificate.sh` creates the development author
+  certificate in `~/.tally/tizen` (with its password) and the `tally` security profile; Tally for Samsung keeps its
+  own per computer (below).
 - **Developer Mode** (the owner or friend does this on the TV once): Apps panel → App Settings (or the Apps screen) →
   type **12345** → Developer mode **On** → Host PC IP = the installing PC → restart the TV fully (hold power; unplug
   with Instant On). It stays on; major firmware upgrades have reset it (and removed sideloaded apps).
-- **One-command installer** (`scripts/install-tizen.sh <tv-ip> --server <jellyfin>`): `sdb connect`, reads the
-  Tizen version and DUID, picks the signing (the `tally` profile on Tizen < 7, else asks for a Samsung profile),
-  packages with the server stamped in, `tizen install`, `tizen run`. The TV then opens straight to Quick Connect.
-  Plan for the owner's other machines and for Tizen 7+:
-  - **Windows and Linux without Tizen Studio**: a Docker image (like the community `install-jellyfin-tizen`) with
-    the Tizen CLI, the shell and this script: `docker run --rm -v tally-certs:/certs ghcr.io/…/tally-tizen <tv-ip>
-    <server>`; the volume keeps the author certificate across installs.
-  - **Samsung certificate without the GUI**: the community tool Apps2Samsung does the Samsung account login in a
-    browser (a loopback redirect) and requests author/distributor certificates for the DUIDs from Samsung's
-    certificate service; the same flow can be scripted into the installer (the login step stays interactive, once a
-    year per TV set).
+- **Development installer** (`scripts/install-tizen.sh <tv-ip> --server <jellyfin>`, needs Tizen Studio):
+  `sdb connect`, reads the Tizen version and DUID, picks the signing (the `tally` profile on Tizen < 7, else asks
+  for a Samsung profile), packages with the server stamped in, `tizen install`, `tizen run`.
+- **Tally for Samsung** (`installer/`, for everyone else; the steps for people are in
+  [INSTALL-SAMSUNG.md](INSTALL-SAMSUNG.md)): one self-contained program per desktop OS, published by
+  `tally/release.sh` as `Tally-Samsung-Installer-windows.exe`, `-linux`, `-macos-arm64`, `-macos-x64`
+  (`installer/build.sh`). No Tizen Studio, Java, Docker or Samsung binaries.
+  - **Stack**: .NET 10, self-contained single file, trimmed (12-15 MB), a console flow (four numbered steps, plain
+    sentences, every error says what to do). The server setup is already C#/.NET and cross-built from Linux the same
+    way; a console instead of a window keeps one UI for Windows, macOS and Linux in this pass (WinForms is Windows
+    only; a window can sit on the same `InstallerFlow` later).
+  - **Find the TV**: shows this PC's address (what Developer Mode's Host PC IP must be), then asks every address of
+    the PC's home networks (/24) at once for Samsung's TV information (`http://<ip>:8001/api/v2/`: name, model code
+    with the year, and on TVs that report them `developerMode`/`developerIP`) and whether the sdb port 26101 takes a
+    connection; or the IP is typed. Connection failures are explained with that information ("Developer Mode is on,
+    but for another computer (192.168.1.33; this PC is 192.168.1.20)") and the Developer Mode steps.
+  - **sdb, reimplemented** (`Sdb/`): the device protocol straight to the TV's sdbd, no sdb server: CNXN (the same
+    version, payload size and banner Tizen Studio's sdb 4.2 sends), OPEN/OKAY/WRTE/CLSE streams with flow control,
+    `capability:` (2-byte length + key:value lines), `shell:0 getduid` (or `0 getduidgadget` / `duid-gadget` on older
+    sdbd, as Samsung's tools choose), `sync:` push (SEND `path,33261`, DATA ≤ 64 KiB, DONE, OKAY/FAIL, QUIT),
+    `shell:0 vd_appinstall TallyTVapp.Tally <sdk_toolpath>/tmp/Tally.wgt` (its progress lines are shown and parsed:
+    completed, or `install failed[118, -12], reason: …` sorted into certificate not trusted / author mismatch /
+    another TV's DUID / not yet valid / expired / Tizen too old), `shell:0 was_execute TallyTVapp.Tally`,
+    `shell:0 vd_appuninstall` (only after asking, on "author certificate not match"). Recorded against the emulator
+    through a logging proxy between Tizen Studio's sdb and sdbd (`installer/tests/fixtures/sdb-trace-emulator.txt`);
+    the TV's sdbd accepts only these fixed "0 …" commands. Samsung's sdb binaries are not redistributable (Tizen SDK
+    license, §3.1); the sdb 3.x source is Apache-2.0 but was not needed.
+  - **Signing, reimplemented** (`Signing/WidgetSigner.cs`): author-signature.xml and signature1.xml exactly as
+    `tizen package` writes them: Exclusive C14N over SignedInfo, RSA-SHA512, SHA-512 digests, references sorted
+    ordinally with Tizen Studio's URI escaping, the `#prop` object (C14N 1.1) with profile/role/identifier, KeyInfo =
+    signer + CA, base64 at 76 columns. Byte-for-byte equal to three golden packages from `tizen package`
+    (`installer/tests/fixtures/golden/`: the shell, odd file names, every punctuation character).
+  - **Certificates** (kept in the app-data folder, `%APPDATA%\Tally\Samsung` / `~/.config/Tally/Samsung`, reused for
+    every update; losing them means uninstalling Tally from the TV before the next install):
+    - Tizen 5.5-6.5 (2020-2022): an author certificate made on first use exactly as Tizen Studio's generator makes one
+      (issued by the Tizen Developers CA with its public key from Tizen's Apache-2.0 certificate-generator: SHA-512,
+      CA:FALSE critical, digitalSignature, codeSigning, notAfter = the CA's end; differences: 2048-bit key, random
+      serial, start one day back) + Tizen's public distributor ("Tizen Public Distributor Signer", Tizen Studio's
+      default, which its own wizard says is for Tizen ≤ 7; the 2022 "Tizen Studio Public Signer" is for 8+ and not in
+      the Apache sources).
+    - Tizen 7+ (2023 on): the Samsung certificate flow of Tizen Studio's Samsung Certificate Extension 2.0.75, as
+      Apps2Samsung (MIT) and Samsung's tizen-agent-skills (Apache-2.0, read as a specification) implement it: the
+      browser opens `account.samsung.com/accounts/…/signInGate?clientId=v285zxnl3h&tokenType=TOKEN&redirect_uri=
+      http://localhost:4794/signin/callback` (the only registered redirect, so port 4794 is fixed; the program listens
+      on IPv4 and IPv6 loopback), Samsung's page POSTs `code` = JSON (access_token, userId, inputEmailID); then
+      multipart POSTs to `https://svdca.samsungqbe.com/apis/v3/authors` (access_token, user_id, platform=VD,
+      csr=author.csr) and `apis/v1/distributors` + `apis/v3/distributors` (… privilege_level=Public,
+      developer_type=Individual, csr=distributor.csr with subjectAltName `URN:tizen:packageid=` +
+      `URN:tizen:deviceid=<DUID>` per TV). Answers are PEM; the chain is completed with Samsung's CA certificates
+      (bundled, issuer matched by signature). The author key is kept across renewals; the distributor certificate
+      lists every TV this PC has installed on. **Untested against Samsung** (no account): unit-tested against the
+      published request/response formats only.
+    - A Tally.wgt someone else signed for this TV (`--wgt`, dragging it onto the program, or choice 2 when the TV
+      needs a Samsung certificate): checked before copying (Tally's app id, signed, its distributor certificate lists
+      this TV's DUID). The owner makes one for another person's TV with `--make-wgt <DUID> --server <address>`.
+  - **Server**: the typed address is tried as the shell would use it (https first, then http with :8096), must
+    answer `/System/Info/Public` as Jellyfin, and `/JellyTV/TV/manifest.json` tells whether the plugin carries the TV
+    app (a warning if not). It is stamped into `config.js` of the package made on the user's PC; the program and the
+    release contain no server address.
+  - Every run writes `Tally-Samsung-Installer.log` in the temp folder.
+- **LG (not built)**: the same program would need, for webOS 5+: the LG **Developer Mode** app state (Dev Mode Status
+  on, **Key Server** on); fetching the TV's SSH private key from its key server (`http://<tv>:9991/webos_rsa`) and
+  decrypting it with the **passphrase** the Developer Mode app shows (typed by the person); an SSH/SFTP client
+  (port 9922, user `prisoner`; e.g. SSH.NET, MIT) to copy the `.ipk` to `/media/developer/temp` and run
+  `luna-send -n 1 luna://com.webos.appInstallService/dev/install '{"id":…,"ipkUrl":…,"subscribe":true}'` and
+  `luna://com.webos.applicationManager/launch`, which is what `ares-install`/`ares-launch` do; building the `.ipk`
+  itself (an `ar` archive of `debian-binary`, `control.tar.gz`, `data.tar.gz`, as `ares-package` writes; no
+  signing); and the 50-hour Developer Mode session, which community tools extend by calling LG's
+  `ResetDevModeSession` with the token stored on the TV. Not cheap (SSH, key handling, the session timer), so it is
+  left for the LG task.
 - **Store**: Samsung Seller Office distribution is possible later; its review of an app that loads its code from a
   server is an open question (Samsung's hosted-app rules allow external scripts with registration).
 
@@ -406,7 +476,30 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   certificate**: `install failed[118, -12], reason: Check certificate error : :Invalid certificate chain with
   certificate in signature.` (the same error Tizen 8+ TVs give). Since TV Extension 7.0.1 the emulator installs only
   Samsung-certificate-signed apps, so running Tally in it (and verifying AVPlay and `webapis` from the server-loaded
-  script) needs the owner's Samsung account (open question). Run only with ≥ 7 GB free on this host.
+  script) needs the owner's Samsung account (open question). Run only with ≥ 7 GB free on this host. It also
+  refuses the same package with Tizen Studio's 2022 public distributor ("Tizen Studio Public Signer") and with its
+  partner and platform distributors (tried September 24, 2026): only a Samsung chain installs. The emulator reaches
+  the host at `10.0.2.2` (QEMU user networking) and the host's LAN address; its sdbd is `127.0.0.1:26101` and takes
+  one client at a time (stop Tizen Studio's `sdb` server before another client connects).
+  **A 2020-2022 TV, simulated** (tvweb-installer, September 24, 2026): the refusal is the TV image's trust list,
+  `/usr/share/ca-certificates/fingerprint/fingerprint_list.xml`, whose `tizen-public` distributor domain lists only
+  Samsung's roots, not Tizen's "Tizen Public Distributor Root CA" (the Tizen Developers roots for authors are
+  there). On a *copy* of the image (`qemu-img` from Tizen Studio to raw, `debugfs` to add that root's SHA-1
+  `04:C5:A6:1D:…:44:AE` to `tizen-public`; the shared `tally-tv` VM untouched), Tally for Samsung's Linux build
+  installed Tally signed on this PC ("install completed"), started it, and the shell loaded the bundle and showed
+  Quick Connect against the dev server; the update path (same author) and another computer's author ("Author
+  certificate not match", uninstall, install) behaved as on a TV. So the signatures, the author chain, the
+  install and launch commands and the server-loaded bundle all work on a real Tizen web runtime (10.0); what
+  2020-2022 firmware trusts is taken from Tizen's upstream list, not measured.
+- **Tally for Samsung** (`installer/`, `dotnet test installer/tests`, xUnit): the signer against three golden
+  packages from `tizen package` (byte for byte), the author certificate against Tizen Studio's (fields, the 2027
+  rule), the sdb client against a fake sdbd that answers as the emulator's did (handshake, capability, DUID, push
+  across payload and sync-chunk boundaries, install/launch/uninstall, hang-up, silence, nothing listening) and the
+  install answers (the emulator's real ones and the documented others), the TV scan (Samsung's `/api/v2/` answer, a
+  fake TV among silent addresses), the server check, the Samsung sign-in callback (served over HTTP) and certificate
+  requests (field names, CSR subjectAltName, error answers, CA matching) against a fake service, and the whole flow
+  (a 2021 TV, the update path with the same author, replacing a Tally from another computer, a TV that refuses this
+  PC, a 2024 TV with a file for another TV, a file for this TV, no TV app on the server).
 - **webOS**: the webOS TV emulator is a VirtualBox image (needs VirtualBox, i.e. root on this host). The webOS TV
   Simulator (a Chromium shell, not LG's media pipeline) is offered for webOS 6.0 and 22-26 on LG's developer site
   behind a license dialog (no webOS 5 build); neither is installed yet: webOS follows Samsung.
@@ -473,14 +566,27 @@ keeping it separate matters; the owner may prefer to state the bundle as GPL-2.0
 Build/test only (not shipped): Vite, Rolldown, TypeScript, ESLint and plugins, Vitest, Playwright, acorn, the Tizen
 Studio CLI and the webOS CLI.
 
+Tally for Samsung (`installer/`) ships the .NET runtime (MIT), the shell, Tizen's public Developers CA certificate
+and key and public distributor (Apache-2.0, git.tizen.org `sdk/tools/certificate-generator`) and Samsung's public
+TV developer CA certificates (published by Samsung under Apache-2.0); `installer/src/certificates/NOTICE.txt` has the
+details and the program prints them with `--licenses`. The key material is data the program reads, not code linked
+into it, and the Apache-2.0 text travels with it; if the owner prefers not to redistribute it, the program can
+download Tizen's `certificate-generator_0.1.4` package from download.tizen.org on first run instead (as Samsung's own
+`@tizentv/tools` does). Tests only: xUnit, System.Security.Cryptography.Xml (an independent canonicalizer).
+
 ## 15. Open questions for the owner
 
 - **Samsung account** for Tizen 7+ TVs and for the Tizen emulator (Samsung certificates are issued per account and
   list the TV's DUID; valid about a year). Which TV does the friend have (model year / Tizen version)?
 - **Author certificate custody**: `~/.tally/tizen` on this machine holds the key every future install must use; where
   should the owner keep a copy?
-- **2027-01-01** Tizen Developers CA expiry for plain Tizen author certificates (affects 2020-2022 TVs installed with
-  the plain certificate; re-signing with a Samsung certificate is the fallback).
+- **2027-01-01** Tizen Developers CA expiry: by Tizen's open validator, author certificates that end with the CA
+  (Tizen Studio's and Tally for Samsung's) keep installing afterwards (section 11); Samsung's TV firmware is closed,
+  so a 2020-2022 TV has to confirm it after that date. The fallback is a Samsung certificate (`--samsung`), which
+  those TVs also take.
+- **Tally for Samsung**: the Samsung sign-in and certificate requests are untested (no account); the first 2023+ TV
+  install is their first real run. Code signing for the Windows/macOS programs (SmartScreen and Gatekeeper warn about
+  unsigned downloads; INSTALL-SAMSUNG.md explains the clicks) is not set up.
 - **Stores** (Samsung Seller Office, LG Content Store): pursue, or sideload only? Both review apps that load code
   from a server.
 - **hls.js licensing** for the browser version (separate file today), or GPL-2.0-or-later for tv-web.

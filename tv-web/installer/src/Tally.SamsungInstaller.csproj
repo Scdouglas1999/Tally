@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- "Tally for Samsung": one self-contained program per OS that installs the Tally TV shell (Tally.wgt) on a Samsung
+       TV in Developer Mode. It finds the TV, talks sdb itself, signs the package itself (Tizen author certificate or a
+       Samsung certificate) and needs no Tizen Studio, Java or Docker.
+       Build: ../build.sh (all four targets) or
+       ~/.dotnet/dotnet publish tv-web/installer/src -c Release -r win-x64 -o <dir> -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>Tally-Samsung-Installer</AssemblyName>
+    <RootNamespace>Tally.SamsungInstaller</RootNamespace>
+    <Product>Tally for Samsung</Product>
+    <Version>1.0.0</Version>
+    <ApplicationIcon>tally.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <DebugType>embedded</DebugType>
+    <!-- as the server setup: .NET 10 refuses to start on Windows 10 builds without CET support otherwise -->
+    <CETCompat>false</CETCompat>
+    <!-- publish: one file, the runtime inside, trimmed -->
+    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
+    <PublishSingleFile Condition="'$(RuntimeIdentifier)' != ''">true</PublishSingleFile>
+    <EnableCompressionInSingleFile Condition="'$(RuntimeIdentifier)' != ''">true</EnableCompressionInSingleFile>
+    <PublishTrimmed Condition="'$(RuntimeIdentifier)' != ''">true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+    <TvWebDir>$(MSBuildThisFileDirectory)../../</TvWebDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tally.SamsungInstaller.Tests" />
+  </ItemGroup>
+
+  <!-- The TV shell, straight from tv-web/shell (the same files scripts/package-tizen.sh packs) -->
+  <ItemGroup>
+    <EmbeddedResource Include="$(TvWebDir)shell/index.html" LogicalName="shell/index.html" />
+    <EmbeddedResource Include="$(TvWebDir)shell/shell.js" LogicalName="shell/shell.js" />
+    <EmbeddedResource Include="$(TvWebDir)shell/shell.css" LogicalName="shell/shell.css" />
+    <EmbeddedResource Include="$(TvWebDir)shell/fonts/*.woff2" LogicalName="shell/fonts/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="$(TvWebDir)../IBM-PLEX-OFL.txt" LogicalName="shell/fonts/OFL.txt" />
+    <EmbeddedResource Include="$(TvWebDir)shell/icons/icon-512.png" LogicalName="shell/icon.png" />
+    <EmbeddedResource Include="$(TvWebDir)shell/tizen/config.xml" LogicalName="shell/config.xml" />
+    <EmbeddedResource Include="$(TvWebDir)package.json" LogicalName="package.json" />
+    <EmbeddedResource Include="certificates/**/*" LogicalName="certificates/%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

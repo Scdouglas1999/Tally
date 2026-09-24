@@ -1,0 +1,23 @@
+Third-party material in Tally for Samsung (Tally-Samsung-Installer)
+===================================================================
+
+tizen/ - Tizen's public signing material
+  tizen-developer-ca.cer, tizen-developer-ca-privatekey.pem (the "Tizen Developers CA" and its key, password in
+  Tizen Studio's conf.ini), tizen-distributor-signer.cert.pem / .key.pem (Tizen's public distributor "Tizen Public
+  Distributor Signer" with its CA, taken out of tizen-distributor-signer.p12, password "tizenpkcs12passfordsigner").
+  Source: Tizen's certificate generator, https://git.tizen.org/cgit/sdk/tools/certificate-generator/
+  (branch tizen_studio, src/res/certificates/), Copyright (c) 2012 - 2013 Samsung Electronics Co., Ltd.,
+  licensed under the Apache License, Version 2.0 (LICENSE-Apache-2.0.txt). The same files ship with every
+  Tizen Studio. Unmodified apart from the distributor .p12 being stored as PEM.
+
+samsung/ - Samsung's public CA certificates for TV developer certificates
+  vd_tizen_dev_author_ca.pem ("Samsung VD Author CA"), vd_tizen_dev_public2.pem ("VD DEVELOPER Public CA
+  Class"), vd_tizen_dev_partner2.pem ("VD DEVELOPER Partner CA Class"): public certificates, used only to complete
+  the chain of certificates Samsung's service issues. From Tizen Studio's Samsung Certificate Extension 2.0.75
+  (res/ca/, Apache License 2.0 per its feature license) and published by Samsung in
+  https://github.com/Samsung/tizen-agent-skills (tizen-sdk-skills/common/assets/samsung-tv-ca/, Apache License 2.0).
+  Stored as PEM, otherwise unmodified.
+
+The program itself is part of Tally and licensed under the GNU General Public License, version 2. It contains the
+.NET runtime (MIT, .NET Foundation and contributors) and the Tally TV shell (tv-web/shell) with IBM Plex fonts
+(SIL Open Font License 1.1).

@@ -51,6 +51,20 @@ repository's git history; the fork starts after Wholphin's `v1.0.8` release.
   and **Microsoft.Bcl.AsyncInterfaces** (© Microsoft Corporation / .NET Foundation), all under the MIT license.
 - `Tally-Server-Setup.exe` contains the .NET runtime, Windows Forms, System.Management and
   System.ServiceProcess.ServiceController, © .NET Foundation and contributors, under the MIT license.
+- **Tally for Samsung** (`Tally-Samsung-Installer-*`, built from [`tv-web/installer/`](tv-web/installer/)) contains the
+  .NET runtime (© .NET Foundation and contributors, MIT), the Tally TV shell with IBM Plex (SIL OFL 1.1), and public
+  signing material it needs to sign the TV app on the user's computer, each unmodified apart from its file format
+  (details and sources in [`tv-web/installer/src/certificates/NOTICE.txt`](tv-web/installer/src/certificates/NOTICE.txt),
+  printed by `--licenses`):
+  - Tizen's public **Tizen Developers CA** certificate and key and its public **distributor** certificate, © 2012-2013
+    Samsung Electronics, from Tizen's certificate generator (git.tizen.org `sdk/tools/certificate-generator`), under
+    the Apache License 2.0 (text next to them and in the program);
+  - Samsung's public **TV developer CA certificates** (Samsung VD Author CA, VD DEVELOPER Public/Partner CA Class),
+    as Samsung publishes them in Tizen Studio's Samsung Certificate Extension and in `Samsung/tizen-agent-skills`
+    (Apache License 2.0).
+  It talks to the TV's sdb service and to Samsung's certificate service with its own code (no Samsung tools are
+  bundled); its Samsung account and certificate requests follow the published behavior of Tizen Studio's extension,
+  Apps2Samsung (MIT) and Samsung's tizen-agent-skills, reimplemented, not copied.
 - Nothing Tally publishes contains Jellyfin. The installers download the official Jellyfin from Jellyfin's own servers
   (repo.jellyfin.org, and the `jellyfin/jellyfin` image on Docker Hub) when it is needed.
 
