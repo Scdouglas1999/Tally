@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
     "versions": [
       {
+        "version": "2.1.0.12",
+        "changelog": "Tally 2.1: record games in the background (DVR), Tally for Samsung TVs served by the plugin, the Tally look for Jellyfin in the browser, live fixes for Jellyfin 12.1.\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.1.0/Tally-server-2.1.0-jf12.zip",
+        "checksum": "7de433a68dbf5490002dfe78fc7fca2f",
+        "timestamp": "2026-09-25T11:19:19.0000000Z"
+      },
+      {
+        "version": "2.1.0.11",
+        "changelog": "Tally 2.1: record games in the background (DVR), Tally for Samsung TVs served by the plugin, the Tally look for Jellyfin in the browser, live fixes for Jellyfin 12.1.\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.1.0/Tally-server-2.1.0-jf10.11.zip",
+        "checksum": "0c56c95bc29049fdfd0fec5c603f4991",
+        "timestamp": "2026-09-25T11:19:19.0000000Z"
+      },
+      {
+        "version": "2.1.0.10",
+        "changelog": "Tally 2.1: record games in the background (DVR), Tally for Samsung TVs served by the plugin, the Tally look for Jellyfin in the browser, live fixes for Jellyfin 12.1.\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.1.0/Tally-server-2.1.0-jf10.10.zip",
+        "checksum": "bd4878c98aafb36abf7afe4e7b57f01e",
+        "timestamp": "2026-09-25T11:19:19.0000000Z"
+      },
+      {
         "version": "2.0.3.12",
         "changelog": "Tally 2.0.3: a live stream that arrives in bursts no longer buffers; the plugin switches to a steadier copy of the game or keeps a cushion, and logs a health line every minute.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
