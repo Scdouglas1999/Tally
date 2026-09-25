@@ -71,6 +71,15 @@ the highest frame rate and resolution that your server can download fast enough.
 stall, the next part of the game comes from the next stream in line, and the picture keeps going without a
 reload. After a few steady minutes it goes back to the better stream, if that one has recovered.
 
+The plugin also watches how steadily each stream arrives. If one comes in stop-and-go bursts, Tally moves to a
+steadier copy of the game. If there's no steadier copy, it starts a little further behind live so the pauses don't
+reach your screen.
+
+**Record a game.** Press and hold a game and choose Record, or record every game of a team you follow. The server
+records in the background, stops when the game is over, not when the listing ends, and checks there's room
+first. You can start watching from the beginning while the game is still going. A recorded game never shows you the
+score before you've watched it.
+
 ## Watching together
 
 <p align="center">
@@ -105,6 +114,10 @@ The same app runs on Android phones. On a TV nothing changes; on a phone, every 
 
 Sports, multiview and watch parties work on the phone too, from the same server.
 
+**Downloads.** Download a film, an episode, a season or an album to the phone, at its original quality or a smaller
+size, and watch it with no connection. With no server in reach, Tally opens straight to your downloads, and
+what you watch offline is marked as watched once you're back.
+
 ## Everything else
 
 Under the new look, Tally is built on [Wholphin](https://github.com/damontecres/Wholphin), so it plays nearly
@@ -114,6 +127,9 @@ can't. You also get subtitle styling, ExoPlayer or MPV playback, profiles with P
 
 When a film in a collection ends, Tally offers the next one. Otherwise it suggests something like it. And when a
 new version of Tally comes out, the app offers to update itself the next time you open it.
+
+If you normally reach your server over the internet and the internet goes down, Tally switches to the server's
+home-network address and keeps playing. It switches back when the internet returns.
 
 ## Install
 
@@ -137,6 +153,18 @@ Tally installs next to the official Jellyfin app and Wholphin, and doesn't repla
 Jellyfin server with a short Downloader code, and the app it hands out already knows your server's address. Friends
 then sign in from their phone with Quick Connect, so nobody has to type a password with a remote.
 
+### Samsung TVs
+
+Tally also runs on Samsung smart TVs from 2020 on, with no streaming box. It's the same Tally, with sports,
+multiview and the player, rebuilt as a TV web app. The TV app comes from your server's Tally plugin, so the server
+needs the plugin (2.1 or newer), and plugin updates update the TV.
+
+Installing it takes a computer on the same network: turn on the TV's Developer Mode, then run
+**Tally for Samsung** (`Tally-Samsung-Installer-windows.exe`, or the Linux and macOS versions, from the
+[latest release](https://github.com/Scdouglas1999/Tally/releases/latest)). It finds the TV, signs Tally for it and
+installs it. [tv-web/INSTALL-SAMSUNG.md](tv-web/INSTALL-SAMSUNG.md) walks through every step. On 2023 and newer
+Samsung TVs, the installer asks you to sign in with a free Samsung account once. LG TVs are next.
+
 ## The server plugin
 
 Tally is a complete Jellyfin app on its own. The server plugin adds the parts that need the server's help:
@@ -146,6 +174,9 @@ Tally is a complete Jellyfin app on its own. The server plugin adds the parts th
 - several streams per game, with the switch to a working one when a stream struggles
 - the install page and the short Downloader code
 - **Play on TV**: start something on your TV from Jellyfin in your phone's browser
+- recording games in the background (the DVR)
+- the Tally TV app for Samsung TVs
+- the Tally look for Jellyfin in a web browser, with a Sports page (you can turn it off in the plugin's settings)
 
 It works with Jellyfin 10.10, 10.11 and 12.1. Its source is in [`server/`](server/), in this repository, under the
 same license as the app. Without the plugin, Tally hides the Sports section and works like any other Jellyfin app.
