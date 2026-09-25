@@ -50,7 +50,28 @@ public class ProxyController : ControllerBase
         var h = StreamSigner.EncodeHeaders(headers);
         var s = signer.Sign(upstream, h);
         var pb = request.PathBase.Value ?? string.Empty;
-        return $"{pb}/JellyTV/Proxy?u={Uri.EscapeDataString(upstream)}&h={h}&s={s}";
+        return $"{pb}/JellyTV/Proxy/{ProxyFileName(upstream)}?u={Uri.EscapeDataString(upstream)}&h={h}&s={s}";
+    }
+
+    // ffmpeg's HLS demuxer (allowed_segment_extensions, "extension_picky") as shipped with Jellyfin 12.1.
+    private static readonly HashSet<string> SegmentExtensions = new(StringComparer.Ordinal)
+    {
+        "3gp", "3gpp", "aac", "avi", "ac3", "eac3", "flac", "mkv", "m3u8", "m4a", "m4s", "m4v", "mpg", "mov", "mp2", "mp3",
+        "mp4", "mpeg", "mpegts", "ogg", "ogv", "oga", "ts", "vob", "vtt", "wav", "webvtt", "cmfv", "cmfa"
+    };
+
+    /// <summary>
+    /// The file name in a proxy address (<c>/JellyTV/Proxy/s.ts?u=…</c>): the upstream's own extension when ffmpeg knows
+    /// it, otherwise <c>ts</c>. The ffmpeg in Jellyfin 12.1 refuses an HLS segment whose address does not end in a media
+    /// extension ("not in allowed_segment_extensions"), which broke Jellyfin's Live TV of proxied channels there; the
+    /// name is only for ffmpeg, the signed query still says what is fetched.
+    /// </summary>
+    public static string ProxyFileName(string upstream)
+    {
+        var ext = Uri.TryCreate(upstream, UriKind.Absolute, out var uri)
+            ? Path.GetExtension(uri.AbsolutePath).TrimStart('.').ToLowerInvariant()
+            : string.Empty;
+        return "s." + (SegmentExtensions.Contains(ext) ? ext : "ts");
     }
 
     /// <summary>
@@ -117,6 +138,12 @@ public class ProxyController : ControllerBase
         return bytes == null ? NotFound() : File(bytes, "video/mp2t");
     }
 
+    /// <summary>The same as <see cref="Get"/>, under a file name ffmpeg accepts (<see cref="ProxyFileName"/>).</summary>
+    [HttpGet("{file}")]
+    public Task<IActionResult> GetFile(string file, [FromQuery] string u, [FromQuery] string? h, [FromQuery] string? s, CancellationToken cancellationToken)
+        => Get(u, h, s, cancellationToken);
+
+    /// <summary>A signed upstream resource; addresses without a file name are still served (made before 2.1).</summary>
     [HttpGet]
     public Task<IActionResult> Get([FromQuery] string u, [FromQuery] string? h, [FromQuery] string? s, CancellationToken cancellationToken)
     {
