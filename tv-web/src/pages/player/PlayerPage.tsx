@@ -7,7 +7,7 @@ import type { PageProps } from '../../app/page';
 import { setFocus } from '../../focus/focus';
 import { useKeyHandler } from '../../platform/keyRouter';
 import type { VideoScale } from '../../player/engine';
-import { preparePlayback, reporter, type Prepared } from '../../player/playback';
+import { nativeAudioFor, preparePlayback, reporter, type Prepared } from '../../player/playback';
 import { bitrateLabel, qualityOptions, type QualityOption } from '../../player/qualityLadder';
 import { back, replace, resetTo, type Route } from '../../router/router';
 import { useStore } from '../../util/store';
@@ -206,6 +206,9 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
       setLoadError(null);
       e.stop();
       await e.load(p.source);
+      // a directly played file: the engine picks the chosen audio track itself (AVPlay)
+      const native = nativeAudioFor(p, e.nativeAudioTracks());
+      if (native !== null) e.selectNativeAudio(native);
       // a new stream starts at normal speed and fit: put the viewer's choices back
       e.setSpeed?.(settingsRef.current.speed);
       e.setScale?.(settingsRef.current.scale);
@@ -614,7 +617,17 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
           current: s.Index === p?.audioIndex,
           onPress: () => {
             close();
-            if (s.Index !== p?.audioIndex) restartWith({ audio: s.Index ?? undefined });
+            if (p === null || s.Index === p.audioIndex) return;
+            // a directly played file switches in place where the engine can (AVPlay); else the server restarts
+            // the stream with the track
+            const e = player.engine.current;
+            const next = { ...p, audioIndex: s.Index ?? null };
+            const native = e !== null ? nativeAudioFor(next, e.nativeAudioTracks()) : null;
+            if (e !== null && native !== null) {
+              e.selectNativeAudio(native);
+              setPrepared(next);
+              preparedRef.current = next;
+            } else restartWith({ audio: s.Index ?? undefined });
           },
         }));
       case 'subtitles':

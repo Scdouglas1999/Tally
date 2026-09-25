@@ -196,7 +196,7 @@ public class SamsungTests
     [Fact]
     public void StoreReusesSamsungCertificatesForTheirTvs()
     {
-        var store = new CertificateStore(TestDirs.New());
+        var store = new CertificateStore(TestDirs.New(), TestTizen.Defaults);
         Assert.Null(store.SamsungFor("DUID0000000001", DateTimeOffset.UtcNow));
         var (ca, caKey) = FakeCa("Samsung VD Author CA");
         var authorKey = store.SamsungAuthorKey();

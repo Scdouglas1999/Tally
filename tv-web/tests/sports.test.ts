@@ -5,7 +5,7 @@ import { boardRows, gameForChannel, POSTPONED, rowState } from '../src/sports/bo
 import { fittedColumnWidth, COMPACT, FULL, isLeading, periodColumnCount, periodLabels, periodValue } from '../src/sports/lineScore';
 import { easeOut, rollIncomingOffset, rollOutgoingOffset, rollRestart, scoreWentUp } from '../src/sports/scoreRoll';
 import { startsIn, startsInText } from '../src/sports/startsIn';
-import { markFont } from '../src/sports/teamMark';
+import { markFont, sizedLogo } from '../src/sports/teamMark';
 
 const periods = decodeBoard(JSON.parse(readFileSync(new URL('../../app/src/test/resources/tally/board-sample-periods.json', import.meta.url), 'utf8')));
 const dev = decodeBoard(JSON.parse(readFileSync(new URL('./fixtures/board-dev.json', import.meta.url), 'utf8')));
@@ -162,5 +162,18 @@ describe('team mark fallback', () => {
     const small = markFont('RDG', 32);
     expect(small.letterSpacing).toBe(0);
     expect(3 * small.fontSize * 0.6).toBeLessThanOrEqual(32 - 10);
+  });
+});
+
+describe('sizedLogo (team logos at their drawn size)', () => {
+  it('asks ESPN for the drawn size', () => {
+    expect(sizedLogo('https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/gb.png', 51)).toBe(
+      'https://a.espncdn.com/combiner/i?img=%2Fi%2Fteamlogos%2Fnfl%2F500%2Fscoreboard%2Fgb.png&w=51&h=51',
+    );
+    expect(sizedLogo('https://a.espncdn.com/i/teamlogos/mlb/500/tb.png', 124.8)).toContain('&w=125&h=125');
+  });
+  it('keeps other addresses', () => {
+    expect(sizedLogo('http://server/JellyTV/Logo/1.png', 51)).toBe('http://server/JellyTV/Logo/1.png');
+    expect(sizedLogo('https://a.espncdn.com/combiner/i?img=/x.png&w=500', 51)).toBe('https://a.espncdn.com/combiner/i?img=/x.png&w=500');
   });
 });

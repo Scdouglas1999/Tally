@@ -8,7 +8,7 @@ import { resolveShell } from './shell-contract/shell';
 import { createPlatform } from './platform/platform';
 import { app } from './app/context';
 import { initJellyfin } from './api/jellyfin';
-import { initFocus } from './focus/focus';
+import { currentFocusKey, initFocus } from './focus/focus';
 import { installKeyRouter } from './platform/keyRouter';
 import { createStage } from './platform/stage';
 import { App, rootBack } from './app/App';
@@ -26,4 +26,4 @@ const stage = createStage();
 render(<App onFirstScreen={() => shell.started()} />, stage);
 
 // For the end-to-end tests and for poking at a TV over the web inspector: open any route directly.
-(window as unknown as { TallyDebug: unknown }).TallyDebug = { push, stack };
+(window as unknown as { TallyDebug: unknown }).TallyDebug = { push, stack, focus: currentFocusKey };

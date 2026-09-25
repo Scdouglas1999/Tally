@@ -176,6 +176,11 @@ public sealed class InstallerFlow(Ui ui, Options options, HttpClient http, Certi
             }
             else
             {
+                if (!await LoadTizenMaterialAsync(ct).ConfigureAwait(false))
+                {
+                    return 1;
+                }
+
                 ui.Progress("Signing Tally with this PC's Tizen certificate…");
                 wgt = ShellPackage.BuildSigned(server, store.TizenAuthor(Clock), store.TizenDistributor(), options.Bundle);
             }
@@ -718,11 +723,34 @@ public sealed class InstallerFlow(Ui ui, Options options, HttpClient http, Certi
             return 1;
         }
 
+        if (!await LoadTizenMaterialAsync(ct).ConfigureAwait(false))
+        {
+            return 1;
+        }
+
         var wgt = ShellPackage.BuildSigned(server, store.TizenAuthor(Clock), store.TizenDistributor(), options.Bundle);
         var output = options.Out ?? Path.Combine(Environment.CurrentDirectory, "Tally.wgt");
         await File.WriteAllBytesAsync(output, wgt, ct).ConfigureAwait(false);
         ui.Good($"Wrote {output} (signed with this PC's Tizen certificate: for 2020-2022 TVs).");
         return 0;
+    }
+
+    /// <summary>
+    /// Tizen's public signing material (downloaded once from download.tizen.org, then saved); false after telling the
+    /// person why it could not be had.
+    /// </summary>
+    private async Task<bool> LoadTizenMaterialAsync(CancellationToken ct)
+    {
+        try
+        {
+            await store.LoadTizenDefaultsAsync(http, ui.Progress, ct).ConfigureAwait(false);
+            return true;
+        }
+        catch (TizenSdkDownloadException ex)
+        {
+            ui.Problem(ex.Message);
+            return false;
+        }
     }
 
     /// <summary>A .wgt from disk, checked: a Tally package, signed, and (for a Samsung signature) listing this TV.</summary>

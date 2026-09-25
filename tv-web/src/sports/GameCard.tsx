@@ -8,17 +8,20 @@ import { gameStatusLabel, hasNoResult } from '../util/format';
 import { ScoreDigits } from './ScoreDigits';
 import { RecTag } from './SportsBits';
 import { startsIn, startsInText } from './startsIn';
-import { markFont } from './teamMark';
+import { markFont, sizedLogo } from './teamMark';
 import './sports.css';
 
 /** A team's logo, never cropped; a bordered square with the abbreviation when there is none or it fails. */
 export function TeamMark(props: { team: TallyTeam; size: number }) {
-  const [failed, setFailed] = useState(false);
+  // 0: the logo at its drawn size, 1: the logo as the board gives it (the sized one failed), 2: the abbreviation
+  const [failed, setFailed] = useState(0);
   const style = { width: `${props.size}px`, height: `${props.size}px` };
-  if (props.team.logo !== '' && !failed) {
+  if (props.team.logo !== '' && failed < 2) {
+    const sized = sizedLogo(props.team.logo, props.size);
+    const src = failed === 0 ? sized : props.team.logo;
     return (
       <span class="team-mark" style={style}>
-        <img src={props.team.logo} alt="" onError={() => setFailed(true)} />
+        <img key={src} src={src} alt="" onError={() => setFailed(failed === 0 && sized !== props.team.logo ? 1 : 2)} />
       </span>
     );
   }

@@ -8,6 +8,7 @@ import { useArrivalFocus, type PageProps } from '../../app/page';
 import { currentFocusKey, focusExists, setFocus } from '../../focus/focus';
 import { ItemCard } from '../../kit/ItemCard';
 import { MediaRow } from '../../kit/MediaRow';
+import { useSettledBackdrop } from '../../kit/settledBackdrop';
 import { ScrollPage } from '../../kit/ScrollPage';
 import { ToastHost } from '../../kit/Toast';
 import { useKeyHandler } from '../../platform/keyRouter';
@@ -38,6 +39,9 @@ function Clock() {
   }, []);
   return <div class="home-clock">{formatTime(now)}</div>;
 }
+
+const gameKey = (game: TallyGame): string => 'home-game-' + game.id;
+const itemKey = (row: string, item: BaseItemDto): string => `home-${row}-${item.Id ?? ''}`;
 
 /** What a card on Home is, by focus key: the item menu, the game menu and the PLAY key look it up. */
 type HomeCard = { kind: 'item'; item: BaseItemDto } | { kind: 'game'; game: TallyGame };
@@ -82,16 +86,21 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
   });
   const firstRow = visibleRows[0];
   const firstRowReady = firstRow !== undefined && rows[firstRow.key]?.kind === 'items';
-  const target = games.length > 0 ? 'home-game-0' : firstRow !== undefined ? `home-${firstRow.key}-0` : null;
+  // focus keys follow the game or item, not its place: a row that reorders (the board's sort, followed teams arriving
+  // after the board, Continue Watching after playback) keeps focus on the same card instead of dropping it
+  const firstRowState = firstRow !== undefined ? rows[firstRow.key] : undefined;
+  const firstItem = firstRowState?.kind === 'items' ? firstRowState.items[0] : undefined;
+  const target =
+    games[0] !== undefined ? gameKey(games[0]) : firstRow !== undefined && firstItem !== undefined ? itemKey(firstRow.key, firstItem) : null;
   useArrivalFocus(props, target, gamesSettled && (games.length > 0 || firstRowReady));
 
   // --- the cards' menus (HOLD OK or MENU, as Android's long press) and the PLAY key ------------------------------
   const cards = useRef(new Map<string, HomeCard>());
   cards.current.clear();
-  games.forEach((game, i) => cards.current.set('home-game-' + String(i), { kind: 'game', game }));
+  games.forEach((game) => cards.current.set(gameKey(game), { kind: 'game', game }));
   for (const spec of visibleRows) {
     const r = rows[spec.key];
-    if (r?.kind === 'items') r.items.forEach((item, i) => cards.current.set(`home-${spec.key}-${i}`, { kind: 'item', item }));
+    if (r?.kind === 'items') r.items.forEach((item) => cards.current.set(itemKey(spec.key, item), { kind: 'item', item }));
   }
   const [dialog, setDialog] = useState<Dialog | null>(null);
   const [gameMenu, setGameMenu] = useState<{ gameId: string; returnKey: string } | null>(null);
@@ -126,7 +135,8 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
     if (gameMenu !== null && menuGame === null) closeGameMenu();
   }, [gameMenu !== null && menuGame === null]);
 
-  const backdrop = focus?.kind === 'item' ? backdropUrl(focus.item) : focus?.kind === 'game' && focus.game.backdropPath !== null ? absolute(focus.game.backdropPath) : null;
+  const wanted = focus?.kind === 'item' ? backdropUrl(focus.item) : focus?.kind === 'game' && focus.game.backdropPath !== null ? absolute(focus.game.backdropPath) : null;
+  const backdrop = useSettledBackdrop(wanted);
 
   return (
     <div class="home">
@@ -141,10 +151,10 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
         <ScrollPage>
           {games.length > 0 ? (
             <MediaRow title={games.some(isLive) ? 'Live now' : "Today's games"} count={games.length} focusKey="home-games">
-              {games.map((g, i) => (
+              {games.map((g) => (
                 <GameCard
                   key={g.id}
-                  focusKey={'home-game-' + String(i)}
+                  focusKey={gameKey(g)}
                   game={g}
                   hideScores={hideScores}
                   favorite={(g.watch !== null && favorites.has(g.watch.channelId)) || isFollowed(g, teams)}
@@ -168,10 +178,10 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
                 height={POSTER_ROW_HEIGHT}
               >
                 {state.kind === 'items'
-                  ? state.items.map((item, i) => (
+                  ? state.items.map((item) => (
                       <ItemCard
                         key={item.Id}
-                        focusKey={`home-${spec.key}-${i}`}
+                        focusKey={itemKey(spec.key, item)}
                         item={item}
                         shape={spec.shape}
                         watchingRow={spec.watching}

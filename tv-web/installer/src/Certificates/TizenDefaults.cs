@@ -28,18 +28,30 @@ public sealed class TizenDefaults
     public RSA DeveloperCaKey { get; }
     public SigningIdentity Distributor { get; }
 
-    /// <summary>The copies carried in the program (certificates/tizen/, see NOTICE.md).</summary>
-    public static TizenDefaults Embedded()
+    /// <summary>The distributor .p12's password (Tizen Studio's, the same for everyone).</summary>
+    internal const string DistributorPassword = "tizenpkcs12passfordsigner";
+
+    /// <summary>
+    /// From Tizen Studio's own files (the certificate generator's certificates/developer/tizen-developer-ca.cer and
+    /// tizen-developer-ca-privatekey.pem, certificates/distributor/tizen-distributor-signer.p12), which this program
+    /// downloads instead of carrying (<see cref="TizenSdkDownload"/>).
+    /// </summary>
+    public static TizenDefaults FromSdkFiles(byte[] developerCaCer, byte[] developerCaKeyPem, byte[] distributorP12)
     {
-        var ca = CertificateTools.Embedded("tizen/tizen-developer-ca.cer");
-        var caKey = LegacyPem.DecryptRsa(CertificateTools.EmbeddedText("certificates/tizen/tizen-developer-ca-privatekey.pem"),
-            DeveloperCaPassword);
-        var distributorKey = RSA.Create();
-        distributorKey.ImportFromPem(CertificateTools.EmbeddedText("certificates/tizen/tizen-distributor-signer.key.pem"));
-        var distributorCerts = CertificateTools.LoadCertificates(
-            CertificateTools.EmbeddedText("certificates/tizen/tizen-distributor-signer.cert.pem"));
+        var ca = CertificateTools.LoadCertificates(Encoding.UTF8.GetString(developerCaCer))[0];
+        var caKey = LegacyPem.DecryptRsa(Encoding.UTF8.GetString(developerCaKeyPem), DeveloperCaPassword);
+        var p12 = X509CertificateLoader.LoadPkcs12Collection(distributorP12, DistributorPassword, X509KeyStorageFlags.Exportable);
+        var signer = p12.FirstOrDefault(c => c.HasPrivateKey)
+            ?? throw new CryptographicException("the distributor file holds no key");
+        var signerKey = signer.GetRSAPrivateKey() ?? throw new CryptographicException("the distributor key is not RSA");
+        // a key of our own (the loaded one belongs to the certificate object)
+        var key = RSA.Create();
+        key.ImportPkcs8PrivateKey(signerKey.ExportPkcs8PrivateKey(), out _);
+        var chain = p12.Where(c => !c.HasPrivateKey)
+            .Select(c => X509CertificateLoader.LoadCertificate(c.RawData))
+            .ToList();
         return new TizenDefaults(ca, caKey,
-            new SigningIdentity(distributorKey, distributorCerts[0], distributorCerts.Skip(1).ToList()));
+            new SigningIdentity(key, X509CertificateLoader.LoadCertificate(signer.RawData), chain));
     }
 
     /// <summary>

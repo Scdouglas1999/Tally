@@ -14,6 +14,7 @@
   var SERVER_KEY = 'tally.shell.server';
   var BUNDLE_KEY = 'tally.shell.bundle';
   var ASK_KEY = 'tally.shell.ask';
+  var STAMP_KEY = 'tally.shell.stamp';
   var TIMEOUT_MS = 10000;
   var config = window.TALLY_SHELL_CONFIG || {};
   var platform = config.platform || 'browser';
@@ -233,10 +234,16 @@
   var bundleOverride = query('bundle');
   if (bundleOverride !== null) store(BUNDLE_KEY, bundleOverride === '' ? null : bundleOverride);
   var fromQuery = query('server');
+  // an address the installer stamped in this time (a reinstall for a server that moved) wins over the remembered one
+  var stamped = config.server || '';
+  if (stamped !== '' && stamped !== (read(STAMP_KEY) || '')) {
+    store(STAMP_KEY, stamped);
+    store(SERVER_KEY, null);
+  }
   if (!fromQuery && read(ASK_KEY) === '1') {
     store(ASK_KEY, null);
     askAddress(null);
   } else {
-    start(normalize(fromQuery || read(SERVER_KEY) || config.server || ''));
+    start(normalize(fromQuery || read(SERVER_KEY) || stamped));
   }
 })();

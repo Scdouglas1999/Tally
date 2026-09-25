@@ -18,14 +18,36 @@ namespace Tally.SamsungInstaller.Certificates;
 /// </summary>
 public sealed class CertificateStore
 {
+    private TizenDefaults? defaults;
+
+    /// <param name="directory">Where this PC's certificates are kept.</param>
+    /// <param name="defaults">Tizen's public signing material when it is already at hand (tests); otherwise
+    /// <see cref="LoadTizenDefaultsAsync"/> downloads it (once) before a Tizen signature.</param>
     public CertificateStore(string directory, TizenDefaults? defaults = null)
     {
         Directory = directory;
-        Defaults = defaults ?? TizenDefaults.Embedded();
+        this.defaults = defaults;
     }
 
     public string Directory { get; }
-    public TizenDefaults Defaults { get; }
+
+    /// <summary>Where Tizen's public signing material is downloaded from (tests point it elsewhere).</summary>
+    public TizenSdkSource TizenSource { get; init; } = TizenSdkSource.Official;
+
+    /// <summary>Tizen's public signing material; <see cref="LoadTizenDefaultsAsync"/> must have run.</summary>
+    public TizenDefaults Defaults => defaults
+        ?? throw new InvalidOperationException("Tizen's signing material is not loaded (LoadTizenDefaultsAsync)");
+
+    /// <summary>
+    /// Tizen's public signing material (the Tizen Developers CA and the public distributor), from the saved copy in
+    /// <see cref="Directory"/> or downloaded from download.tizen.org the first time. Throws
+    /// <see cref="TizenSdkDownloadException"/> with a message for the person when it cannot be had.
+    /// </summary>
+    public async Task<TizenDefaults> LoadTizenDefaultsAsync(HttpClient http, Action<string>? progress, CancellationToken ct)
+    {
+        defaults ??= await TizenSdkDownload.LoadAsync(Directory, http, TizenSource, progress, ct).ConfigureAwait(false);
+        return defaults;
+    }
 
     public static string DefaultDirectory =>
         Environment.GetEnvironmentVariable("TALLY_SAMSUNG_DATA") is { Length: > 0 } dir

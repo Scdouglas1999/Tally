@@ -152,7 +152,7 @@ public class FlowTests
     {
         var output = new StringWriter();
         var ui = new Ui(new StringReader(input), output, color: false);
-        store ??= new CertificateStore(TestDirs.New());
+        store ??= new CertificateStore(TestDirs.New(), TestTizen.Defaults);
         var flow = new InstallerFlow(ui, options ?? new Options { Tv = "127.0.0.1", SdbPort = tv.Port }, new HttpClient(jellyfin ?? Jellyfin()), store)
         {
             OpenBrowser = _ => throw new InvalidOperationException("no browser in tests"),
@@ -190,7 +190,7 @@ public class FlowTests
         await using var tv = new FakeSdbd();
         var output = new StringWriter();
         var ui = new Ui(new StringReader("\n192.0.2.10:8096\n"), output, color: false);
-        var store = new CertificateStore(TestDirs.New());
+        var store = new CertificateStore(TestDirs.New(), TestTizen.Defaults);
         var flow = new InstallerFlow(ui, new Options { SdbPort = tv.Port, NoLaunch = true }, new HttpClient(Jellyfin()), store)
         {
             Networks = () => [(IPAddress.Parse("127.0.0.1"), [IPAddress.Parse("127.0.0.3"), IPAddress.Loopback])],
@@ -208,7 +208,7 @@ public class FlowTests
     public async Task UpdatesWithTheSameAuthorCertificate()
     {
         await using var tv = new FakeSdbd();
-        var store = new CertificateStore(TestDirs.New());
+        var store = new CertificateStore(TestDirs.New(), TestTizen.Defaults);
         var options = new Options { Tv = "127.0.0.1", SdbPort = tv.Port, Server = "192.0.2.10:8096", Yes = true };
         var (first, _, _) = Make(tv, "", options, store: store);
         Assert.Equal(0, await first.RunAsync(CancellationToken.None));

@@ -46,13 +46,13 @@ export function wideUrl(item: BaseItemDto, width: number, height: number): strin
   return null;
 }
 
-/** The backdrop behind Home and detail pages. */
-export function backdropUrl(item: BaseItemDto, width = 1920): string | null {
+/** The backdrop behind Home and detail pages, at the size they draw it (1400x788, top right). */
+export function backdropUrl(item: BaseItemDto, width = 1400, height = 788): string | null {
   const own = item.BackdropImageTags?.[0];
-  if (item.Id != null && own !== undefined) return itemImage(item.Id, ImageType.Backdrop, own, width);
+  if (item.Id != null && own !== undefined) return itemImage(item.Id, ImageType.Backdrop, own, width, height);
   const parent = item.ParentBackdropImageTags?.[0];
   if (item.ParentBackdropItemId != null && parent !== undefined) {
-    return itemImage(item.ParentBackdropItemId, ImageType.Backdrop, parent, width);
+    return itemImage(item.ParentBackdropItemId, ImageType.Backdrop, parent, width, height);
   }
   return null;
 }

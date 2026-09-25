@@ -1,6 +1,7 @@
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models/base-item-dto';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { backdropUrl } from '../../api/images';
+import { useSettledBackdrop } from '../../kit/settledBackdrop';
 import type { PageProps } from '../../app/page';
 import { currentFocusKey, setFocus } from '../../focus/focus';
 import { useKeyHandler } from '../../platform/keyRouter';
@@ -182,7 +183,7 @@ export function LibraryPage(props: PageProps<LibraryRoute>) {
   const [recItem, setRecItem] = useState<BaseItemDto | null>(null);
   const focusedItem = data.status.kind === 'ready' ? data.item(focusedIndex) : null;
   const backdropItem = tab === 'recommended' ? recItem : display?.view.showBackdrop === true ? focusedItem : null;
-  const backdrop = backdropItem !== null ? backdropUrl(backdropItem) : null;
+  const backdrop = useSettledBackdrop(backdropItem !== null ? backdropUrl(backdropItem) : null);
 
   // --- where focus goes when content arrives: on arrival, and after a tab is chosen --------------------------------
   const pending = useRef<string | null>('arrival');

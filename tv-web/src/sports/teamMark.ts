@@ -15,3 +15,15 @@ export function markFont(abbr: string, size: number): { fontSize: number; letter
   const scale = Math.min(1, inner / (chars * base * MONO_ADVANCE));
   return { fontSize: Math.floor(base * scale * 10) / 10, letterSpacing: 0 };
 }
+
+/**
+ * A team logo at the size it is drawn. The board's logos are ESPN's 500 px PNGs (some are 4096 px: 64 MB decoded,
+ * for a 51 px mark); ESPN's image combiner scales them on its side, so a TV downloads and decodes a few KB instead.
+ * Other addresses are kept as they are.
+ */
+export function sizedLogo(url: string, size: number): string {
+  const m = /^https?:\/\/a\.espncdn\.com(\/i\/[^?#]+\.png)$/i.exec(url);
+  if (m === null) return url;
+  const px = Math.ceil(size);
+  return `https://a.espncdn.com/combiner/i?img=${encodeURIComponent(m[1] as string)}&w=${px}&h=${px}`;
+}
