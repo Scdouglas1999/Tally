@@ -46,6 +46,14 @@ The tests sign in through Quick Connect and approve the code with an admin token
 never reused, so a worktree never tests another one's bundle: give each worktree its own port). Screenshots land in
 `test-results/shots/`, the report in `playwright-report/`.
 
+Performance on a TV-class budget (Chromium with the CPU slowed 4x: startup, key-to-paint latency and long frames on
+Home, a library grid, a film page and the Sports board, picture sizes, and a long browsing + playback session with
+the heap and DOM measured after each cycle) runs only when asked:
+
+```sh
+TALLY_PERF=1 TALLY_PERF_CYCLES=90 npx playwright test e2e/perf.spec.ts   # results in test-results/perf/*.json
+```
+
 Sports needs live games. The score simulator makes them on the dev server (`tally/dev/score-sim.py`):
 
 ```sh
@@ -115,7 +123,8 @@ Installed without root under `~/tools/` on the development machine:
   step when `/dev/kvm` is already usable.
 - **Tizen TV emulator**: `scripts/tizen-emulator.sh start|shot <png>|stop` runs the VM `tally-tv` (1080p, 1 GB RAM,
   Tizen 10.0 TV image) on a private Xvfb display; it needs ≥ 7 GB free. Samsung documents that it installs only
-  Samsung-certificate-signed apps.
+  Samsung-certificate-signed apps; a patched copy that takes the Tizen certificate, and how to inspect and drive
+  Tally in it (web inspector over `sdb shell 0 debug`, keys through the window), is in ARCHITECTURE.md, Testing.
 - **webOS CLI**: `npm install --prefix ~/tools/webos-cli @webos-tools/cli@3.2.6` (commands in
   `~/tools/webos-cli/node_modules/.bin`).
 

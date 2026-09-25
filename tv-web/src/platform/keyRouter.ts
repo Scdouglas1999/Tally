@@ -37,34 +37,47 @@ function fieldKeeps(input: HTMLInputElement, key: Key | null, event: KeyboardEve
 
 /**
  * A held key repeats. Browsers flag the repeats (`event.repeat`); the Tizen runtime (emulator, September 2026)
- * delivers a held key as key-up/key-down pairs a few ms apart with `repeat` false. A key-down this soon after the
- * same key went up, or while it is still down (its key-up not seen within the hold window), is taken as a repeat.
+ * delivers a held key as key-up/key-down pairs with `repeat` false: the first key-up ~660 ms after the press, then
+ * pairs every ~40 ms (gaps from key-up to key-down of 0-90 ms). So once a press has been held HOLD_START_MS and goes
+ * up, a key-down of the same key within REPEAT_GAP_MS continues it (a repeat); a quick second press after a short one
+ * (a double tap) stays a press. A key-down while the key is still down (its key-up not seen) is a repeat too.
  */
-const REPEAT_AFTER_UP_MS = 100;
+const HOLD_START_MS = 400;
+const REPEAT_GAP_MS = 120;
 const REPEAT_WHILE_DOWN_MS = 700;
 const repeats = new WeakSet<Event>();
-const lastDown: Record<number, number> = {};
-const lastUp: Record<number, number> = {};
+interface KeyTrack {
+  pressAt: number;
+  downAt: number | null;
+  upAt: number | null;
+  chain: boolean;
+}
+const tracks: Record<number, KeyTrack> = {};
 
-/** Whether this key-down is the remote repeating a held key (see REPEAT_AFTER_UP_MS). */
+/** Whether this key-down is the remote repeating a held key (see HOLD_START_MS). */
 export function isRepeat(event: KeyboardEvent): boolean {
   return event.repeat || repeats.has(event);
 }
 
 /** Records a key-down / key-up for `isRepeat` (exported for the tests). */
 export function trackRepeat(type: 'down' | 'up', event: KeyboardEvent, now = Date.now()): void {
-  const code = event.keyCode;
+  const t = (tracks[event.keyCode] ??= { pressAt: now, downAt: null, upAt: null, chain: false });
   if (type === 'up') {
-    lastUp[code] = now;
-    delete lastDown[code];
+    if (t.chain || now - t.pressAt >= HOLD_START_MS) t.chain = true;
+    t.upAt = now;
+    t.downAt = null;
     return;
   }
-  const down = lastDown[code];
-  const up = lastUp[code];
-  if (event.repeat || (down !== undefined && now - down < REPEAT_WHILE_DOWN_MS) || (up !== undefined && now - up < REPEAT_AFTER_UP_MS)) {
-    repeats.add(event);
+  const repeat =
+    event.repeat ||
+    (t.downAt !== null && now - t.downAt < REPEAT_WHILE_DOWN_MS) ||
+    (t.chain && t.upAt !== null && now - t.upAt < REPEAT_GAP_MS);
+  if (repeat) repeats.add(event);
+  else {
+    t.pressAt = now;
+    t.chain = false;
   }
-  lastDown[code] = now;
+  t.downAt = now;
 }
 
 export function installKeyRouter(platform: Platform, onRootBack: () => void): void {

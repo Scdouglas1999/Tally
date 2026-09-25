@@ -30,9 +30,9 @@ describe('remote keys', () => {
 
 describe('held keys (isRepeat)', () => {
   const ev = (keyCode: number, repeat = false) => ({ keyCode, repeat }) as unknown as KeyboardEvent;
-  it('takes the Tizen runtime’s up/down pairs as repeats, not new presses', async () => {
+  it('takes the Tizen runtime’s up/down pairs as repeats, not new presses; a double tap stays two presses', async () => {
     const { isRepeat, trackRepeat } = await import('../src/platform/keyRouter');
-    // what the emulator delivered for OK held 1.2 s: down, up after 660 ms, then pairs ~40 ms apart
+    // what the emulator delivered for OK held 1.2 s: down, up after 660 ms, then pairs ~40 ms apart (gaps up to 92 ms)
     const first = ev(13);
     trackRepeat('down', first, 1000);
     expect(isRepeat(first)).toBe(false);
@@ -41,17 +41,30 @@ describe('held keys (isRepeat)', () => {
     trackRepeat('down', again, 1661);
     expect(isRepeat(again)).toBe(true);
     trackRepeat('up', ev(13), 1700);
+    const late = ev(13);
+    trackRepeat('down', late, 1792);
+    expect(isRepeat(late)).toBe(true);
+    trackRepeat('up', ev(13), 1800);
     // a new press after a real pause
     const next = ev(13);
-    trackRepeat('down', next, 2100);
+    trackRepeat('down', next, 2300);
     expect(isRepeat(next)).toBe(false);
-    trackRepeat('up', ev(13), 2200);
+    trackRepeat('up', ev(13), 2380);
+    // a quick double tap of LEFT (Playwright's press, a person tapping): two presses
+    const tap1 = ev(37);
+    trackRepeat('down', tap1, 3000);
+    trackRepeat('up', ev(37), 3010);
+    const tap2 = ev(37);
+    trackRepeat('down', tap2, 3030);
+    expect(isRepeat(tap1)).toBe(false);
+    expect(isRepeat(tap2)).toBe(false);
+    trackRepeat('up', ev(37), 3040);
     // browsers flag repeats themselves; a key-down while the key is still down is a repeat
     expect(isRepeat(ev(39, true))).toBe(true);
     const r1 = ev(39);
-    trackRepeat('down', r1, 3000);
+    trackRepeat('down', r1, 4000);
     const r2 = ev(39);
-    trackRepeat('down', r2, 3050);
+    trackRepeat('down', r2, 4050);
     expect(isRepeat(r1)).toBe(false);
     expect(isRepeat(r2)).toBe(true);
   });

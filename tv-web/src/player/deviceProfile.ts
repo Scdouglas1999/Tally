@@ -65,8 +65,16 @@ const NATIVE: Record<ShellPlatform, { containers: string[]; video: string[]; aud
   browser: { containers: ['mp4', 'm4v', 'webm'], video: ['h264'], audio: ['aac', 'mp3'] },
 };
 
+/**
+ * Codecs a platform's web probe reports that its native player does not play from files: on the Tizen emulator
+ * (Tizen 10, September 2026) MSE says yes to AV1 while AVPlay refuses an AV1 MKV (prepareAsync: InvalidAccessError).
+ * They are left to the server (converted), which always works.
+ */
+const PROBE_NOT_NATIVE: Partial<Record<ShellPlatform, string[]>> = { tizen: ['av1'] };
+
 export function detectCapabilities(platform: ShellPlatform, probe: Probe, uhd: boolean): Capabilities {
-  const probedVideo = Object.keys(MP4_VIDEO).filter((c) => probe(MP4_VIDEO[c] as string));
+  const skip = PROBE_NOT_NATIVE[platform] ?? [];
+  const probedVideo = Object.keys(MP4_VIDEO).filter((c) => skip.indexOf(c) < 0 && probe(MP4_VIDEO[c] as string));
   const probedAudio = Object.keys(AUDIO).filter((c) => probe(AUDIO[c] as string));
   const native = NATIVE[platform];
   const tv = platform !== 'browser';

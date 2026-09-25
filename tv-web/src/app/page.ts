@@ -15,6 +15,8 @@ export interface PageProps<R extends Route = Route> {
  * Initial focus when a page opens: once `ready`, focus `target` (the first card, the primary button) unless the
  * user already moved focus inside the page. Runs once per page.
  */
+let firstFocusMarked = false;
+
 export function useArrivalFocus(props: PageProps, target: string | null, ready: boolean): void {
   const done = useRef(false);
   useEffect(() => {
@@ -23,6 +25,15 @@ export function useArrivalFocus(props: PageProps, target: string | null, ready: 
     const current = currentFocusKey();
     if (current === props.pageKey || current === '' || current === 'SN:ROOT' || !document.querySelector('[data-focused]')) {
       setFocus(target);
+    }
+    // startup time on a TV (launch → the first page ready for the remote), read over the web inspector
+    if (!firstFocusMarked) {
+      firstFocusMarked = true;
+      try {
+        performance.mark('tally-first-focus');
+      } catch {
+        // no User Timing: nothing to measure
+      }
     }
   });
 }

@@ -86,7 +86,15 @@ Performance rules (the reason a DOM app is quick on a TV):
   offsets), instantly, without smooth scrolling.
 - No blur, glow, shadows (the design forbids them anyway), no animated layout. The lamp is the only animation and
   writes one element's styles from `requestAnimationFrame`.
-- Images are requested at the size they are drawn (`fillWidth/fillHeight` at the 1080p canvas).
+- Images are requested at the size they are drawn (`fillWidth/fillHeight` at the 1080p canvas): backdrops 1400x788
+  (their box), team logos through ESPN's image combiner at the mark's size (the board's logos are 500 px PNGs, one
+  NFL logo is 4096 px: 64 MB decoded for a 51 px mark).
+- A backdrop that follows focus (Home, library) changes only once focus rests on a card (`useSettledBackdrop`:
+  the old picture goes at once, the new one after 600 ms, as Android's BackdropService), so moving along a row does
+  not fetch and decode a large picture per card.
+- Focus keys follow the item, not its place (`home-game-<id>`, `home-<row>-<item id>`): a row that reorders (the
+  board's sort, followed teams arriving after the board, Continue Watching after playback) keeps focus on the card.
+  With keys by index, Home sometimes came up with no focus at all (the reordered row removed the focused key).
 - Hidden pages stay mounted (`display: none`) instead of re-rendering on BACK.
 
 ## 4. Build and the Chromium 68 floor
@@ -139,10 +147,16 @@ Performance rules (the reason a DOM app is quick on a TV):
 | Video | H.264, HEVC (Main/Main10), VP9, MPEG-2/4, VC-1; AV1 where probed | H.264, HEVC, VP9, MPEG-2/4; AV1 where probed | what `MediaSource.isTypeSupported` says |
 | Audio | AAC, MP3, AC-3, E-AC-3, FLAC, Opus, Vorbis, PCM; DTS only if probed | same list | AAC, MP3, Opus, FLAC, Vorbis (+AC-3 where probed) |
 | Server conversion | HLS TS, HEVC or H.264 + AAC/AC-3/E-AC-3, 6 channels | same | HLS TS, H.264 + AAC, 2 channels |
-| State | written, **not yet run on a TV or the emulator** | stub (the HTML5 engine named `webos`) | **verified** in Chromium |
+| State | **verified on the Tizen 10 emulator** (tvweb-tizen: films direct and converted, tracks, rungs, live, start over; real 2020-2022 firmware not yet) | stub (the HTML5 engine named `webos`) | **verified** in Chromium |
 
 - **Device profiles** (`deviceProfile.ts`): tables for what each native pipeline plays from files (web engines
   under-report: `canPlayType` knows nothing of MKV or AC-3 in AVPlay), merged with probes; conservative for 2020 sets.
+  Checked on the Tizen 10 emulator with AVPlay (tvweb-tizen): the dev films (MKV, H.264 + AAC, two audio tracks) and
+  Big Buck Bunny (MKV, 1080p H.264 + AC-3 5.1) direct play; a rung (720p · 3 Mbps) plays the server's HLS (H.264, AC-3
+  5.1 copied). Generated clips: MP4, TS, MKV and WebM containers, HEVC 8 and 10-bit, VP9, MPEG-2, AAC, MP2, AC-3,
+  E-AC-3 5.1, FLAC and Opus all play; **AV1 is refused** (prepareAsync InvalidAccessError) although the web engine's
+  MSE says yes, so on Tizen AV1 is left to the server whatever the probe says; DTS plays without sound (the probe says
+  no, so it is converted). The emulator decodes in software: real sets decide 4K/HDR, the tables stay as they are.
   DTS: Samsung dropped it 2018-2022, LG 2020-2021, so only when probed. UHD panels (`productinfo.
   isUdPanelSupported`) allow 3840x2160 and HDR10/HLG. Anything not listed is converted by the server, never refused.
   Exact per-model tables are refined on real TVs.
@@ -151,8 +165,10 @@ Performance rules (the reason a DOM app is quick on a TV):
   look on every engine, and AVPlay has no `<track>`. Picture subtitles (PGS, DVD, DVB) are **burned in** by the
   server (the menu marks them). Verified: Spanish external and English embedded tracks on the dev films.
 - **Audio tracks**: a choice restarts the stream at the current position with `AudioStreamIndex` (works on every
-  engine; the server remuxes or converts). AVPlay can also switch tracks itself on a direct-played file
-  (`nativeAudioTracks`/`selectNativeAudio`), to be used once verified. Jellyfin 10.10 ignores `AudioStreamIndex`
+  engine; the server remuxes or converts), except on a **direct-played file on AVPlay**, which plays the file's first
+  audio track whatever PlaybackInfo said (measured: Spanish chosen, English heard, the session said DirectPlay): there
+  the engine picks the track itself (`nativeAudioFor` maps the stream to AVPlay's track by order, `setSelectTrack`),
+  at start (Jellyfin's default or remembered language) and in place when the viewer switches (no restart). Jellyfin 10.10 ignores `AudioStreamIndex`
   unless the request also names the `MediaSourceId` (measured), so restarts always send it. Verified in Chromium: the
   server's new transcoding URL carries the chosen track and playback continues from 11.7 s at 12.4 s.
 - **Quality**: the Android ladder exactly (Original, 4K 120/80/60/40, 1080p 30/20/15/10/8, 720p 5/3, 480p 2,
@@ -161,7 +177,18 @@ Performance rules (the reason a DOM app is quick on a TV):
   bitrate cap alone left them at full size (measured on Android).
 - **Live**: the plugin's continuous playlist (`/JellyTV/Live/{id}.m3u8?s=…`, signed, anonymous), the same address
   multiview uses; the live ladder keeps it going across source switches. hls.js holds ~15 s (5 segments) behind the
-  edge like Android's `TallyLivePlayback`; AVPlay gets a 6 s start buffer. Fallback (not built): the channel's
+  edge like Android's `TallyLivePlayback`; AVPlay gets a 6 s start buffer. On the emulator: channels, CH+/CH-, the
+  score bug, box score, switcher and start over play on AVPlay; a server that goes silent for 25 or 55 s stalls the
+  picture and AVPlay carries on by itself when it answers again (no error is raised); a live stream that does fail is
+  opened again (5 tries, 4 s apart).
+- **AVPlay engine rules** (`avplayEngine.ts`, all measured on the emulator): a new stream is close → open →
+  setDisplayRect → prepareAsync → seekTo → play; seeks run one at a time (a second seekTo while one runs throws) and
+  the latest target wins; a seek past the file's last keyframe fails (`PLAYER_ERROR_SEEK_FAILED`) *and stalls the
+  player* until another seek, so seeks stay 3 s off the end and a refused seek is tried 5 s earlier, then where
+  playback was; both seek callbacks can fire for one seek (the first counts); a seek that never answers is released
+  after 8 s. The Home button pauses the player, and `suspend()`/`restore(url, ms, true)` left it IDLE at 0 (play()
+  then throws INVALID_STATE), so a hidden app closes the player and a shown app opens the stream again at its place,
+  playing if the viewer was playing (paused stays paused; live goes back to the edge). Fallback (not built): the channel's
   Jellyfin Live TV item through PlaybackInfo when a TV cannot decode the source (e.g. 1080p60 HEVC on an old set).
   Verified in Chromium: playlist requests, playback, score bug, CH+/CH- switching.
 - **Live overlays** (`pages/player/LivePage.tsx`, `liveOverlays.tsx`; tvweb-sports), as on the Android TV live player
@@ -190,14 +217,25 @@ Performance rules (the reason a DOM app is quick on a TV):
   (`/JellyTV/Card/{id}.png`) until focus reaches them, when the picture moves there (a channel change on the one
   decoder). Tiles stop when the page is covered (full screen from a tile) and restart on return.
   - Browser: **4** (software decoders; verified in Chromium: four tiles playing, one unmuted).
-  - Tizen and webOS: **1** until probed. The probe (to write and run on real sets, per model): open tiles one at a
-    time on the dev channels; a tile counts when its `<video>` reaches `playing` within 8 s and every earlier tile
-    keeps advancing `currentTime` for 10 s more; stop at the first failure (a `MEDIA_ERR_DECODE`, a stall, an earlier
-    tile freezing). Record the count per `productinfo.getRealModel()` (Tizen) / `webOS.deviceInfo` model name (LG)
-    and make `multiviewDecoders()` read it. Expectation to check: 2021+ Samsung sets decode two HD streams (the same
-    hardware that gives `webapis.avplaystore` a second player); LG webOS 5 sets vary by SoC.
-- **Screensaver / lifecycle**: Tizen `appcommon.setScreenSaver(OFF)` while a player is open; AVPlay is suspended on
-  `visibilitychange` (hidden) and restored at the same position.
+  - TVs, measured on the Tizen 10 emulator: **one video decoder for everything** (AVPlay and `<video>` together).
+    A tile's `<video>` plays the channel's HLS natively; a second `<video>` never starts (no error, readyState 0), a
+    fourth stole the decoder from the first (`MEDIA_ERR_DECODE`); two `webapis.avplaystore.getPlayer()` players both
+    report PLAYING but only the second draws and advances. A new `<video>` started right after another released the
+    decoder can wait forever, so tiles on TVs start 500 ms after taking over, and a tile whose picture has not moved
+    for 12 s is started again (`useTilePlayer`).
+  - Documented for real sets: Samsung's AVPlay guide says AVPlayStore runs **two players at once** and its
+    `IN_APP_MULTIVIEW` property exists from Tizen 7.0; Samsung's own Multi View (a TV feature, not for apps) shows two
+    videos on 2021+ Q60A and up, four on Q800A/Q900A. No per-model list exists for apps.
+  - So `multiviewDecoders()` gives Samsung 2021+ sets (Tizen 6.0+) **two** tiles, others one, and a set that cannot
+    (a tile that never moves, or a decode error, while two play) drops to one and remembers it for its model
+    (`tally.multiview.decoders.<model>`): once per TV, about 20 s of stalled tiles, then one tile plays and the others
+    show live cards, as before. Verified: the emulator falls back and then plays one tile, following focus. Whether
+    2021+ sets play two `<video>` at once is for a real set to show; an AVPlayStore tile engine (the video plane
+    placed with setDisplayRect) is the next step if they do not.
+- **Screensaver / lifecycle**: Tizen `appcommon.setScreenSaver(OFF)` while a player is open; a hidden app closes
+  AVPlay and reopens the stream on return (above). Verified on the emulator: Home during a film, then Tally again
+  from the Apps list (`was_execute`: "resumed", the same page) plays on from where it was. A server that does not
+  answer at launch gets the shell's CAN'T CONNECT screen, TRY AGAIN works once it answers.
 
 ## 7. Design: tokens, type, components
 
@@ -232,7 +270,13 @@ Performance rules (the reason a DOM app is quick on a TV):
   TV libraries, Sports; LIBRARIES; Surprise me, Favorites; Settings pinned last. Live TV hidden while Sports exists.
 - **Keys** (`platform/keys.ts`, `keyRouter.ts`): one listener maps each platform's codes to app keys (Tizen: BACK
   10009, media and color keys registered through `tizen.tvinputdevice` with the codes the TV reports; webOS: BACK
-  461 with `disableBackHistoryAPI`, CH± 33/34; browsers: Escape/Backspace, media keys). Order: a text field being
+  461 with `disableBackHistoryAPI`, CH± 33/34; browsers: Escape/Backspace, media keys). Measured on the emulator's
+  remote: arrows 37-40, OK 13 and BACK 10009 with key-ups; PLAY/PAUSE 10252, CH+ 427, CH- 428 delivered once
+  registered; `getSupportedKeys()` lists the media keys (412-417, 19, 10232/10233), colors 403-406, INFO 457, TOOLS
+  10135 (registered as the item menu, like MENU on other remotes; MENU 10133 stays the TV's settings) and EXIT 10182
+  (left to the TV, which closes the app). A **held key** arrives as key-up/key-down pairs ~40 ms apart with
+  `repeat` false (the first key-up ~660 ms after the press): `isRepeat()` treats a key-down within 100 ms of the same
+  key's key-up, or while it is still down, as a repeat (held seeks accelerate, HOLD OK does not fire twice). Order: a text field being
   edited, then `useKeyHandler` handlers newest first (dialogs, players, a page's own BACK), then arrows/OK to the
   focus system and BACK to the router.
 - **BACK**: dialog/overlay → page → previous page → on Home the drawer opens → BACK in the open drawer leaves the app
@@ -246,9 +290,10 @@ Performance rules (the reason a DOM app is quick on a TV):
   in the libraries; `pages/sports/useOkHold.ts`):
   on screens that have holds, OK is delivered on key-up; held for 500 ms it is a hold. The remote's auto-repeat while
   the key is down is swallowed (a key-down within 700 ms of the last counts as a repeat: Tizen does not flag repeats
-  reliably), so a menu opening under the finger does not pick its first row; menus also ignore OK for their first
-  400 ms, as on Android. MENU/INFO (where the remote has them; ContextMenu on a keyboard) open the same actions. To
-  verify on a TV: that OK's key-up arrives (without it a short press only acts after the hold time).
+  reliably), and after a hold fired every OK event is swallowed until OK has been quiet for 300 ms (the emulator's
+  up/down repeat pairs otherwise read as new presses and picked the first row of the menu the hold had opened);
+  menus also ignore OK for their first 400 ms, as on Android. MENU/INFO/TOOLS open the same actions. Verified on the
+  emulator: OK's key-up arrives, a short OK acts at once, a 1.2 s hold opens the game menu and nothing else.
 
 ## 9. Code layout and parallel work
 
@@ -396,6 +441,11 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
     (`installer/tests/fixtures/golden/`: the shell, odd file names, every punctuation character).
   - **Certificates** (kept in the app-data folder, `%APPDATA%\Tally\Samsung` / `~/.config/Tally/Samsung`, reused for
     every update; losing them means uninstalling Tally from the TV before the next install):
+    - Tizen's public signing material (the Tizen Developers CA with its key, the public distributor) is **not in the
+      program**: it is downloaded on first use from download.tizen.org (Tizen Studio's
+      `certificate-generator_0.1.4_ubuntu-64.zip`, the same files in the Windows and macOS packages), checked against a
+      pinned SHA-256 (`TizenSdkDownload`), and kept in the app-data folder; offline, the program says so and what to
+      do. Only the Samsung (2023+) path works without it.
     - Tizen 5.5-6.5 (2020-2022): an author certificate made on first use exactly as Tizen Studio's generator makes one
       (issued by the Tizen Developers CA with its public key from Tizen's Apache-2.0 certificate-generator: SHA-512,
       CA:FALSE critical, digitalSignature, codeSigning, notAfter = the CA's end; differences: 2048-bit key, random
@@ -491,6 +541,14 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   certificate not match", uninstall, install) behaved as on a TV. So the signatures, the author chain, the
   install and launch commands and the server-loaded bundle all work on a real Tizen web runtime (10.0); what
   2020-2022 firmware trusts is taken from Tizen's upstream list, not measured.
+  **Running Tally in it** (tvweb-tizen, September 24, 2026): the copy (`workbench/.tvweb-installer-emu`) starts with
+  `emulator.sh --conf vms/tally-tv-installer/vm_launch.conf` on its own Xvfb (2300x1200; the window's right-click
+  menu Scale 1x makes the TV picture 1920x1080 at +92+92 for `import -crop`). Tally is installed with Tally for
+  Samsung (`--tv 127.0.0.1 --tizen`, `--bundle http://<this PC>:<port>/` to load a development bundle). The web
+  inspector: `sdb shell 0 debug TallyTVapp.Tally` (with the app closed first: `0 was_kill`) prints a port,
+  `sdb forward tcp:9333 tcp:<port>` exposes Chrome DevTools Protocol (Chrome 130) for reading state and
+  `TallyDebug.push/focus`; keys go through the emulator window (`xdotool key`: arrows, Return, Escape = BACK 10009)
+  and its remote skin (PLAY/PAUSE, CH±, Home). Screenshots from X show the video plane with the page over it.
 - **Tally for Samsung** (`installer/`, `dotnet test installer/tests`, xUnit): the signer against three golden
   packages from `tizen package` (byte for byte), the author certificate against Tizen Studio's (fields, the 2027
   rule), the sdb client against a fake sdbd that answers as the emulator's did (handshake, capability, DUID, push
@@ -541,7 +599,7 @@ how), **not possible** (and why).
 | Live player: tune-in lamp | done |
 | Live player: event banners, game switcher, box score overlay | done |
 | Corner view (picture in picture) | adapted: needs a second decoder (Tizen avplaystore / webOS dual <video> where the set has it), else the live card image |
-| Multiview 4-up | done in browsers; adapted on TVs: one decoder until probed, the other tiles show live cards (section 6) |
+| Multiview 4-up | done in browsers; adapted on TVs: two playing tiles on Samsung 2021+ (one where the set shows it cannot, remembered per model), one elsewhere; the other tiles show live cards (section 6) |
 | Follow teams, hide scores, "My channels only" (shared settings) | done |
 | Favorite channels | planned (the board reads them; no screen sets them on Android TV either) |
 | DVR: record a game, record every team game (keep last N), Recordings tab, watch from the start, stop/cancel/delete | done (recording itself unverified on the dev server: it keeps 10 GB free and has less) |
@@ -566,13 +624,14 @@ keeping it separate matters; the owner may prefer to state the bundle as GPL-2.0
 Build/test only (not shipped): Vite, Rolldown, TypeScript, ESLint and plugins, Vitest, Playwright, acorn, the Tizen
 Studio CLI and the webOS CLI.
 
-Tally for Samsung (`installer/`) ships the .NET runtime (MIT), the shell, Tizen's public Developers CA certificate
-and key and public distributor (Apache-2.0, git.tizen.org `sdk/tools/certificate-generator`) and Samsung's public
-TV developer CA certificates (published by Samsung under Apache-2.0); `installer/src/certificates/NOTICE.txt` has the
-details and the program prints them with `--licenses`. The key material is data the program reads, not code linked
-into it, and the Apache-2.0 text travels with it; if the owner prefers not to redistribute it, the program can
-download Tizen's `certificate-generator_0.1.4` package from download.tizen.org on first run instead (as Samsung's own
-`@tizentv/tools` does). Tests only: xUnit, System.Security.Cryptography.Xml (an independent canonicalizer).
+Tally for Samsung (`installer/`) ships the .NET runtime (MIT), the shell and Samsung's public TV developer CA
+certificates (published by Samsung under Apache-2.0). Tizen's public Developers CA certificate and key and public
+distributor (Apache-2.0, git.tizen.org `sdk/tools/certificate-generator`) are **not shipped**: the program downloads
+Tizen's `certificate-generator_0.1.4` package from download.tizen.org on first use (as Samsung's own
+`@tizentv/tools` does), pinned by SHA-256. `installer/src/certificates/NOTICE.txt` has the details, with the
+Apache-2.0 text, and the program prints them with `--licenses`. Tests only: xUnit, System.Security.Cryptography.Xml
+(an independent canonicalizer), and a copy of Tizen's files as test fixtures (`installer/tests/fixtures/tizen-sdk/`,
+with its notice) for the byte-for-byte signing tests.
 
 ## 15. Open questions for the owner
 

@@ -217,7 +217,7 @@ test('Sports: CHANNELS grid (HOLD adds to multiview), MULTIVIEW queue, SETTINGS,
   await page.keyboard.press('ArrowLeft');
   await expect(page.locator('.sports-tab[data-focused] .label')).toHaveText('RECORDINGS');
   await page.keyboard.press('Enter');
-  await expect(page.locator('.recordings-tab, .tab-empty')).toBeVisible();
+  await expect(page.locator('.recordings-tab, .tab-empty').first()).toBeVisible();
   await page.waitForTimeout(800);
   await shot(page, info, 'sports-recordings');
 });

@@ -36,7 +36,11 @@ export function useOkHold(onHold: () => boolean, enabled: boolean, active: boole
   useKeyHandler((key, event) => {
     const st = s.current;
     if (key === 'menu' || key === 'info') return enabled ? cb.current() : false;
-    if (key !== 'enter') return false;
+    if (key !== 'enter') {
+      // another key ends the held press: the next OK is a new one
+      st.swallow = false;
+      return false;
+    }
     const now = Date.now();
     if (st.swallow) {
       if (now - st.lastEnterAt < QUIET_MS) {

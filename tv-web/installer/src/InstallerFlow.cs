@@ -582,6 +582,12 @@ public sealed class InstallerFlow(Ui ui, Options options, HttpClient http, Certi
                    "  1  Sign in with a Samsung account now (free; your browser opens Samsung's sign-in page).\n" +
                    "  2  Use a Tally.wgt someone made for this TV. Send them this TV's DUID: " + tv.Duid);
             var choice = options.Yes ? "1" : ui.Ask("Type 1 or 2:");
+            // anything else asks again: a stray key must not open a browser to Samsung's sign-in
+            while (choice != "1" && choice != "2")
+            {
+                choice = ui.Ask("Type 1 (Samsung account) or 2 (a Tally.wgt file), then press Enter:");
+            }
+
             if (choice == "2")
             {
                 var path = ui.Ask("Drag the Tally.wgt file into this window (or type its path), then press Enter:").Trim('"', '\'', ' ');

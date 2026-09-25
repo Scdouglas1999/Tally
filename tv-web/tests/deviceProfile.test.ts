@@ -17,6 +17,16 @@ describe('device profiles', () => {
     expect(caps.maxWidth).toBe(3840);
   });
 
+  it('on Tizen, leaves AV1 to the server although the web engine probes it (AVPlay refused AV1 on the emulator)', () => {
+    // what the Tizen 10 emulator's MSE answered: AV1, HEVC, VP9, AC-3, E-AC-3, Opus yes; DTS no
+    const emulator = (mime: string): boolean => /av01|hvc1|vp9|ac-3|ec-3|opus|avc1|mp4a/.test(mime);
+    const caps = detectCapabilities('tizen', emulator, true);
+    expect(caps.videoCodecs).not.toContain('av1');
+    expect(caps.videoCodecs).toContain('vp9');
+    expect(caps.audioCodecs).not.toContain('dts');
+    expect(detectCapabilities('browser', emulator, false).videoCodecs).toContain('av1');
+  });
+
   it('keeps a browser to what it probes, converts MKV, and sends 2 channels', () => {
     const caps = detectCapabilities('browser', chrome, false);
     const profile = buildDeviceProfile(caps, 8_000_000);
