@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
     "versions": [
       {
+        "version": "2.0.3.12",
+        "changelog": "Tally 2.0.3: a live stream that arrives in bursts no longer buffers; the plugin switches to a steadier copy of the game or keeps a cushion, and logs a health line every minute.\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.3/Tally-server-2.0.3-jf12.zip",
+        "checksum": "840d1f63d487f42bf539b0a795c003f7",
+        "timestamp": "2026-09-25T00:18:47.0000000Z"
+      },
+      {
+        "version": "2.0.3.11",
+        "changelog": "Tally 2.0.3: a live stream that arrives in bursts no longer buffers; the plugin switches to a steadier copy of the game or keeps a cushion, and logs a health line every minute.\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.3/Tally-server-2.0.3-jf10.11.zip",
+        "checksum": "ced0f8c5c455c34d004d9900477d8e80",
+        "timestamp": "2026-09-25T00:18:47.0000000Z"
+      },
+      {
+        "version": "2.0.3.10",
+        "changelog": "Tally 2.0.3: a live stream that arrives in bursts no longer buffers; the plugin switches to a steadier copy of the game or keeps a cushion, and logs a health line every minute.\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.0.3/Tally-server-2.0.3-jf10.10.zip",
+        "checksum": "0f2bec52e7c24e5adc80fee104c2a319",
+        "timestamp": "2026-09-25T00:18:47.0000000Z"
+      },
+      {
         "version": "2.0.2.12",
         "changelog": "Tally 2.0.2: no plugin changes (the app's download files were renamed).\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
