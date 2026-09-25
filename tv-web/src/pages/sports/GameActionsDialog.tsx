@@ -27,7 +27,10 @@ export interface GameActions {
 interface GameDvr {
   canManage: boolean;
   recording: GameRecordingView | null;
+  /** A live game that won't fit: RECORD disabled with this reason. */
   refusal: string | null;
+  /** The server's space warning or refusal, shown under RECORD (an upcoming game stays recordable). */
+  spaceLine: string | null;
   estimate: string | null;
   awayRule: DvrRule | null;
   homeRule: DvrRule | null;
@@ -50,11 +53,15 @@ function useGameDvr(game: TallyGame | null): GameDvr | null {
   const recording = recordingView(game, list);
   const canManage = list?.canManage === true;
   const storage = estimates[game.id];
-  const refusal = storage?.estimate !== null && storage?.estimate !== undefined && !storage.estimate.fits ? storage.estimate.message : null;
+  const shortOfSpace = storage?.estimate !== null && storage?.estimate !== undefined && !storage.estimate.fits ? storage.estimate.message : null;
+  // an upcoming game that won't fit today stays recordable: the server schedules it and judges the space again when
+  // it starts (GameDvr.kt)
+  const refusal = isUpcoming(game) ? null : shortOfSpace;
   return {
     canManage,
     recording,
     refusal,
+    spaceLine: shortOfSpace,
     estimate: estimateLine(storage),
     awayRule: list !== null ? teamRuleFor(list, game, game.away) : null,
     homeRule: list !== null ? teamRuleFor(list, game, game.home) : null,
@@ -91,7 +98,7 @@ function dvrGameLines(game: TallyGame, dvr: GameDvr): MenuLine[] {
     }
   }
   if (dvr.canRecord) {
-    const refusalLine = dvr.refusal !== null && dvr.refusal !== r?.reason ? dvr.refusal : null;
+    const refusalLine = dvr.spaceLine !== null && dvr.spaceLine !== r?.reason ? dvr.spaceLine : null;
     lines.push({
       id: 'dvr-record',
       label: 'Record',

@@ -41,11 +41,17 @@ class GameDvr(
     val canRecord: Boolean
         get() = canManage && (game.isUpcoming || game.isLive) && (recording == null || recording.allowsNewRecording)
 
-    /** The estimate says it won't fit: RECORD is shown disabled with the server's reason. */
-    val refusal: String? get() = estimate?.estimate?.takeIf { !it.fits }?.message
+    /** The estimate says it won't fit today: the server's words ("May not fit: …" for an upcoming game). */
+    private val shortOfSpace: String? get() = estimate?.estimate?.takeIf { !it.fits }?.message
 
-    /** The refusal as a line under RECORD, unless the failed job above already says the same. */
-    val refusalLine: String? get() = refusal?.takeIf { it != recording?.reason }
+    /**
+     * A live game that won't fit: RECORD is shown disabled with the server's reason. An upcoming game stays
+     * recordable: the server schedules it and judges the space again when it starts ([refusalLine] warns).
+     */
+    val refusal: String? get() = shortOfSpace?.takeIf { !game.isUpcoming }
+
+    /** The space warning or refusal as a line under RECORD, unless the failed job above already says the same. */
+    val refusalLine: String? get() = shortOfSpace?.takeIf { it != recording?.reason }
 
     /** A finished game with a recording: its score stays hidden until asked for. */
     val guarded: Boolean get() = game.spoilerGuarded

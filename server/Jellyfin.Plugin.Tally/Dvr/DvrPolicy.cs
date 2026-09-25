@@ -201,6 +201,15 @@ public static class DvrSpace
     public static string MayNotFit(SpaceCheck s)
         => $"May not fit: {Shortfall(s.EstimateBytes, s.FreeBytes, s.ReserveBytes)}. Checked again when it starts";
 
+    /// <summary>
+    /// Why a game's estimate does not fit: a game not started yet can still be scheduled ("May not fit: …", judged again
+    /// when it starts, see <see cref="DvrPolicy"/>); a game already on is refused ("Not enough space: …").
+    /// </summary>
+    public static string EstimateMessage(string? gameState, long estimateBytes, long freeBytes, long reserveBytes)
+        => gameState == "pre"
+            ? MayNotFit(new SpaceCheck(estimateBytes, freeBytes, reserveBytes, BitrateKnown: true))
+            : NotEnough(estimateBytes, freeBytes, reserveBytes);
+
     /// <summary>In the pre-roll, without the room yet.</summary>
     public static string WaitingForSpace(SpaceCheck s)
         => $"Waiting for space: {Shortfall(s.EstimateBytes, s.FreeBytes, s.ReserveBytes)}. Fails if there is still not enough when the game starts";
