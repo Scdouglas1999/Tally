@@ -1,4 +1,4 @@
-import type { AvPlayApi } from '../platform/tizen-types';
+import type { AvPlayApi, AvPlayListener } from '../platform/tizen-types';
 import '../platform/tizen-types';
 import type { EngineEvents, NativeAudioTrack, PlayerEngine, Source } from './engine';
 
@@ -27,6 +27,30 @@ const SEEK_RETRY_STEP_MS = 5000;
  *    shown app opens the same stream again at the same place, playing if it was playing;
  *  - a direct-played file plays its first audio track: `selectNativeAudio` picks another (setSelectTrack works).
  */
+/**
+ * AVPlay's listener is set once and forwards to the engine in use. On the Tizen emulator every setListener() +
+ * playback kept the old listener's closures alive (3 DOM nodes per film, 6 per player visit, never collected: an hour
+ * of watching grew the page by ~400 nodes); one listener for the life of the app does not grow.
+ */
+let active: AvPlayListener | null = null;
+let listeningOn: AvPlayApi | null = null;
+function listen(avplay: AvPlayApi, listener: AvPlayListener): void {
+  active = listener;
+  if (listeningOn === avplay) return;
+  listeningOn = avplay;
+  avplay.setListener({
+    onbufferingstart: () => active?.onbufferingstart?.(),
+    onbufferingprogress: (p: number) => active?.onbufferingprogress?.(p),
+    onbufferingcomplete: () => active?.onbufferingcomplete?.(),
+    oncurrentplaytime: (ms: number) => active?.oncurrentplaytime?.(ms),
+    onstreamcompleted: () => active?.onstreamcompleted?.(),
+    onevent: (type: string, data: string) => active?.onevent?.(type, data),
+    onerror: (type: string) => active?.onerror?.(type),
+    onsubtitlechange: (duration: number, text: string, type: number, attributes: unknown) => active?.onsubtitlechange?.(duration, text, type, attributes),
+    ondrmevent: (type: string, data: unknown) => active?.ondrmevent?.(type, data),
+  });
+}
+
 export function createAvPlayEngine(host: HTMLElement, events: EngineEvents): PlayerEngine {
   const avplay: AvPlayApi | undefined = window.webapis?.avplay;
   if (avplay === undefined) throw new Error('AVPlay is not available (webapis.js missing?)');
@@ -188,7 +212,7 @@ export function createAvPlayEngine(host: HTMLElement, events: EngineEvents): Pla
     }, LIVE_RETRY_MS);
   };
 
-  avplay.setListener({
+  const listener: AvPlayListener = {
     onbufferingstart: () => events.state('buffering'),
     onbufferingcomplete: () => reportState(),
     oncurrentplaytime: (ms: number) => {
@@ -217,7 +241,8 @@ export function createAvPlayEngine(host: HTMLElement, events: EngineEvents): Pla
       events.error('Playback failed (' + type + ').');
       events.state('error');
     },
-  });
+  };
+  listen(avplay, listener);
 
   const onVisibility = (): void => {
     if (destroyed || source === null) return;
@@ -302,6 +327,7 @@ export function createAvPlayEngine(host: HTMLElement, events: EngineEvents): Pla
     },
     destroy() {
       destroyed = true;
+      if (active === listener) active = null;
       generation++;
       window.clearTimeout(retryTimer);
       document.removeEventListener('visibilitychange', onVisibility);

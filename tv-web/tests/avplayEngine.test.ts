@@ -86,7 +86,10 @@ beforeEach(() => {
     restore: (url: string, ms?: number) => calls.push(`restore ${url} ${String(ms)}`),
     getState: () => state,
     getDuration: () => 90_000,
-    setListener: (l: AvPlayListener) => (listener = l),
+    setListener: (l: AvPlayListener) => {
+      listener = l;
+      calls.push('listener');
+    },
     getTotalTrackInfo: () => [
       { index: 0, type: 'VIDEO', extra_info: '{}' },
       { index: 1, type: 'AUDIO', extra_info: '{"language":"eng"}' },
@@ -123,7 +126,7 @@ describe('AVPlay engine', () => {
     expect(host.children[0]?.attrs.type).toBe('application/avplayer');
     expect(doc.body.classes.has('native-video')).toBe(true);
     await engine.load({ url: 'http://s/v.m3u8', kind: 'hls', live: false, startMs: 42_000 });
-    expect(calls).toEqual(['open http://s/v.m3u8', 'rect 0,0,1920,1080', 'method PLAYER_DISPLAY_MODE_LETTER_BOX', 'prepare', 'seek 42000', 'play']);
+    expect(calls).toEqual(['listener', 'open http://s/v.m3u8', 'rect 0,0,1920,1080', 'method PLAYER_DISPLAY_MODE_LETTER_BOX', 'prepare', 'seek 42000', 'play']);
   });
 
   it('never seeks a live stream and asks for a start buffer', async () => {
@@ -241,6 +244,19 @@ describe('AVPlay engine', () => {
     online.forEach((f) => f());
     expect(calls).toContain('open u');
     expect(calls).toContain('seek 9000');
+  });
+
+  it('sets AVPlay’s listener once and forwards to the engine in use (old listeners stayed alive on Tizen)', async () => {
+    let first = 0;
+    let second = 0;
+    const a = createAvPlayEngine(new FakeElement() as unknown as HTMLElement, { ...noEvents, time: () => first++ });
+    a.destroy();
+    const b = createAvPlayEngine(new FakeElement() as unknown as HTMLElement, { ...noEvents, time: () => second++ });
+    await b.load({ url: 'u', kind: 'file', live: false, startMs: 0 });
+    listener.oncurrentplaytime?.(1000);
+    expect(calls.filter((c) => c === 'listener')).toHaveLength(1);
+    expect(first).toBe(0);
+    expect(second).toBe(1);
   });
 
   it('lists and switches the file’s own audio tracks, and cleans up', () => {
