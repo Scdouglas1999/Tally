@@ -44,8 +44,9 @@ fi
 SERVER_TAG="tally-v$SERVER_VERSION"
 NOTES="${TALLY_NOTES:-Tally for Android TV $VERSION}"
 # One quiet line at the end of every release's notes. The app's update screen cuts the notes at the marker, so the line
-# shows on GitHub and not on the TV.
-NOTES="$NOTES
+# shows on GitHub and not on the TV. Apps older than 2.1 do not cut it, so the release that 2.0.x apps are offered
+# leaves it out (TALLY_NO_SUPPORT_LINE=1).
+[ "${TALLY_NO_SUPPORT_LINE:-}" = 1 ] || NOTES="$NOTES
 
 <!-- tally-support -->
 ---
