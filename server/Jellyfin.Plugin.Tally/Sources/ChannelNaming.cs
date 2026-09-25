@@ -8,7 +8,7 @@ namespace Jellyfin.Plugin.Tally.Sources;
 
 /// <summary>
 /// Settles the names web page sources could only take from a page title (<see cref="SourceChannel.NameFromTitle"/>).
-/// A page title is mostly the site's own name and tagline ("… - Sports for NBA, NFL, Boxing, MMA, and F1"), so a
+/// A page title is mostly the site's own name and tagline ("Example Streams - Every Game, Every Night"), so a
 /// channel named from one would show the site's advertising as a channel name. Such a name stands only as the game it
 /// names: a channel whose title names both teams of a game on the scoreboard is named after that game ("Away at Home");
 /// any other is dropped. Without a scoreboard (scores switched off or unreachable) a title that is shaped like a
