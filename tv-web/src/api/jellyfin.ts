@@ -162,3 +162,20 @@ export function signOut(): void {
   api = null;
   session.set(null);
 }
+
+/**
+ * The shell's server (stamped by the installer, or typed on the TV) wins over the address saved with the session:
+ * the same server at a new address keeps the session with the new address; another server signs out (its sign-in
+ * screen follows). Nothing changes when the shell's server does not answer (the saved session is kept).
+ */
+export async function adoptShellServer(url: string | null): Promise<void> {
+  const s = session.get();
+  if (s === null || url === null || url === '' || s.serverUrl === url) return;
+  const info = await probeServer(url);
+  if (info === null) return;
+  if (info.id !== '' && info.id === s.serverId) {
+    const moved: Session = { ...s, serverUrl: url, serverName: info.name, serverVersion: info.version };
+    writeJson(SESSION_KEY, moved);
+    session.set(moved);
+  } else signOut();
+}

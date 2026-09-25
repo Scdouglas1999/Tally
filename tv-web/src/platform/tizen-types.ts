@@ -18,6 +18,9 @@ export interface TizenApi {
   application: {
     getCurrentApplication(): { exit(): void; hide(): void };
   };
+  systeminfo?: {
+    getCapability(key: string): unknown;
+  };
 }
 
 export type AvPlayState = 'NONE' | 'IDLE' | 'READY' | 'PLAYING' | 'PAUSED';

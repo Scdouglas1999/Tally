@@ -35,11 +35,44 @@ function fieldKeeps(input: HTMLInputElement, key: Key | null, event: KeyboardEve
   return false;
 }
 
+/**
+ * A held key repeats. Browsers flag the repeats (`event.repeat`); the Tizen runtime (emulator, September 2026)
+ * delivers a held key as key-up/key-down pairs a few ms apart with `repeat` false. A key-down this soon after the
+ * same key went up, or while it is still down (its key-up not seen within the hold window), is taken as a repeat.
+ */
+const REPEAT_AFTER_UP_MS = 100;
+const REPEAT_WHILE_DOWN_MS = 700;
+const repeats = new WeakSet<Event>();
+const lastDown: Record<number, number> = {};
+const lastUp: Record<number, number> = {};
+
+/** Whether this key-down is the remote repeating a held key (see REPEAT_AFTER_UP_MS). */
+export function isRepeat(event: KeyboardEvent): boolean {
+  return event.repeat || repeats.has(event);
+}
+
+/** Records a key-down / key-up for `isRepeat` (exported for the tests). */
+export function trackRepeat(type: 'down' | 'up', event: KeyboardEvent, now = Date.now()): void {
+  const code = event.keyCode;
+  if (type === 'up') {
+    lastUp[code] = now;
+    delete lastDown[code];
+    return;
+  }
+  const down = lastDown[code];
+  const up = lastUp[code];
+  if (event.repeat || (down !== undefined && now - down < REPEAT_WHILE_DOWN_MS) || (up !== undefined && now - up < REPEAT_AFTER_UP_MS)) {
+    repeats.add(event);
+  }
+  lastDown[code] = now;
+}
+
 export function installKeyRouter(platform: Platform, onRootBack: () => void): void {
   fallbackBack = onRootBack;
   window.addEventListener(
     'keydown',
     (event) => {
+      trackRepeat('down', event);
       const key = mapKey({ keyCode: event.keyCode, key: event.key }, platform.name, platform.runtimeKeys);
       const input = typingIn(event.target);
       if (input !== null && fieldKeeps(input, key, event)) return;
@@ -67,6 +100,7 @@ export function installKeyRouter(platform: Platform, onRootBack: () => void): vo
   window.addEventListener(
     'keyup',
     (event) => {
+      trackRepeat('up', event);
       const key = mapKey({ keyCode: event.keyCode, key: event.key }, platform.name, platform.runtimeKeys);
       const nav = key === null ? undefined : NAV[key];
       if (nav !== undefined) navigateRelease(nav);

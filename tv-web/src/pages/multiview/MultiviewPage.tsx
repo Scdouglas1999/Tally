@@ -69,7 +69,23 @@ interface TilePlayback {
  * The picture of one tile: its own <video> engine while it has a decoder (`playing`), retried a few times when the
  * stream fails; muted unless it holds the audio. Without a decoder the channel's live card stands in.
  */
-function useTilePlayer(host: { current: HTMLDivElement | null }, url: string | null, playing: boolean, audio: boolean): TilePlayback {
+/** The number of tiles this TV model could play at once, per model ("tally.multiview.decoders.<model>"). */
+const DECODERS_KEY = 'tally.multiview.decoders.';
+
+/** Wait before a tile takes the TV's decoder over from another tile (see useTilePlayer). */
+const TV_HANDOVER_MS = 500;
+/** A tile whose picture has not moved this long is started again. */
+const STALL_MS = 12_000;
+
+function useTilePlayer(
+  host: { current: HTMLDivElement | null },
+  url: string | null,
+  playing: boolean,
+  audio: boolean,
+  onDecoderTrouble: () => void,
+): TilePlayback {
+  const trouble = useRef(onDecoderTrouble);
+  trouble.current = onDecoderTrouble;
   const [state, setState] = useState<TilePlayback>({ buffering: true, error: null });
   const audioRef = useRef(audio);
   audioRef.current = audio;
@@ -88,14 +104,19 @@ function useTilePlayer(host: { current: HTMLDivElement | null }, url: string | n
     let retries = 0;
     let timer = 0;
     let alive = true;
+    let lastProgress = Date.now();
     const failed = (): void => {
       if (!alive) return;
+      lastProgress = Date.now();
       if (retries >= MAX_RETRIES) {
         setState({ buffering: false, error: 'Stream unavailable' });
         return;
       }
       retries++;
       window.clearTimeout(timer);
+      // give the decoder back now; the next try starts after the pause (a TV hands it over slowly)
+      engine?.destroy();
+      engine = null;
       timer = window.setTimeout(start, RETRY_MS);
     };
     const events: EngineEvents = {
@@ -108,21 +129,39 @@ function useTilePlayer(host: { current: HTMLDivElement | null }, url: string | n
           setState({ buffering: true, error: null });
         }
       },
-      time: () => undefined,
+      time: () => {
+        lastProgress = Date.now();
+      },
       firstFrame: () => undefined,
-      error: failed,
+      error: () => {
+        // MEDIA_ERR_DECODE: the decoder was taken away (seen on the emulator with a second tile)
+        if (el.querySelector('video')?.error?.code === 3) trouble.current();
+        failed();
+      },
     };
     function start(): void {
       if (!alive || url === null || el === null) return;
       engine?.destroy();
+      lastProgress = Date.now();
       engine = createHtml5Engine(el, events, app.shell.bundleBase, 'html5');
       mute();
       void engine.load({ url, kind: 'hls', live: true, startMs: 0 }).catch(failed);
     }
-    start();
+    // A TV's decoder is handed from the tile that had it to this one: the Tizen runtime does not always release it at
+    // once, and a <video> started too early waits forever without an error (measured on the emulator). Start a moment
+    // later on TVs, and count a picture that has not moved for STALL_MS as a failure (it is started again).
+    timer = window.setTimeout(start, app.platform.name === 'browser' ? 0 : TV_HANDOVER_MS);
+    const watchdog = window.setInterval(() => {
+      if (alive && Date.now() - lastProgress > STALL_MS) {
+        // a picture that never moves while other tiles play: the TV has fewer decoders than tiles playing
+        trouble.current();
+        failed();
+      }
+    }, 2000);
     return () => {
       alive = false;
       window.clearTimeout(timer);
+      window.clearInterval(watchdog);
       engine?.destroy();
     };
   }, [playing, url]);
@@ -140,11 +179,12 @@ function TileView(props: {
   onFocus: (index: number) => void;
   onOk: (index: number) => void;
   onArrow: (direction: string) => boolean;
+  onDecoderTrouble: () => void;
 }) {
   const { tile } = props;
   const picture = useRef<HTMLDivElement>(null);
   const [cardFailed, setCardFailed] = useState(false);
-  const playback = useTilePlayer(picture, tile.hlsUrl, props.playing, props.audio);
+  const playback = useTilePlayer(picture, tile.hlsUrl, props.playing, props.audio, props.onDecoderTrouble);
   const f = useFocusable<HTMLDivElement>({
     focusKey: tileKey(props.index),
     onEnter: () => props.onOk(props.index),
@@ -272,8 +312,17 @@ export function MultiviewPage(props: PageProps<Extract<Route, { name: 'multiview
   const big = tiles.length === 0 ? 0 : Math.min(bigIndex, tiles.length - 1);
   const audio = tiles.length === 0 ? 0 : Math.min(audioIndex, tiles.length - 1);
   const slots = tileSlots(tiles.length, layout, big, STAGE_W, STAGE_H_WITH_HINT);
-  const decoders = multiviewDecoders(app.platform.name);
+  // decoders: what this TV model showed before, else the platform's guess; a set that cannot play the tiles it
+  // was given drops to one (remembered for the model, so it happens once)
+  const decoderKey = DECODERS_KEY + app.platform.model();
+  const [decoders, setDecoders] = useState(() => multiviewDecoders(app.platform.name, readJson<number>(decoderKey), app.platform.tizenVersion()));
   const playing = playingTiles(tiles.length, audio, props.active ? decoders : 0);
+  const playingCount = playing.filter((p) => p).length;
+  const onDecoderTrouble = (): void => {
+    if (playingCount < 2 || decoders <= 1) return;
+    writeJson(decoderKey, 1);
+    setDecoders(1);
+  };
 
   // keep the TV awake while tiles play
   const anyPlaying = playing.some((p) => p);
@@ -393,6 +442,7 @@ export function MultiviewPage(props: PageProps<Extract<Route, { name: 'multiview
                       slot={slot}
                       audio={i === audio}
                       playing={playing[i] === true}
+                      onDecoderTrouble={onDecoderTrouble}
                       hideScores={hideScores}
                       onFocus={(index) => {
                         setAudioIndex(index);

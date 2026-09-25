@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'preact/hooks';
 import { app } from '../../app/context';
 import type { PageProps } from '../../app/page';
 import { setFocus } from '../../focus/focus';
-import { useKeyHandler } from '../../platform/keyRouter';
+import { isRepeat, useKeyHandler } from '../../platform/keyRouter';
 import type { VideoScale } from '../../player/engine';
 import { nativeAudioFor, preparePlayback, reporter, type Prepared } from '../../player/playback';
 import { bitrateLabel, qualityOptions, type QualityOption } from '../../player/qualityLadder';
@@ -509,7 +509,7 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
 
   useKeyHandler((key, event) => {
     lastInteraction.current = Date.now();
-    repeats.current = event.repeat ? repeats.current + 1 : 0;
+    repeats.current = isRepeat(event) ? repeats.current + 1 : 0;
     const e = player.engine.current;
     switch (key) {
       case 'playPause':
@@ -585,7 +585,7 @@ export function PlayerPage(props: PageProps<Extract<Route, { name: 'player' }>>)
       case 'down':
       case 'info':
       case 'menu':
-        if (!event.repeat) showControls();
+        if (!isRepeat(event)) showControls();
         return true;
       default:
         return false;

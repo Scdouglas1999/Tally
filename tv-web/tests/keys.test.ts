@@ -27,3 +27,37 @@ describe('remote keys', () => {
     expect(mapKey({ keyCode: 9999, key: '' }, 'tizen', { 9999: 'info' })).toBe('info');
   });
 });
+
+describe('held keys (isRepeat)', () => {
+  const ev = (keyCode: number, repeat = false) => ({ keyCode, repeat }) as unknown as KeyboardEvent;
+  it('takes the Tizen runtime’s up/down pairs as repeats, not new presses', async () => {
+    const { isRepeat, trackRepeat } = await import('../src/platform/keyRouter');
+    // what the emulator delivered for OK held 1.2 s: down, up after 660 ms, then pairs ~40 ms apart
+    const first = ev(13);
+    trackRepeat('down', first, 1000);
+    expect(isRepeat(first)).toBe(false);
+    trackRepeat('up', ev(13), 1660);
+    const again = ev(13);
+    trackRepeat('down', again, 1661);
+    expect(isRepeat(again)).toBe(true);
+    trackRepeat('up', ev(13), 1700);
+    // a new press after a real pause
+    const next = ev(13);
+    trackRepeat('down', next, 2100);
+    expect(isRepeat(next)).toBe(false);
+    trackRepeat('up', ev(13), 2200);
+    // browsers flag repeats themselves; a key-down while the key is still down is a repeat
+    expect(isRepeat(ev(39, true))).toBe(true);
+    const r1 = ev(39);
+    trackRepeat('down', r1, 3000);
+    const r2 = ev(39);
+    trackRepeat('down', r2, 3050);
+    expect(isRepeat(r1)).toBe(false);
+    expect(isRepeat(r2)).toBe(true);
+  });
+  it('registers TOOLS as the item menu on Tizen', async () => {
+    const { TIZEN_KEY_NAMES } = await import('../src/platform/keys');
+    expect(TIZEN_KEY_NAMES.Tools).toBe('menu');
+    expect(mapKey({ keyCode: 10135, key: '' }, 'tizen', { 10135: 'menu' })).toBe('menu');
+  });
+});

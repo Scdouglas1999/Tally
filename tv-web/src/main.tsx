@@ -7,7 +7,7 @@ import './kit/kit.css';
 import { resolveShell } from './shell-contract/shell';
 import { createPlatform } from './platform/platform';
 import { app } from './app/context';
-import { initJellyfin } from './api/jellyfin';
+import { adoptShellServer, initJellyfin } from './api/jellyfin';
 import { currentFocusKey, initFocus } from './focus/focus';
 import { installKeyRouter } from './platform/keyRouter';
 import { createStage } from './platform/stage';
@@ -23,7 +23,9 @@ initJellyfin(platform.deviceName());
 initFocus();
 installKeyRouter(platform, () => rootBack(() => platform.exit()));
 const stage = createStage();
-render(<App onFirstScreen={() => shell.started()} />, stage);
+// a session saved for another address of the shell's server follows the shell (the server moved, or the TV was
+// reinstalled for another server) before the first screen asks it for anything
+void adoptShellServer(shell.serverUrl).finally(() => render(<App onFirstScreen={() => shell.started()} />, stage));
 
 // For the end-to-end tests and for poking at a TV over the web inspector: open any route directly.
 (window as unknown as { TallyDebug: unknown }).TallyDebug = { push, stack, focus: currentFocusKey };
