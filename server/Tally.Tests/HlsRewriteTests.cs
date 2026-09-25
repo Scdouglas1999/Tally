@@ -78,3 +78,17 @@ public class HeaderCodecTests
         Assert.Empty(StreamSigner.DecodeHeaders("not-valid-b64!!!"));
     }
 }
+
+public class ProxyFileNameTests
+{
+    [Theory]
+    [InlineData("https://cdn.example.com/live/seg_001.ts?token=abc", "s.ts")]
+    [InlineData("https://cdn.example.com/live/chunk.M4S", "s.m4s")]
+    [InlineData("https://cdn.example.com/live/index.m3u8", "s.m3u8")]
+    [InlineData("https://cdn.example.com/live/audio.aac", "s.aac")]
+    [InlineData("https://wrapper.example.com/stream.php?id=3", "s.ts")]
+    [InlineData("https://cdn.example.com/segment/42", "s.ts")]
+    [InlineData("not a url", "s.ts")]
+    public void Proxy_Addresses_End_In_A_Media_Extension_For_Ffmpeg(string upstream, string expected)
+        => Assert.Equal(expected, Jellyfin.Plugin.Tally.Api.ProxyController.ProxyFileName(upstream));
+}

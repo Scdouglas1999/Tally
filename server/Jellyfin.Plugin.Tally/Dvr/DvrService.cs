@@ -1462,7 +1462,7 @@ public sealed class DvrService : IHostedService, IDisposable
         var estimate = DvrSpace.Estimate(bps, left);
         var free = DiskSpace.For(RecordingsFolder(settings))?.FreeBytes ?? 0;
         var fits = DvrSpace.Fits(free, estimate, settings.ReserveBytes);
-        return new Estimate(game.Id, estimate, bps, bitrate != null, left.TotalSeconds, fits, fits ? null : DvrSpace.NotEnough(estimate, free, settings.ReserveBytes));
+        return new Estimate(game.Id, estimate, bps, bitrate != null, left.TotalSeconds, fits, fits ? null : DvrSpace.EstimateMessage(game.State, estimate, free, settings.ReserveBytes));
     }
 
     /// <summary>The Jellyfin library whose folders include the recordings folder, if any.</summary>

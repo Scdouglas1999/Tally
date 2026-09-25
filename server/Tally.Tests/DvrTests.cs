@@ -284,6 +284,14 @@ public class DvrSpaceTests
     }
 
     [Fact]
+    public void An_Upcoming_Game_That_Does_Not_Fit_Today_Is_A_Warning_A_Live_One_A_Refusal()
+    {
+        const long gb = DvrSettings.Gb;
+        Assert.Equal("May not fit: needs ~9 GB, 4 GB free. Checked again when it starts", DvrSpace.EstimateMessage("pre", 9 * gb, 4 * gb, 10 * gb));
+        Assert.Equal("Not enough space: needs ~9 GB, 4 GB free", DvrSpace.EstimateMessage("in", 9 * gb, 4 * gb, 10 * gb));
+    }
+
+    [Fact]
     public void A_Recording_Stops_Below_The_Reserve_And_Remuxes_Only_With_Room_To_Spare()
     {
         const long gb = DvrSettings.Gb;
