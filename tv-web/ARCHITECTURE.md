@@ -362,7 +362,9 @@ Scope, in this order; everything else follows through server updates (no reinsta
    MULTIVIEW, RECORDINGS when the server records, SETTINGS), the game actions menu (watch, multiview, follow, hide
    scores, record, record every game of a team), multiview, the Recordings tab and watch-from-the-start, the live
    overlays (verified in Chromium against the dev server with the score simulator).
-7. **Tizen verification**: AVPlay engine, remote keys, screensaver, suspend/resume, device profile on a real set.
+7. **Tizen verification**: AVPlay engine, remote keys, screensaver, suspend/resume, device profile. *Done on the
+   Tizen 10 emulator in tvweb-tizen* (sections 6, 8, 12); a real 2020-2022 set is still to confirm the same (the
+   emulator is the only Tizen here).
 
 Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3), `tvweb-player` (5),
 `tvweb-sports` (6), `tvweb-tizen` (7, needs a TV or the emulator with a Samsung certificate), `tvweb-installer`
@@ -549,6 +551,21 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   `sdb forward tcp:9333 tcp:<port>` exposes Chrome DevTools Protocol (Chrome 130) for reading state and
   `TallyDebug.push/focus`; keys go through the emulator window (`xdotool key`: arrows, Return, Escape = BACK 10009)
   and its remote skin (PLAY/PAUSE, CH±, Home). Screenshots from X show the video plane with the page over it.
+- **Performance** (tvweb-tizen, `e2e/perf.spec.ts` with `TALLY_PERF=1`; Chromium at 1920x1080 with the CPU slowed 4x,
+  standing in for a 2020 TV SoC, and the Tizen emulator for the runtime):
+  - start: launch to Home ready for the remote (first focus) 0.3-0.5 s in Chromium 4x (the bundle from the server),
+    0.8-1.7 s on the emulator (`performance.mark('tally-first-focus')`, read over the inspector);
+  - remote keys (Event Timing, key-down to the next paint, a press every 150 ms then held): Home p95 40 ms (was 72),
+    library grid 32 ms, film page 40 ms, Sports board 40 ms (was 144); no frame over 50 ms (the library had one of
+    350 ms). The fixes: backdrops that wait for focus to rest, pictures at their drawn size, logos from ESPN's
+    combiner (section 3);
+  - pictures: every picture on those screens within 1.5x of its drawn size, except Jellyfin's chapter images (it
+    returns 640x360 for 371x209; small);
+  - an hour on the emulator (browsing Home, a library, a film page, 20 s of AVPlay playback and the Sports board,
+    over and over; heap and DOM after a forced collection each cycle): before the fix below the page kept 6 DOM
+    nodes per film played (AVPlay kept every listener's closures), ~420 nodes and +1.7 MB of heap in the hour;
+    after it, 92 cycles in 60 minutes: DOM flat (442-447 nodes, 402 once the games row shrank), heap 5.1 MB at
+    cycle 10 (caches filled), 5.8 MB at the end (+0.7 MB in 50 minutes, flattening). Chromium, 20 cycles: heap 4.8 → 6.0 MB in the first 10 cycles (caches filling), then flat.
 - **Tally for Samsung** (`installer/`, `dotnet test installer/tests`, xUnit): the signer against three golden
   packages from `tizen package` (byte for byte), the author certificate against Tizen Studio's (fields, the 2027
   rule), the sdb client against a fake sdbd that answers as the emulator's did (handshake, capability, DUID, push
@@ -650,3 +667,6 @@ with its notice) for the byte-for-byte signing tests.
   from a server.
 - **hls.js licensing** for the browser version (separate file today), or GPL-2.0-or-later for tv-web.
 - **LG**: a Developer Mode app session expires every 50 hours; acceptable for friends, or aim for the store?
+- **The friend's TV** is the first real Samsung: what the emulator could not show is how many multiview tiles it
+  plays (two are tried on 2021+ sets, section 6), 4K/HDR direct play, and that 2020-2022 firmware behaves as the
+  Tizen 10 emulator did (AVPlay rules, keys). Its web inspector works the same way (Developer Mode, `sdb connect`).
