@@ -1,14 +1,15 @@
 Third-party material in Tally for Samsung (Tally-Samsung-Installer)
 ===================================================================
 
-tizen/ - Tizen's public signing material
-  tizen-developer-ca.cer, tizen-developer-ca-privatekey.pem (the "Tizen Developers CA" and its key, password in
-  Tizen Studio's conf.ini), tizen-distributor-signer.cert.pem / .key.pem (Tizen's public distributor "Tizen Public
-  Distributor Signer" with its CA, taken out of tizen-distributor-signer.p12, password "tizenpkcs12passfordsigner").
-  Source: Tizen's certificate generator, https://git.tizen.org/cgit/sdk/tools/certificate-generator/
-  (branch tizen_studio, src/res/certificates/), Copyright (c) 2012 - 2013 Samsung Electronics Co., Ltd.,
-  licensed under the Apache License, Version 2.0 (LICENSE-Apache-2.0.txt). The same files ship with every
-  Tizen Studio. Unmodified apart from the distributor .p12 being stored as PEM.
+Tizen's public signing material (not carried in the program)
+  The "Tizen Developers CA" with its key (password in Tizen Studio's conf.ini) and Tizen's public distributor
+  ("Tizen Public Distributor Signer", tizen-distributor-signer.p12, password "tizenpkcs12passfordsigner") are
+  downloaded on first use from Tizen's server, in Tizen Studio's certificate generator package
+  (https://download.tizen.org/sdk/tizenstudio/official/binary/certificate-generator_0.1.4_ubuntu-64.zip, checked
+  against a pinned SHA-256), and kept in the program's app-data folder. Source: Tizen's certificate generator,
+  https://git.tizen.org/cgit/sdk/tools/certificate-generator/, Copyright (c) 2012 - 2013 Samsung Electronics Co.,
+  Ltd., licensed under the Apache License, Version 2.0 (LICENSE-Apache-2.0.txt). The same files ship with every
+  Tizen Studio.
 
 samsung/ - Samsung's public CA certificates for TV developer certificates
   vd_tizen_dev_author_ca.pem ("Samsung VD Author CA"), vd_tizen_dev_public2.pem ("VD DEVELOPER Public CA

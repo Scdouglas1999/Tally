@@ -102,7 +102,7 @@ export function PostPlayPage(props: PageProps<Extract<Route, { name: 'postplay' 
     setFocus(similar.length > 0 ? 'postplay-poster-0' : 'postplay-watch');
   }, [film, similar, props.active]);
 
-  const backdrop = film !== null ? backdropUrl(film, 1920) : null;
+  const backdrop = film !== null ? backdropUrl(film, 1920, 1080) : null;
   const logo = film !== null ? logoUrl(film, 576) : null;
   return (
     <div class="postplay">

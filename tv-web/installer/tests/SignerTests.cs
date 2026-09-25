@@ -39,7 +39,7 @@ public class SignerTests
     public void SignsByteForByteAsTizenStudio(string golden)
     {
         var files = ShellPackage.Unzip(File.ReadAllBytes(Fixture("golden/" + golden)));
-        var signed = WidgetSigner.Sign(files, TestAuthor(), TizenDefaults.Embedded().Distributor);
+        var signed = WidgetSigner.Sign(files, TestAuthor(), TestTizen.Defaults.Distributor);
 
         Assert.Equal(Encoding.UTF8.GetString(files[WidgetSigner.AuthorSignatureFile]),
             Encoding.UTF8.GetString(signed[WidgetSigner.AuthorSignatureFile]));
@@ -68,7 +68,7 @@ public class SignerTests
             ["signature2.xml"] = "old"u8.ToArray(),
             ["docs/signature1.xml"] = "kept: not at the root"u8.ToArray(),
         };
-        var signed = WidgetSigner.Sign(files, TestAuthor(), TizenDefaults.Embedded().Distributor);
+        var signed = WidgetSigner.Sign(files, TestAuthor(), TestTizen.Defaults.Distributor);
         Assert.Equal(["author-signature.xml", "docs/signature1.xml", "index.html", "signature1.xml"], signed.Keys);
         var author = Encoding.UTF8.GetString(signed["author-signature.xml"]);
         Assert.Contains("URI=\"docs%2Fsignature1.xml\"", author, StringComparison.Ordinal);
@@ -78,7 +78,7 @@ public class SignerTests
     [Fact]
     public void TizenDefaultsLoad()
     {
-        var d = TizenDefaults.Embedded();
+        var d = TestTizen.Defaults;
         Assert.Equal("CN=Tizen Developers CA, OU=Tizen Association, O=Tizen Association", d.DeveloperCa.Subject);
         // the CA key is the CA certificate's key
         Assert.Equal(d.DeveloperCa.GetRSAPublicKey()!.ExportSubjectPublicKeyInfo(), d.DeveloperCaKey.ExportSubjectPublicKeyInfo());
@@ -90,7 +90,7 @@ public class SignerTests
     [Fact]
     public void AuthorCertificateAsTizenStudioMakesThem()
     {
-        var d = TizenDefaults.Embedded();
+        var d = TestTizen.Defaults;
         var now = new DateTimeOffset(2026, 9, 24, 12, 0, 0, TimeSpan.Zero);
         var (key, cert) = d.CreateAuthorCertificate("Tally", now);
         Assert.Equal("CN=Tally, O=Tally", cert.Subject);
@@ -113,7 +113,7 @@ public class SignerTests
     {
         // cert-svc checks an out-of-date signing certificate's chain at the middle of its validity: made in 2028, it
         // must sit inside the CA's dates to keep working
-        var d = TizenDefaults.Embedded();
+        var d = TestTizen.Defaults;
         var (_, cert) = d.CreateAuthorCertificate("Tally", new DateTimeOffset(2028, 3, 1, 0, 0, 0, TimeSpan.Zero));
         Assert.Equal(d.DeveloperCa.NotAfter, cert.NotAfter);
         Assert.True(cert.NotBefore >= d.DeveloperCa.NotBefore);
@@ -123,7 +123,7 @@ public class SignerTests
     [Fact]
     public void AuthorCertificateKeepsAGivenKey()
     {
-        var d = TizenDefaults.Embedded();
+        var d = TestTizen.Defaults;
         using var key = RSA.Create(2048);
         var (same, cert) = d.CreateAuthorCertificate("Tally", DateTimeOffset.UtcNow, key);
         Assert.Same(key, same);
@@ -134,7 +134,7 @@ public class SignerTests
     public void SignedShellVerifiesWithOpenStandards()
     {
         // what a TV checks, redone independently: every digest, the #prop digest and both signature values
-        var store = new CertificateStore(TestDirs.New());
+        var store = new CertificateStore(TestDirs.New(), TestTizen.Defaults);
         var wgt = ShellPackage.BuildSigned("http://192.0.2.10:8096", store.TizenAuthor(), store.TizenDistributor());
         var files = ShellPackage.Unzip(wgt);
         foreach (var sigFile in new[] { WidgetSigner.AuthorSignatureFile, WidgetSigner.DistributorSignatureFile })

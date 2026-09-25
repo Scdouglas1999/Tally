@@ -16,6 +16,10 @@ export interface Platform {
   keepAwake(awake: boolean): void;
   /** Leaves the app. */
   exit(): void;
+  /** The TV model (Samsung's model code, e.g. "QN55Q80AAFXZA"), '' where unknown. */
+  model(): string;
+  /** Tizen's version as a number (6.5), 0 elsewhere. */
+  tizenVersion(): number;
 }
 
 function tizenPlatform(shell: TallyShell): Platform {
@@ -58,6 +62,21 @@ function tizenPlatform(shell: TallyShell): Platform {
     exit() {
       shell.exit();
     },
+    model() {
+      try {
+        return window.webapis?.productinfo?.getRealModel() ?? '';
+      } catch {
+        return '';
+      }
+    },
+    tizenVersion() {
+      try {
+        const v = window.tizen?.systeminfo?.getCapability('http://tizen.org/feature/platform.version');
+        return typeof v === 'string' ? parseFloat(v) || 0 : 0;
+      } catch {
+        return 0;
+      }
+    },
   };
 }
 
@@ -74,6 +93,8 @@ function webosPlatform(shell: TallyShell): Platform {
     exit() {
       shell.exit();
     },
+    model: () => '',
+    tizenVersion: () => 0,
   };
 }
 
@@ -94,6 +115,8 @@ function browserPlatform(shell: TallyShell): Platform {
     exit() {
       shell.exit();
     },
+    model: () => '',
+    tizenVersion: () => 0,
   };
 }
 

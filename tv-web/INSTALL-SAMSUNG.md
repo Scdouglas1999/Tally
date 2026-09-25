@@ -7,6 +7,8 @@ Tally updates itself from the Jellyfin server.
 
 - The Samsung TV, switched on.
 - A computer on the same home network as the TV (the same Wi-Fi or router). Windows 10 or 11, a Mac, or Linux.
+- An internet connection on the computer the first time you run the installer. It downloads Tizen's public signing
+  certificates (4 MB, from download.tizen.org) once and keeps them for later.
 - The **address of the Jellyfin server** and **your Jellyfin account**. The person who runs the server gives you both.
   The address looks like `https://jellyfin.example.com` or `192.168.1.10:8096`.
 
@@ -137,6 +139,7 @@ middle button and choose **Add to Home**.
 |---|---|
 | "Your TV is not in Developer Mode, or the IP in Developer Mode is not this PC's" | Do step 2 again. Check that Host PC IP is exactly the address the installer shows, and restart the TV fully (hold the power button). |
 | "Nothing answered at …" | The TV is off, asleep or on another network, or the address is wrong. Turn the TV on, check it's on the same Wi-Fi, and press Enter to try again. |
+| "This PC could not download Tizen's signing certificates" | Connect the computer to the internet and run the installer again. It needs the internet only this once. |
 | "No Jellyfin server answered" | Check the address with the server's owner. Try it in the computer's browser, where it should open Jellyfin. |
 | "This server does not have Tally's TV app yet" | Ask the server's owner to install or update the Tally plugin. Tally installs anyway. |
 | "Tally is already on this TV, installed from another computer" | Type `y` to replace it. You'll sign in on the TV again. |

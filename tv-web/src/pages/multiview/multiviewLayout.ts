@@ -134,11 +134,17 @@ export function tileFocusMap(index: number, count: number, layout: MultiviewLayo
 
 /**
  * How many tiles can play video at once. Browsers decode in software: all four, as on Android. TVs have a fixed
- * number of hardware decoders: one is guaranteed (2020+ Samsung and LG sets); more only where a real set has been
- * probed (ARCHITECTURE.md, multiview). Tiles beyond this show the channel's live card and the audio tile plays.
+ * number of hardware decoders, which web apps cannot ask for:
+ *  - what this TV model showed before (`remembered`: a set that could not play two tiles is remembered at 1);
+ *  - else Samsung 2021+ sets (Tizen 6.0+) try 2 (Samsung documents two AVPlay players at once through AVPlayStore on
+ *    those sets; the Tizen emulator has one decoder and falls back to 1 by itself, see MultiviewPage);
+ *  - else 1 (2020 Samsung sets, LG until probed).
+ * Tiles beyond this show the channel's live card, and the audio tile always plays.
  */
-export function multiviewDecoders(platform: 'tizen' | 'webos' | 'browser'): number {
-  return platform === 'browser' ? 4 : 1;
+export function multiviewDecoders(platform: 'tizen' | 'webos' | 'browser', remembered: number | null = null, tizenVersion = 0): number {
+  if (platform === 'browser') return 4;
+  if (remembered !== null && remembered >= 1) return Math.min(remembered, 4);
+  return platform === 'tizen' && tizenVersion >= 6 ? 2 : 1;
 }
 
 /**

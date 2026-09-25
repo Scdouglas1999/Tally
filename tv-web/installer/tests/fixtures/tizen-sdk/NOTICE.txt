@@ -1,0 +1,7 @@
+Tizen's public signing material, for the tests only (the program downloads it from download.tizen.org instead of
+carrying it): tizen-developer-ca.cer, tizen-developer-ca-privatekey.pem (the "Tizen Developers CA" and its key) and
+tizen-distributor-signer.p12 (Tizen's public distributor), unmodified, out of Tizen Studio's certificate generator
+(https://download.tizen.org/sdk/tizenstudio/official/binary/certificate-generator_0.1.4_ubuntu-64.zip,
+data/tools/certificate-generator/certificates/; source: https://git.tizen.org/cgit/sdk/tools/certificate-generator/).
+Copyright (c) 2012 - 2013 Samsung Electronics Co., Ltd., licensed under the Apache License, Version 2.0
+(../../../src/certificates/LICENSE-Apache-2.0.txt).

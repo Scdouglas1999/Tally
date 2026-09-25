@@ -35,11 +35,57 @@ function fieldKeeps(input: HTMLInputElement, key: Key | null, event: KeyboardEve
   return false;
 }
 
+/**
+ * A held key repeats. Browsers flag the repeats (`event.repeat`); the Tizen runtime (emulator, September 2026)
+ * delivers a held key as key-up/key-down pairs with `repeat` false: the first key-up ~660 ms after the press, then
+ * pairs every ~40 ms (gaps from key-up to key-down of 0-90 ms). So once a press has been held HOLD_START_MS and goes
+ * up, a key-down of the same key within REPEAT_GAP_MS continues it (a repeat); a quick second press after a short one
+ * (a double tap) stays a press. A key-down while the key is still down (its key-up not seen) is a repeat too.
+ */
+const HOLD_START_MS = 400;
+const REPEAT_GAP_MS = 120;
+const REPEAT_WHILE_DOWN_MS = 700;
+const repeats = new WeakSet<Event>();
+interface KeyTrack {
+  pressAt: number;
+  downAt: number | null;
+  upAt: number | null;
+  chain: boolean;
+}
+const tracks: Record<number, KeyTrack> = {};
+
+/** Whether this key-down is the remote repeating a held key (see HOLD_START_MS). */
+export function isRepeat(event: KeyboardEvent): boolean {
+  return event.repeat || repeats.has(event);
+}
+
+/** Records a key-down / key-up for `isRepeat` (exported for the tests). */
+export function trackRepeat(type: 'down' | 'up', event: KeyboardEvent, now = Date.now()): void {
+  const t = (tracks[event.keyCode] ??= { pressAt: now, downAt: null, upAt: null, chain: false });
+  if (type === 'up') {
+    if (t.chain || now - t.pressAt >= HOLD_START_MS) t.chain = true;
+    t.upAt = now;
+    t.downAt = null;
+    return;
+  }
+  const repeat =
+    event.repeat ||
+    (t.downAt !== null && now - t.downAt < REPEAT_WHILE_DOWN_MS) ||
+    (t.chain && t.upAt !== null && now - t.upAt < REPEAT_GAP_MS);
+  if (repeat) repeats.add(event);
+  else {
+    t.pressAt = now;
+    t.chain = false;
+  }
+  t.downAt = now;
+}
+
 export function installKeyRouter(platform: Platform, onRootBack: () => void): void {
   fallbackBack = onRootBack;
   window.addEventListener(
     'keydown',
     (event) => {
+      trackRepeat('down', event);
       const key = mapKey({ keyCode: event.keyCode, key: event.key }, platform.name, platform.runtimeKeys);
       const input = typingIn(event.target);
       if (input !== null && fieldKeeps(input, key, event)) return;
@@ -67,6 +113,7 @@ export function installKeyRouter(platform: Platform, onRootBack: () => void): vo
   window.addEventListener(
     'keyup',
     (event) => {
+      trackRepeat('up', event);
       const key = mapKey({ keyCode: event.keyCode, key: event.key }, platform.name, platform.runtimeKeys);
       const nav = key === null ? undefined : NAV[key];
       if (nav !== undefined) navigateRelease(nav);

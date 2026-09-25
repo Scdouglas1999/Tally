@@ -152,7 +152,7 @@ public class FlowTests
     {
         var output = new StringWriter();
         var ui = new Ui(new StringReader(input), output, color: false);
-        store ??= new CertificateStore(TestDirs.New());
+        store ??= new CertificateStore(TestDirs.New(), TestTizen.Defaults);
         var flow = new InstallerFlow(ui, options ?? new Options { Tv = "127.0.0.1", SdbPort = tv.Port }, new HttpClient(jellyfin ?? Jellyfin()), store)
         {
             OpenBrowser = _ => throw new InvalidOperationException("no browser in tests"),
@@ -190,7 +190,7 @@ public class FlowTests
         await using var tv = new FakeSdbd();
         var output = new StringWriter();
         var ui = new Ui(new StringReader("\n192.0.2.10:8096\n"), output, color: false);
-        var store = new CertificateStore(TestDirs.New());
+        var store = new CertificateStore(TestDirs.New(), TestTizen.Defaults);
         var flow = new InstallerFlow(ui, new Options { SdbPort = tv.Port, NoLaunch = true }, new HttpClient(Jellyfin()), store)
         {
             Networks = () => [(IPAddress.Parse("127.0.0.1"), [IPAddress.Parse("127.0.0.3"), IPAddress.Loopback])],
@@ -208,7 +208,7 @@ public class FlowTests
     public async Task UpdatesWithTheSameAuthorCertificate()
     {
         await using var tv = new FakeSdbd();
-        var store = new CertificateStore(TestDirs.New());
+        var store = new CertificateStore(TestDirs.New(), TestTizen.Defaults);
         var options = new Options { Tv = "127.0.0.1", SdbPort = tv.Port, Server = "192.0.2.10:8096", Yes = true };
         var (first, _, _) = Make(tv, "", options, store: store);
         Assert.Equal(0, await first.RunAsync(CancellationToken.None));
@@ -254,9 +254,11 @@ public class FlowTests
         var other = MakeSamsungWgt("OTHERTV0000001");
         var path = Path.Combine(TestDirs.New(), "Tally.wgt");
         await File.WriteAllBytesAsync(path, other);
-        var (flow, output, _) = Make(tv, $"192.0.2.10:8096\n2\n{path}\n");
+        // a stray answer ("y") asks again instead of opening Samsung's sign-in
+        var (flow, output, _) = Make(tv, $"192.0.2.10:8096\ny\n2\n{path}\n");
         Assert.Equal(1, await flow.RunAsync(CancellationToken.None));
         var text = output.ToString();
+        Has(text, "Type 1 (Samsung account) or 2 (a Tally.wgt file)");
         Has(text, "only installs apps signed with a Samsung certificate");
         Has(text, "NEWTV000000001");
         Has(text, "was made for another TV (OTHERTV0000001)");

@@ -122,6 +122,12 @@ describe('multiview layout (TallyMultiviewPage.kt)', () => {
   it('gives decoders to the audio tile first when the TV has fewer than tiles', () => {
     expect(multiviewDecoders('browser')).toBe(4);
     expect(multiviewDecoders('tizen')).toBe(1);
+    // 2021+ Samsung sets try two tiles until the set shows it cannot (then 1 is remembered for the model)
+    expect(multiviewDecoders('tizen', null, 6)).toBe(2);
+    expect(multiviewDecoders('tizen', null, 5.5)).toBe(1);
+    expect(multiviewDecoders('tizen', 1, 10)).toBe(1);
+    expect(multiviewDecoders('webos', null, 0)).toBe(1);
+    expect(multiviewDecoders('browser', 1)).toBe(4);
     expect(playingTiles(4, 2, 4)).toEqual([true, true, true, true]);
     expect(playingTiles(4, 2, 1)).toEqual([false, false, true, false]);
     expect(playingTiles(3, 2, 2)).toEqual([true, false, true]);

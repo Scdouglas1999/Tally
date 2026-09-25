@@ -9,7 +9,7 @@ import { getSessionApi } from '@jellyfin/sdk/lib/utils/api/session-api';
 import { currentApi, deviceId, session } from '../api/jellyfin';
 import type { Platform } from '../platform/platform';
 import { browserProbe, buildDeviceProfile, detectCapabilities } from './deviceProfile';
-import type { Source } from './engine';
+import type { NativeAudioTrack, Source } from './engine';
 import { applyQualityToUrl, type QualityOption } from './qualityLadder';
 
 /** Original quality's cap: high enough never to force a transcode on a LAN. */
@@ -206,4 +206,21 @@ export function reporter(itemId: string, prepared: () => Prepared | null) {
         .catch(() => undefined);
     },
   };
+}
+
+/**
+ * The engine's own track for the chosen audio of a directly played file, or null when the engine has nothing to
+ * switch (a stream the server made already carries the chosen track). AVPlay plays a file's first audio track unless
+ * told otherwise, so without this a direct-played film ignored the viewer's (and Jellyfin's default) audio choice.
+ * Tracks are matched by their order among the file's own audio streams (external audio files are not in the file).
+ */
+export function nativeAudioFor(p: Prepared, tracks: readonly NativeAudioTrack[]): number | null {
+  if (p.method !== 'DirectPlay' || p.audioIndex === null || tracks.length < 2) return null;
+  const internal = (p.mediaSource.MediaStreams ?? [])
+    .filter((x) => x.Type === 'Audio' && x.IsExternal !== true && x.Index != null)
+    .sort((a, b) => (a.Index as number) - (b.Index as number));
+  const at = internal.findIndex((x) => x.Index === p.audioIndex);
+  if (at < 0 || internal.length !== tracks.length) return null;
+  const ordered = tracks.slice().sort((a, b) => a.index - b.index);
+  return ordered[at]?.index ?? null;
 }
