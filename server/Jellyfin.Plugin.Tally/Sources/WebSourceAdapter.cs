@@ -83,13 +83,16 @@ public class WebSourceAdapter : ISourceAdapter
             return snapshot;
         }
 
+        var games = await GamesAsync(cancellationToken).ConfigureAwait(false);
         if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null)
         {
             _logger.LogInformation("JellyTV: HTTP scan found nothing on {Url}; trying headless browser", Definition.PageUrl);
             try
             {
+                var seeds = extractor?.DiscoveredLinks ?? Array.Empty<string>();
+                var ranks = games == null ? null : CrawlRanks(seeds, games, DateTimeOffset.UtcNow);
                 found = await new BrowserExtractor(_logger, ua, _browser)
-                    .ExtractAsync(Definition.PageUrl, Definition.MaxPages, cancellationToken, extractor?.DiscoveredLinks)
+                    .ExtractAsync(Definition.PageUrl, Definition.MaxPages, cancellationToken, seeds, ranks == null ? null : u => ranks.GetValueOrDefault(u, UnknownRank))
                     .ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -104,7 +107,7 @@ public class WebSourceAdapter : ISourceAdapter
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var counter = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var skipped = 0;
-        var gameOf = await GamesByStreamAsync(found, cancellationToken).ConfigureAwait(false);
+        var gameOf = games == null ? new Dictionary<int, GameInfo>() : GamesByStream(found, games);
 
         for (var i = 0; i < found.Count; i++)
         {
@@ -176,44 +179,87 @@ public class WebSourceAdapter : ISourceAdapter
         return snapshot;
     }
 
-    /// <summary>Stream index → the game its name names both teams of, when the scoreboard is available.</summary>
-    private async Task<Dictionary<int, GameInfo>> GamesByStreamAsync(List<ExtractedStream> found, CancellationToken cancellationToken)
+    /// <summary>Crawl rank of a page no game on the scoreboard matches (another sport, or a game the feed lacks).</summary>
+    public const int UnknownRank = 2;
+
+    /// <summary>
+    /// Crawl rank of each event page, from the game its URL names (see <see cref="BrowserExtractor.PlanCrawl"/>):
+    /// 0 live now, 1 starting within 30 minutes, <see cref="UnknownRank"/> no game on the board, 3 later, 4 over.
+    /// </summary>
+    public static Dictionary<string, int> CrawlRanks(IEnumerable<string> pages, IReadOnlyList<GameInfo> games, DateTimeOffset now)
     {
-        var result = new Dictionary<int, GameInfo>();
-        if (_games == null || found.Count == 0)
+        var named = pages.Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(u => (Url: u, Name: BrowserExtractor.NameFromUrl(u)))
+            .Where(p => p.Name != null)
+            .ToList();
+        var ranks = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (i, g) in Matches(named.Select(p => p.Name!).ToList(), games, includeFinished: true))
         {
-            return result;
+            var rank = g.State == "in" ? 0
+                : g.State == "post" ? 4
+                : g.Start - now <= TimeSpan.FromMinutes(30) ? 1
+                : 3;
+            ranks[named[i].Url] = Math.Min(rank, ranks.GetValueOrDefault(named[i].Url, int.MaxValue));
         }
 
-        IReadOnlyList<GameInfo>? games;
+        return ranks;
+    }
+
+    private async Task<IReadOnlyList<GameInfo>?> GamesAsync(CancellationToken cancellationToken)
+    {
+        if (_games == null)
+        {
+            return null;
+        }
+
         try
         {
-            games = await _games(cancellationToken).ConfigureAwait(false);
+            var games = await _games(cancellationToken).ConfigureAwait(false);
+            return games is { Count: > 0 } ? games : null;
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
         {
-            _logger.LogDebug(ex, "JellyTV: no scoreboard to classify {Source}'s streams", Definition.Name);
-            return result;
+            _logger.LogDebug(ex, "JellyTV: no scoreboard for {Source}", Definition.Name);
+            return null;
+        }
+    }
+
+    /// <summary>Stream index → the game its name names both teams of.</summary>
+    private static Dictionary<int, GameInfo> GamesByStream(List<ExtractedStream> found, IReadOnlyList<GameInfo> games)
+    {
+        var result = new Dictionary<int, GameInfo>();
+        foreach (var (i, g) in Matches(found.Select(f => f.Name).ToList(), games, includeFinished: false))
+        {
+            result.TryAdd(i, g);
         }
 
-        if (games is not { Count: > 0 })
+        return result;
+    }
+
+    /// <summary>(index into <paramref name="names"/>, game) for each name that names both teams of a game. The
+    /// matcher passes over finished games; <paramref name="includeFinished"/> matches them too.</summary>
+    private static IEnumerable<(int Index, GameInfo Game)> Matches(IReadOnlyList<string> names, IReadOnlyList<GameInfo> games, bool includeFinished)
+    {
+        if (names.Count == 0)
         {
-            return result;
+            yield break;
         }
 
         // the matcher mutates the games' channel lists: work on copies
         var copies = games.Select(g => g.Clone()).ToList();
-        var probes = found.Select((f, i) => new ChannelProbe(i.ToString(CultureInfo.InvariantCulture), f.Name, null)).ToList();
-        GameChannelMatcher.Match(copies, probes);
-        foreach (var g in copies)
+        if (includeFinished)
         {
-            foreach (var gc in g.Channels.Where(c => c.Kind == "teams"))
-            {
-                result.TryAdd(int.Parse(gc.Id, CultureInfo.InvariantCulture), g);
-            }
+            copies.ForEach(c => c.State = c.State == "post" ? "pre" : c.State);
         }
 
-        return result;
+        GameChannelMatcher.Match(copies, names.Select((n, i) => new ChannelProbe(i.ToString(CultureInfo.InvariantCulture), n, null)).ToList());
+        for (var k = 0; k < copies.Count; k++)
+        {
+            foreach (var gc in copies[k].Channels.Where(c => c.Kind == "teams"))
+            {
+                yield return (int.Parse(gc.Id, CultureInfo.InvariantCulture), games[k]);
+            }
+        }
     }
 
     private static readonly string[] CollegeFootball = { "college football", "ncaaf", "cfb", "ncaa football", "college-football", "ncaa-football" };

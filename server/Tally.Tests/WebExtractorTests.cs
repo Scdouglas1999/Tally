@@ -179,6 +179,82 @@ public class WebExtractorTests
         Assert.All(snapshot.Channels, c => Assert.Equal(group, c.Group));
     }
 
+    // A Saturday listing as a real site had it: dozens of college games (most not started) ahead of the baseball.
+    private static readonly string[] SaturdayListing =
+        Enumerable.Range(0, 60).Select(i => $"https://site.example/cfb/college-{i}-home-{i}/15292{i:00}")
+            .Concat(new[]
+            {
+                "https://site.example/mlb/detroit-tigers-pittsburgh-pirates/1376170",
+                "https://site.example/mlb/boston-red-sox-chicago-cubs/1376181",
+                "https://site.example/mlb-live-streams",
+                "https://site.example/cfb/ohio-state-buckeyes-illinois-fighting-illini/1529233",
+                "https://site.example/cfb/texas-longhorns-tennessee-volunteers/1529234"
+            })
+            .ToArray();
+
+    private static List<Jellyfin.Plugin.Tally.Scores.GameInfo> SaturdayBoard(DateTimeOffset now)
+    {
+        Jellyfin.Plugin.Tally.Scores.GameInfo Game(string id, string state, TimeSpan startsIn, string away, string home, string league) => new()
+        {
+            Id = id, State = state, Start = now + startsIn, League = league, Sport = league == "MLB" ? "baseball" : "football",
+            Away = new() { Id = id + "a", Name = away, ShortName = away.Split(' ')[0], Nickname = away.Split(' ')[^1], Location = away.Split(' ')[0] },
+            Home = new() { Id = id + "h", Name = home, ShortName = home.Split(' ')[0], Nickname = home.Split(' ')[^1], Location = home.Split(' ')[0] }
+        };
+        return new()
+        {
+            Game("det", "in", TimeSpan.FromHours(-1), "Detroit Tigers", "Pittsburgh Pirates", "MLB"),
+            Game("bos", "pre", TimeSpan.FromMinutes(20), "Boston Red Sox", "Chicago Cubs", "MLB"),
+            Game("osu", "post", TimeSpan.FromHours(-4), "Ohio State Buckeyes", "Illinois Fighting Illini", "NCAAF"),
+            Game("tex", "pre", TimeSpan.FromHours(4), "Texas Longhorns", "Tennessee Volunteers", "NCAAF"),
+        };
+    }
+
+    [Fact]
+    public void Crawl_Ranks_Follow_The_Scoreboard()
+    {
+        var now = new DateTimeOffset(2026, 9, 26, 19, 0, 0, TimeSpan.Zero);
+        var ranks = WebSourceAdapter.CrawlRanks(SaturdayListing, SaturdayBoard(now), now);
+
+        Assert.Equal(0, ranks["https://site.example/mlb/detroit-tigers-pittsburgh-pirates/1376170"]);
+        Assert.Equal(1, ranks["https://site.example/mlb/boston-red-sox-chicago-cubs/1376181"]);
+        Assert.Equal(3, ranks["https://site.example/cfb/texas-longhorns-tennessee-volunteers/1529234"]);
+        Assert.Equal(4, ranks["https://site.example/cfb/ohio-state-buckeyes-illinois-fighting-illini/1529233"]);
+        Assert.False(ranks.ContainsKey("https://site.example/cfb/college-3-home-3/1529203")); // not on the board: UnknownRank
+    }
+
+    [Fact]
+    public void Live_Games_Are_Crawled_Even_Behind_Dozens_Of_Other_Games()
+    {
+        var now = new DateTimeOffset(2026, 9, 26, 19, 0, 0, TimeSpan.Zero);
+        var ranks = WebSourceAdapter.CrawlRanks(SaturdayListing, SaturdayBoard(now), now);
+        var (seeds, budget) = BrowserExtractor.PlanCrawl(SaturdayListing, 12, u => ranks.GetValueOrDefault(u, WebSourceAdapter.UnknownRank));
+
+        // the landing page is visited first, so these are the next budget - 1 pages
+        var visited = seeds.Take(budget - 1).ToList();
+        Assert.Equal("https://site.example/mlb/detroit-tigers-pittsburgh-pirates/1376170", visited[0]);
+        Assert.Equal("https://site.example/mlb/boston-red-sox-chicago-cubs/1376181", visited[1]);
+        Assert.DoesNotContain("https://site.example/cfb/ohio-state-buckeyes-illinois-fighting-illini/1529233", visited); // over
+        Assert.DoesNotContain("https://site.example/mlb-live-streams", visited); // not an event page
+        Assert.Equal(12, budget);
+
+        // without a scoreboard: page order, as before (the baseball is never reached)
+        var (plain, plainBudget) = BrowserExtractor.PlanCrawl(SaturdayListing, 12, null);
+        Assert.Equal(12, plainBudget);
+        Assert.DoesNotContain("https://site.example/mlb/detroit-tigers-pittsburgh-pirates/1376170", plain.Take(plainBudget - 1));
+    }
+
+    [Theory]
+    [InlineData(5, 12)]   // few live games: the configured budget
+    [InlineData(20, 21)]  // more live games than it covers: every one, plus the landing page
+    [InlineData(80, 40)]  // capped
+    public void The_Crawl_Budget_Grows_To_Reach_Every_Live_Game(int live, int budget)
+    {
+        var pages = Enumerable.Range(0, 100).Select(i => $"https://site.example/mlb/a-{i}-b-{i}/100{i:000}").ToList();
+        var plan = BrowserExtractor.PlanCrawl(pages, 12, u => pages.IndexOf(u) < live ? 0 : 3);
+        Assert.Equal(budget, plan.Budget);
+        Assert.All(plan.Seeds.Take(Math.Min(live, budget - 1)), u => Assert.True(pages.IndexOf(u) < live));
+    }
+
     private static HttpResponseMessage Html(string body) =>
         new(HttpStatusCode.OK) { Content = new StringContent(body, System.Text.Encoding.UTF8, "text/html") };
 
