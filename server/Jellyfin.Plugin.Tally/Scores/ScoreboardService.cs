@@ -19,8 +19,24 @@ namespace Jellyfin.Plugin.Tally.Scores;
 public sealed class ScoreboardService
 {
     // Anything ESPN has a scoreboard for can be added under Settings → Live scores
-    // ("basketball/nba", "hockey/nhl", "football/college-football", "soccer/eng.1"…).
-    public const string DefaultLeagues = "football/nfl,baseball/mlb";
+    // ("basketball/nba", "hockey/nhl", "soccer/eng.1"…), or by a short name from LeagueNames.
+    public const string DefaultLeagues = "football/nfl,football/college-football,baseball/mlb";
+
+    /// <summary>Short names the Leagues setting takes besides ESPN paths.</summary>
+    public static readonly IReadOnlyDictionary<string, string> LeagueNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ["nfl"] = "football/nfl",
+        ["ncaaf"] = "football/college-football",
+        ["cfb"] = "football/college-football",
+        ["college-football"] = "football/college-football",
+        ["mlb"] = "baseball/mlb",
+        ["nba"] = "basketball/nba",
+        ["wnba"] = "basketball/wnba",
+        ["ncaab"] = "basketball/mens-college-basketball",
+        ["nhl"] = "hockey/nhl",
+        ["mls"] = "soccer/usa.1",
+        ["epl"] = "soccer/eng.1",
+    };
 
     // The feed sits behind a bot filter that is picky in non-obvious ways: site.api.espn.com
     // 403s requests with no User-Agent (HttpClient's default), with an unknown one, and with a
@@ -121,6 +137,7 @@ public sealed class ScoreboardService
     public static IReadOnlyList<string> ParseLeagues(string? configured)
         => (string.IsNullOrWhiteSpace(configured) ? DefaultLeagues : configured)
             .Split(new[] { ',', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(l => LeagueNames.TryGetValue(l, out var path) ? path : l)
             // path segments only — this string ends up in an outbound URL
             .Where(l => l.Count(ch => ch == '/') == 1 && l.All(ch => char.IsLetterOrDigit(ch) || ch is '/' or '.' or '-'))
             .Distinct(StringComparer.OrdinalIgnoreCase)

@@ -808,7 +808,7 @@ function gameRow(g, hide) {
 
   const team = (t, other) => `<div class="g-team${post && !hide && !t.winner && other.winner ? ' lose' : ''}">
       ${t.logo ? `<img class="g-logo" src="${esc(t.logo)}" loading="lazy" referrerpolicy="no-referrer" alt="">` : '<span class="g-logo"></span>'}
-      <span class="g-name">${esc(t.shortName || t.abbr)}</span>
+      <span class="g-name">${t.rank ? `<span class="g-rank">${t.rank}</span>` : ''}${esc(t.shortName || t.abbr)}</span>
       ${t.record ? `<span class="g-rec">${esc(t.record)}</span>` : ''}
       ${live && !hide && t.possession ? '<i class="led on" title="Possession"></i>' : ''}
       <span class="g-score">${pre ? '' : hide ? '–' : (t.score ?? 0)}</span></div>`;
@@ -1428,8 +1428,8 @@ async function renderAdmin(container, fresh) {
         Show the Games board, score bugs and switch alerts</label></div>
       <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.LiveCardsEnabled !== false ? ' on' : ''}" id="set-livecards" role="switch" aria-checked="${!!(cfg && cfg.LiveCardsEnabled !== false)}"></button>
         Live cards for TV apps — redraw channel cards with the current score every 2 minutes while games are on, and keep channels numbered hottest-first (re-runs Jellyfin's guide refresh each time)</label></div>
-      <div class="f-row"><label for="set-leagues">Leagues — comma-separated ESPN paths, blank for the defaults (NFL and MLB)</label>
-        <input type="text" id="set-leagues" value="${esc(cfg ? cfg.ScoreLeagues || '' : '')}" placeholder="football/nfl, baseball/mlb"></div>
+      <div class="f-row"><label for="set-leagues">Leagues — comma-separated ESPN paths or short names (nfl, ncaaf, mlb, nba, nhl…), blank for the defaults (NFL, college football and MLB)</label>
+        <input type="text" id="set-leagues" value="${esc(cfg ? cfg.ScoreLeagues || '' : '')}" placeholder="nfl, ncaaf, mlb"></div>
     </div>
 
     <div class="set-card">
@@ -1473,7 +1473,7 @@ async function renderAdmin(container, fresh) {
           <div class="f-row"><label>Page URL — streams are auto-detected on the page and its embeds</label>
             <input type="text" id="ns-page" placeholder="https://example.com/live"></div>
           <div class="f-row"><label>Only include — leagues or groups, comma-separated (blank = everything)</label>
-            <input type="text" id="ns-include" placeholder="NFL, MLB"></div>
+            <input type="text" id="ns-include" placeholder="NFL, NCAAF, MLB"></div>
           <div class="f-row"><label class="check">
             <input type="checkbox" id="ns-browser" checked>
             Headless-browser fallback — sniff streams that only appear after JavaScript runs</label></div>

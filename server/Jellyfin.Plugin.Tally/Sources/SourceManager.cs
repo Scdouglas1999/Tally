@@ -239,9 +239,12 @@ public class SourceManager
     }
 
     /// <summary>Today's games, for naming and grouping; null without a scoreboard.</summary>
-    private async Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(List<SourceChannel> channels, CancellationToken ct)
+    private Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(List<SourceChannel> channels, CancellationToken ct)
+        => GamesAsync(channels.Count, ct);
+
+    private async Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(int channelCount, CancellationToken ct)
     {
-        if (_scoreboard == null || !(Plugin.Instance?.Configuration.ScoresEnabled ?? true) || channels.Count == 0)
+        if (_scoreboard == null || !(Plugin.Instance?.Configuration.ScoresEnabled ?? true) || channelCount == 0)
         {
             return null;
         }
@@ -293,7 +296,7 @@ public class SourceManager
         return def.Kind switch
         {
             SourceKind.Direct => new DirectSourceAdapter(def, _httpClientFactory, _logger),
-            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser),
+            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser, ct => GamesAsync(1, ct)),
             _ => new M3uSourceAdapter(def, _httpClientFactory, _logger)
         };
     }

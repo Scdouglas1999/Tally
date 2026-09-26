@@ -71,7 +71,7 @@ public class SourceDefinition
     public int MaxPages { get; set; } = 12;
 
     /// <summary>Web sources: comma-separated leagues/groups to include
-    /// ("NFL, MLB", "American Football", "Basketball"...). Empty = everything found.</summary>
+    /// ("NFL, MLB", "NCAAF", "American Football", "College Football", "Basketball"...). Empty = everything found.</summary>
     public string Include { get; set; } = string.Empty;
 
     public bool Enabled { get; set; } = true;
@@ -126,7 +126,8 @@ public class PluginConfiguration : BasePluginConfiguration
     /// of minutes while games are on, and re-run Jellyfin's guide refresh so channel order follows the heat.</summary>
     public bool LiveCardsEnabled { get; set; } = true;
 
-    /// <summary>Comma-separated ESPN league paths ("football/nfl,baseball/mlb"). Empty = built-in defaults.
+    /// <summary>Comma-separated ESPN league paths ("football/nfl,baseball/mlb") or short names ("nfl, ncaaf, mlb"; see
+    /// ScoreboardService.LeagueNames). Empty = built-in defaults (NFL, college football, MLB).
     /// A string, not a list: XmlSerializer appends to list defaults on every load.</summary>
     public string ScoreLeagues { get; set; } = string.Empty;
 

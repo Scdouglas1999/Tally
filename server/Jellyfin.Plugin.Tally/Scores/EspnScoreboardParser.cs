@@ -194,6 +194,12 @@ public static class EspnScoreboardParser
             team.Record = Str(recs[0], "summary");
         }
 
+        // unranked teams come as 99
+        if (c.TryGetProperty("curatedRank", out var rank) && Int(rank, "current") is >= 1 and <= 25 and var r)
+        {
+            team.Rank = r;
+        }
+
         if (c.TryGetProperty("team", out var t))
         {
             team.Id = Str(t, "id") ?? string.Empty;

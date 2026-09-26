@@ -121,11 +121,74 @@ public class WebExtractorTests
         Assert.Equal("Lakers vs Celtics", StreamClassifier.CleanName("Watch Lakers vs Celtics Live Stream HD"));
     }
 
+    [Theory]
+    [InlineData("College Football", "LSU Tigers vs Alabama Crimson Tide", "")]      // a college nickname outranks MLB's Tigers
+    [InlineData("College Football", "Team A vs Team B", "https://site.example/college-football/123456")]
+    [InlineData("College Football", "Oregon vs Washington - NCAAF", "")]
+    [InlineData("American Football", "Chiefs vs Bills", "")]
+    [InlineData("American Football", "NFL RedZone", "")]
+    [InlineData("Baseball", "Detroit Tigers vs Cleveland Guardians", "")]
+    [InlineData("Hockey", "Boston Bruins vs Toronto Maple Leafs", "")]
+    public void Classifier_Tells_College_Football_From_The_Nfl(string group, string name, string context)
+        => Assert.Equal(group, StreamClassifier.GroupFor(name, context));
+
+    [Fact]
+    public void A_Stream_Of_A_Game_On_The_Board_Takes_The_Games_League()
+    {
+        Assert.Equal("College Football", StreamClassifier.GroupForGame(new() { Sport = "football", LeaguePath = "football/college-football" }));
+        Assert.Equal("American Football", StreamClassifier.GroupForGame(new() { Sport = "football", LeaguePath = "football/nfl" }));
+        Assert.Equal("Baseball", StreamClassifier.GroupForGame(new() { Sport = "baseball", LeaguePath = "baseball/mlb" }));
+        Assert.Null(StreamClassifier.GroupForGame(new() { Sport = "racing", LeaguePath = "racing/f1" }));
+    }
+
+    [Theory]
+    [InlineData(true, "College Football", 1)]
+    [InlineData(false, "Baseball", 0)] // without the board, "Tigers" reads as baseball and the NCAAF filter drops it
+    public async Task Web_Source_Include_Filter_Knows_A_College_Game_By_The_Scoreboard(bool withBoard, string group, int kept)
+    {
+        var router = (string url) => url.Contains("load-playlist")
+            ? Playlist()
+            : url.Contains("new-stream-embed")
+                ? Html("<html><body><script>const source = \"https://cdn.x/playlist/56866/load-playlist\";</script></body></html>")
+                : Html("<html><head><title>Live</title></head><body><iframe src=\"https://emb.x/new-stream-embed/56866\"></iframe></body></html>");
+        var def = new Jellyfin.Plugin.Tally.SourceDefinition
+        {
+            Name = "Listings", Kind = Jellyfin.Plugin.Tally.SourceKind.Web, UseBrowserFallback = false, Include = "NCAAF",
+            PageUrl = "https://site.example/games/clemson-tigers-auburn-tigers/1376053"
+        };
+        var board = new List<Jellyfin.Plugin.Tally.Scores.GameInfo>
+        {
+            new()
+            {
+                Id = "401", Sport = "football", League = "NCAAF", LeaguePath = "football/college-football", State = "pre",
+                Away = new() { Id = "228", Abbr = "CLEM", Name = "Clemson Tigers", ShortName = "Clemson", Nickname = "Tigers", Location = "Clemson" },
+                Home = new() { Id = "2", Abbr = "AUB", Name = "Auburn Tigers", ShortName = "Auburn", Nickname = "Tigers", Location = "Auburn" }
+            }
+        };
+
+        var adapter = new WebSourceAdapter(def, new StubFactory(new StubHandler(router)), NullLogger.Instance, null,
+            withBoard ? _ => Task.FromResult<IReadOnlyList<Jellyfin.Plugin.Tally.Scores.GameInfo>?>(board) : null);
+        var snapshot = await adapter.RefreshAsync(CancellationToken.None);
+
+        if (!withBoard)
+        {
+            Assert.Equal(group, StreamClassifier.GroupFor("Clemson Tigers Auburn Tigers", ""));
+        }
+
+        Assert.Equal(kept, snapshot.Channels.Count);
+        Assert.All(snapshot.Channels, c => Assert.Equal(group, c.Group));
+    }
+
     private static HttpResponseMessage Html(string body) =>
         new(HttpStatusCode.OK) { Content = new StringContent(body, System.Text.Encoding.UTF8, "text/html") };
 
     private static HttpResponseMessage Playlist() =>
         new(HttpStatusCode.OK) { Content = new StringContent("#EXTM3U\n#EXT-X-VERSION:3\n") };
+
+    private sealed class StubFactory(HttpMessageHandler handler) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => new(handler, disposeHandler: false);
+    }
 
     private sealed class StubHandler : HttpMessageHandler
     {

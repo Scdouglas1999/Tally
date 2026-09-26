@@ -14,7 +14,8 @@ public static partial class StreamClassifier
     private static readonly (string Group, string[] Keywords)[] Rules =
     {
         ("Basketball", new[] { "nba", "wnba", "basketball", "ncaa basketball", "march madness" }),
-        ("American Football", new[] { "nfl", "ncaa football", "college football", "super bowl", "ncaaf", "cfb" }),
+        ("College Football", new[] { "ncaa football", "college football", "college-football", "ncaa-football", "ncaaf", "cfb" }),
+        ("American Football", new[] { "nfl", "super bowl" }),
         ("Soccer", new[] { "premier league", "epl", "la liga", "serie a", "bundesliga", "ligue 1", "mls", "champions league", "europa league", "fifa", "uefa", "soccer", "world cup", "copa america", "fa cup" }),
         ("Hockey", new[] { "nhl", "hockey", "stanley cup" }),
         ("Baseball", new[] { "mlb", "baseball", "world series" }),
@@ -33,6 +34,10 @@ public static partial class StreamClassifier
     // league keyword, so teams do most of the classification work on real pages.
     private static readonly (string Group, string[] Keywords)[] TeamRules =
     {
+        // College nicknames no pro team uses (so not Tigers, Bruins, Ducks, Hurricanes…), checked first so
+        // "LSU Tigers vs Alabama Crimson Tide" is football, not baseball. When the scoreboard has the game,
+        // GroupForGame settles it instead.
+        ("College Football", new[] { "crimson tide", "longhorns", "volunteers", "buckeyes", "wolverines", "fighting irish", "nittany lions", "seminoles", "gators", "sooners", "cornhuskers", "razorbacks", "gamecocks", "commodores", "aggies", "red raiders", "horned frogs", "mountaineers", "jayhawks", "cyclones", "hawkeyes", "badgers", "golden gophers", "boilermakers", "hoosiers", "fighting illini", "spartans", "terrapins", "scarlet knights", "tar heels", "blue devils", "demon deacons", "yellow jackets", "hokies", "wolfpack", "sun devils", "trojans", "utes", "buffaloes", "beavers", "golden bears", "cougars", "huskies", "wildcats", "bulldogs", "rebels", "bearcats", "mustangs", "green wave", "mean green", "roadrunners", "lobos", "aztecs", "rainbow warriors", "midshipmen", "black knights", "chanticleers", "thundering herd", "hilltoppers", "blue raiders", "ragin cajuns", "warhawks", "red wolves", "chippewas", "redhawks", "golden flashes", "minutemen", "bobcats" }),
         ("Basketball", new[] { "lakers", "celtics", "warriors", "bulls", "heat", "knicks", "nets", "76ers", "sixers", "bucks", "cavaliers", "raptors", "suns", "mavericks", "nuggets", "clippers", "rockets", "spurs", "thunder", "timberwolves", "pelicans", "hawks", "hornets", "pacers", "pistons", "magic", "wizards", "grizzlies", "trail blazers", "jazz", "kings" }),
         ("American Football", new[] { "chiefs", "eagles", "cowboys", "49ers", "bills", "ravens", "bengals", "lions", "packers", "steelers", "patriots", "broncos", "raiders", "chargers", "rams", "seahawks", "vikings", "buccaneers", "dolphins", "jets", "giants", "bears", "commanders", "falcons", "saints", "panthers", "cardinals", "colts", "texans", "jaguars", "titans", "browns" }),
         ("Hockey", new[] { "bruins", "rangers", "maple leafs", "canadiens", "oilers", "avalanche", "golden knights", "panthers", "lightning", "hurricanes", "stars", "wild", "capitals", "penguins", "red wings", "blackhawks", "kraken", "canucks", "flames", "jets", "islanders", "devils", "flyers", "senators", "sabres", "blue jackets", "sharks", "ducks", "kings", "blues", "predators", "coyotes", "utah hockey" }),
@@ -56,6 +61,20 @@ public static partial class StreamClassifier
         s = Regex.Replace(s, @"\s{2,}", " ").Trim(' ', '-', '|', '–', '·');
         return s.Length > 80 ? s[..80].Trim() : s;
     }
+
+    /// <summary>The group for a stream known to carry <paramref name="game"/>, from the game's league; null for a
+    /// sport this classifier has no group for.</summary>
+    public static string? GroupForGame(Scores.GameInfo game)
+        => game.LeaguePath.Equals("football/college-football", StringComparison.OrdinalIgnoreCase) ? "College Football"
+            : game.Sport.ToLowerInvariant() switch
+            {
+                "football" => "American Football",
+                "basketball" => "Basketball",
+                "baseball" => "Baseball",
+                "hockey" => "Hockey",
+                "soccer" => "Soccer",
+                _ => null
+            };
 
     /// <summary>True if the name looks like an event matchup ("A vs B", "A @ B").</summary>
     public static bool LooksLikeEvent(string name) => Vs.IsMatch(name);

@@ -38,6 +38,9 @@ public class GameTeam
 
     [JsonPropertyName("record")] public string? Record { get; set; }
 
+    /// <summary>Poll ranking (college: the AP Top 25, 1–25); null when unranked or the league has no poll.</summary>
+    [JsonPropertyName("rank")] public int? Rank { get; set; }
+
     [JsonPropertyName("possession")] public bool HasPossession { get; set; }
 
     [JsonPropertyName("winner")] public bool Winner { get; set; }

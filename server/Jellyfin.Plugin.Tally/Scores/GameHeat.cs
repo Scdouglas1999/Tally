@@ -65,6 +65,12 @@ public static class GameHeat
                     g.Tags.Insert(0, "RED ZONE");
                 }
 
+                if (g.Period >= 3 && IsUpset(g))
+                {
+                    heat += 15;
+                    g.Tags.Add("UPSET ALERT");
+                }
+
                 break;
 
             case "basketball":
@@ -154,5 +160,14 @@ public static class GameHeat
         }
 
         g.Heat = Math.Clamp(heat, 0, 100);
+    }
+
+    /// <summary>A ranked team is losing to an unranked one, or to one ranked at least ten places below it.</summary>
+    private static bool IsUpset(GameInfo g)
+    {
+        var (leader, trailer) = (g.Home.Score ?? 0) > (g.Away.Score ?? 0) ? (g.Home, g.Away)
+            : (g.Away.Score ?? 0) > (g.Home.Score ?? 0) ? (g.Away, g.Home)
+            : (null, null);
+        return trailer?.Rank is { } favorite && (leader!.Rank is not { } underdog || underdog - favorite >= 10);
     }
 }

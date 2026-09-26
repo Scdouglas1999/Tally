@@ -81,6 +81,45 @@ public class EspnScoreboardParserTests
         Assert.Equal("Liverpool", g.Away.ShortName); // falls back to the full name
     }
 
+    // Trimmed from the real football/college-football board of 2026-09-26.
+    private const string Cfb = """
+        {
+          "leagues": [{ "id": "23", "abbreviation": "NCAAF" }],
+          "week": { "number": 4 },
+          "events": [{
+            "id": "401754533", "date": "2026-09-26T16:00Z", "shortName": "TEX @ TENN",
+            "status": { "clock": 625.0, "displayClock": "10:25", "period": 4,
+                        "type": { "name": "STATUS_IN_PROGRESS", "state": "in", "shortDetail": "10:25 - 4th" } },
+            "competitions": [{
+              "broadcasts": [{ "market": "national", "names": ["ABC"] }],
+              "competitors": [
+                { "homeAway": "home", "score": "17", "curatedRank": { "current": 14 },
+                  "team": { "id": "2633", "abbreviation": "TENN", "displayName": "Tennessee Volunteers", "shortDisplayName": "Tennessee", "name": "Volunteers", "location": "Tennessee", "logo": "https://a.espncdn.com/i/teamlogos/ncaa/500/2633.png" } },
+                { "homeAway": "away", "score": "24", "curatedRank": { "current": 99 },
+                  "team": { "id": "251", "abbreviation": "TEX", "displayName": "Texas Longhorns", "shortDisplayName": "Texas", "name": "Longhorns", "location": "Texas" } }
+              ],
+              "situation": { "downDistanceText": "4th & 24 at TENN 16", "isRedZone": false, "possession": "2633",
+                             "lastPlay": { "text": "Punt", "probability": { "homeWinPercentage": 0.189 } } }
+            }]
+          }]
+        }
+        """;
+
+    [Fact]
+    public void Parses_College_Football_With_Poll_Rankings()
+    {
+        var g = Assert.Single(EspnScoreboardParser.Parse(Cfb, "football/college-football"));
+        Assert.Equal("football", g.Sport);
+        Assert.Equal("NCAAF", g.League);
+        Assert.Equal("football/college-football", g.LeaguePath);
+        Assert.Equal(14, g.Home.Rank);
+        Assert.Null(g.Away.Rank); // 99 is ESPN's "unranked"
+        Assert.True(g.Home.HasPossession);
+        Assert.Equal("4th & 24 at TENN 16", g.DownDistance);
+        Assert.Equal(new[] { "ABC" }, g.Broadcasts);
+        Assert.Null(ScoreboardService.BoardDay(Cfb)); // a weekly board, like the NFL's
+    }
+
     [Fact]
     public void Empty_Or_Eventless_Board_Is_Not_An_Error()
     {
@@ -157,6 +196,88 @@ public class GameChannelMatcherTests
     }
 }
 
+public class CollegeFootballMatchTests
+{
+    private static GameTeam Team(string id, string abbr, string location, string nickname, string? shortName = null) => new()
+    {
+        Id = id, Abbr = abbr, Location = location, Nickname = nickname,
+        ShortName = shortName ?? location, Name = location + " " + nickname
+    };
+
+    private static GameInfo Game(string id, GameTeam away, GameTeam home, string league = "NCAAF") => new()
+    {
+        Id = id, League = league, Sport = "football", State = "pre", Away = away, Home = home
+    };
+
+    // A slice of a real Saturday: schools inside other schools' names, and nicknames several schools share.
+    private static List<GameInfo> Saturday() => new()
+    {
+        Game("tex", Team("251", "TEX", "Texas", "Longhorns"), Team("2633", "TENN", "Tennessee", "Volunteers")),
+        Game("ttu", Team("2534", "SHSU", "Sam Houston", "Bearkats"), Team("2641", "TTU", "Texas Tech", "Red Raiders")),
+        Game("msu", Team("127", "MSU", "Michigan State", "Spartans"), Team("356", "ILL", "Illinois", "Fighting Illini")),
+        Game("mich", Team("130", "MICH", "Michigan", "Wolverines"), Team("2294", "IOWA", "Iowa", "Hawkeyes")),
+        Game("lsu", Team("99", "LSU", "LSU", "Tigers"), Team("2", "AUB", "Auburn", "Tigers")),
+        Game("uga", Team("61", "UGA", "Georgia", "Bulldogs"), Team("344", "MSST", "Mississippi State", "Bulldogs")),
+        Game("clem", Team("228", "CLEM", "Clemson", "Tigers"), Team("2579", "SC", "South Carolina", "Gamecocks")),
+        Game("nfl", Team("22", "ARI", "Arizona", "Cardinals"), Team("29", "CAR", "Carolina", "Panthers"), "NFL"),
+        Game("ariz", Team("12", "ARIZ", "Arizona", "Wildcats"), Team("2439", "UNLV", "UNLV", "Rebels")),
+    };
+
+    private static List<string> Matched(string channel, List<GameInfo>? games = null)
+    {
+        games ??= Saturday();
+        GameChannelMatcher.Match(games, new[] { new ChannelProbe("c", channel, null) });
+        return games.Where(g => g.Channels.Any(c => c.Kind == "teams")).Select(g => g.Id).ToList();
+    }
+
+    [Theory]
+    [InlineData("NCAAF: Texas Longhorns vs Tennessee Volunteers", "tex")]
+    [InlineData("Texas at Tennessee", "tex")]
+    [InlineData("TEX @ TENN", "tex")]
+    [InlineData("Sam Houston vs Texas Tech", "ttu")]
+    [InlineData("Michigan State vs Illinois", "msu")]
+    [InlineData("Michigan Wolverines at Iowa Hawkeyes", "mich")]
+    [InlineData("LSU Tigers vs Auburn Tigers", "lsu")]
+    [InlineData("Georgia vs Mississippi State", "uga")]
+    [InlineData("Clemson vs South Carolina", "clem")]
+    [InlineData("Arizona Cardinals vs Carolina Panthers", "nfl")]
+    [InlineData("Cardinals @ Panthers", "nfl")]
+    [InlineData("Arizona vs UNLV", "ariz")]
+    public void Each_Matchup_Names_Its_Own_Game(string channel, string game)
+        => Assert.Equal(new[] { game }, Matched(channel));
+
+    [Theory]
+    [InlineData("Texas Tech vs Tennessee")]   // "Texas" inside "Texas Tech" is not Texas
+    [InlineData("Michigan State vs Iowa")]    // nor "Michigan" inside "Michigan State"
+    [InlineData("Tigers vs Tigers")]          // three Tigers play today: shared nicknames alone name none of them
+    [InlineData("Bulldogs vs Bulldogs")]
+    [InlineData("Tigers vs Bulldogs")]
+    [InlineData("Arizona Cardinals vs UNLV")] // the NFL team's name is not the school's
+    public void Names_Another_Team_Owns_Do_Not_Match(string channel)
+        => Assert.Empty(Matched(channel));
+
+    [Theory]
+    [InlineData("Tigers vs Gamecocks", "clem")]            // one of the three Tigers plays the Gamecocks
+    [InlineData("Bulldogs vs Mississippi State", "uga")]
+    public void A_Shared_Name_Counts_When_The_Other_Team_Pins_The_Game(string channel, string game)
+        => Assert.Equal(new[] { game }, Matched(channel));
+
+    [Theory]
+    [InlineData("SEC Network", "SEC Network HD")]
+    [InlineData("SEC Network", "SECN")]
+    [InlineData("BTN", "Big Ten Network")]
+    [InlineData("ACC Network", "US: ACC Network")]
+    [InlineData("ESPNU", "ESPN U")]
+    [InlineData("CW", "The CW")]
+    public void College_Networks_Are_Normalized(string broadcast, string channel)
+    {
+        var g = Saturday()[0];
+        g.Broadcasts = new List<string> { broadcast };
+        GameChannelMatcher.Match(new[] { g }, new[] { new ChannelProbe("c", channel, null) });
+        Assert.Equal("network", Assert.Single(g.Channels).Kind);
+    }
+}
+
 public class GameHeatTests
 {
     private static readonly DateTimeOffset Now = new(2026, 9, 20, 20, 0, 0, TimeSpan.Zero);
@@ -186,6 +307,24 @@ public class GameHeatTests
         Assert.Equal(new[] { "RED ZONE", "TWO-MINUTE DRILL", "ONE-SCORE GAME" }, thriller.Tags);
         Assert.Empty(blowout.Tags);
         Assert.True(thriller.Heat > blowout.Heat + 40);
+    }
+
+    [Fact]
+    public void A_Ranked_Team_Losing_Late_Is_An_Upset_Alert()
+    {
+        var upset = Live("football", 3, 400, 10, 21);
+        upset.Home.Rank = 5;
+        var expected = Live("football", 3, 400, 21, 10);
+        expected.Home.Rank = 5;
+        var close = Live("football", 3, 400, 10, 21);
+        (close.Home.Rank, close.Away.Rank) = (5, 12); // a top-5 team losing to #12 is no upset
+        var early = Live("football", 1, 400, 0, 7);
+        early.Home.Rank = 5;
+
+        Assert.Contains("UPSET ALERT", Heated(upset).Tags);
+        Assert.True(upset.Heat > Heated(expected).Heat);
+        Assert.DoesNotContain("UPSET ALERT", Heated(close).Tags);
+        Assert.DoesNotContain("UPSET ALERT", Heated(early).Tags);
     }
 
     [Fact]
@@ -300,10 +439,16 @@ public class ScoreboardServiceTests
     [Fact]
     public void League_Config_Falls_Back_To_Defaults_And_Rejects_Anything_Not_A_Path()
     {
-        Assert.Equal(new[] { "football/nfl", "baseball/mlb" }, ScoreboardService.ParseLeagues(null));
+        Assert.Equal(new[] { "football/nfl", "football/college-football", "baseball/mlb" }, ScoreboardService.ParseLeagues(null));
         Assert.Contains("football/nfl", ScoreboardService.ParseLeagues("  "));
 
         var parsed = ScoreboardService.ParseLeagues("football/nfl, soccer/eng.1\nfootball/nfl, ../../etc/passwd, nfl, a/b?x=1");
         Assert.Equal(new[] { "football/nfl", "soccer/eng.1" }, parsed);
     }
+
+    [Fact]
+    public void League_Config_Takes_Short_Names()
+        => Assert.Equal(
+            new[] { "football/nfl", "football/college-football", "baseball/mlb" },
+            ScoreboardService.ParseLeagues("NFL, ncaaf, cfb, mlb, football/nfl"));
 }

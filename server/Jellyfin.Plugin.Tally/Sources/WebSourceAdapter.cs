@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Tally.Models;
+using Jellyfin.Plugin.Tally.Scores;
 using Jellyfin.Plugin.Tally.Services;
 using Microsoft.Extensions.Logging;
 
@@ -20,13 +22,22 @@ public class WebSourceAdapter : ISourceAdapter
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger;
     private readonly BrowserRuntime? _browser;
+    private readonly Func<CancellationToken, Task<IReadOnlyList<GameInfo>?>>? _games;
 
-    public WebSourceAdapter(SourceDefinition definition, IHttpClientFactory httpClientFactory, ILogger logger, BrowserRuntime? browser = null)
+    /// <param name="games">Today's scoreboard, when there is one: a stream that names both teams of a game takes its
+    /// group from the game's league and passes an Include filter naming that league.</param>
+    public WebSourceAdapter(
+        SourceDefinition definition,
+        IHttpClientFactory httpClientFactory,
+        ILogger logger,
+        BrowserRuntime? browser = null,
+        Func<CancellationToken, Task<IReadOnlyList<GameInfo>?>>? games = null)
     {
         Definition = definition;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _browser = browser;
+        _games = games;
     }
 
     public SourceDefinition Definition { get; }
@@ -93,16 +104,20 @@ public class WebSourceAdapter : ISourceAdapter
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var counter = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var skipped = 0;
+        var gameOf = await GamesByStreamAsync(found, cancellationToken).ConfigureAwait(false);
 
-        foreach (var s in found)
+        for (var i = 0; i < found.Count; i++)
         {
+            var s = found[i];
             if (!seen.Add(s.Url))
             {
                 continue;
             }
 
-            var group = StreamClassifier.GroupFor(s.Name, s.Context + " " + s.Referer);
-            if (!Included(s, group))
+            var game = gameOf.GetValueOrDefault(i);
+            var group = (game == null ? null : StreamClassifier.GroupForGame(game))
+                ?? StreamClassifier.GroupFor(s.Name, s.Context + " " + s.Referer);
+            if (!Included(s, group, game))
             {
                 skipped++;
                 continue;
@@ -161,12 +176,59 @@ public class WebSourceAdapter : ISourceAdapter
         return snapshot;
     }
 
+    /// <summary>Stream index → the game its name names both teams of, when the scoreboard is available.</summary>
+    private async Task<Dictionary<int, GameInfo>> GamesByStreamAsync(List<ExtractedStream> found, CancellationToken cancellationToken)
+    {
+        var result = new Dictionary<int, GameInfo>();
+        if (_games == null || found.Count == 0)
+        {
+            return result;
+        }
+
+        IReadOnlyList<GameInfo>? games;
+        try
+        {
+            games = await _games(cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogDebug(ex, "JellyTV: no scoreboard to classify {Source}'s streams", Definition.Name);
+            return result;
+        }
+
+        if (games is not { Count: > 0 })
+        {
+            return result;
+        }
+
+        // the matcher mutates the games' channel lists: work on copies
+        var copies = games.Select(g => g.Clone()).ToList();
+        var probes = found.Select((f, i) => new ChannelProbe(i.ToString(CultureInfo.InvariantCulture), f.Name, null)).ToList();
+        GameChannelMatcher.Match(copies, probes);
+        foreach (var g in copies)
+        {
+            foreach (var gc in g.Channels.Where(c => c.Kind == "teams"))
+            {
+                result.TryAdd(int.Parse(gc.Id, CultureInfo.InvariantCulture), g);
+            }
+        }
+
+        return result;
+    }
+
+    private static readonly string[] CollegeFootball = { "college football", "ncaaf", "cfb", "ncaa football", "college-football", "ncaa-football" };
+
     // League/group tokens expand to every way they can appear: the classifier's
     // group name, the league tag used in listing URLs (/nfl/…), and loose names.
     private static readonly Dictionary<string, string[]> LeagueAliases = new(StringComparer.OrdinalIgnoreCase)
     {
         ["nfl"] = new[] { "american football", "nfl", "cfb", "ncaaf", "college football" },
         ["football"] = new[] { "american football", "nfl", "cfb", "ncaaf", "college football" },
+        ["american football"] = new[] { "american football", "nfl", "cfb", "ncaaf", "college football" },
+        ["ncaaf"] = CollegeFootball,
+        ["cfb"] = CollegeFootball,
+        ["college football"] = CollegeFootball,
+        ["ncaa football"] = CollegeFootball,
         ["mlb"] = new[] { "baseball", "mlb" },
         ["baseball"] = new[] { "baseball", "mlb" },
         ["nba"] = new[] { "basketball", "nba", "wnba" },
@@ -183,14 +245,16 @@ public class WebSourceAdapter : ISourceAdapter
     /// <summary>True when a stream passes the source's Include filter. A token
     /// matches on the classified group or as a word in the stream's name/URLs —
     /// so "NFL" keeps a game even when team names weren't enough to classify it.</summary>
-    private bool Included(ExtractedStream s, string group)
+    private bool Included(ExtractedStream s, string group, GameInfo? game)
     {
         if (string.IsNullOrWhiteSpace(Definition.Include))
         {
             return true;
         }
 
-        var hay = (group + " " + s.Name + " " + s.Context + " " + s.Referer).ToLowerInvariant();
+        // the game's league label and path ("NCAAF", "football college football") count as words of the stream
+        var league = game == null ? string.Empty : " " + game.League + " " + game.LeaguePath.Replace('/', ' ').Replace('-', ' ');
+        var hay = (group + " " + s.Name + " " + s.Context + " " + s.Referer + league).ToLowerInvariant();
         foreach (var raw in Definition.Include.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             var keywords = LeagueAliases.TryGetValue(raw, out var aliases) ? aliases : new[] { raw };
