@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { isFinal, isLive, isUpcoming, type TallyGame, type TallyTeam } from '../api/tallyModels';
+import { canWatch, hasStream, isFinal, isLive, isUpcoming, noStreamLabel, type TallyGame, type TallyTeam } from '../api/tallyModels';
 import { spoilerGuarded } from '../api/tallyDvr';
 import { useFocusable } from '../focus/focus';
 import { IndicatorSquare, LabelBar } from '../kit/Bits';
@@ -69,8 +69,10 @@ function useCardNow(active: boolean): number {
 }
 
 /**
- * A game card: league + status strip, two team lines, a black channel label bar. A game with no channel yet stays
- * focusable (the header describes it) but is dimmed and OK does nothing.
+ * A game card: league + status strip, two team lines, a black channel label bar. A game with no stream yet is drawn
+ * at full strength like any other; its bar says LOOKING FOR A STREAM (the server is searching now) or NO STREAM YET,
+ * and OK still watches it (the caller's `onWatch` looks for a stream first). Only a finished game with no channel has
+ * nothing to watch.
  *
  * `sportsExtras` turns on the rest of the Android GameCard: scores roll (and flash amber) when they change, the REC
  * tag, a followed team's start counting down (IN 23 MIN, STARTING), and no spoilers for a finished game that has a
@@ -90,7 +92,7 @@ export function GameCard(props: {
   const { game } = props;
   const extras = props.sportsExtras === true;
   const reveal = useRowReveal();
-  const watchable = game.watch !== null;
+  const watchable = canWatch(game);
   const f = useFocusable<HTMLDivElement>({
     focusKey: props.focusKey,
     onEnter: () => {
@@ -109,7 +111,7 @@ export function GameCard(props: {
   const soon = counting && !isNaN(soonStart) ? startsIn(soonStart, now) : null;
   const statusColor = soon !== null || isLive(game) ? 'var(--accent)' : isUpcoming(game) ? 'var(--text-secondary)' : 'var(--muted)';
   return (
-    <div ref={f.ref} class={'game-card' + (watchable ? '' : ' dark')} data-game={game.id} onClick={() => watchable && props.onWatch(game)}>
+    <div ref={f.ref} class={'game-card' + (game.watch !== null ? '' : ' no-stream')} data-game={game.id} onClick={() => watchable && props.onWatch(game)}>
       <div class="game-body">
         <div class="strip">
           <span class={'league mono-label ellipsis' + (props.favorite ? ' favorite' : '')}>{game.league.toUpperCase()}</span>
@@ -133,7 +135,7 @@ export function GameCard(props: {
           </>
         )}
       </div>
-      <LabelBar text={game.watch !== null ? game.watch.channelName : 'Not on your channels'} live={isLive(game) && watchable} />
+      <LabelBar text={game.watch !== null ? game.watch.channelName : noStreamLabel(game)} live={isLive(game) && hasStream(game)} />
     </div>
   );
 }

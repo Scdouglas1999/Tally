@@ -57,6 +57,17 @@ export interface TallyGameRecording {
   reason: string | null;
 }
 
+/**
+ * The server's stream search for a game (2.2.1 contract, board field `search`): present while the game is live or
+ * starts within 30 minutes and has no `watch`. `searching`: a search that covers the game runs now; `waiting`: none
+ * runs, the next is due at `nextAt`. Absent (null) on older plugins, for games with a `watch` and for finished games.
+ */
+export interface TallySearch {
+  state: string;
+  lastAt: string | null;
+  nextAt: string | null;
+}
+
 export interface TallyGame {
   id: string;
   sport: string;
@@ -84,6 +95,8 @@ export interface TallyGame {
   backdropPath: string | null;
   /** The server DVR's job for this game; null when there is none (or the server does not record). */
   recording: TallyGameRecording | null;
+  /** The server's stream search for this game (see TallySearch); null when the board has none. */
+  search: TallySearch | null;
 }
 
 export interface TallyProgramme {
@@ -181,7 +194,7 @@ function decodeTeam(v: unknown): TallyTeam {
   };
 }
 
-function decodeWatch(v: unknown): TallyWatch | null {
+export function decodeWatch(v: unknown): TallyWatch | null {
   if (v === null || v === undefined) return null;
   const o = obj(v);
   return {
@@ -221,7 +234,14 @@ export function decodeGame(v: unknown): TallyGame {
     watch: decodeWatch(o.watch),
     backdropPath: strOrNull(o.backdropPath),
     recording: decodeRecording(o.recording),
+    search: decodeSearch(o.search),
   };
+}
+
+function decodeSearch(v: unknown): TallySearch | null {
+  if (v === null || v === undefined) return null;
+  const o = obj(v);
+  return { state: str(o.state), lastAt: strOrNull(o.lastAt), nextAt: strOrNull(o.nextAt) };
 }
 
 function decodeRecording(v: unknown): TallyGameRecording | null {
@@ -309,6 +329,21 @@ export function decodeSettings(v: unknown): TallySettings {
 export const isLive = (g: TallyGame): boolean => g.state === 'in';
 export const isUpcoming = (g: TallyGame): boolean => g.state === 'pre';
 export const isFinal = (g: TallyGame): boolean => g.state === 'post';
+
+/** The game has a stream this server can play now (a `watch` with its continuous playlist). */
+export const hasStream = (g: TallyGame): boolean => g.watch !== null && g.watch.hlsPath !== '';
+
+/**
+ * WATCH is offered: every game that is not final (one without a stream searches for one first), and a finished game
+ * still on a channel. Never blocked by a missing stream (2.2.1 contract, "never block").
+ */
+export const canWatch = (g: TallyGame): boolean => hasStream(g) || !isFinal(g);
+
+/** What a game's black label bar says when it has no stream: the server is searching now, or not yet found. */
+export function noStreamLabel(g: TallyGame): string {
+  if (g.search !== null && g.search.state === 'searching') return 'Looking for a stream';
+  return isFinal(g) ? 'No stream' : 'No stream yet';
+}
 
 /** The settings key under which a team is followed ("NFL:KC"). */
 export const teamKey = (g: TallyGame, t: TallyTeam): string => g.league.toUpperCase() + ':' + t.abbr.toUpperCase();

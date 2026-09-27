@@ -4,7 +4,7 @@ import { isFollowed, isLive, isUpcoming, type TallyBoard, type TallyGame } from 
  * What the Tally row on Home shows, in order (port of the Android app's HomeRowSelection +
  * withFollowedTeamsFirst; keep the two in step):
  *  - live games, then games starting within 12 hours (or due up to 1 hour ago: feeds flip to "in" late);
- *  - games with no channel yet still get a card ("not on your channels");
+ *  - games with no stream yet still get a card (NO STREAM YET; OK looks for one);
  *  - in each group: watchable first, then favorite channels, then league, then start time;
  *  - at most 10 cards, never cutting a watchable game for one that is not;
  *  - followed teams first inside the live and the later group.

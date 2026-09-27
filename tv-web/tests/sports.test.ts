@@ -61,7 +61,7 @@ describe('games board rows (Android BoardOrganizer, same cases as BoardOrganizer
     expect(post[0]?.games.map((g) => g.id)).toEqual(['late', 'early']);
   });
 
-  it('drops dark games with "My channels only", never returns empty rows, finds the live game on a channel', () => {
+  it('drops games without a stream with "Only games with a stream", never returns empty rows, finds the live game on a channel', () => {
     expect(rows([game('watchable', { channelId: 'x' }), game('dark')], [], true)[0]?.games.map((g) => g.id)).toEqual(['watchable']);
     expect(rows([game('dark')], [], true)).toEqual([]);
     const g = [game('pre', { state: 'pre', channelId: 'ch' }), game('live', { state: 'in', channelId: 'ch' }), game('other', { state: 'in', channelId: 'nope' })];

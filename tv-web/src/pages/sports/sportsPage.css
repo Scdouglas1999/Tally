@@ -65,6 +65,7 @@
 .watch-bar .channel { flex: 1; min-width: 0; margin-right: 38px; color: var(--text); }
 .watch-bar .channel.muted { color: var(--muted); }
 .watch-bar .broadcasters { flex: none; max-width: 700px; font-family: var(--sans); font-size: 24px; color: var(--muted); }
+.watch-bar .broadcasters + .key-hint { margin-left: 38px; }
 .game-card .strip .rec-tag { margin-left: 13px; }
 
 /* ---- Channels grid (ChannelsGrid.kt): 4 columns, 176dp cards ---- */

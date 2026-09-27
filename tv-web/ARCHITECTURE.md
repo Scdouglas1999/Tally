@@ -664,7 +664,11 @@ Proposed parallel tasks after tvweb-0: `tvweb-details` (4), `tvweb-library` (3),
   page (rows, item menu, sort, the mixed grid), the playlist page (move down and back up, Remove from playlist, PLAY
   from a row), Remove from continue watching, the league in Home's game header, the score bug's show/fade rule (a key, a
   simulated score change) and FROM THE START, the recording notice and the plugin art parameters. Live states come from the score simulator
-  (`tally/dev/score-sim.py`, run with `TALLY_SIM=1`; its parts are skipped without it). Screenshots in
+  (`tally/dev/score-sim.py`, run with `TALLY_SIM=1`; its parts are skipped without it); never blocking a game
+  (`e2e/streams.spec.ts`, 2.2.1): the NO STREAM YET card at full strength, "Looking for a stream…" then the message
+  for a simulator game with no channel, the game getting a channel while Tally looks and playing, `find` scripted
+  (searching → found, 45 s → the message), the switcher and multiview's rail, the renamed setting off by default and
+  its empty state, the dialog with LG's pointer and BACK 461. Screenshots in
   `test-results/shots/`.
 - **Tizen emulator**: Tizen Studio 6.1 CLI + TV Extension 10.0 in `~/tools/tizen-studio` (installed without root on
   this Arch host: a `dpkg` shim answers the package manager's Ubuntu prerequisite check; all emulator libraries
@@ -832,7 +836,8 @@ how), **not possible** (and why).
 | Multiview 4-up | done in browsers; adapted on TVs: two playing tiles on Samsung 2021+ (one where the set shows it cannot, remembered per model), one on LG (every generation) and elsewhere; the other tiles show live cards (section 6) |
 | Remote: D-pad, BACK, media, color, channel keys | done on Samsung (measured on the emulator) and LG (LG's key codes; in Chromium with webOS forced) |
 | LG Magic Remote pointer (hover, click, wheel) | done (webOS: pointer mode and 5-way mode, section 8) |
-| Follow teams, hide scores, "My channels only" (shared settings) | done |
+| Follow teams, hide scores, "Only games with a stream" (shared settings; the old "My channels only", off unless turned on) | done |
+| Never block a game (2.2.1): WATCH on every game not over, "Looking for a stream…" (`POST games/{id}/find`, 3 s polls, 45 s, Keep looking), NO STREAM YET / LOOKING FOR A STREAM labels, the switcher and multiview's rail pick games without a stream | done (tvweb-221; `pages/sports/streamSearch.ts`, `StreamSearchDialog.tsx`) |
 | Favorite channels | planned (the board reads them; no screen sets them on Android TV either) |
 | DVR: record a game, record every team game (keep last N), Recordings tab, watch from the start, stop/cancel/delete | done (recording itself unverified on the dev server: it keeps 10 GB free and has less) |
 | Watch parties (SyncPlay) | planned (Jellyfin SyncPlay over the SDK's websocket) |

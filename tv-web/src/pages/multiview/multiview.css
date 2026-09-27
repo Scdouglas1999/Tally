@@ -37,6 +37,7 @@
 .swap-row .channel-name { margin-top: 6px; font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text); }
 .swap-row .team { display: flex; align-items: center; margin-top: 6px; }
 .swap-row .team .name { flex: 1; min-width: 0; font-family: var(--sans); font-size: 32px; line-height: 45px; color: var(--text); }
+.swap-row .no-stream { margin-top: 6px; color: var(--muted); }
 .swap-row .team .score { margin-left: 16px; font-family: var(--mono); font-weight: 500; font-size: 26px; color: var(--text); }
 
 .mv-hint {

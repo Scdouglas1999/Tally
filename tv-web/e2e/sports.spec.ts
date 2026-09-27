@@ -208,7 +208,7 @@ test('Sports: CHANNELS grid (HOLD adds to multiview), MULTIVIEW queue, SETTINGS,
   await page.keyboard.press('ArrowUp');
   await moveTo(page, 'ArrowRight', async () => ((await page.locator('.sports-tab[data-focused] .label').textContent()) ?? '') === 'SETTINGS');
   await page.keyboard.press('Enter');
-  await expect(page.locator('.tally-row[data-focused] .label')).toHaveText('My channels only');
+  await expect(page.locator('.tally-row[data-focused] .label')).toHaveText('Only games with a stream');
   await expect(page.locator('.server-block .line').first()).toContainText('API v');
   await shot(page, info, 'sports-settings');
 

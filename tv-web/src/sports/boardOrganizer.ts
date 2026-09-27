@@ -47,7 +47,8 @@ function compareStart(a: string, b: string): number {
  * Board order: live before upcoming before final before postponed; within a state, rows that contain a favorite game
  * first, then leagues alphabetically. Within a row: favorites (followed teams, favorite channels) first, then by start
  * time (newest first for final and postponed games). Postponed and canceled games (the feed reports them as `post`)
- * get their own rows ("MLB / POSTPONED") after the finals: they are not results.
+ * get their own rows ("MLB / POSTPONED") after the finals: they are not results. `onlyWatchable` is the viewer's
+ * "Only games with a stream" (the shared setting keeps its old key): games without a `watch` are left out.
  */
 export function boardRows(
   games: readonly TallyGame[],

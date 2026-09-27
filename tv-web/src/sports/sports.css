@@ -9,7 +9,6 @@
 }
 .game-card[data-focused] { background: var(--ground-raised); }
 .game-card[data-focused]::after { border: var(--focus) solid var(--accent); }
-.game-card.dark .game-body { opacity: 0.6; }
 .game-card .strip { display: flex; align-items: center; height: 54px; padding: 0 16px; }
 .game-card .strip .league { flex: 0 1 auto; min-width: 0; color: var(--muted); }
 .game-card .strip .league.favorite { color: var(--accent); }
@@ -30,3 +29,5 @@
 .team-mark img { width: 100%; height: 100%; object-fit: contain; }
 .team-mark.fallback { border: 3px solid var(--rule-strong); }
 .team-mark.fallback span { font-family: var(--mono); font-weight: 600; font-size: 22px; letter-spacing: 1px; color: var(--text); }
+/* no stream yet: the card stays at full strength; only its bar's words step back */
+.game-card.no-stream .label-bar .text { color: var(--text-secondary); }

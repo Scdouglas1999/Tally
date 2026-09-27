@@ -1,5 +1,5 @@
 import { spoilerGuarded } from '../../api/tallyDvr';
-import { isFinal, isLive, isUpcoming, type TallyGame, type TallyTeam } from '../../api/tallyModels';
+import { isFinal, isLive, isUpcoming, noStreamLabel, type TallyGame, type TallyTeam } from '../../api/tallyModels';
 import { IndicatorSquare } from '../../kit/Bits';
 import { TeamMark } from '../../sports/GameCard';
 import { ScoreDigits } from '../../sports/ScoreDigits';
@@ -42,7 +42,10 @@ function Situation(props: { game: TallyGame }) {
   return game.detail !== '' ? <div class="situation ellipsis">{game.detail.toUpperCase()}</div> : null;
 }
 
-/** The black bar under the panel: the channel and key hints, or "not on your channels" with the broadcasters. */
+/**
+ * The black bar under the panel: the channel and key hints; for a game without a stream, LOOKING FOR A STREAM or NO
+ * STREAM YET with the broadcasters, and OK Watch (it looks for one) unless the game is over.
+ */
 function WatchBar(props: { game: TallyGame }) {
   const { game } = props;
   const w = game.watch;
@@ -58,8 +61,9 @@ function WatchBar(props: { game: TallyGame }) {
   }
   return (
     <div class="watch-bar">
-      <span class="channel mono-label muted ellipsis">NOT ON YOUR CHANNELS</span>
+      <span class="channel mono-label muted ellipsis">{tallyUppercase(noStreamLabel(game))}</span>
       {game.broadcasts.length > 0 ? <span class="broadcasters ellipsis">On {game.broadcasts.join(', ')}</span> : null}
+      {!isFinal(game) ? <KeyHint keyName="OK" label="Watch" /> : null}
     </div>
   );
 }

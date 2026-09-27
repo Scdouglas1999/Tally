@@ -1,0 +1,18 @@
+/* "Looking for a stream…": the confirm dialog's look (520dp wide, 20dp sides), over everything else on the page. */
+.stream-search-scrim {
+  position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 45; display: flex; align-items: center;
+  justify-content: center; background: rgba(0, 0, 0, 0.6);
+}
+.stream-search { width: 832px; background: var(--ground); border: var(--hairline) solid var(--rule-strong); }
+.stream-search .kicker { display: flex; align-items: center; padding: 29px 32px 0; color: var(--accent); }
+.stream-search .kicker .lamp { margin-right: 16px; }
+.stream-search .rule { height: var(--hairline); margin: 19px 32px 22px; background: var(--rule); }
+.stream-search .title {
+  padding: 0 32px; font-family: var(--sans); font-weight: 600; font-size: 38px; line-height: 48px; color: var(--text);
+}
+.stream-search .status { margin-top: 6px; padding: 0 32px; color: var(--muted); }
+.stream-search .status.live { color: var(--accent); }
+.stream-search .message {
+  margin-top: 22px; padding: 0 32px; font-family: var(--sans); font-size: 27px; line-height: 38px; color: var(--text-secondary);
+}
+.stream-search .buttons { display: flex; padding: 29px 32px 32px; }

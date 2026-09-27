@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { absolute } from '../../api/tally';
 import { DvrState } from '../../api/tallyDvr';
-import { isLive, type TallyBoard, type TallyEvent, type TallyGame } from '../../api/tallyModels';
+import { canWatch, isLive, type TallyBoard, type TallyEvent, type TallyGame } from '../../api/tallyModels';
 import type { PageProps } from '../../app/page';
 import { currentFocusKey, setFocus } from '../../focus/focus';
 import { IndicatorSquare } from '../../kit/Bits';
@@ -17,7 +17,8 @@ import { board, onBoardEvent, tallyUserSettings, useBoardPolling } from '../../s
 import { formatTime, tallyUppercase } from '../../util/format';
 import { useStore } from '../../util/store';
 import { GameActionsDialog } from '../sports/GameActionsDialog';
-import { addToMultiviewWithNotice, channelRoute, gameRoute, watchGame } from '../sports/sportsState';
+import { addGameToMultiviewAction, addToMultiviewWithNotice, channelRoute, watchGame } from '../sports/sportsState';
+import { StreamSearchHost, useStreamSearchOpen } from '../sports/StreamSearchDialog';
 import { useOkHold } from '../sports/useOkHold';
 import { BoxScoreOverlay, EventBanner, GameSwitcher, ScoreBug, switcherKey } from './liveOverlays';
 import { TuneIn, useEngine } from './playerKit';
@@ -38,6 +39,15 @@ function otherGames(current: TallyBoard | null, channelId: string, favorites: Re
   return boardRows(games, favorites, true, teams)
     .reduce<TallyGame[]>((acc, r) => acc.concat(r.games), [])
     .slice(0, MAX_OTHERS);
+}
+
+/**
+ * Live games with no stream yet, in board order: listed after the ones that play (2.2.1: picking one looks for its
+ * stream and switches when it appears; the switcher itself still switches only to a stream).
+ */
+function unstreamedGames(current: TallyBoard | null, favorites: ReadonlySet<string>, teams: ReadonlySet<string>): TallyGame[] {
+  const games = (current?.games ?? []).filter((g) => isLive(g) && g.watch === null);
+  return boardRows(games, favorites, false, teams).reduce<TallyGame[]>((acc, r) => acc.concat(r.games), []);
 }
 
 /**
@@ -75,6 +85,7 @@ function gamelessChannelGames(current: TallyBoard | null, channelId: string): Ta
       watch: { channelId: c.id, channelName: c.name, liveTvItemId: c.liveTvItemId, hlsPath: c.hlsPath, cardPath: c.cardPath, confidence: '' },
       backdropPath: null,
       recording: null,
+      search: null,
     }));
 }
 
@@ -115,6 +126,7 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   const [boxScore, setBoxScore] = useState(false);
   const [switcher, setSwitcher] = useState(false);
   const [actionsGameId, setActionsGameId] = useState<string | null>(null);
+  const searching = useStreamSearchOpen();
   const [bugShownAt, setBugShownAt] = useState(Date.now());
   const [bugVisible, setBugVisible] = useState(true);
   const [banner, setBanner] = useState<TallyEvent | null>(null);
@@ -140,7 +152,9 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   const byRoute = games.find((g) => g.id === props.route.gameId) ?? null;
   const game = gameForChannel(props.route.channelId, games) ?? (byRoute !== null && isLive(byRoute) ? byRoute : null);
   const others = otherGames(current, props.route.channelId, favorites, teams);
-  const switcherGames = others.length > 0 ? others : gamelessChannelGames(current, props.route.channelId);
+  const switcherGames = (others.length > 0 ? others : gamelessChannelGames(current, props.route.channelId))
+    .concat(unstreamedGames(current, favorites, teams))
+    .slice(0, MAX_OTHERS);
   const channels = current?.channels ?? [];
   const channelName = channels.find((c) => c.id === props.route.channelId)?.name ?? '';
   const recording = game?.recording ?? null;
@@ -237,12 +251,12 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
       setActionsGameId(g.id);
       return true;
     },
-    actionsGameId === null && switcher,
+    actionsGameId === null && switcher && !searching,
     props.active,
   );
 
   useKeyHandler((key) => {
-    if (actionsGameId !== null) return false; // the menu's own handler (registered later) runs first
+    if (actionsGameId !== null || searching) return false; // the menu's (or the search's) own handler runs first
     setBugShownAt(Date.now());
     if (boxScore) {
       // any key closes the box score; UP and BACK stop there, everything else also reaches the player
@@ -321,7 +335,8 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   }, [barUp, startOver !== null, props.active]);
 
   const actionsGame = actionsGameId !== null ? (switcherGames.find((g) => g.id === actionsGameId) ?? null) : null;
-  const actionsIsGame = actionsGame !== null && others.length > 0;
+  // a real game (not a looping channel drawn as a card with blank teams)
+  const actionsIsGame = actionsGame !== null && games.some((g) => g.id === actionsGame.id);
 
   return (
     <div class="player live">
@@ -361,8 +376,8 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
           game={actionsIsGame ? actionsGame : null}
           channelName={actionsGame.watch?.channelName ?? actionsGame.name}
           actions={{
-            watch: gameRoute(actionsGame) !== null ? () => switchTo(actionsGame) : undefined,
-            addToMultiview: actionsGame.watch !== null ? () => addToMultiviewWithNotice(actionsGame.watch?.channelId ?? '') : undefined,
+            watch: canWatch(actionsGame) ? () => switchTo(actionsGame) : undefined,
+            addToMultiview: actionsIsGame ? addGameToMultiviewAction(actionsGame) : actionsGame.watch !== null ? () => addToMultiviewWithNotice(actionsGame.watch?.channelId ?? '') : undefined,
             follow: actionsIsGame,
           }}
           hideScores={hideScores}
@@ -377,6 +392,7 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
       ) : null}
       <ToastHost />
       <RecordingNoticeHost active={props.active} pageKey={props.pageKey} />
+      <StreamSearchHost active={props.active} pageKey={props.pageKey} />
     </div>
   );
 }
