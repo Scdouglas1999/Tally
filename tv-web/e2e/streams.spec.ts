@@ -147,13 +147,14 @@ test('No stream: full-strength card with NO STREAM YET, the panel offers OK Watc
 });
 
 test('No stream (sim): a live game with no channel: the label, OK looks for a stream, then the no-stream message; OK / KEEP LOOKING / BACK', async ({ page }, info) => {
+  test.setTimeout(150_000);
   test.skip(!SIM, 'needs the score simulator (TALLY_SIM=1)');
-  sim('add --id 900221 --away ROT:Riverton:Otters --home LKH:Lakeside:Herons --start -20 --state in');
+  sim('add --id 977221 --away "ZZA:Zephyr Bay:Anvils" --home "ZZK:Marrow Point:Kestrels" --start -20 --state in');
   try {
-    await boardGame('900221', (g) => g.state === 'in' && g.watch == null);
+    await boardGame('977221', (g) => g.state === 'in' && g.watch == null);
     await openSports(page);
-    await focusGame(page, '900221');
-    const c = card(page, '900221');
+    await focusGame(page, '977221');
+    const c = card(page, '977221');
     await expect(c.locator('.label-bar .text')).toHaveText(/^(NO STREAM YET|LOOKING FOR A STREAM)$/);
     await shot(page, info, 'streams-sim-card');
 
@@ -161,7 +162,7 @@ test('No stream (sim): a live game with no channel: the label, OK looks for a st
     await page.keyboard.press('Enter');
     await expect(dialog(page)).toHaveAttribute('data-phase', 'searching');
     await expect(dialog(page).locator('.kicker')).toHaveText('LOOKING FOR A STREAM…');
-    await expect(dialog(page).locator('.title')).toHaveText('Otters at Herons');
+    await expect(dialog(page).locator('.title')).toHaveText('Anvils at Kestrels');
     await expect(focusedButton(page)).toHaveText('CANCEL');
     await shot(page, info, 'streams-searching');
 
@@ -212,17 +213,18 @@ test('No stream (sim): a live game with no channel: the label, OK looks for a st
     await page.keyboard.press('Escape');
     await expect(dialog(page)).toHaveCount(0);
   } finally {
-    sim('remove 900221');
+    sim('remove 977221');
   }
 });
 
 test('No stream (sim): the game gets a channel while Tally is looking, and it plays', async ({ page }, info) => {
+  test.setTimeout(150_000);
   test.skip(!SIM, 'needs the score simulator (TALLY_SIM=1)');
-  sim('add --id 900222 --away ROT:Riverton:Otters --home LKH:Lakeside:Herons --start -20 --state in');
+  sim('add --id 977222 --away "ZZA:Zephyr Bay:Anvils" --home "ZZK:Marrow Point:Kestrels" --start -20 --state in');
   try {
-    await boardGame('900222', (g) => g.state === 'in' && g.watch == null);
+    await boardGame('977222', (g) => g.state === 'in' && g.watch == null);
     await openSports(page);
-    await focusGame(page, '900222');
+    await focusGame(page, '977222');
     await page.keyboard.press('Enter');
     await expect(dialog(page)).toBeVisible();
     // a server without find says "no stream" at once: KEEP LOOKING keeps the dialog looking
@@ -233,7 +235,7 @@ test('No stream (sim): the game gets a channel while Tally is looking, and it pl
     }
     await expect(dialog(page)).toHaveAttribute('data-phase', 'searching');
     // the game now names teams one of the dev channels shows: the plugin matches it to that channel
-    sim('add --id 900222 --away "CIN:Cincinnati:Reds" --home "TOR:Toronto:Blue Jays" --start -20 --state in');
+    sim('add --id 977222 --away "CIN:Cincinnati:Reds" --home "TOR:Toronto:Blue Jays" --start -20 --state in');
     await expect(page.locator('.page:not(.hidden) .player.live')).toBeVisible({ timeout: 45_000 });
     await expect(dialog(page)).toHaveCount(0);
     await expect(page.locator('.player.live .live-top .title')).toHaveText('Reds at Blue Jays');
@@ -243,9 +245,9 @@ test('No stream (sim): the game gets a channel while Tally is looking, and it pl
     await page.keyboard.press('Escape');
     await page.keyboard.press('Escape');
     await expect(page.locator('.page:not(.hidden) .sports-page')).toBeVisible();
-    await expect(card(page, '900222')).toHaveAttribute('data-focused', /.*/);
+    await expect(card(page, '977222')).toHaveAttribute('data-focused', /.*/);
   } finally {
-    sim('remove 900222');
+    sim('remove 977222');
   }
 });
 

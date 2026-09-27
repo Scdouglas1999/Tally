@@ -45,8 +45,9 @@ function otherGames(current: TallyBoard | null, channelId: string, favorites: Re
  * Live games with no stream yet, in board order: listed after the ones that play (2.2.1: picking one looks for its
  * stream and switches when it appears; the switcher itself still switches only to a stream).
  */
-function unstreamedGames(current: TallyBoard | null, favorites: ReadonlySet<string>, teams: ReadonlySet<string>): TallyGame[] {
-  const games = (current?.games ?? []).filter((g) => isLive(g) && g.watch === null);
+function unstreamedGames(current: TallyBoard | null, playingId: string | undefined, favorites: ReadonlySet<string>, teams: ReadonlySet<string>): TallyGame[] {
+  // not the game on screen (found by a search just now, before the board has its channel)
+  const games = (current?.games ?? []).filter((g) => isLive(g) && g.watch === null && g.id !== playingId);
   return boardRows(games, favorites, false, teams).reduce<TallyGame[]>((acc, r) => acc.concat(r.games), []);
 }
 
@@ -153,7 +154,7 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   const game = gameForChannel(props.route.channelId, games) ?? (byRoute !== null && isLive(byRoute) ? byRoute : null);
   const others = otherGames(current, props.route.channelId, favorites, teams);
   const switcherGames = (others.length > 0 ? others : gamelessChannelGames(current, props.route.channelId))
-    .concat(unstreamedGames(current, favorites, teams))
+    .concat(unstreamedGames(current, props.route.gameId, favorites, teams))
     .slice(0, MAX_OTHERS);
   const channels = current?.channels ?? [];
   const channelName = channels.find((c) => c.id === props.route.channelId)?.name ?? '';
