@@ -10,11 +10,13 @@ button that switches to the next id (7701, 7711, ...); every player points at ST
 server can play).
 
   stream-search-fixture.py serve --game ROT:LKH [--game DVL:SMT ...] [--league mlb] [--port 8000] [--stream URL]
-                                 [--hidden] [--busy Riverton,Lakeside,...]
+                                 [--hidden] [--busy Riverton,Lakeside,...] [--spanish]
       (--away ROT --home LKH still works for a single game)
       --hidden   start with the wanted games unlisted
       --busy     a busy day: every fourth filler link names one of these cities in another sport ("Riverton Rockets
                  12 vs ..."), the way a listing names a wanted team's city many times over
+      --spanish  each game's page also offers its Spanish feed: an "ESPN Deportes" button switching to the player
+                 after Link 2 (/embed/7702, 7712, ...), which Tally should list as its own "… (Español)" channel
   curl -X POST http://<fixture>:8000/_ctl/list      # the front page lists the wanted games
   curl -X POST http://<fixture>:8000/_ctl/unlist    # it does not (a site that adds a game's link near game time)
   curl -X POST 'http://<fixture>:8000/_ctl/slow?s=3' # each page takes 3 s to answer (0: back to normal), to watch
@@ -183,7 +185,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200, '<html><head><title>Listing Example</title></head><body>'
                                  f'<iframe id="player" src="/embed/{embed}"></iframe>'
                                  f'<button onclick="changeStream({embed})">Link 1</button>'
-                                 f'<button onclick="changeStream({embed + 1})">Link 2</button></body></html>')
+                                 f'<button onclick="changeStream({embed + 1})">Link 2</button>'
+                                 + (f'<button onclick="changeStream({embed + 2})">ESPN Deportes</button>' if opts.spanish else '')
+                                 + '</body></html>')
 
         if path.startswith("/embed/"):
             tag = path[len("/embed/"):]
@@ -212,6 +216,7 @@ def main():
     serve.add_argument("--stream", default="http://172.17.0.2/live.m3u8", help="a live HLS playlist every player points at")
     serve.add_argument("--hidden", action="store_true", help="start with the wanted games unlisted")
     serve.add_argument("--busy", default="", help="comma-separated cities other filler links name (a busy day)")
+    serve.add_argument("--spanish", action="store_true", help="each game's page also offers an \"ESPN Deportes\" (Spanish) player")
     opts = parser.parse_args()
     games = [tuple(g.split(":", 1)) for g in opts.game]
     if opts.away and opts.home:

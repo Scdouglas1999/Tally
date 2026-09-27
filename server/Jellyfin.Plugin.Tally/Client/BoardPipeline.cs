@@ -119,4 +119,26 @@ public static class WatchResolver
 
         return null;
     }
+
+    /// <summary>
+    /// The channel to open for a game in each language it has one in (English first; see <see cref="Resolve"/> for
+    /// the rules within one language), and the one a viewer who prefers <paramref name="preferred"/> gets: that
+    /// language's when there is one, otherwise the other.
+    /// </summary>
+    public static (GameChannel? Watch, List<(string Language, GameChannel Channel)> Feeds) ResolveFeeds(
+        GameInfo game, IReadOnlyCollection<GameInfo> allGames, Func<string, bool> channelExists, Func<string, string> languageOf, string? preferred)
+    {
+        var feeds = new List<(string Language, GameChannel Channel)>();
+        foreach (var language in new[] { StreamLanguage.English, StreamLanguage.Spanish })
+        {
+            if (Resolve(game, allGames, id => channelExists(id) && languageOf(id) == language) is { } pick)
+            {
+                feeds.Add((language, pick));
+            }
+        }
+
+        var want = StreamLanguage.Normalize(preferred);
+        var watch = feeds.Where(f => f.Language == want).Select(f => f.Channel).FirstOrDefault() ?? feeds.Select(f => f.Channel).FirstOrDefault();
+        return (watch, feeds);
+    }
 }

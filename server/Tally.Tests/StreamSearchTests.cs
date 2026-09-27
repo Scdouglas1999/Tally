@@ -60,6 +60,10 @@ public sealed class FixtureSite
 
     public IReadOnlyList<FixtureGame> Games { get; }
 
+    /// <summary>True: every wanted game's page offers a third player, an "ESPN Deportes" button switching to
+    /// /embed/{Embed + 2} (a Spanish feed of the game).</summary>
+    public bool SpanishFeed { get; set; }
+
     /// <summary>False: the wanted games' streams answer 404 (the event has ended upstream).</summary>
     public bool WantedAlive { get; set; } = true;
 
@@ -138,7 +142,8 @@ public sealed class FixtureSite
         {
             return Html("<html><head><title>Listing Example</title></head><body>" +
                 $"<iframe id=\"player\" src=\"https://embed.example.test/embed/{wanted.Embed}\"></iframe>" +
-                $"<button onclick=\"changeStream({wanted.Embed})\">Link 1</button><button onclick=\"changeStream({wanted.Embed + 1})\">Link 2</button></body></html>");
+                $"<button onclick=\"changeStream({wanted.Embed})\">Link 1</button><button onclick=\"changeStream({wanted.Embed + 1})\">Link 2</button>" +
+                (SpanishFeed ? $"<button onclick=\"changeStream({wanted.Embed + 2})\">ESPN Deportes</button>" : string.Empty) + "</body></html>");
         }
 
         if (path.StartsWith("/embed/", StringComparison.Ordinal))

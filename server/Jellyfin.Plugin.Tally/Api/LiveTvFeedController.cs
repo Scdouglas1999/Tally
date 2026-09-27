@@ -50,7 +50,7 @@ public class LiveTvFeedController : ControllerBase
         var baseUrl = $"{Request.Scheme}://{Request.Host.ToUriComponent()}";
 
         // numbered hottest-first: native apps list channels by number
-        var channels = CardArtService.HeatOrder(_sourceManager.GetChannels(), games);
+        var channels = LiveTvOrder(_sourceManager.GetChannels(), games, SpanishInLiveTv);
         for (var i = 0; i < channels.Count; i++)
         {
             var c = channels[i];
@@ -78,7 +78,7 @@ public class LiveTvFeedController : ControllerBase
         var baseUrl = $"{Request.Scheme}://{Request.Host.ToUriComponent()}";
 
         // Several source channels can share one tvg-id — emit each guide channel once.
-        var channels = _sourceManager.GetChannels()
+        var channels = LiveTvOrder(_sourceManager.GetChannels(), games, SpanishInLiveTv)
             .GroupBy(EpgChannelId, StringComparer.OrdinalIgnoreCase)
             .Select(g => g.First())
             .ToList();
@@ -156,6 +156,22 @@ public class LiveTvFeedController : ControllerBase
         }
 
         return File(ms.ToArray(), "application/xml; charset=utf-8");
+    }
+
+    private static bool SpanishInLiveTv => Plugin.Instance?.Configuration.SpanishInLiveTv ?? true;
+
+    /// <summary>The channels Jellyfin's Live TV gets, in number order: the English ones hottest-first (see
+    /// <see cref="CardArtService.HeatOrder"/>), then the Spanish ones the same way — or none of those when
+    /// <paramref name="spanish"/> is off (the Tally board still lists them).</summary>
+    public static List<SourceChannel> LiveTvOrder(IReadOnlyList<SourceChannel> channels, IReadOnlyDictionary<string, GameInfo> games, bool spanish)
+    {
+        var english = CardArtService.HeatOrder(channels.Where(c => StreamLanguage.Of(c) != StreamLanguage.Spanish).ToList(), games);
+        if (spanish)
+        {
+            english.AddRange(CardArtService.HeatOrder(channels.Where(c => StreamLanguage.Of(c) == StreamLanguage.Spanish).ToList(), games));
+        }
+
+        return english;
     }
 
     /// <summary>A provider logo when there is one and nothing better; otherwise a rendered card.

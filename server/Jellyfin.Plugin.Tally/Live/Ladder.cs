@@ -76,6 +76,11 @@ public sealed class CandidateProbe
 
     /// <summary>A live playlist (no #EXT-X-ENDLIST). Recordings and VOD are never laddered.</summary>
     public bool IsLive { get; init; } = true;
+
+    /// <summary>The language every audio rendition of its master declares (EXT-X-MEDIA TYPE=AUDIO LANGUAGE), null when
+    /// it declares none or several (see <c>StreamLanguage.FromAudio</c>). Read from the playlist the probe fetches
+    /// anyway.</summary>
+    public string? AudioLanguage { get; init; }
 }
 
 public static class LadderRanking

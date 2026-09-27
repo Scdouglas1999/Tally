@@ -29,6 +29,13 @@ public class ExtractedStream
     /// a link to the event: page titles are mostly the site's own name and tagline, so such a name stands only if it
     /// names a game (see <c>ChannelNaming</c>).</summary>
     public bool NameFromTitle { get; set; } = true;
+
+    /// <summary>The label the stream was found under, before cleaning (an iframe's title, the page's title).</summary>
+    public string RawName { get; set; } = string.Empty;
+
+    /// <summary>The commentary's language as the page said it ("es" for a "Spanish" or "ESPN Deportes" link, an
+    /// "/es/" page), before names are cleaned; null when nothing said (see <c>StreamLanguage</c>).</summary>
+    public string? Language { get; set; }
 }
 
 /// <summary>
@@ -95,6 +102,8 @@ public partial class WebExtractor
         var titles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         // page → the matchup a link to it (or to the page embedding it) was labeled with ("Chiefs vs Bills")
         var labels = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        // page → the raw text of the link or player button that led to it ("Spanish", "ESPN Deportes", "Link 2")
+        var linkTexts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         // Two-tier queue: event pages and embeds are where streams live —
         // they jump ahead of generic "watch"-hint links (nav, blog posts) that
         // would otherwise burn the page budget.
@@ -142,6 +151,7 @@ public partial class WebExtractor
                 try
                 {
                     var doc = new AngleSharp.Html.Parser.HtmlParser().ParseDocument(html);
+                    var switchLabels = SwitchLabels(doc);
 
                     foreach (var f in doc.QuerySelectorAll("iframe[src], frame[src], embed[src], video[src], source[src]"))
                     {
@@ -163,6 +173,8 @@ public partial class WebExtractor
                                 labels.TryAdd(NormalizePage(src), parentLabel);
                             }
 
+                            NoteLinkText(linkTexts, src, url, switchLabels);
+
                             if (depth < 3)
                             {
                                 hot.Enqueue(new CrawlItem(src, depth + 1, origin));
@@ -176,6 +188,8 @@ public partial class WebExtractor
                                     {
                                         labels.TryAdd(NormalizePage(sibling), siblingLabel);
                                     }
+
+                                    NoteLinkText(linkTexts, sibling, url, switchLabels);
 
                                     hot.Enqueue(new CrawlItem(sibling, depth + 1, origin));
                                 }
@@ -199,12 +213,19 @@ public partial class WebExtractor
                             // ending in a numeric id (/mlb/team-a-team-b/1376048).
                             var ev = IsEventPath(url, href);
                             var looksLikeEvent = StreamClassifier.LooksLikeEvent(text);
-                            if (ev || LinkHint.IsMatch(href) || LinkHint.IsMatch(text) || looksLikeEvent)
+                            // (on an event page, its "English" / "Español" players too; not the listing's own language menu)
+                            var languageLink = depth == 1 && !looksLikeEvent && text.Length <= 40 && StreamLanguage.FromText(text) != null;
+                            if (ev || LinkHint.IsMatch(href) || LinkHint.IsMatch(text) || looksLikeEvent || languageLink)
                             {
                                 _discoveredLinks.Add(href);
                                 if (LinkLabel(text) is { } label)
                                 {
                                     labels.TryAdd(NormalizePage(href), label);
+                                }
+
+                                if (text.Length > 0)
+                                {
+                                    linkTexts.TryAdd(NormalizePage(href), text);
                                 }
 
                                 (ev || looksLikeEvent ? hot : warm).Enqueue(new CrawlItem(href, depth + 1, ev ? href : origin));
@@ -222,7 +243,7 @@ public partial class WebExtractor
         PagesVisited = visited.Count;
         _logger.LogInformation("JellyTV: HTTP crawl visited {Pages} pages, found {Streams} manifest candidates", visited.Count, found.Count);
 
-        NameStreams(found, labels, titles);
+        NameStreams(found, labels, titles, linkTexts);
 
         // Validate candidates, FetchParallelism at a time — keep only live playlists.
         var validated = new List<ExtractedStream>();
@@ -257,10 +278,13 @@ public partial class WebExtractor
     /// already says which game it is. Failing all that, the event page's title is kept only as a hint (NameFromTitle):
     /// a title is mostly the site's name and tagline.
     /// </summary>
-    private void NameStreams(List<ExtractedStream> found, Dictionary<string, string> labels, Dictionary<string, string> titles)
+    private void NameStreams(List<ExtractedStream> found, Dictionary<string, string> labels, Dictionary<string, string> titles, Dictionary<string, string> linkTexts)
     {
         foreach (var s in found)
         {
+            // the language first, while the texts that say it are at hand
+            s.Language ??= LanguageOf(s, linkTexts, titles);
+
             var named = NameFromUrl(s.Context);
             if (named == null && (labels.TryGetValue(NormalizePage(s.Context), out var label) || labels.TryGetValue(NormalizePage(s.Referer), out label)))
             {
@@ -282,6 +306,66 @@ public partial class WebExtractor
                 s.Name = cleaned;
             }
         }
+    }
+
+    /// <summary>
+    /// What the texts around a stream say its language is, most specific first: the link or player button that led to
+    /// its player page ("Spanish", "ESPN Deportes"), the label it was found under, its own address and its player
+    /// page's ("/es/", "-es.m3u8"), then the link to its event page, that page's address and title. Null when none
+    /// says (English).
+    /// </summary>
+    public static string? LanguageOf(ExtractedStream s, IReadOnlyDictionary<string, string> linkTexts, IReadOnlyDictionary<string, string> titles)
+    {
+        string? Said(IReadOnlyDictionary<string, string> texts, string page)
+            => Uri.TryCreate(page, UriKind.Absolute, out _) && texts.TryGetValue(NormalizePage(page), out var t) ? StreamLanguage.FromText(t) : null;
+
+        return StreamLanguage.First(
+            Said(linkTexts, s.Referer),
+            StreamLanguage.FromText(s.RawName),
+            StreamLanguage.FromUrl(s.Url),
+            StreamLanguage.FromUrl(s.Referer),
+            Said(linkTexts, s.Context),
+            StreamLanguage.FromUrl(s.Context),
+            Said(titles, s.Context));
+    }
+
+    /// <summary>The raw text of the player button that switches to <paramref name="embedUrl"/> (see
+    /// <see cref="SwitchLabels"/>), else the text of the link that led to the page embedding it.</summary>
+    private static void NoteLinkText(Dictionary<string, string> linkTexts, string embedUrl, string pageUrl, IReadOnlyDictionary<string, string> switchLabels)
+    {
+        if (TrailingId().Match(embedUrl) is { Success: true } m && switchLabels.TryGetValue(m.Groups[2].Value, out var button))
+        {
+            linkTexts.TryAdd(NormalizePage(embedUrl), button);
+        }
+        else if (linkTexts.TryGetValue(NormalizePage(pageUrl), out var parent))
+        {
+            linkTexts.TryAdd(NormalizePage(embedUrl), parent);
+        }
+    }
+
+    /// <summary>Stream id → the text of the button that switches a page's player to it (<c>&lt;button
+    /// onclick="changeStream(1001)"&gt;ESPN Deportes&lt;/button&gt;</c>), or its title when it has no text.</summary>
+    public static Dictionary<string, string> SwitchLabels(IParentNode doc)
+    {
+        var labels = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var el in doc.QuerySelectorAll("[onclick], [onchange], [onmousedown], [ontouchstart]"))
+        {
+            foreach (var attr in el.Attributes)
+            {
+                if (!attr.Name.StartsWith("on", StringComparison.OrdinalIgnoreCase) || SwitchArgument().Match(attr.Value) is not { Success: true } m)
+                {
+                    continue;
+                }
+
+                var text = el.TextContent?.Trim() is { Length: > 0 } t ? t : el.GetAttribute("title") ?? el.GetAttribute("aria-label") ?? string.Empty;
+                if (text.Length > 0)
+                {
+                    labels.TryAdd(m.Groups[1].Value, text.Length > 80 ? text[..80] : text);
+                }
+            }
+        }
+
+        return labels;
     }
 
     private async Task<string?> FetchPage(string url, CancellationToken ct)
@@ -391,6 +475,7 @@ public partial class WebExtractor
         {
             Url = url,
             Name = string.IsNullOrEmpty(name) ? "Stream" : name,
+            RawName = nameHint ?? string.Empty,
             Referer = referer,
             Context = context
         });
@@ -438,6 +523,9 @@ public partial class WebExtractor
 
     [GeneratedRegex(@"^(.*/)(\d{3,})(/?(?:\?.*)?)$")]
     private static partial Regex TrailingId();
+
+    [GeneratedRegex(@"^\s*[\w.$]+\(\s*['""]?(\d{3,})['""]?\s*\)")]
+    private static partial Regex SwitchArgument();
 
     [GeneratedRegex(@"\bon(?:click|change|mousedown|touchstart)\s*=\s*[""'][\w.$]+\(\s*['""]?(\d{3,})['""]?\s*\)", RegexOptions.IgnoreCase)]
     private static partial Regex SwitchCall();

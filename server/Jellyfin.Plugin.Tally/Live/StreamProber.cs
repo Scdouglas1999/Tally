@@ -59,12 +59,14 @@ public sealed class StreamProber
         }
 
         var tiers = new List<Tier>();
+        string? audioLanguage = null;
         HlsMediaPlaylist media;
         Uri mediaFinal;
         Tier probed;
         if (HlsParser.IsMaster(text))
         {
             var variants = HlsParser.ParseMaster(text, top.FinalUri);
+            audioLanguage = Sources.StreamLanguage.FromAudio(HlsParser.AudioLanguages(text));
             if (variants.Count == 0)
             {
                 return Failed(now, "empty master playlist");
@@ -181,7 +183,8 @@ public sealed class StreamProber
             NextSequence = media.NextSequence,
             IsTs = isTs,
             Encrypted = encrypted,
-            IsLive = !media.EndList
+            IsLive = !media.EndList,
+            AudioLanguage = audioLanguage
         };
     }
 

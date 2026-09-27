@@ -131,6 +131,10 @@ public class PluginConfiguration : BasePluginConfiguration
     /// of minutes while games are on, and re-run Jellyfin's guide refresh so channel order follows the heat.</summary>
     public bool LiveCardsEnabled { get; set; } = true;
 
+    /// <summary>Spanish channels ("… (Español)") in Jellyfin's Live TV, numbered after every English one. Off hides them
+    /// from Live TV only: the Tally board still lists them and offers a game's Spanish feed.</summary>
+    public bool SpanishInLiveTv { get; set; } = true;
+
     /// <summary>Comma-separated ESPN league paths ("football/nfl,baseball/mlb"). Empty = built-in defaults.
     /// A string, not a list: XmlSerializer appends to list defaults on every load.</summary>
     public string ScoreLeagues { get; set; } = string.Empty;

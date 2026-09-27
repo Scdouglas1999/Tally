@@ -404,6 +404,15 @@ public class SourceManager
                 channels = kept;
             }
 
+            // one channel per language: Spanish ones get their own name and group, other languages are left out
+            var (spoken, unspoken) = StreamLanguage.Apply(channels);
+            if (unspoken > 0)
+            {
+                _logger.LogInformation("JellyTV: left out {Count} channels in languages other than English and Spanish", unspoken);
+            }
+
+            channels = spoken;
+
             var fresh = results.Values.Where(r => r != null).SelectMany(r => r!.Channels).Select(c => c.StreamUrl).ToHashSet(StringComparer.Ordinal);
             Pin(channels, defs, games, next.LoadedAt, fresh);
 

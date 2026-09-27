@@ -1536,6 +1536,8 @@ async function renderAdmin(container, fresh) {
         Show the Games board, score bugs and switch alerts</label></div>
       <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.LiveCardsEnabled !== false ? ' on' : ''}" id="set-livecards" role="switch" aria-checked="${!!(cfg && cfg.LiveCardsEnabled !== false)}"></button>
         Live cards for TV apps — redraw channel cards with the current score every 2 minutes while games are on, and keep channels numbered hottest-first (re-runs Jellyfin's guide refresh each time)</label></div>
+      <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.SpanishInLiveTv !== false ? ' on' : ''}" id="set-spanish-livetv" role="switch" aria-checked="${!!(cfg && cfg.SpanishInLiveTv !== false)}"></button>
+        Spanish channels in Jellyfin Live TV — numbered after the English ones; off hides them from Live TV only (Tally still offers them)</label></div>
       <div class="f-row"><label>Leagues on the Games board</label>
         <div id="league-list">${leagueRows(cfg).map(r => `
           <div class="src-row league-row">
@@ -1575,6 +1577,7 @@ async function renderAdmin(container, fresh) {
   $('#set-weblook', container).onclick = () => { cfg.WebLook = cfg.WebLook === false; renderAdmin(container); };
   $('#set-takeover', container).onclick = () => { cfg.ReplaceLiveTv = cfg.ReplaceLiveTv === false; renderAdmin(container); };
   $('#set-livecards', container).onclick = () => { cfg.LiveCardsEnabled = cfg.LiveCardsEnabled === false; renderAdmin(container); };
+  $('#set-spanish-livetv', container).onclick = () => { cfg.SpanishInLiveTv = cfg.SpanishInLiveTv === false; renderAdmin(container); };
   $('#set-scores', container).onclick = () => { cfg.ScoresEnabled = cfg.ScoresEnabled === false; renderAdmin(container); };
 
   $$('[data-league-del]', container).forEach(b => b.onclick = () => {
