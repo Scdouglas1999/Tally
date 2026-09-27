@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
     "versions": [
       {
+        "version": "2.2.2.12",
+        "changelog": "Tally 2.2.2: gentler, game-by-game stream searches, and game pictures for every channel.\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.2.2/Tally-server-2.2.2-jf12.zip",
+        "checksum": "3259d13a97f7bc548b48db04187c32b6",
+        "timestamp": "2026-09-27T03:42:46.0000000Z"
+      },
+      {
+        "version": "2.2.2.11",
+        "changelog": "Tally 2.2.2: gentler, game-by-game stream searches, and game pictures for every channel.\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.2.2/Tally-server-2.2.2-jf10.11.zip",
+        "checksum": "81d275a8545ad7411861917ee98e574d",
+        "timestamp": "2026-09-27T03:42:46.0000000Z"
+      },
+      {
+        "version": "2.2.2.10",
+        "changelog": "Tally 2.2.2: gentler, game-by-game stream searches, and game pictures for every channel.\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.2.2/Tally-server-2.2.2-jf10.10.zip",
+        "checksum": "895055740a0482ad2a00654eac8ab7b2",
+        "timestamp": "2026-09-27T03:42:46.0000000Z"
+      },
+      {
         "version": "2.2.1.12",
         "changelog": "Tally 2.2.1: every game can be watched, and the server looks for streams around game time.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
