@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Tally.Models;
+using Jellyfin.Plugin.Tally.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Tally.Live;
@@ -225,8 +226,8 @@ public sealed class StreamProber
     /// no ffprobe or it cannot tell.</summary>
     public async Task<VideoFacts?> FfprobeAsync(byte[] segment, CancellationToken ct)
     {
-        var exe = _ffprobePath();
-        if (string.IsNullOrEmpty(exe) || !File.Exists(exe))
+        var exe = ToolPath.Resolve(_ffprobePath());
+        if (exe == null)
         {
             return null;
         }
