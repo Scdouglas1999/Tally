@@ -69,6 +69,7 @@ enum class PlaybackDialogType {
     TALLY_SEND_TO,
     TALLY_TOGETHER,
     TALLY_QUALITY,
+    TALLY_COMMENTARY,
     // TALLY: end
 }
 
@@ -319,8 +320,9 @@ fun PlaybackDialog(
         PlaybackDialogType.TALLY_SEND_TO,
         PlaybackDialogType.TALLY_TOGETHER,
         PlaybackDialogType.TALLY_QUALITY,
+        PlaybackDialogType.TALLY_COMMENTARY,
         -> {
-            // handled by TallyGlobalOverlays
+            // handled by TallyGlobalOverlays (the commentary page only exists in the Tally player's own panel)
         }
 
         // TALLY: end

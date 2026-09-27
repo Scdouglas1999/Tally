@@ -50,6 +50,7 @@ import com.github.damontecres.wholphin.ui.playback.overlay.PlaybackAction
 import com.github.damontecres.wholphin.ui.playback.playbackScaleOptions
 import com.github.damontecres.wholphin.ui.playback.playbackSpeedOptions
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.api.TallyFeed
 import io.github.scdouglas1999.tally.formatSleepClock
 import io.github.scdouglas1999.tally.media.kit.FocusEdge
 import io.github.scdouglas1999.tally.media.kit.rememberFocusEdgeSpec
@@ -58,6 +59,8 @@ import io.github.scdouglas1999.tally.quality.TallyQuality
 import io.github.scdouglas1999.tally.ui.TallyGlobalOverlaysViewModel
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.components.feedName
+import io.github.scdouglas1999.tally.ui.components.languageName
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
@@ -68,6 +71,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
 import io.github.scdouglas1999.tally.ui.theme.TallyType
+import io.github.scdouglas1999.tally.watch.commentary
 import kotlinx.coroutines.delay
 import org.jellyfin.sdk.model.api.MediaStream
 import org.jellyfin.sdk.model.api.MediaStreamType
@@ -94,8 +98,9 @@ private data class PanelRow(
  * The player's settings as a Tally side panel (the gear, and the CC and audio buttons, which open their page
  * directly). Same parameters as upstream's `PlaybackDialog`, which hands over to this while the Tally theme is
  * selected. Pages follow upstream's dialog type: `SETTINGS` is the list; `AUDIO`, `CAPTIONS`, `PLAYBACK_SPEED`,
- * `VIDEO_SCALE` and `SUBTITLE_DELAY` replace it in the same panel. BACK on a page returns to the list, BACK on the
- * list closes. Choosing does exactly what upstream's dialog does; the Tally entries open their own dialogs.
+ * `VIDEO_SCALE`, `SUBTITLE_DELAY` and Tally's `TALLY_COMMENTARY` (a live game with English and Spanish streams)
+ * replace it in the same panel. BACK on a page returns to the list, BACK on the list closes. Choosing does exactly
+ * what upstream's dialog does; the Tally entries open their own dialogs.
  */
 @Composable
 fun TallyPlayerSettings(
@@ -117,6 +122,7 @@ fun TallyPlayerSettings(
             PlaybackDialogType.PLAYBACK_SPEED,
             PlaybackDialogType.VIDEO_SCALE,
             PlaybackDialogType.SUBTITLE_DELAY,
+            PlaybackDialogType.TALLY_COMMENTARY,
             -> type
 
             // DEBUG is an action, never a dialog (upstream throws); the Tally entries are drawn by TallyGlobalOverlays.
@@ -193,6 +199,13 @@ fun TallyPlayerSettings(
                 }
             }
 
+            PlaybackDialogType.TALLY_COMMENTARY -> {
+                commentaryRows { feed ->
+                    onDismissRequest()
+                    TallyPlayerMenu.commentary.value?.choose?.invoke(feed)
+                }
+            }
+
             else -> {
                 delayRows(settings.subtitleDelay, onChangeSubtitleDelay)
             }
@@ -204,6 +217,7 @@ fun TallyPlayerSettings(
             PlaybackDialogType.PLAYBACK_SPEED -> R.string.tally_player_speed
             PlaybackDialogType.VIDEO_SCALE -> R.string.tally_player_video_scale
             PlaybackDialogType.SUBTITLE_DELAY -> R.string.tally_player_subtitle_delay
+            PlaybackDialogType.TALLY_COMMENTARY -> R.string.tally_23_player_commentary
             else -> R.string.tally_player_settings
         }
     val readout =
@@ -443,11 +457,22 @@ private fun listRows(
         }
     val scaleName = playbackScaleOptions[settings.contentScale]?.let { stringResource(it) }
     val debugLabel = stringResource(if (settings.showDebugInfo) R.string.hide_debug_info else R.string.show_debug_info)
+    val commentary by TallyPlayerMenu.commentary
+    val commentaryValue = commentary?.choice?.let { choice -> languageName(choice.current) }
     val tally = { request: TallyPlayerMenu.Request ->
         TallyPlayerMenu.request.value = request
         onDismissRequest()
     }
     return buildList {
+        // A live game with more than one commentary: the one on screen, and a page to switch (first: it is the
+        // choice a viewer of that game came here for).
+        if (commentaryValue != null) {
+            add(
+                PanelRow(PlaybackDialogType.TALLY_COMMENTARY, stringResource(R.string.tally_23_player_commentary), commentaryValue) {
+                    onClickPlaybackDialogType(PlaybackDialogType.TALLY_COMMENTARY)
+                },
+            )
+        }
         if (settings.audioStreams.isNotEmpty()) {
             add(
                 PanelRow(PlaybackDialogType.AUDIO, stringResource(R.string.tally_player_audio), audioValue) {
@@ -517,6 +542,19 @@ private fun listRows(
                 tally(TallyPlayerMenu.Request.SEND_TO)
             },
         )
+    }
+}
+
+/** The playing game's commentaries (English, Español), the one on screen marked; choosing one plays it in place. */
+@Composable
+private fun commentaryRows(onChoose: (TallyFeed) -> Unit): List<PanelRow> {
+    val choice = TallyPlayerMenu.commentary.value?.choice ?: return emptyList()
+    return choice.feeds.map { feed ->
+        PanelRow(
+            key = feed.commentary,
+            label = feedName(feed),
+            current = feed.commentary == choice.current,
+        ) { onChoose(feed) }
     }
 }
 

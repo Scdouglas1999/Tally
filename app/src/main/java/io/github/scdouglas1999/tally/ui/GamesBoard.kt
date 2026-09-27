@@ -39,14 +39,18 @@ import com.github.damontecres.wholphin.ui.ifElse
 import com.github.damontecres.wholphin.ui.rememberInt
 import com.github.damontecres.wholphin.ui.rememberPosition
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.api.TallyChannel
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.data.BoardOrganizer
 import io.github.scdouglas1999.tally.data.BoardRow
+import io.github.scdouglas1999.tally.data.RedZone
+import io.github.scdouglas1999.tally.data.RedZoneTile
 import io.github.scdouglas1999.tally.data.isFollowed
 import io.github.scdouglas1999.tally.ui.components.EmptyState
 import io.github.scdouglas1999.tally.ui.components.FocusedGamePanel
 import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.GameCard
+import io.github.scdouglas1999.tally.ui.components.RedZoneCard
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.gameActions
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
@@ -88,6 +92,9 @@ fun GamesBoard(
     val viewModel: TallyViewModel = hiltViewModel()
     val ui by viewModel.uiState.collectAsStateWithLifecycle()
     val teams = ui.favoriteTeams
+    // The RedZone channel's tile leads the first live row while RedZone is on.
+    val redZone = ui.redZone
+    val redZoneRow = if (redZone != null) RedZone.rowIndex(rows) else -1
 
     val focusedGame =
         remember(rows, focusedGameId) {
@@ -167,8 +174,9 @@ fun GamesBoard(
 
             else -> {
                 val targetRow = if (focusedPosition.row in rows.indices) focusedPosition.row else 0
+                val targetCards = (rows.getOrNull(targetRow)?.games?.size ?: 0) + if (targetRow == redZoneRow) 1 else 0
                 val targetColumn =
-                    if (focusedPosition.column in (rows.getOrNull(targetRow)?.games?.indices ?: IntRange.EMPTY)) {
+                    if (focusedPosition.column in 0 until targetCards) {
                         focusedPosition.column
                     } else {
                         0
@@ -193,8 +201,11 @@ fun GamesBoard(
                             hideScores = hideScores,
                             boardFocusIndex = if (rowIndex == targetRow) targetColumn else -1,
                             boardFocusRequester = boardFocusRequester,
+                            redZone = if (rowIndex == redZoneRow) redZone else null,
+                            onWatchRedZone = viewModel::watchChannel,
                             onCardFocused = { index, game ->
-                                focusedGameId = game.id
+                                // The RedZone tile shows the game it is on in the panel, when the board has it.
+                                if (game != null) focusedGameId = game.id
                                 focusedPosition = RowColumn(rowIndex, index)
                                 // Keep the focused row's header at the top of the list, not its card at the bottom edge.
                                 scope.launch { listState.animateScrollToItem(rowIndex) }
@@ -245,7 +256,9 @@ private fun GameRow(
     hideScores: Boolean,
     boardFocusIndex: Int,
     boardFocusRequester: FocusRequester,
-    onCardFocused: (Int, TallyGame) -> Unit,
+    redZone: RedZoneTile?,
+    onWatchRedZone: (TallyChannel) -> Unit,
+    onCardFocused: (Int, TallyGame?) -> Unit,
     onWatch: (TallyGame) -> Unit,
     onAddToMultiview: (String) -> Unit,
     favoriteTeams: Set<String>,
@@ -285,7 +298,26 @@ private fun GameRow(
                     .focusRequester(rowFocus)
                     .then(if (isFirstRow) Modifier.upToTab() else Modifier),
         ) {
-            itemsIndexed(row.games, key = { _, game -> game.id }) { index, game ->
+            // The RedZone tile is card 0 of its row; the games follow it.
+            val offset = if (redZone != null) 1 else 0
+            if (redZone != null) {
+                item(key = "redzone") {
+                    RedZoneCard(
+                        tile = redZone,
+                        onClick = { onWatchRedZone(redZone.channel) },
+                        onFocused = {
+                            position = 0
+                            onCardFocused(0, redZone.game)
+                        },
+                        modifier =
+                            Modifier
+                                .ifElse(position == 0, Modifier.focusRequester(firstFocus))
+                                .ifElse(boardFocusIndex == 0, Modifier.focusRequester(boardFocusRequester)),
+                    )
+                }
+            }
+            itemsIndexed(row.games, key = { _, game -> game.id }) { gameIndex, game ->
+                val index = gameIndex + offset
                 GameCard(
                     game = game,
                     hideScores = hideScores,

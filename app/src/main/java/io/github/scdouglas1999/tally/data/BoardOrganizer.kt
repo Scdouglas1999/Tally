@@ -1,6 +1,7 @@
 package io.github.scdouglas1999.tally.data
 
 import io.github.scdouglas1999.tally.api.TallyGame
+import io.github.scdouglas1999.tally.watch.carries
 import java.time.OffsetDateTime
 
 /**
@@ -85,11 +86,11 @@ object BoardOrganizer {
             )
     }
 
-    /** The first live game shown on the given channel, if any. */
+    /** The first live game shown on the given channel (its WATCH or one of its commentaries), if any. */
     fun gameFor(
         channelId: String,
         games: List<TallyGame>,
-    ): TallyGame? = games.firstOrNull { it.isLive && it.watch?.channelId == channelId }
+    ): TallyGame? = games.firstOrNull { it.isLive && it.carries(channelId) }
 }
 
 /** True when either team of this game is followed. */

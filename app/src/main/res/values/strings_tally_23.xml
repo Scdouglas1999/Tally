@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tally 2.3: commentary language and the RedZone channel (app-23). American English; "Español" is the language's own name, on purpose. -->
+<resources>
+    <!-- Settings: which commentary WATCH plays when a game has English and Spanish streams (settings key streamLanguage) -->
+    <string name="tally_23_settings_commentary">Commentary language</string>
+    <string name="tally_23_settings_commentary_desc">WATCH plays this commentary when a game has more than one. The other stays one choice away in the game menu and the player.</string>
+    <!-- Language names, as each language names itself -->
+    <string name="tally_23_language_en" translatable="false">English</string>
+    <string name="tally_23_language_es" translatable="false">Español</string>
+    <!-- Game menu / sheet: plays the game's other commentary. %1$s is a language name ("Español") -->
+    <string name="tally_23_watch_in">Watch in %1$s</string>
+    <!-- The focused-game panel's watch bar, when the game also has the other commentary. %1$s is a language name -->
+    <string name="tally_23_also_in">Also in %1$s</string>
+    <!-- Player settings: the commentary row and its page -->
+    <string name="tally_23_player_commentary">Commentary</string>
+    <!-- Card chip: the game plays with Spanish commentary -->
+    <string name="tally_23_es_chip" translatable="false">ES</string>
+    <!-- The RedZone channel's tile on the Games board and its overlay in the player -->
+    <string name="tally_23_redzone">Tally RedZone</string>
+    <!-- %1$s is the game on RedZone right now ("Chiefs at Bills") -->
+    <string name="tally_23_redzone_on_now">On now: %1$s</string>
+    <string name="tally_23_redzone_on_redzone_now">On RedZone now</string>
+    <string name="tally_23_redzone_desc">One stream that cuts to the hottest game. Lighter than multiview.</string>
+    <!-- Why RedZone is on the game it shows (the status endpoint's reason) -->
+    <string name="tally_23_redzone_reason_red_zone">Red zone</string>
+    <string name="tally_23_redzone_reason_score">Score</string>
+    <string name="tally_23_redzone_reason_two_minute">Two-minute drill</string>
+    <string name="tally_23_redzone_reason_overtime">Overtime</string>
+    <string name="tally_23_redzone_reason_close">Close game</string>
+    <string name="tally_23_redzone_reason_hottest">Top game</string>
+</resources>
