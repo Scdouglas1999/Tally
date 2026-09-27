@@ -92,3 +92,14 @@ public class Board
 
     [JsonPropertyName("errors")] public Dictionary<string, string> Errors { get; set; } = new();
 }
+
+/// <summary>What <c>POST games/{gameId}/find</c> answers.</summary>
+public class FindResult
+{
+    /// <summary>"found" (with <see cref="Watch"/>), "searching" or "none".</summary>
+    [JsonPropertyName("state")] public string State { get; set; } = "searching";
+
+    [JsonPropertyName("watch")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public WatchTarget? Watch { get; set; }
+}

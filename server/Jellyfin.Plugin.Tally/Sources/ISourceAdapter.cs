@@ -16,6 +16,11 @@ public class SourceSnapshot
         = new Dictionary<string, List<Programme>>();
 
     public string? Error { get; set; }
+
+    /// <summary>Web page sources: pages the crawl visited, and of those, the ones visited for wanted games.</summary>
+    public int PagesVisited { get; set; }
+
+    public int TargetedPagesVisited { get; set; }
 }
 
 /// <summary>A pluggable provider of live channels + optional EPG data.</summary>

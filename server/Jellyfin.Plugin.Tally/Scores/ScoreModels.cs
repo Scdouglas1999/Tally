@@ -148,6 +148,12 @@ public class GameInfo
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Dvr.GameRecording? Recording { get; set; }
 
+    /// <summary>The stream search for a game that is live or starts within 30 minutes and has no <see cref="Watch"/>
+    /// (see Sources/StreamSearchService.cs); absent otherwise. Filled in by the Client API.</summary>
+    [JsonPropertyName("search")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public GameSearch? Search { get; set; }
+
     /// <summary>Per-module additions, keyed by module name ("fantasy"…). Clients ignore keys they don't know.</summary>
     [JsonPropertyName("extras")] public Dictionary<string, object> Extras { get; set; } = new();
 
@@ -171,6 +177,24 @@ public class GameInfo
         copy.Extras = new Dictionary<string, object>();
         copy.Watch = null;
         copy.Recording = null;
+        copy.Search = null;
         return copy;
     }
+}
+
+/// <summary>Where the server's search for a game's stream stands.</summary>
+public class GameSearch
+{
+    /// <summary>"searching" (a search covering the game is running now, or queued to run next) or "waiting".</summary>
+    [JsonPropertyName("state")] public string State { get; set; } = "waiting";
+
+    /// <summary>When the last search that covered the game ended; null before the first.</summary>
+    [JsonPropertyName("lastAt")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public DateTimeOffset? LastAt { get; set; }
+
+    /// <summary>When the next one is due ("waiting" only); null when none is scheduled.</summary>
+    [JsonPropertyName("nextAt")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public DateTimeOffset? NextAt { get; set; }
 }

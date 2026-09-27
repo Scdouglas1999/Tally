@@ -68,7 +68,20 @@ In the app → **Settings → Sources → Add source**:
   into categories (NBA, NFL, soccer leagues, UFC, sports networks, …). Captured
   Referer/Origin headers are replayed through the proxy automatically.
 - Streams on web pages are usually ephemeral (rotating tokens) — the source is
-  re-scanned on every refresh, so treat the channel list as a snapshot.
+  re-scanned on every refresh, so treat the channel list as a snapshot. One exception: a stream that names a game
+  on the scoreboard that is not over stays after a scan that no longer reaches its page, as long as its playlist
+  still answers, until the game ends.
+- **Searching around game time**: a scan reads at most 96 pages, so on a busy day a listing's later games can be out
+  of its reach. Tally therefore also searches for each game on the scoreboard that has no stream at its start −15,
+  −5, 0, +3, +8 and +15 minutes, then every 5 minutes while it is live (at least 2 minutes between two such
+  searches), and whenever a viewer presses Watch on it. Such a search reads the source's page and the pages whose
+  link text or address names one of the wanted games' teams (by name, city or abbreviation: "rays-vs-phillies",
+  "Tampa Bay Rays @ Philadelphia Phillies", "/mlb/tb-phi"), plus what those pages embed; it adds what it finds and
+  removes nothing. The regular scan visits those pages first too, on a budget of its own (16 pages per game, 32 to
+  160) on top of the 96. A stream found on a page whose link named both teams is named after the game ("Tampa Bay
+  Rays at Philadelphia Phillies") when its page's address says less. Each search is logged in one line
+  (`JellyTV stream search`: the games wanted, pages visited, streams per game). The schedule reads the scoreboard
+  in the background (at most once a minute) while scores are on and a web page source is enabled.
 - **Limits**: Cloudflare challenges, heavy JS obfuscation, DRM, and login walls
   can defeat extraction. If the scan finds nothing, the source shows an error
   in Settings → Sources — try the headless fallback, or fall back to a Direct
@@ -171,7 +184,8 @@ mode.
 
 Data comes from ESPN's public scoreboard feed, fetched **by the server** (one
 cached request per league, every ~12 s while a game is live and only while
-someone has Tally open or a recording is scheduled). The default leagues are **NFL and MLB**; admins can
+someone has Tally open or a recording is scheduled, and at most once a minute while a web page source is enabled, for
+the [stream search](#web-page-auto-extract)). The default leagues are **NFL and MLB**; admins can
 add others (`basketball/nba`, `hockey/nhl`, `football/college-football`,
 `soccer/eng.1`…) or switch the
 whole feature off under **Settings → Live scores**; off means the server makes
@@ -239,6 +253,16 @@ added it yet) or `noLibrary` (no library covers the recordings folder); so does 
 Changes without the permission answer 403 with `{"error": "…"}`. On the board each game with a job gains
 `recording: {state, jobId, startOverPath?, itemId?, reason?}`, and `/info` lists the `dvr` feature. Admin:
 `GET/POST /JellyTV/Recordings/Settings`, `GET /JellyTV/Recordings/Folder?path=`, `POST /JellyTV/Recordings/Library`.
+
+**Finding a stream for a game** (Client API v1, any signed-in user): every game on the board that is live or starts
+within 30 minutes and has no `watch` carries `search: {"state": "searching" | "waiting", "lastAt": ISO | null,
+"nextAt": ISO | null}` (`searching`: a search covering the game is running or queued to run next; `waiting`: `nextAt`
+is when the schedule above runs the next one, null when none is scheduled). `POST /JellyTV/Client/v1/games/{gameId}/find`
+starts a search for the game now or joins the running one and answers at once with `{"state": "found" | "searching" |
+"none", "watch": <watch> | null}`: `found` with the game's `watch`, `searching`, or `none` when a search for it ended
+less than a minute ago with nothing (and for a final game). 404 with `{"error": "…"}` for a game that is not on the
+scoreboard. Callers are coalesced: at most one crawl runs at a time. Clients poll the board (or call `find` again) every
+3 s for up to 45 s. The web UI's Watch on a game without a stream does exactly that ("Looking for a stream…").
 
 While a recording rule or job exists, the server reads the scoreboard itself (the same cached requests the Games
 board makes, plus the next week's boards of the leagues team rules follow, every three hours).

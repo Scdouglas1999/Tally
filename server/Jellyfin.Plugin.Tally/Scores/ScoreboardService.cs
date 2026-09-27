@@ -128,19 +128,24 @@ public sealed class ScoreboardService
             .ToList();
 
     /// <summary>All games for the configured leagues, refreshing whatever has gone stale.</summary>
-    public async Task<List<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
+    public Task<List<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
+        => GetGamesAsync(cancellationToken, TimeSpan.Zero);
+
+    /// <summary>All games, refreshing a league only when it has gone stale and is at least <paramref name="minAge"/>
+    /// old: the background stream search reads the board once a minute, not at the live rate a viewer's board uses.</summary>
+    public async Task<List<GameInfo>> GetGamesAsync(CancellationToken cancellationToken, TimeSpan minAge)
     {
         var leagues = ParseLeagues(Plugin.Instance?.Configuration.ScoreLeagues);
         var now = DateTimeOffset.UtcNow;
 
-        if (leagues.Any(l => IsStale(l, now)))
+        if (leagues.Any(l => IsStale(l, now, minAge)))
         {
             // single flight: concurrent viewers share one refresh instead of each hitting upstream
             await _refreshLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 now = DateTimeOffset.UtcNow;
-                await Task.WhenAll(leagues.Where(l => IsStale(l, now)).Select(l => RefreshLeagueAsync(l, cancellationToken))).ConfigureAwait(false);
+                await Task.WhenAll(leagues.Where(l => IsStale(l, now, minAge)).Select(l => RefreshLeagueAsync(l, cancellationToken))).ConfigureAwait(false);
             }
             finally
             {
@@ -154,8 +159,8 @@ public sealed class ScoreboardService
             .ToList();
     }
 
-    private bool IsStale(string league, DateTimeOffset now)
-        => !_cache.TryGetValue(league, out var c) || now - c.FetchedAt >= c.Ttl;
+    private bool IsStale(string league, DateTimeOffset now, TimeSpan minAge)
+        => !_cache.TryGetValue(league, out var c) || (now - c.FetchedAt >= c.Ttl && now - c.FetchedAt >= minAge);
 
     private async Task RefreshLeagueAsync(string league, CancellationToken cancellationToken)
     {

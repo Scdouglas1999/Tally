@@ -280,7 +280,6 @@ const state = {
   flash: {},             // game id -> flash-until timestamp (score just changed)
   alerted: {},           // game id -> last switch-alert timestamp
   leagueFilter: null,
-  onlyMine: false,       // games board: only games on your channels
   tv: null,              // Play-on-TV target: { id, deviceId, name, client, canPlay, canMessage }
   tvNow: null,           // channel id last sent to the TV
   follow: false,         // auto-switch the TV to the hottest game
@@ -798,6 +797,60 @@ function fillMultiview() {
   toast(picks.length + (picks.length === 1 ? ' game' : ' games') + ' added — hottest first');
 }
 
+const onlyWatchableOn = () => !!(state.settings && state.settings.onlyWatchable === true);
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+// WATCH on a game without a stream: ask the server to look for one now (POST …/games/{id}/find, which starts a
+// search or joins the one running) and ask again every 3 s; play as soon as it answers "found". After 45 s: say so,
+// and offer another 45 s. Esc, Cancel or a click outside stops asking (the server keeps looking on its own schedule).
+function findStream(g) {
+  $$('.jtv-modal-veil').forEach(n => n.remove());
+  const title = (g.away.shortName || g.away.abbr) + ' at ' + (g.home.shortName || g.home.abbr);
+  const veil = el(`<div class="jtv-modal-veil"><div class="jtv-modal jtv-find" role="dialog" aria-label="Looking for a stream">
+    <div class="m-head"><h3>${esc(title)}</h3><button class="icon-btn" id="m-x" aria-label="Cancel">${icons.close}</button></div>
+    <div class="m-body"><div class="m-none" id="f-msg"></div></div>
+    <div class="m-foot" id="f-foot"></div></div></div>`);
+  document.body.appendChild(veil);
+  const close = () => veil.remove();
+  $('#m-x', veil).onclick = close;
+  veil.onclick = (e) => { if (e.target === veil) close(); };
+
+  const looking = () => {
+    $('#f-msg', veil).innerHTML = '<i class="led on"></i> Looking for a stream…';
+    $('#f-foot', veil).innerHTML = '<span class="f-grow"></span><button class="btn" id="f-cancel">Cancel</button>';
+    $('#f-cancel', veil).onclick = close;
+    $('#f-cancel', veil).focus();
+  };
+  const nothing = () => {
+    $('#f-msg', veil).textContent = 'No stream for this game yet. Tally keeps looking and will light it up when one appears.';
+    $('#f-foot', veil).innerHTML = '<span class="f-grow"></span><button class="btn" id="f-more">Keep looking</button><button class="btn btn-primary" id="f-ok">OK</button>';
+    $('#f-more', veil).onclick = () => run();
+    $('#f-ok', veil).onclick = close;
+    $('#f-ok', veil).focus();
+  };
+  const run = async () => {
+    looking();
+    const until = Date.now() + 45e3;
+    while (veil.isConnected) {
+      let r = null;
+      try { r = await api('Client/v1/games/' + encodeURIComponent(g.id) + '/find', { method: 'POST' }); } catch (e) {}
+      if (!veil.isConnected) return;
+      if (r && r.state === 'found' && r.watch) {
+        const id = r.watch.channelId;
+        if (!chanById(id)) { try { await loadChannels(); } catch (e) {} }
+        if (!veil.isConnected) return;
+        close();
+        if (chanById(id)) play(id); else toast('Found a stream — its channel is still being added, try again in a moment', true);
+        loadScores().then(() => { if (state.view === 'games' && !state.player) render(); }).catch(() => {});
+        return;
+      }
+      if (Date.now() + 3000 > until) { nothing(); return; }
+      await sleep(3000);
+    }
+  };
+  run();
+}
+
 function gameRow(g, hide) {
   const live = g.state === 'in', pre = g.state === 'pre', post = g.state === 'post';
   const chans = (g.channels || []).map(gc => ({ kind: gc.kind, c: chanById(gc.id) })).filter(x => x.c).slice(0, 3);
@@ -829,13 +882,19 @@ function gameRow(g, hide) {
     sit = `<div class="g-play">${esc(g.lastPlay)}</div>`;
   }
 
+  // No stream yet: WATCH asks the server to look for one (findStream). The label says how its search stands, for a
+  // game that is live or starts within 30 minutes.
+  const searching = !!(g.search && g.search.state === 'searching');
+  const soon = live || (pre && start - Date.now() <= 30 * 60e3);
+  const label = searching ? 'Looking for a stream' : soon ? 'No stream yet' : '';
   const watch = chans.length
     ? chans.map((x, i) => `<button class="g-chan${i === 0 ? ' first' : ''}" data-watch="${esc(x.c.id)}" title="${x.kind === 'network' ? 'Broadcaster match — may be carrying a different regional game' : 'Watch'}">
         <i class="led${live ? ' live' : ''}"></i><span class="nm">${esc(x.c.name)}</span>${x.kind === 'network' ? '<span class="q">NET</span>' : ''}</button>`).join('')
       + `<button class="icon-btn" data-gmv="${esc(chans[0].c.id)}" title="Add to multiview" aria-label="Add to multiview">${icons.grid}</button>`
-    : post ? '' : `<span class="g-none">Not on your channels</span>`;
+    : post ? '' : `${label ? `<span class="g-none${searching ? ' on' : ''}">${label}</span>` : ''}
+        <button class="g-chan first" data-find="${esc(g.id)}" title="Look for a stream and play it"><i class="led${searching ? ' on' : ''}"></i><span class="nm">Watch</span></button>`;
 
-  return `<div class="game${live ? ' live' : ''}${flash ? ' flash' : ''}${chans.length ? ' can' : ''}" data-game="${esc(g.id)}">
+  return `<div class="game${live ? ' live' : ''}${flash ? ' flash' : ''}${post ? '' : ' can'}" data-game="${esc(g.id)}">
     <div class="g-status"><div class="jtv-k">${esc(g.league)}</div><div class="g-clock">${esc(live ? g.detail : pre ? when : 'Final')}</div></div>
     <div class="g-teams">${team(g.away, g.home)}${team(g.home, g.away)}</div>
     <div class="g-sit">${sit}</div>
@@ -846,12 +905,13 @@ function gameRow(g, hide) {
 function renderGames(content) {
   const hide = spoilerFree();
   const mine = (g) => (g.channels || []).some(gc => chanById(gc.id));
+  const onlyWatchable = onlyWatchableOn();
   const leagues = [...new Set(state.games.map(g => g.league))];
   if (state.leagueFilter && !leagues.includes(state.leagueFilter)) state.leagueFilter = null;
 
   let list = state.games;
   if (state.leagueFilter) list = list.filter(g => g.league === state.leagueFilter);
-  if (state.onlyMine) list = list.filter(mine);
+  if (onlyWatchable) list = list.filter(mine);
 
   const by = (s) => list.filter(g => g.state === s);
   const live = by('in').sort((a, b) => hide ? new Date(a.start) - new Date(b.start) : b.heat - a.heat);
@@ -874,24 +934,30 @@ function renderGames(content) {
       <button class="btn" id="g-fill">${icons.grid} Fill multiview with the hottest games</button></div>
     <div class="jtv-filterbar g-filter">
       <div class="jtv-chips">${chip('', 'All', !state.leagueFilter)}${leagues.map(l => chip(l, esc(l), state.leagueFilter === l)).join('')}</div>
-      <button class="jtv-chip${state.onlyMine ? ' active' : ''}" id="g-mine"><i class="led${state.onlyMine ? ' on' : ''}"></i>My channels</button>
+      <button class="jtv-chip${onlyWatchable ? ' active' : ''}" id="g-mine"><i class="led${onlyWatchable ? ' on' : ''}"></i>Only games with a stream</button>
       <button class="jtv-chip${hide ? ' active' : ''}" id="g-hide"><i class="led${hide ? ' on' : ''}"></i>Hide scores</button>
     </div>
     ${feedNote}
     ${list.length ? sec('Live', live) + sec('Upcoming', pre) + sec('Final', post)
-      : `<div class="jtv-empty"><div>${state.scoresAt ? 'No games to show.' : state.scoresErr ? 'Couldn’t reach the scores feed — retrying.' : 'Loading games…'}</div>${state.scoresAt ? `<div class="sub">${state.onlyMine ? 'None of today’s games match your channels — turn off “My channels” to see the full board.' : errs.length ? 'The scores feed is failing — details above. The server log has more.' : 'Nothing scheduled today in the leagues you follow.'}</div>` : ''}</div>`}
+      : `<div class="jtv-empty"><div>${state.scoresAt ? (onlyWatchable && state.games.length ? 'No game has a stream right now.' : 'No games to show.') : state.scoresErr ? 'Couldn’t reach the scores feed — retrying.' : 'Loading games…'}</div>${state.scoresAt ? `<div class="sub">${onlyWatchable ? 'Turn off “Only games with a stream” to see them all.' : errs.length ? 'The scores feed is failing — details above. The server log has more.' : 'Nothing scheduled today in the leagues you follow.'}</div>` : ''}</div>`}
   </div>`;
   content.firstElementChild.scrollTop = top;
 
   $$('[data-l]', content).forEach(b => b.onclick = () => { state.leagueFilter = b.dataset.l || null; render(); });
-  $('#g-mine', content).onclick = () => { state.onlyMine = !state.onlyMine; render(); };
+  // shared with the TV and phone apps (settings key onlyWatchable; never chosen = off)
+  $('#g-mine', content).onclick = () => { state.settings.onlyWatchable = !onlyWatchable; saveSettings(); render(); };
   $('#g-hide', content).onclick = () => { state.settings.hideScores = !hide; saveSettings(); render(); };
   $('#g-fill', content).onclick = fillMultiview;
   content.firstElementChild.onclick = (ev) => {
     const mv = ev.target.closest('[data-gmv]'), w = ev.target.closest('[data-watch]'), row = ev.target.closest('.game.can');
     if (mv) addToMultiview(mv.dataset.gmv);
     else if (w) play(w.dataset.watch);
-    else if (row) { const c = bestChannel(state.games.find(g => g.id === row.dataset.game) || {}); if (c) play(c.id); }
+    else if (row) {
+      const g = state.games.find(x => x.id === row.dataset.game);
+      if (!g) return;
+      const c = bestChannel(g);
+      if (c) play(c.id); else findStream(g);
+    }
   };
 }
 

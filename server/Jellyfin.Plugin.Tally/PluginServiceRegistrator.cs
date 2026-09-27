@@ -71,6 +71,9 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         services.AddHostedService(sp => sp.GetRequiredService<Dvr.DvrService>());
         services.AddHostedService(sp => sp.GetRequiredService<Live.LiveLadderService>());
         services.AddHostedService<RefreshService>();
+        // searches for games' streams around their start and on a viewer's find
+        services.AddSingleton<StreamSearchService>();
+        services.AddHostedService(sp => sp.GetRequiredService<StreamSearchService>());
         services.AddHostedService<LiveTvRegistrationService>();
         services.AddHostedService<LiveCardRefreshService>();
         services.AddHostedService<PluginRepositoryService>();
