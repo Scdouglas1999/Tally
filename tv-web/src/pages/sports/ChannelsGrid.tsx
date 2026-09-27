@@ -7,7 +7,8 @@ import { offsetWithin, reveal } from '../../kit/scroll';
 import { stableSort } from '../../sports/homeRow';
 import { EmptyState } from '../../sports/SportsBits';
 import { useTabArrival } from './tabArrival';
-import { watchChannel } from './sportsState';
+import { LangTag } from '../../sports/SportsBits';
+import { watchChannel, watchRedZone } from './sportsState';
 
 export const channelFocusKey = (channel: TallyChannel): string => 'sc-' + channel.id;
 
@@ -26,18 +27,20 @@ function scoreline(game: TallyGame): string {
 function ChannelCard(props: { channel: TallyChannel; game: TallyGame | null; hideScores: boolean; onFocusCard: (el: HTMLElement, channel: TallyChannel) => void }) {
   const { channel } = props;
   const [failed, setFailed] = useState(false);
+  const watch = (): void => (channel.kind === 'redzone' ? watchRedZone(channel) : watchChannel(channel));
   const f = useFocusable<HTMLDivElement>({
     focusKey: channelFocusKey(channel),
-    onEnter: () => watchChannel(channel),
+    onEnter: watch,
     onFocus: () => {
       if (f.ref.current !== null) props.onFocusCard(f.ref.current, channel);
     },
   });
   const url = channel.cardPath !== '' ? artUrl(channel.cardPath, CHANNEL_CARD_W) : null;
   return (
-    <div ref={f.ref} class="channel-card" onClick={() => watchChannel(channel)}>
+    <div ref={f.ref} class="channel-card" onClick={watch}>
       <div class="art">{url !== null && !failed ? <img src={url} alt="" onError={() => setFailed(true)} /> : null}</div>
       <LabelBar text={channel.name} live={true}>
+        <LangTag language={channel.language} />
         {props.game !== null && !props.hideScores ? <span class="trailing mono-label">{scoreline(props.game)}</span> : null}
       </LabelBar>
     </div>

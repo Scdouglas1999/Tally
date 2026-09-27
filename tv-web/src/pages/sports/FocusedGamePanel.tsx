@@ -1,9 +1,9 @@
 import { spoilerGuarded } from '../../api/tallyDvr';
-import { isFinal, isLive, isUpcoming, noStreamLabel, type TallyGame, type TallyTeam } from '../../api/tallyModels';
+import { isFinal, isLive, isUpcoming, isSpanish, noStreamLabel, otherFeed, type TallyGame, type TallyTeam } from '../../api/tallyModels';
 import { IndicatorSquare } from '../../kit/Bits';
 import { TeamMark } from '../../sports/GameCard';
 import { ScoreDigits } from '../../sports/ScoreDigits';
-import { BaseballDiamond, baseballCount, KeyHint, LineScore } from '../../sports/SportsBits';
+import { BaseballDiamond, baseballCount, KeyHint, LangTag, LineScore } from '../../sports/SportsBits';
 import { gameStatusLabel, hasNoResult, tallyUppercase } from '../../util/format';
 
 function HeroTeamLine(props: { team: TallyTeam; game: TallyGame; home: boolean; hideScores: boolean }) {
@@ -43,17 +43,27 @@ function Situation(props: { game: TallyGame }) {
 }
 
 /**
- * The black bar under the panel: the channel and key hints; for a game without a stream, LOOKING FOR A STREAM or NO
+ * The black bar under the panel: the channel (with the ES chip for a Spanish stream, and ALSO IN ESPAÑOL / ENGLISH for
+ * a game streamed in both: HOLD's menu watches the other) and key hints; for a game without a stream, LOOKING FOR A STREAM or NO
  * STREAM YET with the broadcasters, and OK Watch (it looks for one) unless the game is over.
  */
 function WatchBar(props: { game: TallyGame }) {
   const { game } = props;
   const w = game.watch;
   if (w !== null) {
+    const feed = otherFeed(game);
+    const tagged = feed !== null || isSpanish(w);
     return (
       <div class="watch-bar">
         <IndicatorSquare tone={isLive(game) ? 'live' : 'idle'} />
-        <span class="channel mono-label ellipsis">{tallyUppercase(w.channelName)}</span>
+        <span class={'channel mono-label ellipsis' + (tagged ? ' tagged' : '')}>{tallyUppercase(w.channelName)}</span>
+        {tagged ? (
+          <>
+            <LangTag language={w.language} />
+            {feed !== null ? <span class="also-feed mono-label">{tallyUppercase('Also in ' + feed.label)}</span> : null}
+            <span class="grow" />
+          </>
+        ) : null}
         <KeyHint keyName="OK" label="Watch" />
         <KeyHint keyName="HOLD" label="Add to multiview" />
       </div>

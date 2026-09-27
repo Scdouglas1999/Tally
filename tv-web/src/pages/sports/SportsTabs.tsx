@@ -1,7 +1,8 @@
-import type { TallyChannel, TallyInfo } from '../../api/tallyModels';
+import { languageLabel, type StreamLanguage, type TallyChannel, type TallyInfo } from '../../api/tallyModels';
 import { push } from '../../router/router';
 import { KeyHint, EmptyState, TallyRow, TallySwitch } from '../../sports/SportsBits';
-import { setHideScores, setOnlyWatchable } from '../../state/sportsData';
+import { setHideScores, setOnlyWatchable, setStreamLanguage } from '../../state/sportsData';
+import { tallyUppercase } from '../../util/format';
 import { removeFromMultiview } from './sportsState';
 import { useTabArrival } from './tabArrival';
 
@@ -29,10 +30,17 @@ export function MultiviewQueueTab(props: { queue: string[]; channels: TallyChann
 
 /**
  * SETTINGS (TallySettingsContent.kt): "Only games with a stream" (off unless the viewer turns it on: the shared
- * setting's null is off) and "Hide scores" as rows with square switches, then the server plugin's build, API version
- * and features.
+ * setting's null is off) and "Hide scores" as rows with square switches, "Commentary language" (OK switches between
+ * English and Español; the board follows), then the server plugin's build, API version and features.
  */
-export function SportsSettingsTab(props: { onlyWatchable: boolean; hideScores: boolean; info: TallyInfo | null; takeFocus: boolean; active: boolean }) {
+export function SportsSettingsTab(props: {
+  onlyWatchable: boolean;
+  hideScores: boolean;
+  streamLanguage: StreamLanguage;
+  info: TallyInfo | null;
+  takeFocus: boolean;
+  active: boolean;
+}) {
   useTabArrival(props.takeFocus && props.active, 'sst-mine', true);
   return (
     <div class="tab-list">
@@ -46,6 +54,14 @@ export function SportsSettingsTab(props: { onlyWatchable: boolean; hideScores: b
       </TallyRow>
       <TallyRow focusKey="sst-hide" label="Hide scores" description="Never show scores, results, or spoilers" onPress={() => void setHideScores(!props.hideScores)}>
         <TallySwitch checked={props.hideScores} />
+      </TallyRow>
+      <TallyRow
+        focusKey="sst-language"
+        label="Commentary language"
+        description="Games streamed in both languages play in this one"
+        onPress={() => void setStreamLanguage(props.streamLanguage === 'es' ? 'en' : 'es')}
+      >
+        <span class="setting-value mono-label">{tallyUppercase(languageLabel(props.streamLanguage))}</span>
       </TallyRow>
       <div class="server-block">
         <div class="mono-label heading">SERVER PLUGIN</div>

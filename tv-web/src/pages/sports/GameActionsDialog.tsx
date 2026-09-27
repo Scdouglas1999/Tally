@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { allowsNewRecording, DvrState, recordingView, spoilerGuarded, teamRuleFor, type DvrRule, type GameRecordingView, type LibraryState } from '../../api/tallyDvr';
-import { isLive, isUpcoming, noStreamLabel, teamKey, type TallyGame, type TallyTeam } from '../../api/tallyModels';
+import { isLive, isUpcoming, noStreamLabel, otherFeed, teamKey, type TallyFeed, type TallyGame, type TallyTeam } from '../../api/tallyModels';
 import { setFocus } from '../../focus/focus';
 import { gameStatusLabel, tallyUppercase } from '../../util/format';
 import { useStore } from '../../util/store';
@@ -17,6 +17,8 @@ import { MenuDialog, type MenuLine } from './MenuDialog';
 export interface GameActions {
   watch?: () => void;
   watchLabel?: string;
+  /** Plays the game in another commentary language: offered as "Watch in Español" / "Watch in English" (2.3). */
+  watchFeed?: (feed: TallyFeed) => void;
   addToMultiview?: () => void;
   removeFromMultiview?: () => void;
   /** Offer following each team (the board, the switcher, a multiview tile's game). */
@@ -130,7 +132,7 @@ export function KeepLastDialog(props: { teamLabel: string; rule: DvrRule | null;
 
 /**
  * The HOLD OK menu for a game (GameActionsDialog.kt): Watch (for a game without a stream too: it looks for one first,
- * under a NO STREAM YET / LOOKING FOR A STREAM line), Add to multiview, the DVR's lines, follow each team (and
+ * under a NO STREAM YET / LOOKING FOR A STREAM line), Watch in Español / English (a game streamed in both), Add to multiview, the DVR's lines, follow each team (and
  * record every game of it), hide or show scores, remove from multiview. Watch, multiview and remove close the menu;
  * follow and hide scores toggle in place. `game` null: a channel with no game (a multiview tile between games), titled
  * with `channelName`, without the follow rows.
@@ -155,6 +157,10 @@ export function GameActionsDialog(props: {
   // a game without a stream still has Watch (it looks for one first); the line above it says where things stand
   const noStream = game !== null && game.watch === null ? tallyUppercase(noStreamLabel(game)) : null;
   if (actions.watch !== undefined) lines.push({ id: 'watch', label: actions.watchLabel ?? 'Watch', info: noStream, dismiss: true, onPress: actions.watch });
+  // the game in its other language: `watch` is already the viewer's preferred one
+  const feed = game !== null && actions.watchFeed !== undefined ? otherFeed(game) : null;
+  const watchFeed = actions.watchFeed;
+  if (feed !== null && watchFeed !== undefined) lines.push({ id: 'watch-feed', label: `Watch in ${feed.label}`, dismiss: true, onPress: () => watchFeed(feed) });
   if (actions.addToMultiview !== undefined) lines.push({ id: 'multiview', label: 'Add to multiview', dismiss: true, onPress: actions.addToMultiview });
   if (game !== null && dvr !== null) lines.push(...dvrGameLines(game, dvr));
   const teamLines = (g: TallyGame, team: TallyTeam, side: 'away' | 'home'): void => {

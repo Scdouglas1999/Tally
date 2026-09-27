@@ -70,3 +70,16 @@
 .player.live .live-bar .hints { display: flex; align-items: center; margin-top: 29px; }
 /* WATCH FROM THE START at the end of the bar (the start-over action ends the Android TV controls row) */
 .player.live .live-bar .hints .start-over { margin-left: auto; }
+
+/* ---- RedZone (2.3): what the channel shows now, bottom-start, a lower third faded like the bug ---- */
+.player.live .redzone-now { position: absolute; left: 77px; bottom: 58px; display: flex; align-items: stretch; transition: opacity 140ms linear; }
+.player.live .redzone-now.faded { opacity: 0; transition: opacity 420ms linear; }
+.player.live .redzone-now .lt-bar { flex: none; width: 5px; background: var(--accent); }
+.player.live .redzone-now .lt-panel { max-width: 1100px; padding: 16px 22px; background: var(--label-bar); border: var(--hairline) solid var(--live); }
+.player.live .redzone-now .rz-kicker { display: flex; align-items: center; color: var(--live-text); }
+.player.live .redzone-now .rz-kicker .indicator { width: 12px; height: 12px; margin-right: 13px; }
+.player.live .redzone-now .rz-title { margin-top: 6px; font-family: var(--sans); font-weight: 600; font-size: 40px; line-height: 50px; color: var(--text); }
+.player.live .redzone-now .rz-reason { margin-top: 6px; color: var(--accent); }
+/* the Commentary button sits at the end of the bar, before FROM THE START */
+.player.live .live-bar .hints .bar-buttons { margin-left: auto; }
+.player.live .live-bar .hints .bar-buttons + .start-over { margin-left: 26px; }
