@@ -6,7 +6,7 @@
     <string name="tally_tab_channels">Channels</string>
     <string name="tally_tab_multiview">Multiview</string>
     <string name="tally_tab_settings">Settings</string>
-    <string name="tally_not_on_your_channels">Not on your channels</string>
+    <string name="tally_not_on_your_channels">No stream yet</string>
     <string name="tally_on_broadcasters">On %1$s</string>
     <string name="tally_final">Final</string>
     <string name="tally_situation">Situation</string>
@@ -25,7 +25,6 @@
     <string name="tally_player_also_on_now">Also on now</string>
     <string name="tally_player_switch">Switch</string>
     <string name="tally_player_press_down_for_games">Press DOWN for games</string>
-    <string name="tally_player_channel_pending">Channel is not ready yet</string>
     <string name="tally_player_added_to_multiview">Added to multiview</string>
     <string name="tally_player_already_in_multiview">Already in multiview</string>
     <string name="tally_player_multiview_full">Multiview is full</string>
@@ -49,8 +48,8 @@
     <string name="tally_feeds_failed">Some feeds failed: %1$s</string>
     <string name="tally_empty_games_title">No games today</string>
     <string name="tally_empty_games_sub">There are no games on the board right now</string>
-    <string name="tally_empty_filtered_title">Nothing on your channels</string>
-    <string name="tally_empty_filtered_sub">None of today\u2019s games are on your channels. Turn off \u201cMy channels only\u201d in Settings to see every game.</string>
+    <string name="tally_empty_filtered_title">No game has a stream right now.</string>
+    <string name="tally_empty_filtered_sub">Turn off \u201cOnly games with a stream\u201d to see them all.</string>
     <string name="tally_no_channels_title">No channels yet</string>
     <string name="tally_no_channels_sub">Channels appear here once the server registers them</string>
 
@@ -67,8 +66,8 @@
     <string name="tally_remove_from_multiview">Remove</string>
 
     <!-- Settings -->
-    <string name="tally_settings_my_channels">My channels only</string>
-    <string name="tally_settings_my_channels_desc">Only show games you can watch on your channels</string>
+    <string name="tally_settings_my_channels">Only games with a stream</string>
+    <string name="tally_settings_my_channels_desc">Hide games that have no stream yet</string>
     <string name="tally_settings_hide_scores">Hide scores</string>
     <string name="tally_settings_hide_scores_desc">Never show scores, results, or spoilers</string>
     <string name="tally_settings_plugin">Server plugin</string>

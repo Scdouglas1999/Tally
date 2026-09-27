@@ -220,7 +220,7 @@ fun GamesBoard(
                     favoriteTeams = teams,
                     hideScores = hideScores,
                     onWatch = onWatch,
-                    onAddToMultiview = { game -> game.watch?.channelId?.let(onAddToMultiview) },
+                    onAddToMultiview = viewModel::addGameToMultiview,
                     onWatchInCorner = null,
                     onToggleFollow = viewModel::toggleFollow,
                     onToggleHideScores = { viewModel.setHideScores(!hideScores) },

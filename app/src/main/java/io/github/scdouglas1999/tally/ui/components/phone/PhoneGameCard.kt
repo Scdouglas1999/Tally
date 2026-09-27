@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -32,6 +31,7 @@ import io.github.scdouglas1999.tally.ui.components.StartsIn
 import io.github.scdouglas1999.tally.ui.components.TeamMark
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
 import io.github.scdouglas1999.tally.ui.components.hasNoResult
+import io.github.scdouglas1999.tally.ui.components.noStreamLabel
 import io.github.scdouglas1999.tally.ui.components.parseGameStart
 import io.github.scdouglas1999.tally.ui.components.rememberCardNow
 import io.github.scdouglas1999.tally.ui.components.startsInLabel
@@ -52,8 +52,9 @@ private val CardPadding = 12.dp
  * fits [PhoneDimens.gameCardWidth]). A status line (league, the FOLLOWING mark, and at the right `■ LIVE` in `live`
  * red with the inning or clock, the start time, or the result), two team lines (mark, name in `PhoneType.headline`,
  * score in `PhoneType.score` rolling as on the TV, the loser dimmed when final unless scores are hidden), and the
- * black label bar with the channel or NOT ON YOUR CHANNELS. A game on none of your channels is drawn at 60%, as on
- * the TV. A tap calls [onClick] and a long-press [onLongClick] (both open the game sheet where it is used).
+ * black label bar with the channel, or LOOKING FOR A STREAM / NO STREAM YET (muted) for a game no channel carries yet,
+ * drawn at full strength as on the TV. A tap calls [onClick] and a long-press [onLongClick] (both open the game sheet
+ * where it is used).
  */
 @Composable
 fun PhoneGameCard(
@@ -75,7 +76,7 @@ fun PhoneGameCard(
                 .background(TallyColors.ground)
                 .phoneClickable(onLongClick = onLongClick, onClick = onClick),
     ) {
-        Column(Modifier.fillMaxWidth().alpha(if (watchable) 1f else DIMMED_ALPHA)) {
+        Column(Modifier.fillMaxWidth()) {
             PhoneGameStatusLine(
                 game = game,
                 isFavorite = isFavorite,
@@ -110,15 +111,13 @@ fun PhoneGameCard(
                 PhoneTeamLine(team = game.home, game = game, hideScores = scoresHidden)
             }
             PhoneGameFooter(
-                text = game.watch?.channelName ?: stringResource(R.string.tally_not_on_your_channels),
+                text = game.watch?.channelName ?: noStreamLabel(game),
                 live = game.isLive && watchable,
                 muted = !watchable,
             )
         }
     }
 }
-
-private const val DIMMED_ALPHA = 0.6f
 
 private fun TallyTeam.isBlankTeam(): Boolean = abbr.isBlank() && shortName.isBlank() && name.isBlank()
 

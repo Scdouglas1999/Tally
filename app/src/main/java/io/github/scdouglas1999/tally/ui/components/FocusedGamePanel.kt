@@ -331,20 +331,33 @@ private fun WatchBar(game: TallyGame) {
                 )
             }
         } else {
+            // No channel carries it yet: what the server is doing about it, the broadcasters, and OK still watches
+            // (it looks for a stream) unless the game is over.
             Text(
-                text = stringResource(R.string.tally_not_on_your_channels).uppercase(),
+                text = noStreamLabel(game).uppercase(),
                 style = TallyType.label,
                 color = TallyColors.muted,
                 maxLines = 1,
                 modifier = Modifier.weight(1f),
             )
-            if (game.broadcasts.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.tally_on_broadcasters, game.broadcasts.joinToString(", ")),
-                    style = TallyType.hint,
-                    color = TallyColors.muted,
-                    maxLines = 1,
-                )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+            ) {
+                if (game.broadcasts.isNotEmpty()) {
+                    Text(
+                        text = stringResource(R.string.tally_on_broadcasters, game.broadcasts.joinToString(", ")),
+                        style = TallyType.hint,
+                        color = TallyColors.muted,
+                        maxLines = 1,
+                    )
+                }
+                if (game.canWatch) {
+                    KeyHint(
+                        key = stringResource(R.string.tally_key_ok),
+                        label = stringResource(R.string.tally_watch),
+                    )
+                }
             }
         }
     }

@@ -38,6 +38,7 @@ import io.github.scdouglas1999.tally.ui.components.ScoreDigits
 import io.github.scdouglas1999.tally.ui.components.TeamMark
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
 import io.github.scdouglas1999.tally.ui.components.hasNoResult
+import io.github.scdouglas1999.tally.ui.components.noStreamLabel
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.phone.PhoneSheet
 import io.github.scdouglas1999.tally.ui.settings.phone.PhoneDialogRow
@@ -48,7 +49,8 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 /**
  * The game sheet: what a tap on a game opens on a phone (and a long-press, the TV's long OK). The focused-game
  * panel's content ([PhoneGamePanel]: matchup with records, the situation and last play, the line score, broadcasts,
- * the start time before the game), the channel's label bar and a full-width WATCH when a channel carries the game,
+ * the start time before the game), the channel's label bar and a full-width WATCH for every game that is not final
+ * (without a stream it looks for one) and a final one a channel carries,
  * then the TV game menu's other actions: add to multiview, follow each team, hide / show scores, remove from
  * multiview. Follow and hide scores toggle in place (the sheet stays, its rows and the scores update); the others
  * close the sheet after they run, as on the TV. The corner view is not offered on a phone.
@@ -85,7 +87,7 @@ fun PhoneGameSheet(
                 )
                 Spacer(Modifier.height(16.dp))
                 PhoneGameFooter(
-                    text = game.watch?.channelName ?: stringResource(R.string.tally_not_on_your_channels),
+                    text = game.watch?.channelName ?: noStreamLabel(game),
                     live = game.isLive && game.watch != null,
                     muted = game.watch == null,
                     modifier = Modifier.padding(horizontal = PhoneDimens.margin),

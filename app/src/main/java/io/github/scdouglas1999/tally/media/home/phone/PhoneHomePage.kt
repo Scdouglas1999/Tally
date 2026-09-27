@@ -99,6 +99,7 @@ import io.github.scdouglas1999.tally.media.kit.resumePercent
 import io.github.scdouglas1999.tally.together.ui.TogetherRow
 import io.github.scdouglas1999.tally.ui.components.LampState
 import io.github.scdouglas1999.tally.ui.components.TallyLamp
+import io.github.scdouglas1999.tally.ui.components.canWatch
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
 import io.github.scdouglas1999.tally.ui.components.hasNoResult
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
@@ -440,7 +441,7 @@ private fun PhoneHomeLoaded(
                                     favoriteTeams = favoriteTeams,
                                     hideScores = hideScores,
                                     onWatch = tallyRow::watch,
-                                    onAddToMultiview = { game -> game.watch?.channelId?.let(tallyRow::addToMultiview) },
+                                    onAddToMultiview = tallyRow::addGameToMultiview,
                                     onWatchInCorner = null,
                                     onToggleFollow = tallyRow::toggleFollow,
                                     onToggleHideScores = tallyRow::toggleHideScores,
@@ -716,7 +717,8 @@ private fun ItemHero(
 
 /**
  * Hero for a game: kicker `MLB · BOT 7TH`, the matchup, the TV game header's mono line (the score, or the broadcasts
- * before the start), then WATCH (a direct watch) and GAME (the game sheet, as a tap on a game card opens).
+ * before the start), then WATCH (a direct watch; without a stream it looks for one) and GAME (the game sheet, as a
+ * tap on a game card opens).
  */
 @Composable
 private fun GameHero(
@@ -752,16 +754,12 @@ private fun GameHero(
             horizontalArrangement = Arrangement.spacedBy(PhoneDimens.cardGap),
             modifier = Modifier.widthIn(max = PhoneDimens.buttonMaxWidth).fillMaxWidth(),
         ) {
+            // Never blocked: without a stream WATCH looks for one (the hero's games are live or about to start).
             PhoneButton(
-                label =
-                    if (game.watch != null) {
-                        stringResource(R.string.tally_phone_browse_watch)
-                    } else {
-                        stringResource(R.string.tally_phone_browse_not_on_channels)
-                    },
-                glyph = if (game.watch != null) stringResource(R.string.fa_play) else null,
-                primary = game.watch != null,
-                enabled = game.watch != null,
+                label = stringResource(R.string.tally_phone_browse_watch),
+                glyph = stringResource(R.string.fa_play),
+                primary = true,
+                enabled = game.canWatch,
                 onClick = onWatch,
                 modifier = Modifier.weight(1f),
             )

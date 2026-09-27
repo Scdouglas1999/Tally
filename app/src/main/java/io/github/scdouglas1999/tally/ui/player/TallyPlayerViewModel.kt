@@ -3,16 +3,15 @@ package io.github.scdouglas1999.tally.ui.player
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.damontecres.wholphin.R
-import com.github.damontecres.wholphin.services.NavigationManager
 import com.github.damontecres.wholphin.services.PlayerFactory
 import com.github.damontecres.wholphin.ui.launchIO
-import com.github.damontecres.wholphin.ui.nav.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.scdouglas1999.tally.api.TallyEvent
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.data.BoardOrganizer
 import io.github.scdouglas1999.tally.data.TallyMultiviewState
 import io.github.scdouglas1999.tally.data.TallyRepository
+import io.github.scdouglas1999.tally.watch.TallyWatchLauncher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -28,7 +27,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jellyfin.sdk.model.serializer.toUUIDOrNull
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -46,8 +44,8 @@ class TallyPlayerViewModel
     constructor(
         private val repository: TallyRepository,
         private val multiviewState: TallyMultiviewState,
-        private val navigationManager: NavigationManager,
         private val playerFactory: PlayerFactory,
+        private val watchLauncher: TallyWatchLauncher,
     ) : ViewModel() {
         private val channelId = MutableStateFlow<String?>(null)
 
@@ -96,23 +94,24 @@ class TallyPlayerViewModel
                 .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
         /**
-         * Other live games on real channels (excludes the bound channel), flattened in
-         * [BoardOrganizer.rows] order — followed teams and favorite channels first, then
-         * league and start — capped at [MAX_OTHERS].
+         * Other live games (excludes the bound channel), flattened in [BoardOrganizer.rows] order — followed teams
+         * and favorite channels first, then league and start — the ones on real channels before the ones no channel
+         * carries yet (picking one of those looks for its stream first), capped at [MAX_OTHERS].
          */
         val others: StateFlow<List<TallyGame>> =
             combine(channelId, repository.board, repository.settings) { id, board, settings ->
-                BoardOrganizer
-                    .rows(
-                        games =
-                            board?.games.orEmpty().filter {
-                                it.isLive && it.watch != null && it.watch?.channelId != id
-                            },
-                        favoriteChannelIds = settings.favorites.toSet(),
-                        onlyWatchable = true,
-                        favoriteTeams = settings.favoriteTeams.map { it.uppercase() }.toSet(),
-                    ).flatMap { it.games }
-                    .take(MAX_OTHERS)
+                val live = board?.games.orEmpty().filter { it.isLive && it.watch?.channelId != id }
+                val (playable, noStream) = live.partition { it.watch != null }
+
+                fun ordered(games: List<TallyGame>) =
+                    BoardOrganizer
+                        .rows(
+                            games = games,
+                            favoriteChannelIds = settings.favorites.toSet(),
+                            onlyWatchable = false,
+                            favoriteTeams = settings.favoriteTeams.map { it.uppercase() }.toSet(),
+                        ).flatMap { it.games }
+                (ordered(playable) + ordered(noStream)).take(MAX_OTHERS)
             }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
         private val _banner = MutableStateFlow<TallyEvent?>(null)
@@ -145,24 +144,22 @@ class TallyPlayerViewModel
         }
 
         /**
-         * Replaces the current playback destination with the channel carrying [game],
-         * so players never stack.
+         * Replaces the current playback destination with the channel carrying [game], so players never stack. A
+         * channel whose Live TV item is not ready yet plays from its playlist; a game without a stream is looked for
+         * first (see [TallyWatchLauncher]).
          */
-        fun switchTo(game: TallyGame) {
-            val watch = game.watch ?: return
-            val itemId = watch.liveTvItemId?.toUUIDOrNull()
-            if (itemId == null) {
-                // The channel exists but its Live TV item has not been resolved yet.
-                _messages.tryEmit(R.string.tally_player_channel_pending)
+        fun switchTo(game: TallyGame) = watchLauncher.watch(game, replaceCurrent = true)
+
+        /** Asks the corner overlay (owned elsewhere) to show [game]; a game without a stream looks for one first. */
+        fun watchInCorner(game: TallyGame) {
+            if (game.watch != null) {
+                CornerRequests.request(game)
                 return
             }
-            navigationManager.backStack.removeLastOrNull()
-            navigationManager.navigateTo(Destination.TallyPlayback(itemId, watch.channelId))
-        }
-
-        /** Asks the corner overlay (owned elsewhere) to show [game]. */
-        fun watchInCorner(game: TallyGame) {
-            CornerRequests.request(game)
+            watchLauncher.whenStreamFound(game) { watch ->
+                CornerRequests.request(game.copy(watch = watch))
+                true
+            }
         }
 
         fun toggleFollow(teamKey: String) {
@@ -174,7 +171,18 @@ class TallyPlayerViewModel
         }
 
         fun addToMultiview(game: TallyGame) {
-            val channelId = game.watch?.channelId ?: return
+            val channelId = game.watch?.channelId?.takeIf { it.isNotBlank() }
+            if (channelId == null) {
+                // Multiview needs a stream: look for one first.
+                watchLauncher.whenStreamFound(game) { watch ->
+                    watch.channelId.isNotBlank().also { if (it) addChannelToMultiview(watch.channelId) }
+                }
+                return
+            }
+            addChannelToMultiview(channelId)
+        }
+
+        private fun addChannelToMultiview(channelId: String) {
             val message =
                 when (multiviewState.add(channelId)) {
                     TallyMultiviewState.AddResult.ADDED -> R.string.tally_player_added_to_multiview

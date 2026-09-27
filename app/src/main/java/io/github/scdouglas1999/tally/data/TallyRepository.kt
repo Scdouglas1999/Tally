@@ -5,6 +5,7 @@ import io.github.scdouglas1999.tally.api.TallyApi
 import io.github.scdouglas1999.tally.api.TallyBoard
 import io.github.scdouglas1999.tally.api.TallyEvent
 import io.github.scdouglas1999.tally.api.TallyException
+import io.github.scdouglas1999.tally.api.TallyFindResult
 import io.github.scdouglas1999.tally.api.TallyInfo
 import io.github.scdouglas1999.tally.api.TallyJson
 import io.github.scdouglas1999.tally.api.TallySettings
@@ -268,6 +269,9 @@ class TallyRepository
         }
 
         fun absoluteUrl(path: String) = tallyApi.absoluteUrl(path)
+
+        /** Asks the server to look for [gameId]'s stream now (see [TallyApi.find]). Throws what the call throws. */
+        suspend fun find(gameId: String): TallyFindResult = tallyApi.find(gameId)
 
         private companion object {
             const val MIN_POLL_SECONDS = 5

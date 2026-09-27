@@ -6,12 +6,13 @@ import com.github.damontecres.wholphin.services.KeyValueService
 import com.github.damontecres.wholphin.services.NavigationManager
 import com.github.damontecres.wholphin.services.ScreensaverService
 import com.github.damontecres.wholphin.ui.launchIO
-import com.github.damontecres.wholphin.ui.nav.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.scdouglas1999.tally.api.TallyGame
+import io.github.scdouglas1999.tally.api.TallyWatch
 import io.github.scdouglas1999.tally.data.BoardOrganizer
 import io.github.scdouglas1999.tally.data.TallyMultiviewState
 import io.github.scdouglas1999.tally.data.TallyRepository
+import io.github.scdouglas1999.tally.watch.TallyWatchLauncher
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import org.jellyfin.sdk.model.serializer.toUUIDOrNull
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -54,6 +54,7 @@ class MultiviewViewModel
         private val keyValueService: KeyValueService,
         val navigationManager: NavigationManager,
         private val screensaverService: ScreensaverService,
+        private val watchLauncher: TallyWatchLauncher,
     ) : ViewModel() {
         val tiles: StateFlow<List<MultiviewTile>> =
             combine(multiviewState.channelIds, repository.board) { ids, board ->
@@ -75,8 +76,9 @@ class MultiviewViewModel
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
         /**
-         * What can be put on screen next: live games first (board order: favorites, league, start time), then
-         * every other channel that is not already tiled, so the rail is useful outside game time too.
+         * What can be put on screen next: live games first (board order: favorites, league, start time), then live
+         * games no channel carries yet (picking one looks for its stream first), then every other channel that is not
+         * already tiled, so the rail is useful outside game time too.
          */
         val bench: StateFlow<List<MultiviewBenchEntry>> =
             combine(
@@ -93,12 +95,17 @@ class MultiviewViewModel
                             val watch = game.watch ?: return@mapNotNull null
                             if (watch.channelId.isBlank()) null else MultiviewBenchEntry(watch.channelId, watch.channelName, game)
                         }.distinctBy { it.channelId }
+                val noStream =
+                    BoardOrganizer
+                        .rows(board?.games.orEmpty().filter { it.isLive && it.watch == null }, settings.favorites.toSet(), false)
+                        .flatMap { it.games }
+                        .map { MultiviewBenchEntry(channelId = "", name = "", game = it) }
                 val liveIds = live.map { it.channelId }.toSet()
                 val others =
                     (board?.channels ?: emptyList())
                         .filter { it.id !in liveIds }
                         .map { MultiviewBenchEntry(it.id, it.name, null) }
-                (live + others).filter { it.channelId !in ids }.take(MAX_BENCH)
+                (live + noStream + others).filter { it.channelId.isBlank() || it.channelId !in ids }.take(MAX_BENCH)
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
         val hideScores: StateFlow<Boolean> =
@@ -193,24 +200,48 @@ class MultiviewViewModel
 
         /**
          * Put [entry]'s channel on screen: replaces the audio tile when the queue is
-         * full, otherwise appends.
+         * full, otherwise appends. A game without a stream looks for one first.
          */
         fun swapIn(entry: MultiviewBenchEntry) {
+            val game = entry.game
+            if (entry.channelId.isBlank() && game != null) {
+                watchLauncher.whenStreamFound(game) { watch ->
+                    watch.channelId.isNotBlank().also { if (it) swapInChannel(watch.channelId) }
+                }
+                return
+            }
+            swapInChannel(entry.channelId)
+        }
+
+        private fun swapInChannel(channelId: String) {
             if (multiviewState.channelIds.value.size >= TallyMultiviewState.MAX) {
-                multiviewState.replace(_audioIndex.value, entry.channelId)
+                multiviewState.replace(_audioIndex.value, channelId)
             } else {
-                multiviewState.add(entry.channelId)
+                multiviewState.add(channelId)
             }
         }
 
         /**
-         * Play [index]'s channel full screen. Multiview stays on the back stack, so BACK returns to it
-         * (its players are released while it is hidden and rebuilt on return).
+         * Play [index]'s channel full screen (from its playlist while its Live TV item is not ready). Multiview stays on
+         * the back stack, so BACK returns to it (its players are released while it is hidden and rebuilt on return).
          */
         fun watchFullScreen(index: Int) {
             val tile = tiles.value.getOrNull(index) ?: return
-            val itemId = tile.liveTvItemId?.toUUIDOrNull() ?: return
-            navigationManager.navigateTo(Destination.TallyPlayback(itemId, tile.channelId))
+            val hlsPath =
+                repository.board.value
+                    ?.channels
+                    ?.firstOrNull { it.id == tile.channelId }
+                    ?.hlsPath
+                    ?: tile.game?.watch?.hlsPath
+            watchLauncher.play(
+                TallyWatch(
+                    channelId = tile.channelId,
+                    channelName = tile.name,
+                    liveTvItemId = tile.liveTvItemId,
+                    hlsPath = hlsPath.orEmpty(),
+                ),
+                title = tile.name,
+            )
         }
 
         fun toggleFollow(teamKey: String) {
@@ -245,12 +276,18 @@ class MultiviewViewModel
         }
     }
 
-/** One row of the swap-in rail: a channel, with the live game it is showing when there is one. */
+/**
+ * One row of the swap-in rail: a channel, with the live game it is showing when there is one. A live game no channel
+ * carries yet has a blank [channelId].
+ */
 data class MultiviewBenchEntry(
     val channelId: String,
     val name: String,
     val game: TallyGame?,
-)
+) {
+    /** Unique in the rail (a game without a stream has no channel id yet). */
+    val key: String get() = channelId.ifBlank { "game:" + game?.id.orEmpty() }
+}
 
 /** How the tiles share the stage. [FOCUS] gives one tile the large slot. */
 enum class MultiviewLayout {

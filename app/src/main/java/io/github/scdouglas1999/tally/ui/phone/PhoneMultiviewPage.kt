@@ -45,6 +45,7 @@ import io.github.scdouglas1999.tally.media.kit.phone.PhoneEmptyState
 import io.github.scdouglas1999.tally.ui.components.GameActions
 import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
+import io.github.scdouglas1999.tally.ui.components.noStreamLabel
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewBenchEntry
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewTile
@@ -195,7 +196,7 @@ fun PhoneMultiviewPage(
             actions =
                 GameActions(
                     watch =
-                        if (actionsTile.liveTvItemId.isNullOrBlank()) {
+                        if (actionsTile.liveTvItemId.isNullOrBlank() && actionsTile.hlsUrl == null) {
                             null
                         } else {
                             { viewModel.watchFullScreen(actionsIndex) }
@@ -345,7 +346,7 @@ private fun MultiviewEditSheet(
             }
             if (live.isNotEmpty()) {
                 item(key = "live") { SheetHeader(stringResource(R.string.tally_phone_sports_mv_live)) }
-                itemsIndexed(live, key = { _, entry -> "live-" + entry.channelId }) { _, entry ->
+                itemsIndexed(live, key = { _, entry -> "live-" + entry.key }) { _, entry ->
                     EditRow(
                         name = entry.name,
                         game = entry.game,
@@ -403,7 +404,7 @@ private fun EditRow(
                 {
                     Text(
                         text =
-                            listOf(it.league, gameStatusLabel(it))
+                            listOf(it.league, gameStatusLabel(it), if (it.watch == null) noStreamLabel(it) else "")
                                 .filter { part ->
                                     part.isNotBlank()
                                 }.joinToString(" · ")

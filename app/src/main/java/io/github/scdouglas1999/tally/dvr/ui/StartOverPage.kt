@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,6 +30,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -80,6 +82,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
 import io.github.scdouglas1999.tally.ui.theme.TallyType
+import io.github.scdouglas1999.tally.watch.TallyLiveStream
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 
@@ -106,13 +109,20 @@ fun StartOverPage(
 ) {
     val viewModel = hiltViewModel<DvrViewModel>()
     val url = remember(destination.path) { viewModel.absoluteUrl(destination.path) }
-    val playback = rememberStartOverPlayback(url)
-    if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
-        PhoneStartOverPage(playback = playback, title = destination.title, modifier = modifier)
-    } else {
-        TvStartOverPage(playback = playback, title = destination.title, modifier = modifier)
+    // A live channel whose Live TV item is not ready yet plays here too, at its live edge (TallyLiveStream).
+    val live = TallyLiveStream.isLive(destination)
+    val playback = rememberStartOverPlayback(url, fromTheStart = !live)
+    CompositionLocalProvider(LocalStartOverLive provides live) {
+        if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
+            PhoneStartOverPage(playback = playback, title = destination.title, modifier = modifier)
+        } else {
+            TvStartOverPage(playback = playback, title = destination.title, modifier = modifier)
+        }
     }
 }
+
+/** True while the page plays a live channel ([TallyLiveStream]) rather than a recording from its start. */
+val LocalStartOverLive = staticCompositionLocalOf { false }
 
 /** The start-over player and what the controls read from it (polled like the other players' seek bars). */
 class StartOverPlayback internal constructor(
@@ -161,16 +171,22 @@ class StartOverPlayback internal constructor(
     }
 }
 
-/** An ExoPlayer on [url] from its first segment, released with the page, paused while the app is in the background. */
+/**
+ * An ExoPlayer on [url] from its first segment ([fromTheStart]) or at its live edge, released with the page, paused
+ * while the app is in the background.
+ */
 @Composable
-fun rememberStartOverPlayback(url: String?): StartOverPlayback {
+fun rememberStartOverPlayback(
+    url: String?,
+    fromTheStart: Boolean = true,
+): StartOverPlayback {
     val context = LocalContext.current
     val playback =
         remember(url) {
             StartOverPlayback(
                 url?.let {
                     ExoPlayer.Builder(context.applicationContext).build().apply {
-                        setMediaItem(
+                        val item =
                             MediaItem
                                 .Builder()
                                 .setUri(it)
@@ -182,9 +198,8 @@ fun rememberStartOverPlayback(url: String?): StartOverPlayback {
                                         .setMinPlaybackSpeed(1f)
                                         .setMaxPlaybackSpeed(1f)
                                         .build(),
-                                ).build(),
-                            0L,
-                        )
+                                ).build()
+                        if (fromTheStart) setMediaItem(item, 0L) else setMediaItem(item)
                         prepare()
                         playWhenReady = true
                     }
@@ -225,11 +240,11 @@ fun rememberStartOverPlayback(url: String?): StartOverPlayback {
     }
     LaunchedEffect(playback) {
         val player = playback.player ?: return@LaunchedEffect
-        var fromTheStart = false
+        var started = !fromTheStart
         while (isActive) {
             // The first real timeline of a live playlist puts the player at the live edge: start at the first minute.
-            if (!fromTheStart && player.playbackState == Player.STATE_READY && !player.currentTimeline.isEmpty) {
-                fromTheStart = true
+            if (!started && player.playbackState == Player.STATE_READY && !player.currentTimeline.isEmpty) {
+                started = true
                 if (player.currentPosition > START_SLACK_MS) player.seekTo(0L)
             }
             playback.playing = player.isPlaying
@@ -276,7 +291,10 @@ fun BoxScope.StartOverPicture(
     }
     if (playback.failed) {
         Text(
-            text = stringResource(R.string.tally_dvr_start_over_failed),
+            text =
+                stringResource(
+                    if (LocalStartOverLive.current) R.string.tally_221_stream_failed else R.string.tally_dvr_start_over_failed,
+                ),
             style = tuneInTitle,
             color = TallyColors.textSecondary,
             modifier = Modifier.align(Alignment.Center).padding(horizontal = 48.dp),
@@ -284,13 +302,16 @@ fun BoxScope.StartOverPicture(
     }
 }
 
-/** The kicker over the title: `■ REC · FROM THE START`. */
+/** The kicker over the title: `■ REC · FROM THE START`, or `■ LIVE` for a live channel. */
 @Composable
 fun StartOverKicker(style: TextStyle) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         IndicatorSquare(color = TallyColors.live, size = 8.dp)
         Text(
-            text = stringResource(R.string.tally_dvr_start_over_kicker).tallyUppercase(),
+            text =
+                stringResource(
+                    if (LocalStartOverLive.current) R.string.tally_dvr_live else R.string.tally_dvr_start_over_kicker,
+                ).tallyUppercase(),
             style = style,
             color = TallyColors.liveText,
             maxLines = 1,

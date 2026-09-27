@@ -59,6 +59,7 @@ import io.github.scdouglas1999.tally.ui.components.GameActions
 import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.RowHeader
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
+import io.github.scdouglas1999.tally.ui.components.noStreamLabel
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewBenchEntry
@@ -258,7 +259,7 @@ fun TallyMultiviewPage(
             actions =
                 GameActions(
                     watch =
-                        if (actionsTile.liveTvItemId.isNullOrBlank()) {
+                        if (actionsTile.liveTvItemId.isNullOrBlank() && actionsTile.hlsUrl == null) {
                             null
                         } else {
                             { viewModel.watchFullScreen(actionsIndex) }
@@ -368,7 +369,7 @@ private fun MultiviewRail(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.weight(1f),
         ) {
-            itemsIndexed(bench, key = { _, entry -> entry.channelId }) { index, entry ->
+            itemsIndexed(bench, key = { _, entry -> entry.key }) { index, entry ->
                 SwapInRow(
                     entry = entry,
                     hideScores = hideScores,
@@ -482,6 +483,16 @@ private fun SwapInRow(
                 }
                 SwapInTeamLine(team = game.away, hideScores = hideScores)
                 SwapInTeamLine(team = game.home, hideScores = hideScores)
+                if (game.watch == null) {
+                    // No channel carries it yet: picking it looks for its stream first.
+                    Text(
+                        text = noStreamLabel(game).uppercase(),
+                        style = TallyType.label,
+                        color = TallyColors.muted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
     }

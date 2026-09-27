@@ -18,6 +18,7 @@ import io.github.scdouglas1999.tally.data.BoardRow
 import io.github.scdouglas1999.tally.data.TallyMultiviewState
 import io.github.scdouglas1999.tally.data.TallyRepository
 import io.github.scdouglas1999.tally.ui.components.TallyTab
+import io.github.scdouglas1999.tally.watch.TallyWatchLauncher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,8 +29,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
-import org.jellyfin.sdk.model.serializer.toUUIDOrNull
-import timber.log.Timber
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -70,6 +69,7 @@ class TallyViewModel
         private val repository: TallyRepository,
         val navigationManager: NavigationManager,
         private val multiviewState: TallyMultiviewState,
+        private val watchLauncher: TallyWatchLauncher,
     ) : ViewModel() {
         private data class RepositoryState(
             val availability: TallyRepository.Availability,
@@ -91,7 +91,7 @@ class TallyViewModel
 
         private val selectedTabState = MutableStateFlow(TallyTab.GAMES)
 
-        /** The user's explicit "My channels" choice; null = not chosen, derive from the board. */
+        /** The user's explicit "Only games with a stream" choice this session; null = the saved one (off when unset). */
         private val onlyWatchableChoice = MutableStateFlow<Boolean?>(null)
 
         val uiState: StateFlow<TallyUiState> =
@@ -106,7 +106,7 @@ class TallyViewModel
                     repo.settings.favoriteTeams
                         .map { it.uppercase() }
                         .toSet()
-                // Off until the viewer turns it on: every game shows, the ones not on their channels dimmed.
+                // Off until the viewer turns it on: every game shows, the ones without a stream labeled so.
                 val onlyWatchable = onlyWatchableChoice ?: repo.settings.onlyWatchable ?: false
                 TallyUiState(
                     availability = repo.availability,
@@ -184,29 +184,24 @@ class TallyViewModel
             viewModelScope.launchIO { repository.toggleFavoriteTeam(teamKey) }
         }
 
-        fun watch(game: TallyGame) {
-            val watch = game.watch ?: return
-            play(watch.liveTvItemId, watch.channelId)
-        }
+        /** WATCH: plays the game's stream, or looks for one first (see [TallyWatchLauncher]). */
+        fun watch(game: TallyGame) = watchLauncher.watch(game)
 
         fun watchChannel(channel: TallyChannel) {
-            play(channel.liveTvItemId, channel.id)
+            // A channel always has a playlist; one with neither it nor a Live TV item is still being set up.
+            if (!watchLauncher.watchChannel(channel)) emitMessage(R.string.tally_channel_registering)
         }
 
-        private fun play(
-            liveTvItemId: String?,
-            channelId: String,
-        ) {
-            val itemId = liveTvItemId?.toUUIDOrNull()
-            if (itemId == null) {
-                if (liveTvItemId != null) {
-                    Timber.w("Unparseable Tally liveTvItemId: %s", liveTvItemId)
-                }
-                emitMessage(R.string.tally_channel_registering)
+        /** Multiview needs a stream: a game without one looks for it first, then its channel is added. */
+        fun addGameToMultiview(game: TallyGame) {
+            val channelId = game.watch?.channelId?.takeIf { it.isNotBlank() }
+            if (channelId != null) {
+                addToMultiview(channelId)
                 return
             }
-            navigationManager.navigateTo(Destination.TallyPlayback(itemId, channelId))
-            viewModelScope.launchIO { repository.setLastChannel(channelId) }
+            watchLauncher.whenStreamFound(game) { watch ->
+                watch.channelId.isNotBlank().also { if (it) addToMultiview(watch.channelId) }
+            }
         }
 
         fun addToMultiview(channelId: String) {

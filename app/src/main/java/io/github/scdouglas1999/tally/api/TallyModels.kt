@@ -69,7 +69,10 @@ data class TallyWatch(
     val channelName: String = "",
     /** Jellyfin Live TV item id (32 hex chars, no dashes) for the app's own player; null for a minute or two after a channel first appears. */
     val liveTvItemId: String? = null,
-    /** Root-relative, signed, anonymous HLS playlist. Prefix with the server base URL. Used by multiview only. */
+    /**
+     * Root-relative, signed, anonymous HLS playlist. Prefix with the server base URL. Multiview plays it, and so does
+     * WATCH while [liveTvItemId] is not ready yet.
+     */
     val hlsPath: String = "",
     /** Root-relative 16:9 PNG card. Prefix with the server base URL. */
     val cardPath: String = "",
@@ -114,6 +117,11 @@ data class TallyGame(
     val extras: Map<String, JsonElement> = emptyMap(),
     /** The server DVR's job for this game (feature `dvr`); null when there is none. Never carries a score. */
     val recording: TallyGameRecording? = null,
+    /**
+     * The server's search for a stream, on a game that is live or starts within 30 minutes and has no [watch].
+     * Null when the game has a [watch], is final, or the server predates it.
+     */
+    val search: TallySearch? = null,
 ) {
     val isLive: Boolean get() = state == "in"
 
@@ -123,6 +131,27 @@ data class TallyGame(
     val isUpcoming: Boolean get() = state == "pre"
     val isFinal: Boolean get() = state == "post"
 }
+
+/** Where the server's search for a game's stream stands. */
+@Serializable
+data class TallySearch(
+    /** "searching": a search that covers this game is running now; "waiting": none is, the next is due at [nextAt]. */
+    val state: String = "",
+    /** ISO-8601; null before the first search. */
+    val lastAt: String? = null,
+    /** ISO-8601; null when none is scheduled. */
+    val nextAt: String? = null,
+) {
+    val isSearching: Boolean get() = state == "searching"
+}
+
+/** The answer to `POST games/{id}/find`. */
+@Serializable
+data class TallyFindResult(
+    /** "found" (with [watch]) | "searching" | "none" (a search finished within the last minute and found nothing). */
+    val state: String = "",
+    val watch: TallyWatch? = null,
+)
 
 /** A game's recording as the board shows it (the DVR's most relevant job for the game). */
 @Serializable
@@ -178,7 +207,7 @@ data class TallySettings(
     val favorites: List<String> = emptyList(),
     val hideScores: Boolean = false,
     val lastChannel: String? = null,
-    /** "My channels only" on the Games board; null = never chosen, which means off. */
+    /** "Only games with a stream" on the Games board; null = never chosen, which means off. */
     val onlyWatchable: Boolean? = null,
     /** Followed teams as "LEAGUE:ABBR" (e.g. "NFL:KC"); their games are pinned first and get start nudges. */
     val favoriteTeams: List<String> = emptyList(),
