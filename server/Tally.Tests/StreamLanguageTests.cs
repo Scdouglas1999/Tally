@@ -427,6 +427,23 @@ public class StreamLanguageBoardTests
     }
 
     [Fact]
+    public void A_Spanish_Channel_Is_Matched_To_Its_Game_Like_The_English_One()
+    {
+        var game = new GameInfo
+        {
+            Id = "g1", State = "in",
+            Away = new GameTeam { Name = "Indianapolis Colts", ShortName = "Colts", Abbr = "IND", Location = "Indianapolis" },
+            Home = new GameTeam { Name = "Houston Texans", ShortName = "Texans", Abbr = "HOU", Location = "Houston" }
+        };
+        GameChannelMatcher.Match(new[] { game }, new[]
+        {
+            new ChannelProbe("en", "Indianapolis Colts at Houston Texans", null),
+            new ChannelProbe("es", "Indianapolis Colts at Houston Texans (Español)", null)
+        });
+        Assert.Equal(new[] { ("en", "teams"), ("es", "teams") }, game.Channels.Select(c => (c.Id, c.Kind)));
+    }
+
+    [Fact]
     public void The_Broadcaster_Rule_Holds_Within_Each_Language()
     {
         // FOX carries two live games: not guessed at; the Spanish broadcaster carries only this one

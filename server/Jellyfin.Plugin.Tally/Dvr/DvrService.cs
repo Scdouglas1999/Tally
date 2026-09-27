@@ -468,11 +468,13 @@ public sealed class DvrService : IHostedService, IDisposable
         var channels = _sources.GetChannels();
         var probes = channels.Select(c => new ChannelProbe(c.Id, c.Name, _sources.GetNowNext(c.Id).Now?.Title)).ToList();
         GameChannelMatcher.Match(games, probes);
-        var exists = channels.Select(c => c.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var languages = channels.GroupBy(c => c.Id, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => StreamLanguage.Of(x.First()), StringComparer.OrdinalIgnoreCase);
         var carrying = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var g in games)
         {
-            var pick = WatchResolver.Resolve(g, games, exists.Contains);
+            // recordings are the server's, not a viewer's: English when the game has it, else Spanish
+            var (pick, _) = WatchResolver.ResolveFeeds(g, games, languages.ContainsKey, id => languages[id], StreamLanguage.English);
             if (pick != null)
             {
                 carrying[g.Id] = pick.Id;
