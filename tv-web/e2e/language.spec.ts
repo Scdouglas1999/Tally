@@ -91,6 +91,7 @@ async function setUp(page: Page): Promise<Setup | null> {
         g.watch.channelName += ' (Español)';
       }
     }
+    json.channels = json.channels.filter((c) => c.kind !== 'redzone'); // a 2.3 server's own: this test's stands in
     json.channels.unshift({ id: 'redzone', name: 'Tally RedZone', group: 'RedZone', hlsPath: rzStream.hlsPath, cardPath: '', gameId: null, kind: 'redzone', language: 'en' });
     json.channels.push({ id: spanishId, name: esWatch.channelName, group: 'Baseball · Español', hlsPath: esStream.hlsPath, cardPath: '', gameId: both.id, language: 'es' });
     await route.fulfill({ response, json }).catch(() => undefined);
@@ -284,4 +285,26 @@ test('Settings: Commentary language switches English / Español, the board is fe
   await page.keyboard.press('Enter');
   await expect(row.locator('.setting-value')).toHaveText(was);
   await back;
+});
+
+test('RedZone on a 2.3 server (nothing scripted): the tile when the server says it is on the air, and the channel plays', async ({ page }, info) => {
+  const real = await api<Board>('/JellyTV/Client/v1/board');
+  const rz = real.channels.find((c) => c.kind === 'redzone');
+  test.skip(rz === undefined, 'the server has no RedZone channel (a plugin before 2.3)');
+  const status = await api<{ active: boolean; gameId: string | null }>('/JellyTV/Client/v1/redzone');
+  test.skip(!status.active, 'RedZone is not on the air');
+  await openSports(page);
+  const tile = page.locator('.page:not(.hidden) .game-card.redzone-card');
+  await expect(tile).toHaveCount(1);
+  await focusCard(page, 'redzone');
+  await expect(page.locator('.page:not(.hidden) .hero-panel.redzone-panel')).toBeVisible();
+  await page.waitForTimeout(400);
+  await shot(page, info, 'redzone-real-tile');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.page:not(.hidden) .player.live')).toBeVisible();
+  await playing(page);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.player.live .redzone-now')).not.toHaveClass(/faded/);
+  await page.waitForTimeout(300);
+  await shot(page, info, 'redzone-real-player');
 });
