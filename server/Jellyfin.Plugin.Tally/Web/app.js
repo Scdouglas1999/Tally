@@ -301,6 +301,71 @@ const prefLang = () => (state.settings && state.settings.streamLanguage === 'es'
 // the server's RedZone channel (2.3): one stream that cuts to the hottest game
 const isRedZone = (c) => !!c && (c.kind === 'redzone' || c.id === 'redzone');
 const redZoneChan = () => state.channels.find(isRedZone) || null;
+
+// --- RedZone overlay sync (RedZoneSync.kt, tv-web redZoneSync.ts) ---
+// The server reports a cut the moment its playlist carries it; the player sits behind the live edge, so its picture
+// cuts that much later. Every status answer is offered; at() says which cut the player has reached: the last one that
+// entered the playlist at least `latency` ago. The first answer shows at once, several cuts inside one latency window
+// each get their turn, and it never steps back. Server times are read on this browser's clock (serverTime).
+const RZ_UNKNOWN_LATENCY_MS = 12000; // liveSyncDurationCount 3 x 3-second segments, plus the one being listed
+function rzTime(iso) {
+  if (!iso) return null;
+  const t = Date.parse(String(iso).replace(/(\.\d{3})\d+/, '$1'));
+  return isNaN(t) ? null : t;
+}
+function redZoneSync() {
+  let cuts = [], shown = null;
+  const same = (a, b) => !!a.active === !!b.active && (a.gameId || null) === (b.gameId || null);
+  return {
+    offer(status, nowMs) {
+      if (!status) return;
+      const kept = Object.assign({}, status, { recent: [], serverTime: null });
+      const server = rzTime(status.serverTime), skew = server === null ? 0 : server - nowMs;
+      const local = (iso) => { const t = rzTime(iso); return t === null ? null : t - skew; };
+      const fresh = [];
+      (status.recent || []).forEach(c => {
+        const since = local(c.since);
+        if (since !== null) fresh.push({ status: Object.assign({}, c, { next: status.next || [] }), sinceMs: since });
+      });
+      const last = fresh[fresh.length - 1];
+      if (last && same(last.status, status)) fresh[fresh.length - 1] = { status: kept, sinceMs: last.sinceMs };
+      else {
+        const floor = last ? last.sinceMs : -Infinity, since = local(status.since);
+        fresh.push({ status: kept, sinceMs: since === null ? floor : Math.max(since, floor) });
+      }
+      fresh.sort((a, b) => a.sinceMs - b.sinceMs);
+      const from = fresh[0].sinceMs;
+      cuts = cuts.filter(c => c.sinceMs < from).concat(fresh).sort((a, b) => a.sinceMs - b.sinceMs).slice(-16);
+      if (shown) { const on = shown; shown = cuts.find(c => c.sinceMs === on.sinceMs && same(c.status, on.status)) || on; }
+    },
+    at(nowMs, latencyMs) {
+      const reached = nowMs - latencyMs;
+      let cand = null;
+      cuts.forEach(c => { if (c.sinceMs <= reached) cand = c; });
+      if (cand && (!shown || cand.sinceMs >= shown.sinceMs)) shown = cand;
+      else if (!shown) shown = cuts[0] || null;
+      if (shown) { const s0 = shown.sinceMs; cuts = cuts.filter(c => c.sinceMs >= s0); }
+      return shown ? shown.status : null;
+    }
+  };
+}
+// How far behind the live edge a <video> plays: hls.js's own estimate, else the end of its seekable range, else what
+// a native player (Safari) has loaded, which reaches the newest segment, plus half a 3-second segment.
+function liveLatencyMs(video, hls) {
+  const l = hls && hls.latency;
+  if (typeof l === 'number' && isFinite(l) && l > 0) return l * 1000;
+  if (!video) return null;
+  const r = video.seekable;
+  if (r && r.length) {
+    const end = r.end(r.length - 1);
+    if (isFinite(end) && end > 0 && end >= video.currentTime) return (end - video.currentTime) * 1000;
+  }
+  const b = video.buffered;
+  if (!b || !b.length) return null;
+  const loaded = b.end(b.length - 1);
+  return isFinite(loaded) && loaded > video.currentTime ? (loaded - video.currentTime) * 1000 + 1500 : null;
+}
+// --- end RedZone overlay sync ---
 const favorites = () => new Set((state.settings && state.settings.favorites) || []);
 const isFav = (id) => favorites().has(id);
 function toggleFav(id) {
@@ -758,11 +823,17 @@ function bestChannel(g) {
   return any || null;
 }
 
+// What RedZone shows: in the full-screen player, the cut its picture has reached; elsewhere, the server's answer.
+function redZoneOnScreen(id) {
+  const p = state.player;
+  return p && p.id === id && p.rzSync ? p.rzShown : state.redzone;
+}
+
 // The game a channel is showing, for score bugs. Ambiguous broadcaster matches get no bug.
 function gameForChannel(id) {
   if (spoilerFree()) return null;
   if (isRedZone(chanById(id))) {
-    const rz = state.redzone;
+    const rz = redZoneOnScreen(id);
     return rz && rz.active ? state.games.find(g => g.id === rz.gameId && g.state === 'in') || null : null;
   }
   const hits = state.games.filter(g => g.state === 'in' && g.channels.some(c => c.id === id));
@@ -1337,7 +1408,8 @@ async function play(id) {
   // remaining-time readout counts down and rolls over to the next programme.
   const paintInfo = () => {
     const cc = chanById(id) || c, g = gameForChannel(id);
-    const rz = isRedZone(cc) && state.redzone && state.redzone.active ? state.redzone : null;
+    const shown = redZoneOnScreen(id);
+    const rz = isRedZone(cc) && shown && shown.active ? shown : null;
     const rzGame = rz ? state.games.find(x => x.id === rz.gameId) : null;
     const rzTitle = rz ? (rzGame ? rzGame.away.name + ' at ' + rzGame.home.name : rz.title || '') : '';
     $('#jp-info', overlay).innerHTML =
@@ -1350,10 +1422,24 @@ async function play(id) {
   updateBugs();   // score bug now, not at the next scores poll
   player.timer = setInterval(paintInfo, 1000);
   // RedZone: what it shows is asked every 10 s, only while it plays
+  // and what the overlay and the bug say follows the picture: a cut shows once playback has reached it
   if (isRedZone(c)) {
-    const ask = () => api('Client/v1/redzone').then(r => { state.redzone = r; updateBugs(); }).catch(() => {});
+    player.rzSync = redZoneSync();
+    player.rzShown = null;
+    const tick = () => {
+      const lat = liveLatencyMs(video, player.hls && player.hls.h);
+      const shown = player.rzSync.at(Date.now(), lat === null ? RZ_UNKNOWN_LATENCY_MS : lat);
+      if (shown !== player.rzShown) { player.rzShown = shown; paintInfo(); updateBugs(); }
+    };
+    const ask = () => api('Client/v1/redzone').then(r => {
+      if (state.player !== player) return;
+      state.redzone = r;
+      player.rzSync.offer(r, Date.now());
+      tick();
+    }).catch(() => {});
     ask();
     player.rzTimer = setInterval(ask, 10e3);
+    player.rzTick = setInterval(tick, 500);
   }
 
   let hideTimer;
@@ -1408,6 +1494,7 @@ function closePlayer() {
   if (!p) return;
   clearInterval(p.timer);
   clearInterval(p.rzTimer);
+  clearInterval(p.rzTick);
   try { p.hls && p.hls.destroy(); } catch (e) {}
   try { p.video.pause(); p.video.removeAttribute('src'); p.video.load(); } catch (e) {}
   if (fsElement() === p.overlay) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
