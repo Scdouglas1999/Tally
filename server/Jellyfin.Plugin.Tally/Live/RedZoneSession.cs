@@ -7,7 +7,8 @@ namespace Jellyfin.Plugin.Tally.Live;
 
 /// <summary>A cut as the RedZone channel's players got it.</summary>
 /// <param name="How">"spliced", "discontinuity" or "slate"; null until the first segment of the new source is served.</param>
-public sealed record RedZoneSwitch(DateTimeOffset At, string? From, string? To, string? Title, string Reason, string? How);
+/// <param name="Game">The game cut to (null: the slate, or a caller that did not say).</param>
+public sealed record RedZoneSwitch(DateTimeOffset At, string? From, string? To, string? Title, string Reason, string? How, string? Game = null);
 
 /// <summary>
 /// The RedZone channel's own playlist: segments taken from the live session of the game on screen (from its
@@ -24,6 +25,7 @@ public sealed class RedZoneSession
     private readonly RedZoneSplicer _splicer = new();
     private string? _target;
     private string? _targetTitle;
+    private string? _targetGame;
     private string _targetReason = string.Empty;
     private bool _hasTarget;
     private string? _source;
@@ -75,8 +77,8 @@ public sealed class RedZoneSession
     }
 
     /// <summary>What to show: a game's channel, or null for the slate. Takes effect at the next <see cref="Pump"/> that
-    /// finds something to cut to.</summary>
-    public void Target(string? channelId, string? title, string reason, DateTimeOffset now)
+    /// finds something to cut to. <paramref name="gameId"/> is recorded with the cut (<see cref="RedZoneSwitch.Game"/>).</summary>
+    public void Target(string? channelId, string? title, string reason, DateTimeOffset now, string? gameId = null)
     {
         if (_hasTarget && channelId == _target)
         {
@@ -86,6 +88,7 @@ public sealed class RedZoneSession
         _hasTarget = true;
         _target = channelId;
         _targetTitle = title;
+        _targetGame = channelId == null ? null : gameId;
         _targetReason = reason;
         _targetSetAt = now;
     }
@@ -227,7 +230,7 @@ public sealed class RedZoneSession
     {
         lock (_gate)
         {
-            _switches.Add(new RedZoneSwitch(now, _onSlate ? "slate" : _source, _target ?? "slate", _targetTitle, _targetReason, how));
+            _switches.Add(new RedZoneSwitch(now, _onSlate ? "slate" : _source, _target ?? "slate", _targetTitle, _targetReason, how, _targetGame));
             if (_switches.Count > 30)
             {
                 _switches.RemoveAt(0);

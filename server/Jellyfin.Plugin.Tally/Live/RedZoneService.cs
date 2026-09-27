@@ -38,6 +38,30 @@ public sealed class RedZoneStatus
 
     /// <summary>The next games by rank, best first.</summary>
     [JsonPropertyName("next")] public List<string> Next { get; set; } = new();
+
+    /// <summary>The channel's last cuts as its players got them, oldest first (2.3; empty while nobody watches). Each
+    /// <c>since</c> is when the cut's first segment was listed in the channel's playlist, so a player that sits behind the
+    /// live edge can tell which game its own picture shows (it runs that far behind these times). The top-level
+    /// <c>since</c> is when the channel decided to cut, which can be a moment earlier.</summary>
+    [JsonPropertyName("recent")] public List<RedZoneRecentCut> Recent { get; set; } = new();
+
+    /// <summary>This server's clock when it answered (2.3), so a player can read <c>since</c> times on its own clock.</summary>
+    [JsonPropertyName("serverTime")] public DateTimeOffset ServerTime { get; set; } = DateTimeOffset.UtcNow;
+}
+
+/// <summary>One cut in <see cref="RedZoneStatus.Recent"/>: from <c>since</c> on, the channel's playlist carries this game
+/// (<c>active</c> false: the "No games live" slate).</summary>
+public sealed class RedZoneRecentCut
+{
+    [JsonPropertyName("active")] public bool Active { get; set; }
+
+    [JsonPropertyName("gameId")] public string? GameId { get; set; }
+
+    [JsonPropertyName("title")] public string? Title { get; set; }
+
+    [JsonPropertyName("reason")] public string? Reason { get; set; }
+
+    [JsonPropertyName("since")] public DateTimeOffset Since { get; set; }
 }
 
 /// <summary>
@@ -65,6 +89,12 @@ public sealed class RedZoneService : IHostedService, IDisposable
 
     /// <summary>A game whose stream has given nothing this long is left (and not picked again for a while).</summary>
     public static readonly TimeSpan StarvedAfter = TimeSpan.FromSeconds(25);
+
+    /// <summary>How far back <see cref="RedZoneStatus.Recent"/> reaches (players sit well under a minute behind the edge).</summary>
+    public static readonly TimeSpan RecentFor = TimeSpan.FromMinutes(2);
+
+    /// <summary>At most this many cuts in <see cref="RedZoneStatus.Recent"/>.</summary>
+    public const int RecentMax = 6;
 
     private static readonly TimeSpan FailedFor = TimeSpan.FromMinutes(2);
     private static readonly TimeSpan Tick = TimeSpan.FromMilliseconds(500);
@@ -232,7 +262,8 @@ public sealed class RedZoneService : IHostedService, IDisposable
                     Title = _director.CurrentTitle,
                     Reason = _director.Reason,
                     Since = _director.Since,
-                    Next = _director.Next.Select(g => g.Id).ToList()
+                    Next = _director.Next.Select(g => g.Id).ToList(),
+                    Recent = Recent(Session.Switches, DateTimeOffset.UtcNow)
                 };
             }
         }
@@ -248,6 +279,31 @@ public sealed class RedZoneService : IHostedService, IDisposable
             Reason = best == null ? null : RedZoneDirector.ReasonOf(best),
             Next = ranked.Skip(1).Take(2).Select(g => g.Id).ToList()
         };
+    }
+
+    /// <summary>The cuts that reached the channel's playlist (<see cref="RedZoneSwitch.How"/> set), oldest first: those of
+    /// the last <see cref="RecentFor"/>, at most <see cref="RecentMax"/>, and always the latest (what is on now).</summary>
+    public static List<RedZoneRecentCut> Recent(IReadOnlyList<RedZoneSwitch> switches, DateTimeOffset now)
+    {
+        var served = switches.Where(s => s.How != null).ToList();
+        var recent = served.Where(s => now - s.At <= RecentFor).TakeLast(RecentMax).ToList();
+        if (recent.Count == 0 && served.Count > 0)
+        {
+            recent.Add(served[^1]);
+        }
+
+        return recent.Select(s =>
+        {
+            var slate = s.How == "slate";
+            return new RedZoneRecentCut
+            {
+                Active = !slate,
+                GameId = slate ? null : s.Game,
+                Title = slate ? null : s.Title,
+                Reason = slate ? null : s.Reason,
+                Since = s.At
+            };
+        }).ToList();
     }
 
     /// <summary>For the admin page (<c>GET /JellyTV/Ladder</c>): the session, the director's last cuts and how each
@@ -468,7 +524,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
                     string.Join(", ", _director.Next.Select(g => g.Title)));
             }
 
-            Session.Target(_director.CurrentChannel, _director.CurrentTitle, _director.Reason ?? "no games live", now);
+            Session.Target(_director.CurrentChannel, _director.CurrentTitle, _director.Reason ?? "no games live", now, _director.CurrentGame);
         }
     }
 

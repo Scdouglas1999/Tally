@@ -277,6 +277,48 @@ public class RedZoneSessionTests
     }
 
     [Fact]
+    public void Recent_Lists_The_Cuts_As_The_Playlist_Got_Them_With_Their_Games_Oldest_First()
+    {
+        var a = new OutputWindow();
+        var b = new OutputWindow();
+        Feed(a, Chain(SegA, 5), T0);
+        var windows = new Dictionary<string, OutputWindow> { ["a"] = a, ["b"] = b };
+        var s = new RedZoneSession();
+        s.Target("a", "A", "hottest", T0, "game-a");
+        s.Pump(T0, id => windows.GetValueOrDefault(id));
+
+        // b is cold when the director cuts to it: the cut reaches the playlist (and recent) only when b has a segment
+        s.Target("b", "B", "score", T0.AddSeconds(2), "game-b");
+        s.Pump(T0.AddSeconds(2), id => windows.GetValueOrDefault(id));
+        Assert.Equal(new[] { "game-a" }, RedZoneService.Recent(s.Switches, T0.AddSeconds(3)).Select(c => c.GameId));
+        Feed(b, Chain(SegB, 4), T0.AddSeconds(5));
+        s.Pump(T0.AddSeconds(5), id => windows.GetValueOrDefault(id));
+
+        var recent = RedZoneService.Recent(s.Switches, T0.AddSeconds(6));
+        Assert.Equal(new[] { ("game-a", "A", "hottest", T0), ("game-b", "B", "score", T0.AddSeconds(5)) },
+            recent.Select(c => (c.GameId!, c.Title!, c.Reason!, c.Since)));
+        Assert.All(recent, c => Assert.True(c.Active));
+
+        // older than RecentFor drops out, but the cut on now always stays
+        Assert.Equal(new[] { "game-b" }, RedZoneService.Recent(s.Switches, T0.AddMinutes(10)).Select(c => c.GameId));
+    }
+
+    [Fact]
+    public void Recent_Keeps_The_Last_Few_And_Names_No_Game_For_The_Slate()
+    {
+        var switches = Enumerable.Range(0, 9)
+            .Select(i => new RedZoneSwitch(T0.AddSeconds(i * 10), null, i == 8 ? "slate" : "ch" + i, "G" + i, "hottest", i == 8 ? "slate" : "spliced", "g" + i))
+            .Append(new RedZoneSwitch(T0.AddSeconds(95), "slate", "ch9", "G9", "score", null, "g9")) // not in the playlist yet
+            .ToList();
+        var recent = RedZoneService.Recent(switches, T0.AddSeconds(100));
+        Assert.Equal(RedZoneService.RecentMax, recent.Count);
+        Assert.Equal(new[] { "g3", "g4", "g5", "g6", "g7", null }, recent.Select(c => c.GameId));
+        Assert.False(recent[^1].Active);
+        Assert.Null(recent[^1].Title);
+        Assert.Empty(RedZoneService.Recent(new List<RedZoneSwitch>(), T0));
+    }
+
+    [Fact]
     public void Enters_The_New_Game_As_Far_Behind_Its_Live_Edge_As_The_Old_One_Was_Left_And_Waits_For_A_Cold_One()
     {
         var a = new OutputWindow();
