@@ -164,7 +164,7 @@ internal fun PhoneGamesBoard(
                     favoriteTeams = state.favoriteTeams,
                     hideScores = state.hideScores,
                     onWatch = viewModel::watch,
-                    onAddToMultiview = { game -> game.watch?.channelId?.let(viewModel::addToMultiview) },
+                    onAddToMultiview = viewModel::addGameToMultiview,
                     onWatchInCorner = null,
                     onToggleFollow = viewModel::toggleFollow,
                     onToggleHideScores = { viewModel.setHideScores(!state.hideScores) },

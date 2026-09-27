@@ -80,7 +80,8 @@ data class GameActions(
 )
 
 /**
- * Builds [GameActions] from a game. Watch needs a resolved Live TV item; multiview needs a channel.
+ * Builds [GameActions] from a game. Watch and multiview are offered for every game that is not final, and for a final
+ * one a channel carries: without a stream the caller looks for one first ([io.github.scdouglas1999.tally.watch.TallyWatchLauncher]).
  * [onWatchInCorner] is null everywhere except the player's switcher, which is the only place that row appears.
  */
 fun gameActions(
@@ -96,8 +97,8 @@ fun gameActions(
     val teams = favoriteTeams.map { it.uppercase() }.toSet()
     val channelId = game.watch?.channelId?.takeIf { it.isNotBlank() }
     return GameActions(
-        watch = if (!game.watch?.liveTvItemId.isNullOrBlank()) ({ onWatch(game) }) else null,
-        addToMultiview = if (channelId != null) ({ onAddToMultiview(game) }) else null,
+        watch = if (game.canWatch) ({ onWatch(game) }) else null,
+        addToMultiview = if (channelId != null || !game.isFinal) ({ onAddToMultiview(game) }) else null,
         watchInCorner = onWatchInCorner?.let { callback -> { callback(game) } },
         followAway = { onToggleFollow(game.teamKey(game.away)) },
         followHome = { onToggleFollow(game.teamKey(game.home)) },
@@ -168,7 +169,17 @@ fun GameActionsDialog(
                 )
             }
             actions.watch?.let { watch ->
-                add(ActionLine(stringResource(actions.watchLabel), dismissOnClick = true, onClick = watch))
+                val label = stringResource(actions.watchLabel)
+                // A game no channel carries yet says so above Watch (which then looks for a stream).
+                val noStream = game?.takeIf { it.watch == null }?.let { noStreamLabel(it).tallyUppercase() }
+                add(
+                    ActionLine(
+                        label,
+                        dismissOnClick = true,
+                        onClick = watch,
+                        dvr = noStream?.let { DvrMenuLine(label = label, info = it, dismiss = true, onClick = watch) },
+                    ),
+                )
             }
             actions.addToMultiview?.let { addToMultiview ->
                 add(

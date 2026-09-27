@@ -13,8 +13,8 @@ import java.time.OffsetDateTime
  *  - live games first, then games that start within [UPCOMING_WINDOW] (a game that was due up to
  *    [START_GRACE] ago still counts: scoreboards flip to "in" a few minutes late);
  *  - games with no channel yet ([TallyGame.watch] == null) still get a card: web-page sources only
- *    list a stream around game time, so hiding them left the row empty all day. Their card says
- *    "not on your channels";
+ *    list a stream around game time, so hiding them left the row empty all day. Their card says what
+ *    the server is doing about it ("looking for a stream", "no stream yet") and WATCH looks for one;
  *  - inside each of those two groups: games you can watch first, then favorites, then league, then
  *    start time;
  *  - at most [MAX_GAMES] cards, and a game you can watch is never cut to make room for one you cannot.

@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
@@ -60,8 +59,9 @@ import java.time.OffsetDateTime
  * A game card: league + status strip, two team lines, and a black channel label bar.
  *
  * Focused = 3dp accent border on groundRaised; unfocused = 1dp ruleStrong border on ground.
- * No scale, no glow. A game that is not on your channels ([TallyGame.watch] == null) stays
- * focusable so the hero panel can show it, but its content is dimmed and its click is a no-op.
+ * No scale, no glow. A game no channel carries yet ([TallyGame.watch] == null) is drawn at full strength with
+ * LOOKING FOR A STREAM / NO STREAM YET in its label bar, and its click still watches (WATCH looks for a stream);
+ * only a final game without one has nothing to watch.
  *
  * [followed] draws the FOLLOWING mark. A followed team's game that starts within 90 minutes
  * replaces the start time with [startsInLabel].
@@ -97,6 +97,7 @@ fun GameCard(
         if (focused) onFocused()
     }
     val watchable = game.watch != null
+    val canWatch = game.canWatch
     // No spoilers: a finished game with a recording keeps its score and result out of sight.
     val scoresHidden = hideScores || game.spoilerGuarded
     val showFocus = tallyFocusVisible()
@@ -116,7 +117,7 @@ fun GameCard(
         }
     Surface(
         onClick = {
-            if (watchable) onClick()
+            if (canWatch) onClick()
         },
         onLongClick = onLongClick,
         shape = ClickableSurfaceDefaults.shape(RectangleShape),
@@ -153,14 +154,9 @@ fun GameCard(
         modifier =
             modifier
                 .size(TallyDimens.cardWidth, TallyDimens.cardHeight)
-                .tallyClickable(onClick = { if (watchable) onClick() }, onLongClick = onLongClick),
+                .tallyClickable(onClick = { if (canWatch) onClick() }, onLongClick = onLongClick),
     ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .alpha(if (watchable) 1f else 0.6f),
-        ) {
+        Column(modifier = Modifier.fillMaxSize()) {
             val now = rememberCardNow(active = followed && game.isUpcoming)
             val (statusText, statusColor) = cardStatus(game, followed, now)
             Row(
@@ -234,7 +230,7 @@ fun GameCard(
                 }
             }
             LabelBar(
-                text = game.watch?.channelName ?: stringResource(R.string.tally_not_on_your_channels),
+                text = game.watch?.channelName ?: noStreamLabel(game),
                 live = game.isLive && watchable,
             )
         }

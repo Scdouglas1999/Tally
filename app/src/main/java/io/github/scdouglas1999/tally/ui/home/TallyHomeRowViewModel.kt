@@ -6,10 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.services.BackdropService
-import com.github.damontecres.wholphin.services.NavigationManager
 import com.github.damontecres.wholphin.ui.launchDefault
 import com.github.damontecres.wholphin.ui.launchIO
-import com.github.damontecres.wholphin.ui.nav.Destination
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.scdouglas1999.tally.api.TallyGame
@@ -17,6 +15,7 @@ import io.github.scdouglas1999.tally.api.TallyTeam
 import io.github.scdouglas1999.tally.data.TallyMultiviewState
 import io.github.scdouglas1999.tally.data.TallyRepository
 import io.github.scdouglas1999.tally.data.isFollowed
+import io.github.scdouglas1999.tally.watch.TallyWatchLauncher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,8 +30,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.jellyfin.sdk.model.serializer.toUUIDOrNull
-import timber.log.Timber
 import java.time.DateTimeException
 import java.time.Instant
 import java.time.OffsetDateTime
@@ -75,10 +72,10 @@ class TallyHomeRowViewModel
     @Inject
     constructor(
         private val repository: TallyRepository,
-        private val navigationManager: NavigationManager,
         private val multiviewState: TallyMultiviewState,
         private val backdropService: BackdropService,
         @param:ApplicationContext private val appContext: Context,
+        private val watchLauncher: TallyWatchLauncher,
     ) : ViewModel() {
         /**
          * Moves the "starts within 12 hours" window on even when the board itself is unchanged
@@ -220,20 +217,19 @@ class TallyHomeRowViewModel
             }
         }
 
-        fun watch(game: TallyGame) {
-            val watch = game.watch ?: return
-            val itemId = watch.liveTvItemId?.toUUIDOrNull()
-            if (itemId == null) {
-                if (watch.liveTvItemId != null) {
-                    Timber.w("Unparseable Tally liveTvItemId: %s", watch.liveTvItemId)
-                }
-                emitMessage(R.string.tally_home_channel_not_ready)
+        /** WATCH: plays the game's stream, or looks for one first (see [TallyWatchLauncher]). */
+        fun watch(game: TallyGame) = watchLauncher.watch(game)
+
+        /** Multiview needs a stream: a game without one looks for it first, then its channel is added. */
+        fun addGameToMultiview(game: TallyGame) {
+            val channelId = game.watch?.channelId?.takeIf { it.isNotBlank() }
+            if (channelId != null) {
+                addToMultiview(channelId)
                 return
             }
-            navigationManager.navigateTo(
-                Destination.TallyPlayback(itemId = itemId, channelId = watch.channelId),
-            )
-            viewModelScope.launchIO { repository.setLastChannel(watch.channelId) }
+            watchLauncher.whenStreamFound(game) { watch ->
+                watch.channelId.isNotBlank().also { if (it) addToMultiview(watch.channelId) }
+            }
         }
 
         fun toggleFollow(teamKey: String) {

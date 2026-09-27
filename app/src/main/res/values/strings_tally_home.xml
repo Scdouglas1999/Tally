@@ -6,5 +6,4 @@
     <string name="tally_home_row_today">Today\'s games</string>
     <string name="tally_home_row_count">\u0020· %1$d</string>
     <!-- Pressing OK on a game whose channel Jellyfin has not registered yet. -->
-    <string name="tally_home_channel_not_ready">Channel not ready yet</string>
 </resources>

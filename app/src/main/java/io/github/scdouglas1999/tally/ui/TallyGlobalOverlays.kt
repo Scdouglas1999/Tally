@@ -24,6 +24,8 @@ import io.github.scdouglas1999.tally.ui.player.SleepTimerDialog
 import io.github.scdouglas1999.tally.ui.player.TallyPlayerMenu
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyScale
+import io.github.scdouglas1999.tally.watch.FindStreamHost
+import io.github.scdouglas1999.tally.watch.TallyWatchLauncher
 import javax.inject.Inject
 
 @HiltViewModel
@@ -32,12 +34,13 @@ class TallyGlobalOverlaysViewModel
     constructor(
         val sleepTimer: SleepTimerService,
         val playerFactory: PlayerFactory,
+        val watchLauncher: TallyWatchLauncher,
     ) : ViewModel()
 
 /**
  * Overlays that must work above any screen: the sleep timer chip, Watch Together, the players' Tally menu
- * dialogs, the SENT / NOT SENT lower third after Send to another screen, and on a cold start the launch card
- * above all of them.
+ * dialogs, the SENT / NOT SENT lower third after Send to another screen, "Looking for a stream…" after WATCH on a game
+ * without one, and on a cold start the launch card above all of them.
  */
 @Composable
 fun TallyGlobalOverlays(modifier: Modifier = Modifier) {
@@ -89,6 +92,7 @@ fun TallyGlobalOverlays(modifier: Modifier = Modifier) {
 
                 null -> {}
             }
+            FindStreamHost(viewModel.watchLauncher)
             TogetherOverlay(Modifier.fillMaxSize())
             // The Send dialog draws the notice itself while it is open (above its scrim).
             if (request != TallyPlayerMenu.Request.SEND_TO) {

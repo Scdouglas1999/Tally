@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tally 2.2.1: never block a game (app-221). American English. -->
+<resources>
+    <!-- A game's label bar while the server searches for its stream (the board's search.state == searching) -->
+    <string name="tally_221_looking_for_stream">Looking for a stream</string>
+    <!-- A final game's label bar when no channel carried it -->
+    <string name="tally_221_no_stream">No stream</string>
+    <!-- WATCH on a game without a stream: the dialog while the server looks -->
+    <string name="tally_221_find_searching">Looking for a stream…</string>
+    <!-- … and when the round ended without one -->
+    <string name="tally_221_find_none_kicker">No stream yet</string>
+    <string name="tally_221_find_none">No stream for this game yet. Tally keeps looking and will light it up when one appears.</string>
+    <string name="tally_221_keep_looking">Keep looking</string>
+    <string name="tally_221_ok">OK</string>
+    <!-- A live channel played from its playlist (its Live TV item not ready yet) that fails to play -->
+    <string name="tally_221_stream_failed">This stream can\'t be played right now.</string>
+</resources>

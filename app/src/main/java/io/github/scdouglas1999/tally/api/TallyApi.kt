@@ -110,6 +110,21 @@ class TallyApi
         suspend fun channel(id: String): TallyChannel = getDecoded("/JellyTV/Client/v1/channels/$id")
 
         /**
+         * Starts a search for [gameId]'s stream now, or joins the one already running; answers at once. A server
+         * without it answers 404 ([TallyException.NotInstalled]).
+         */
+        suspend fun find(gameId: String): TallyFindResult =
+            decode(
+                execute(
+                    Request
+                        .Builder()
+                        .url(baseUrl() + "/JellyTV/Client/v1/games/" + java.net.URLEncoder.encode(gameId, "UTF-8") + "/find")
+                        .post(ByteArray(0).toRequestBody(null))
+                        .build(),
+                ),
+            )
+
+        /**
          * The raw settings document. It is shared with the web UI, so it is kept as a
          * [JsonObject] to round-trip keys this app does not know about.
          */
