@@ -35,6 +35,7 @@ public class TallyController : ControllerBase
     private readonly LgDevModeService _lgDevMode;
     private readonly ILogger<TallyController> _logger;
     private readonly StreamSearchService _search;
+    private readonly LeagueDetector _leagues;
 
     public TallyController(
         SourceManager sourceManager,
@@ -45,9 +46,11 @@ public class TallyController : ControllerBase
         BrowserRuntime browser,
         LgDevModeService lgDevMode,
         ILogger<TallyController> logger,
-        StreamSearchService search)
+        StreamSearchService search,
+        LeagueDetector leagues)
     {
         _search = search;
+        _leagues = leagues;
         _lgDevMode = lgDevMode;
         _sourceManager = sourceManager;
         _signer = signer;
@@ -81,7 +84,15 @@ public class TallyController : ControllerBase
             // the headless browser web page sources use: idle (not needed yet), preparing, ready or failed
             browser = BrowserJson(_browser.Status),
             // LG TVs whose Developer Mode this server keeps on (the settings page's line); no tokens
-            lgDevMode = LgJson(_lgDevMode.Summary())
+            lgDevMode = LgJson(_lgDevMode.Summary()),
+            // the scoreboard's leagues, and why each is on (Settings → Live scores)
+            leagues = new
+            {
+                active = _scoreboard.ActiveLeagues,
+                defaults = LeagueCatalog.Defaults,
+                fromSources = _leagues.FromSources.Select(x => new { league = x.League, label = LeagueCatalog.Label(x.League), channels = x.Channels }),
+                known = LeagueCatalog.Known.Select(k => new { path = k.Path, label = k.Label })
+            }
         });
     }
 

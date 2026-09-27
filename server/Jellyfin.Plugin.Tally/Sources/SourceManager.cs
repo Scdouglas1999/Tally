@@ -36,7 +36,8 @@ public class SourceManager
     private volatile Snapshot _snapshot = new();
     private volatile HashSet<string> _crawling = new(StringComparer.Ordinal);
     private int _generalWaiting;
-    private bool _hadGeneral;
+    private int _webRequested;
+    private DateTimeOffset? _lastWebScan;
 
     public SourceManager(IHttpClientFactory httpClientFactory, ILogger<SourceManager> logger, Scores.ScoreboardService? scoreboard = null, Services.BrowserRuntime? browser = null)
     {
@@ -71,8 +72,21 @@ public class SourceManager
     /// <summary>Raised after every crawl, regular or game-driven, once its channels are in place.</summary>
     public event Action<CrawlReport>? Crawled;
 
-    /// <summary>The games the regular crawl looks for first (<see cref="StreamSearchService"/> sets it).</summary>
-    public Func<IReadOnlyList<WantedGame>>? WantedGames { get; set; }
+    /// <summary>A kept stream (see <see cref="KeepPinned"/>) has its playlist checked at most this often.</summary>
+    public static readonly TimeSpan PinCheckInterval = TimeSpan.FromMinutes(15);
+
+    /// <summary>Spacing for game-driven search passes (and what answered before, for telling the site pushing back).</summary>
+    internal SearchPacer Pacer { get; set; } = SearchPacer.Default();
+
+    /// <summary>Tests: the clock for kept streams and the full-site scan's timing.</summary>
+    internal TimeProvider Clock { get; set; } = TimeProvider.System;
+
+    /// <summary>How often web page sources are read whole: the "Full site scan" setting, 60 to 720 minutes.</summary>
+    public static TimeSpan FullScanInterval
+        => TimeSpan.FromMinutes(Math.Clamp(Plugin.Instance?.Configuration.WebFullScanMinutes ?? 180, 60, 720));
+
+    /// <summary>When web page sources are next due for their full-site scan (now when they have never had one).</summary>
+    public DateTimeOffset NextWebScanAt => _lastWebScan is { } at ? at + FullScanInterval : Clock.GetUtcNow();
 
     /// <summary>Tests: the source list in place of the plugin's configuration.</summary>
     internal Func<IReadOnlyList<SourceDefinition>>? DefinitionsOverride { get; set; }
@@ -147,14 +161,29 @@ public class SourceManager
     }
 
     /// <summary>
-    /// The regular crawl: every enabled source, each one's list replaced by what the scan found (a failed scan keeps
-    /// the last good list; streams of a game that is not over survive while their playlist answers, see
-    /// <see cref="KeepPinned"/>). Web page sources look for <see cref="WantedGames"/> first. At most one crawl of any
-    /// kind runs at a time; a call made while one runs waits for it and then runs, and calls made while one is already
-    /// waiting join that one.
+    /// A full refresh: every enabled source, web page sources' full-site scan included (on startup, on a configuration
+    /// change, on a Refresh request). Each source's list is replaced by what its scan found (a failed scan keeps the
+    /// last good list; streams of a game that is not over survive while their playlist answers, see
+    /// <see cref="KeepPinned"/>). At most one crawl of any kind runs at a time; a call made while one runs waits for it
+    /// and then runs, and calls made while one is already waiting join that one.
     /// </summary>
-    public async Task RefreshAsync(CancellationToken cancellationToken)
+    public Task RefreshAsync(CancellationToken cancellationToken) => RefreshCoreAsync(web: true, cancellationToken);
+
+    /// <summary>
+    /// The regular refresh: M3U and direct sources every time; web page sources only when their full-site scan is due
+    /// (<see cref="FullScanInterval"/> after the last one). Games without a stream are searched on their own schedule
+    /// (<see cref="SearchAsync"/>), not here.
+    /// </summary>
+    public Task RefreshScheduledAsync(CancellationToken cancellationToken)
+        => RefreshCoreAsync(web: Clock.GetUtcNow() >= NextWebScanAt, cancellationToken);
+
+    private async Task RefreshCoreAsync(bool web, CancellationToken cancellationToken)
     {
+        if (web)
+        {
+            Interlocked.Exchange(ref _webRequested, 1);
+        }
+
         if (Interlocked.CompareExchange(ref _generalWaiting, 1, 0) != 0)
         {
             return; // one is already waiting to run after the current crawl: it covers this call
@@ -171,18 +200,8 @@ public class SourceManager
 
         try
         {
-            IReadOnlyList<WantedGame> wanted;
-            try
-            {
-                wanted = WantedGames?.Invoke() ?? Array.Empty<WantedGame>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogDebug(ex, "JellyTV: no wanted games for the crawl");
-                wanted = Array.Empty<WantedGame>();
-            }
-
-            await CrawlLockedAsync(gameDriven: false, wanted, cancellationToken).ConfigureAwait(false);
+            var withWeb = Interlocked.Exchange(ref _webRequested, 0) == 1 || _lastWebScan == null;
+            await CrawlLockedAsync(withWeb ? CrawlMode.Full : CrawlMode.Regular, Array.Empty<WantedGame>(), cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -191,16 +210,17 @@ public class SourceManager
     }
 
     /// <summary>
-    /// A game-driven search: web page sources only, each reading its page and the pages that name a team of
-    /// <paramref name="wanted"/> (see <see cref="WebExtractor"/>). What it finds is added to the source's channels;
-    /// it removes nothing, and its errors do not replace the source's. Waits for a crawl that is running.
+    /// A game-driven search pass: web page sources only, each reading its listing page once and a few pages per game of
+    /// <paramref name="wanted"/> (see <see cref="WebExtractor.SearchGamesAsync"/>), paced by <see cref="Pacer"/>. What it
+    /// finds is added to the source's channels; it removes nothing, and its errors do not replace the source's. Waits
+    /// for a crawl that is running.
     /// </summary>
     public async Task<CrawlReport> SearchAsync(IReadOnlyList<WantedGame> wanted, CancellationToken cancellationToken)
     {
         await _refreshLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            return await CrawlLockedAsync(gameDriven: true, wanted, cancellationToken).ConfigureAwait(false);
+            return await CrawlLockedAsync(CrawlMode.Pass, wanted, cancellationToken).ConfigureAwait(false);
         }
         finally
         {
@@ -208,12 +228,22 @@ public class SourceManager
         }
     }
 
-    private async Task<CrawlReport> CrawlLockedAsync(bool gameDriven, IReadOnlyList<WantedGame> wanted, CancellationToken cancellationToken)
+    private enum CrawlMode
     {
-        var report = new CrawlReport { GameDriven = gameDriven, Wanted = wanted, StartedAt = DateTimeOffset.UtcNow };
+        /// <summary>Every source, web page sources' full-site scan included.</summary>
+        Full,
 
-        // a search before the first regular crawl (right after startup) has nothing to add to: it does the regular crawl
-        gameDriven &= _hadGeneral;
+        /// <summary>M3U and direct sources; web page sources keep what they have.</summary>
+        Regular,
+
+        /// <summary>A game-driven search pass on web page sources, adding to what they have.</summary>
+        Pass
+    }
+
+    private async Task<CrawlReport> CrawlLockedAsync(CrawlMode mode, IReadOnlyList<WantedGame> wanted, CancellationToken cancellationToken)
+    {
+        var gameDriven = mode == CrawlMode.Pass;
+        var report = new CrawlReport { GameDriven = gameDriven, FullSiteScan = mode == CrawlMode.Full, Wanted = wanted, StartedAt = DateTimeOffset.UtcNow };
         _crawling = wanted.Select(w => w.GameId).ToHashSet(StringComparer.Ordinal);
         try
         {
@@ -223,8 +253,26 @@ public class SourceManager
             var defs = (DefinitionsOverride?.Invoke() ?? config?.Sources ?? new List<SourceDefinition>())
                 .Where(s => s.Enabled)
                 .ToList();
-            var crawled = defs.Where(d => !gameDriven || d.Kind == SourceKind.Web).ToList();
-            var tasks = crawled.Select(s => BuildAdapter(s, wanted, gameDriven).RefreshAsync(cancellationToken)).ToList();
+            var crawled = defs.Where(d => mode switch
+            {
+                CrawlMode.Pass => d.Kind == SourceKind.Web,
+                CrawlMode.Regular => d.Kind != SourceKind.Web,
+                _ => true
+            }).ToList();
+            if (mode == CrawlMode.Regular && crawled.Count == 0 && defs.Count > 0)
+            {
+                return report; // only web page sources, and their full-site scan is not due: nothing to do
+            }
+
+            if (mode == CrawlMode.Full)
+            {
+                _lastWebScan = Clock.GetUtcNow();
+            }
+
+            var stats = crawled.Select(_ => new GamePassStats()).ToList();
+            var tasks = crawled.Select((s, i) => gameDriven
+                ? new WebSourceAdapter(s, _httpClientFactory, _logger, _browser).SearchGamesAsync(wanted, Pacer, stats[i], cancellationToken)
+                : BuildAdapter(s).RefreshAsync(cancellationToken)).ToList();
             var results = new Dictionary<string, SourceSnapshot?>(StringComparer.OrdinalIgnoreCase);
 
             for (var i = 0; i < tasks.Count; i++)
@@ -235,9 +283,8 @@ public class SourceManager
                 {
                     result = await tasks[i].ConfigureAwait(false);
                     report.Pages += result.PagesVisited;
-                    report.TargetedPages += result.TargetedPagesVisited;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
                 {
                     _logger.LogWarning(ex, "JellyTV: source '{Name}' refresh failed", def.Name);
                     result = null;
@@ -248,6 +295,11 @@ public class SourceManager
                 }
 
                 results[def.Name] = result;
+            }
+
+            if (gameDriven)
+            {
+                report.Add(stats);
             }
 
             foreach (var def in crawled)
@@ -338,7 +390,6 @@ public class SourceManager
             var games = await GamesAsync(channels, cancellationToken).ConfigureAwait(false);
             if (!gameDriven)
             {
-                _hadGeneral = true;
                 channels = await KeepPinned(channels, crawled, games, cancellationToken).ConfigureAwait(false);
             }
 
@@ -353,7 +404,8 @@ public class SourceManager
                 channels = kept;
             }
 
-            Pin(channels, defs, games, next.LoadedAt);
+            var fresh = results.Values.Where(r => r != null).SelectMany(r => r!.Channels).Select(c => c.StreamUrl).ToHashSet(StringComparer.Ordinal);
+            Pin(channels, defs, games, next.LoadedAt, fresh);
 
             ChannelIdentity.Assign(channels);
             var grouped = Group(channels, games);
@@ -406,15 +458,17 @@ public class SourceManager
     }
 
     /// <summary>
-    /// Web streams of a game that is not over, found by any crawl, survive the regular crawls that no longer reach
-    /// their page, until the game ends (or 3 hours after its expected end when it leaves the scoreboard). One whose
-    /// playlist no longer answers is let go.
+    /// Web streams of a game that is not over, found by any crawl, survive the full-site scans that no longer reach
+    /// their page, until the game ends (or 3 hours after its expected end when it leaves the scoreboard). A kept stream's
+    /// playlist is checked at most every <see cref="PinCheckInterval"/> (the proxy checks it again when someone plays
+    /// it); one that no longer answers is let go.
     /// </summary>
     private async Task<List<SourceChannel>> KeepPinned(List<SourceChannel> channels, IReadOnlyList<SourceDefinition> crawled, IReadOnlyList<Scores.GameInfo>? games, CancellationToken ct)
     {
-        var now = DateTimeOffset.UtcNow;
+        var now = Clock.GetUtcNow();
         var byId = games?.ToDictionary(g => g.Id, StringComparer.Ordinal);
         var present = channels.Select(c => c.StreamUrl).ToHashSet(StringComparer.Ordinal);
+        var keep = new List<(string Source, Pinned Pin)>();
         var check = new List<(string Source, Pinned Pin)>();
         foreach (var def in crawled)
         {
@@ -432,18 +486,18 @@ public class SourceManager
                 }
                 else if (!present.Contains(url))
                 {
-                    check.Add((def.Name, pin));
+                    (now - pin.CheckedAt < PinCheckInterval ? keep : check).Add((def.Name, pin));
                 }
             }
         }
 
-        if (check.Count == 0)
+        if (check.Count == 0 && keep.Count == 0)
         {
             return channels;
         }
 
         var http = _httpClientFactory.CreateClient("jellytv");
-        using var gate = new SemaphoreSlim(8);
+        using var gate = new SemaphoreSlim(2);
         var alive = await Task.WhenAll(check.Select(async x =>
         {
             await gate.WaitAsync(ct).ConfigureAwait(false);
@@ -470,6 +524,13 @@ public class SourceManager
                 continue;
             }
 
+            pin.CheckedAt = now;
+            keep.Add((source, pin));
+            kept++;
+        }
+
+        foreach (var (source, pin) in keep)
+        {
             var copy = pin.Channel.ShallowCopy();
             copy.Candidates = new List<StreamCandidate>();
             copy.MergedIds = new List<string>();
@@ -478,16 +539,17 @@ public class SourceManager
             {
                 state.Channels.Add(copy);
             }
-
-            kept++;
         }
 
-        _logger.LogInformation("JellyTV: kept {Kept} streams of games that are not over although the crawl did not reach them again ({Dropped} no longer answered)", kept, check.Count - kept);
+        _logger.LogInformation(
+            "JellyTV: kept {Kept} streams of games that are not over although the crawl did not reach them again ({Checked} playlists checked, {Dropped} no longer answered; the others were checked less than {Minutes} min ago)",
+            keep.Count, check.Count, check.Count - kept, (int)PinCheckInterval.TotalMinutes);
         return result;
     }
 
-    /// <summary>Remembers the web streams that name a game that is not over (see <see cref="KeepPinned"/>).</summary>
-    private void Pin(List<SourceChannel> channels, IReadOnlyList<SourceDefinition> defs, IReadOnlyList<Scores.GameInfo>? games, DateTimeOffset now)
+    /// <summary>Remembers the web streams that name a game that is not over (see <see cref="KeepPinned"/>); <paramref name="fresh"/>:
+    /// the streams this crawl found (their playlists just answered).</summary>
+    private void Pin(List<SourceChannel> channels, IReadOnlyList<SourceDefinition> defs, IReadOnlyList<Scores.GameInfo>? games, DateTimeOffset now, HashSet<string> fresh)
     {
         if (games == null || games.Count == 0)
         {
@@ -519,7 +581,9 @@ public class SourceManager
                 var copy = c.ShallowCopy();
                 copy.Candidates = new List<StreamCandidate>();
                 copy.MergedIds = new List<string>();
-                pins[c.StreamUrl] = new Pinned(copy, g.Id, until);
+                // found by this crawl, so its playlist answered just now (a crawl keeps only live ones)
+                var checkedAt = !fresh.Contains(c.StreamUrl) && pins.TryGetValue(c.StreamUrl, out var old) ? old.CheckedAt : Clock.GetUtcNow();
+                pins[c.StreamUrl] = new Pinned(copy, g.Id, until) { CheckedAt = checkedAt };
             }
         }
     }
@@ -573,7 +637,11 @@ public class SourceManager
 
     private sealed record SourceState(List<SourceChannel> Channels, Dictionary<string, List<Programme>> Programmes, string? Error);
 
-    private sealed record Pinned(SourceChannel Channel, string GameId, DateTimeOffset Until);
+    private sealed record Pinned(SourceChannel Channel, string GameId, DateTimeOffset Until)
+    {
+        /// <summary>When its playlist last answered (a crawl found it, or <see cref="KeepPinned"/> checked it).</summary>
+        public DateTimeOffset CheckedAt { get; set; }
+    }
 
     public List<ISourceAdapter> BuildAdapters()
     {
@@ -583,14 +651,12 @@ public class SourceManager
             .ToList();
     }
 
-    private ISourceAdapter BuildAdapter(SourceDefinition def) => BuildAdapter(def, null, false);
-
-    private ISourceAdapter BuildAdapter(SourceDefinition def, IReadOnlyList<WantedGame>? wanted, bool targetedOnly)
+    private ISourceAdapter BuildAdapter(SourceDefinition def)
     {
         return def.Kind switch
         {
             SourceKind.Direct => new DirectSourceAdapter(def, _httpClientFactory, _logger),
-            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser, wanted, targetedOnly),
+            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser),
             _ => new M3uSourceAdapter(def, _httpClientFactory, _logger)
         };
     }
@@ -622,14 +688,49 @@ public sealed class CrawlReport
 {
     public bool GameDriven { get; set; }
 
+    /// <summary>A full refresh: web page sources were read whole.</summary>
+    public bool FullSiteScan { get; set; }
+
     public IReadOnlyList<WantedGame> Wanted { get; set; } = Array.Empty<WantedGame>();
 
     public DateTimeOffset StartedAt { get; set; }
 
     public DateTimeOffset FinishedAt { get; set; }
 
-    /// <summary>Pages web page sources visited, and of those, the ones visited for the wanted games.</summary>
+    /// <summary>Pages web page sources read.</summary>
     public int Pages { get; set; }
 
-    public int TargetedPages { get; set; }
+    /// <summary>Search passes: listing pages read (one per web page source).</summary>
+    public int ListingReads { get; set; }
+
+    /// <summary>Search passes: pages read per game (by game id), listings not included.</summary>
+    public Dictionary<string, int> PagesPerGame { get; } = new(StringComparer.Ordinal);
+
+    /// <summary>Search passes: every request made, pages and playlist checks alike.</summary>
+    public int Requests { get; set; }
+
+    /// <summary>Search passes: requests that timed out or could not connect.</summary>
+    public int Failures { get; set; }
+
+    /// <summary>Search passes: the most requests under way at once on one source.</summary>
+    public int MaxInFlight { get; set; }
+
+    /// <summary>Search passes: why a source's site pushed back (the pass stopped there); null when none did.</summary>
+    public string? PushedBack { get; set; }
+
+    internal void Add(IEnumerable<GamePassStats> sources)
+    {
+        foreach (var s in sources)
+        {
+            ListingReads += s.ListingReads;
+            Requests += s.Requests;
+            Failures += s.Failures;
+            MaxInFlight = Math.Max(MaxInFlight, s.MaxInFlight);
+            PushedBack ??= s.PushedBack;
+            foreach (var (id, n) in s.PagesPerGame)
+            {
+                PagesPerGame[id] = PagesPerGame.GetValueOrDefault(id) + n;
+            }
+        }
+    }
 }

@@ -67,21 +67,29 @@ In the app → **Settings → Sources → Add source**:
   tagline — a stream with nothing better to go on is left out) and grouped
   into categories (NBA, NFL, soccer leagues, UFC, sports networks, …). Captured
   Referer/Origin headers are replayed through the proxy automatically.
-- Streams on web pages are usually ephemeral (rotating tokens) — the source is
-  re-scanned on every refresh, so treat the channel list as a snapshot. One exception: a stream that names a game
-  on the scoreboard that is not over stays after a scan that no longer reaches its page, as long as its playlist
-  still answers, until the game ends.
-- **Searching around game time**: a scan reads at most 96 pages, so on a busy day a listing's later games can be out
-  of its reach. Tally therefore also searches for each game on the scoreboard that has no stream at its start −15,
-  −5, 0, +3, +8 and +15 minutes, then every 5 minutes while it is live (at least 2 minutes between two such
-  searches), and whenever a viewer presses Watch on it. Such a search reads the source's page and the pages whose
-  link text or address names one of the wanted games' teams (by name, city or abbreviation: "rays-vs-phillies",
-  "Tampa Bay Rays @ Philadelphia Phillies", "/mlb/tb-phi"), plus what those pages embed; it adds what it finds and
-  removes nothing. The regular scan visits those pages first too, on a budget of its own (16 pages per game, 32 to
-  160) on top of the 96. A stream found on a page whose link named both teams is named after the game ("Tampa Bay
-  Rays at Philadelphia Phillies") when its page's address says less. Each search is logged in one line
-  (`JellyTV stream search`: the games wanted, pages visited, streams per game). The schedule reads the scoreboard
-  in the background (at most once a minute) while scores are on and a web page source is enabled.
+- **Full site scan**: the whole site is read (at most 96 pages, 4 at a time) on start-up, whenever the sources or
+  settings change, on **Refresh now**, and then every *Full site scan* interval (Settings → Sources, 180 minutes by
+  default, 60 to 720). M3U and direct sources keep the *Refresh interval*. Streams on web pages are usually ephemeral
+  (rotating tokens), so treat the channel list as a snapshot. One exception: a stream that names a game on the
+  scoreboard that is not over stays after a scan that no longer reaches its page until the game ends, as long as its
+  playlist still answers (checked at most every 15 minutes, and by the proxy when someone plays it).
+- **Searching around game time**: on a busy day a listing's later games can be out of a scan's reach, and a game's
+  link often appears only near its start. So Tally searches for each game on the scoreboard that has no stream on its
+  own: 5 minutes before its start, at its start, then every 5 minutes until one turns up or the game is final (a game
+  still listed as not started after its start keeps being searched for up to 3 hours). Games due at the same time
+  share one search, and so do viewers pressing Watch on a game (a game searched less than a minute ago gets that
+  search's result).
+  A search is surgical. It reads the source's page once for all its games, then per game only the pages whose link
+  names both teams (by name, city or abbreviation: "rays-vs-phillies", "Tampa Bay Rays @ Philadelphia Phillies",
+  "/mlb/tb-phi"; failing any, at most two naming one team) and what those pages embed: at most 6 pages per game. It
+  sends one request at a time (at most 2 at once), 300 ms apart per host. Searches run one at a time and at least a
+  minute apart. It adds what it finds and removes nothing. A stream found on a page whose link named both teams is
+  named after the game ("Tampa Bay Rays at Philadelphia Phillies") when its page's address says less.
+  If the site pushes back (a 429, a 403 on a page that answered before, most requests timing out or refused), the
+  search stops, and the next one waits 5 minutes, then 10, 20 and at most 30 while it keeps pushing back; a clean
+  search ends that. Each search is logged in one line (`JellyTV stream search pass`: the games and which slot each
+  was due at, listing reads, pages per game, requests, streams per game); a back-off is one warning. The schedule
+  reads the scoreboard in the background (at most once a minute) while scores are on and a web page source is enabled.
 - **Limits**: Cloudflare challenges, heavy JS obfuscation, DRM, and login walls
   can defeat extraction. If the scan finds nothing, the source shows an error
   in Settings → Sources — try the headless fallback, or fall back to a Direct
@@ -185,12 +193,16 @@ mode.
 Data comes from ESPN's public scoreboard feed, fetched **by the server** (one
 cached request per league, every ~12 s while a game is live and only while
 someone has Tally open or a recording is scheduled, and at most once a minute while a web page source is enabled, for
-the [stream search](#web-page-auto-extract)). The default leagues are **NFL and MLB**; admins can
-add others (`basketball/nba`, `hockey/nhl`, `football/college-football`,
-`soccer/eng.1`…) or switch the
-whole feature off under **Settings → Live scores**; off means the server makes
-no third-party requests of its own. Team logos are loaded by the browser from
-ESPN's CDN.
+the [stream search](#web-page-auto-extract)). The default leagues are the **NFL, college football and MLB**.
+**Leagues follow your sources**: when channels are named after a game of a league the board does not cover (both
+teams by their full names, "Boston Celtics Los Angeles Lakers"), Tally adds that league by itself, so those channels
+get their game's card, guide entry and stream searches like any other. It looks at the NFL, college football, MLB,
+the NBA, WNBA, NHL, men's college basketball, MLS and the major European soccer leagues, after a source refresh
+(at most every 10 minutes, or every 30 minutes when no new channel appeared), and lets a league go after 3 days without
+such a channel. **Settings → Live scores** lists the leagues on the board and why each is there (default, added by
+you, from your sources); admins can add any ESPN league (`hockey/nhl`, `soccer/ned.1`…) or remove one (a league
+removed there is not added back), or switch the whole feature off; off means the server makes no third-party
+requests of its own. Team logos are loaded by the browser from ESPN's CDN.
 
 ## Recording games (DVR)
 
@@ -279,7 +291,10 @@ web view — nothing can make them load the Tally web UI. Tally works *with* the
   every 2 minutes. Channels are numbered **hottest game first**, and the guide shows real entries
   ("Jets at Packers") instead of "Live". The native channel grid becomes a heat-sorted scoreboard where
   every card is a play button. Cards are minutes old, not seconds. Switch off under
-  **Settings → Live scores → Live cards for TV apps**.
+  **Settings → Live scores → Live cards for TV apps**. A channel no game claims (another league's game, a stream
+  named oddly) still gets a matchup card when its name reads as two teams: split at "vs" / "at", or two teams of one
+  league found in it ("Mississippi State Bulldogs Missouri Tigers"), with their logos from ESPN's team lists (fetched
+  when first needed, kept a week); otherwise its name set large. Both carry the league or sport.
 - **Sizes and time zones**: cards and game backdrops (`/JellyTV/Backdrop/{gameId}.png`) take `w=<px>`, the width the
   app draws them at: the server snaps it up to 320, 480, 640, 960, 1280 or 1920 (the art's own size when that is not
   smaller) and caches each size. `tz=<IANA zone>` (`America/New_York`) sets the zone of the times drawn on a card;

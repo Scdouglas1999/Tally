@@ -19,8 +19,9 @@ namespace Jellyfin.Plugin.Tally.Scores;
 public sealed class ScoreboardService
 {
     // Anything ESPN has a scoreboard for can be added under Settings → Live scores
-    // ("basketball/nba", "hockey/nhl", "football/college-football", "soccer/eng.1"…).
-    public const string DefaultLeagues = "football/nfl,baseball/mlb";
+    // ("basketball/nba", "hockey/nhl", "soccer/eng.1"…); leagues the sources carry are added by themselves
+    // (LeagueDetector).
+    public static readonly string DefaultLeagues = string.Join(',', LeagueCatalog.Defaults);
 
     // The feed sits behind a bot filter that is picky in non-obvious ways: site.api.espn.com
     // 403s requests with no User-Agent (HttpClient's default), with an unknown one, and with a
@@ -39,6 +40,7 @@ public sealed class ScoreboardService
     private readonly ConcurrentDictionary<string, string> _errors = new(StringComparer.OrdinalIgnoreCase);
     private readonly SemaphoreSlim _refreshLock = new(1, 1);
     private readonly ConcurrentDictionary<string, LeagueCache> _upcoming = new(StringComparer.OrdinalIgnoreCase);
+    private volatile IReadOnlyList<string> _fromSources = Array.Empty<string>();
 
     public ScoreboardService(IHttpClientFactory httpClientFactory, ILogger<ScoreboardService> logger)
     {
@@ -127,15 +129,56 @@ public sealed class ScoreboardService
             .Take(16)
             .ToList();
 
+    /// <summary>
+    /// The leagues the scoreboard covers: the Leagues setting (its defaults when empty), plus the leagues the sources
+    /// carry games of (<paramref name="fromSources"/>, see <see cref="LeagueDetector"/>) that the admin has not
+    /// removed (<paramref name="excluded"/>).
+    /// </summary>
+    public static IReadOnlyList<string> EffectiveLeagues(string? configured, string? excluded, IEnumerable<string> fromSources)
+    {
+        var off = ParseList(excluded);
+        return ParseLeagues(configured)
+            .Concat(fromSources.Where(l => !off.Contains(l)))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(24)
+            .ToList();
+    }
+
+    /// <summary>A comma-separated list of league paths, as a set.</summary>
+    public static HashSet<string> ParseList(string? list)
+        => (list ?? string.Empty).Split(new[] { ',', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>Leagues added because the sources carry their games (set by <see cref="LeagueDetector"/>).</summary>
+    public IReadOnlyList<string> LeaguesFromSources
+    {
+        get => _fromSources;
+        set => _fromSources = value;
+    }
+
+    /// <summary>The leagues the scoreboard covers now (see <see cref="EffectiveLeagues"/>).</summary>
+    public IReadOnlyList<string> ActiveLeagues
+    {
+        get
+        {
+            var config = Plugin.Instance?.Configuration;
+            return EffectiveLeagues(config?.ScoreLeagues, config?.ScoreLeaguesExcluded, _fromSources);
+        }
+    }
+
     /// <summary>All games for the configured leagues, refreshing whatever has gone stale.</summary>
     public Task<List<GameInfo>> GetGamesAsync(CancellationToken cancellationToken)
         => GetGamesAsync(cancellationToken, TimeSpan.Zero);
 
     /// <summary>All games, refreshing a league only when it has gone stale and is at least <paramref name="minAge"/>
     /// old: the background stream search reads the board once a minute, not at the live rate a viewer's board uses.</summary>
-    public async Task<List<GameInfo>> GetGamesAsync(CancellationToken cancellationToken, TimeSpan minAge)
+    public Task<List<GameInfo>> GetGamesAsync(CancellationToken cancellationToken, TimeSpan minAge)
+        => GetGamesAsync(ActiveLeagues, cancellationToken, minAge);
+
+    /// <summary>The games of <paramref name="leagues"/>, whether the scoreboard covers them or not (the league
+    /// detector looks at leagues it does not cover yet), through the same cache.</summary>
+    public async Task<List<GameInfo>> GetGamesAsync(IReadOnlyList<string> leagues, CancellationToken cancellationToken, TimeSpan minAge)
     {
-        var leagues = ParseLeagues(Plugin.Instance?.Configuration.ScoreLeagues);
         var now = DateTimeOffset.UtcNow;
 
         if (leagues.Any(l => IsStale(l, now, minAge)))

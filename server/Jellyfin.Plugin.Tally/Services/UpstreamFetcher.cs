@@ -37,6 +37,9 @@ public sealed class UpstreamFetcher
     /// instead of burning the allowance and extending the throttle.</summary>
     private readonly ConcurrentDictionary<string, DateTimeOffset> _cooldown = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>"Did not answer" warnings: at most one a minute per host.</summary>
+    private readonly HostLogGate _failureLog = new(TimeSpan.FromMinutes(1));
+
     public UpstreamFetcher(IHttpClientFactory httpClientFactory, BrowserFetchService browser, ILogger<UpstreamFetcher> logger, BrowserRuntime? runtime = null)
     {
         _httpClientFactory = httpClientFactory;
@@ -270,9 +273,36 @@ public sealed class UpstreamFetcher
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "JellyTV: upstream fetch failed for {Url}", uri.Host);
+            // no HTTP response at all (a timeout, a refused or reset connection, TLS): say so, host only (a request the
+            // caller gave up on is no failure)
+            if (!ct.IsCancellationRequested && _failureLog.ShouldLog(uri.Host, DateTimeOffset.UtcNow))
+            {
+                _logger.LogWarning("JellyTV: upstream {Host} did not answer: {Error}", uri.Host, DescribeFailure(ex, uri));
+            }
+
             return null;
         }
+    }
+
+    /// <summary>"HttpRequestException: Connection refused (SocketException: Connection refused)": the exception's type
+    /// and message and its inner one's, with the request's address cut down to its host.</summary>
+    public static string DescribeFailure(Exception ex, Uri uri)
+    {
+        var text = ex.GetType().Name + ": " + ex.Message;
+        if (ex.InnerException is { } inner && inner.Message != ex.Message)
+        {
+            text += " (" + inner.GetType().Name + ": " + inner.Message + ")";
+        }
+
+        foreach (var full in new[] { uri.AbsoluteUri, uri.OriginalString, uri.PathAndQuery })
+        {
+            if (full.Length > 1)
+            {
+                text = text.Replace(full, full == uri.PathAndQuery ? string.Empty : uri.Host, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        return text;
     }
 
     private async Task<FetchOutcome?> FetchViaBrowserAsync(Uri uri, Dictionary<string, string> headers, CancellationToken ct)
@@ -293,5 +323,39 @@ public sealed class UpstreamFetcher
         }
 
         return new FetchOutcome { Status = r.Status, ContentType = r.ContentType, Body = r.Body };
+    }
+}
+
+/// <summary>Lets a message about a host through at most once per interval.</summary>
+public sealed class HostLogGate
+{
+    private readonly ConcurrentDictionary<string, DateTimeOffset> _last = new(StringComparer.OrdinalIgnoreCase);
+
+    public HostLogGate(TimeSpan interval) => Interval = interval;
+
+    public TimeSpan Interval { get; }
+
+    /// <summary>True when a message about <paramref name="host"/> may be logged at <paramref name="now"/> (and counts it).</summary>
+    public bool ShouldLog(string host, DateTimeOffset now)
+    {
+        while (true)
+        {
+            if (_last.TryGetValue(host, out var last))
+            {
+                if (now - last < Interval)
+                {
+                    return false;
+                }
+
+                if (_last.TryUpdate(host, now, last))
+                {
+                    return true;
+                }
+            }
+            else if (_last.TryAdd(host, now))
+            {
+                return true;
+            }
+        }
     }
 }

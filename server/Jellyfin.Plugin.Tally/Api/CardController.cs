@@ -28,7 +28,7 @@ public class CardController : ControllerBase
     /// <param name="w">Width the app draws the card at; snapped up to 320/480/640/960/1280 (see <see cref="ArtRequest"/>).</param>
     /// <param name="tz">The viewer's IANA time zone for the kickoff and "as of" times; the server's zone when missing or unknown.</param>
     [HttpGet("{key}.png")]
-    public async Task<IActionResult> Get(string key, [FromQuery] string? n, [FromQuery] string? w, [FromQuery] string? tz, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(string key, [FromQuery] string? n, [FromQuery] string? w, [FromQuery] string? tz, [FromQuery] string? v, CancellationToken cancellationToken)
     {
         var width = ArtRequest.SnapWidth(w, CardArtService.Width);
         var channel = _sourceManager.GetChannels().FirstOrDefault(c => CardArtService.StableKey(c.Name) == key)
@@ -37,7 +37,7 @@ public class CardController : ControllerBase
         // Never 404: Jellyfin and the apps hold on to card URLs long after a game's stream has gone, and a
         // missing image is an error in the server log plus a broken tile on the TV. Draw a plain card instead.
         var png = channel != null
-            ? await _cards.RenderAsync(channel, width, ArtRequest.Zone(tz), cancellationToken).ConfigureAwait(false)
+            ? await _cards.RenderAsync(channel, width, ArtRequest.Zone(tz), cancellationToken, v).ConfigureAwait(false)
             : CardArtService.RenderTitle(string.IsNullOrWhiteSpace(n) ? "Tally" : (n.Length > 80 ? n[..80] : n), null);
         if (channel == null && width is { } gone)
         {

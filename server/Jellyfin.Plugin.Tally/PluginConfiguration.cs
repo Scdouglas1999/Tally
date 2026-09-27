@@ -100,6 +100,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>How often playlists/EPG are refreshed, in minutes.</summary>
     public int RefreshIntervalMinutes { get; set; } = 30;
 
+    /// <summary>"Full site scan": how often web page sources are read whole, in minutes (60 to 720). They are also read
+    /// whole on startup and whenever the configuration changes; in between, games without a stream are searched on
+    /// their own around their start.</summary>
+    public int WebFullScanMinutes { get; set; } = 180;
+
     /// <summary>Default User-Agent for upstream playlist/segment requests.</summary>
     public string UserAgent { get; set; } =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
@@ -129,6 +134,10 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>Comma-separated ESPN league paths ("football/nfl,baseball/mlb"). Empty = built-in defaults.
     /// A string, not a list: XmlSerializer appends to list defaults on every load.</summary>
     public string ScoreLeagues { get; set; } = string.Empty;
+
+    /// <summary>Comma-separated league paths the admin removed after Tally added them because the sources carry their
+    /// games (see Scores/LeagueDetector.cs): they are not added again.</summary>
+    public string ScoreLeaguesExcluded { get; set; } = string.Empty;
 
     /// <summary>Development only, never shown in the settings page: a base URL that replaces ESPN's hosts for the
     /// scoreboard feed ("http://172.17.0.1:8765"), so a simulator can serve an ESPN-shaped payload and bump scores

@@ -47,34 +47,24 @@ public partial class WebExtractor
     // HTTP pages are cheap — the crawl is bounded by depth + this budget, not by
     // the (expensive, browser-bound) MaxPages setting.
     private const int MaxHttpPages = 96;
-    private const int FetchParallelism = 8;
+    private const int FetchParallelism = 4;
     private const int MaxStreams = 160;
 
     private readonly HttpClient _http;
     private readonly ILogger _logger;
     private readonly string _userAgent;
     private readonly List<string> _discoveredLinks = new();
-    private readonly List<string> _targetedPages = new();
     private readonly Dictionary<string, WantedGame> _targetGames = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Candidate pages (event links, embeds) seen during the last
     /// <see cref="ExtractAsync"/> run — useful as browser-fallback seeds.</summary>
     public IReadOnlyList<string> DiscoveredLinks => _discoveredLinks;
 
-    /// <summary>Pages the last run visited because they name a wanted team (or were reached from one).</summary>
-    public IReadOnlyList<string> TargetedPages => _targetedPages;
-
     /// <summary>Pages the last run visited, in all.</summary>
     public int PagesVisited { get; private set; }
 
-    /// <summary>Of <see cref="PagesVisited"/>, those visited for wanted games.</summary>
-    public int TargetedPagesVisited { get; private set; }
-
-    /// <summary>Pages a crawl for wanted games may visit on top of the general budget: 16 per game, 32 to 160.</summary>
-    public static int TargetedBudget(int wantedGames) => wantedGames <= 0 ? 0 : Math.Clamp(16 * wantedGames, 32, 160);
-
     /// <summary>The wanted game whose teams a link to <paramref name="pageUrl"/> (or to a page embedding it) named,
-    /// if any.</summary>
+    /// if any (game-driven searches, see <see cref="SearchGamesAsync"/>).</summary>
     public WantedGame? TargetGameFor(string? pageUrl)
     {
         if (string.IsNullOrEmpty(pageUrl) || !Uri.TryCreate(pageUrl, UriKind.Absolute, out _))
@@ -92,26 +82,14 @@ public partial class WebExtractor
         _userAgent = userAgent;
     }
 
-    public Task<List<ExtractedStream>> ExtractAsync(string startUrl, int maxPages, CancellationToken ct)
-        => ExtractAsync(startUrl, maxPages, ct, null);
-
-    /// <param name="wanted">Games to look for first: pages whose link text or address names a team of one of them
-    /// (and what those pages embed) are visited before the general crawl, on a budget of their own
-    /// (<see cref="TargetedBudget"/>) on top of the general one.</param>
-    /// <param name="targetedOnly">A game-driven search: read the start page and the pages that name a wanted team,
-    /// nothing else.</param>
-    public async Task<List<ExtractedStream>> ExtractAsync(string startUrl, int maxPages, CancellationToken ct, IReadOnlyList<WantedGame>? wanted, bool targetedOnly = false)
+    /// <summary>
+    /// The full-site crawl: the page, then event pages and embeds before generic watch links, at most
+    /// <see cref="MaxHttpPages"/> pages, <see cref="FetchParallelism"/> at a time. Game-driven searches do not use it
+    /// (see <see cref="SearchGamesAsync"/>).
+    /// </summary>
+    public async Task<List<ExtractedStream>> ExtractAsync(string startUrl, int maxPages, CancellationToken ct)
     {
         _ = maxPages; // governs the browser fallback; HTTP uses MaxHttpPages
-        wanted ??= Array.Empty<WantedGame>();
-        var generalBudget = targetedOnly ? 1 : MaxHttpPages;
-        var targetedBudget = TargetedBudget(wanted.Count);
-        // A page naming one team (a city, a nickname shared with other leagues' teams: "Philadelphia", "Kings") is only
-        // a hint: those take at most 8 pages per wanted game, after every page that names both teams of one.
-        var oneTeamBudget = Math.Min(targetedBudget / 2, 8 * wanted.Count);
-        var generalVisited = 0;
-        var targetedVisited = 0;
-        var oneTeamVisited = 0;
         var found = new List<ExtractedStream>();
         var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var titles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -122,51 +100,17 @@ public partial class WebExtractor
         // would otherwise burn the page budget.
         var hot = new Queue<CrawlItem>();
         var warm = new Queue<CrawlItem>();
-        // Pages that name a wanted team go before both, best first: what a page naming both teams embeds (3), the
-        // page itself (2), then pages naming one team (1).
-        var targeted = new PriorityQueue<CrawlItem, (int, long)>();
-        long seq = 0;
         hot.Enqueue(new CrawlItem(startUrl, 0, startUrl));
-        void Enqueue(CrawlItem item, bool priority)
-        {
-            if (item.Priority > 0)
-            {
-                targeted.Enqueue(item, (-item.Priority, seq++));
-            }
-            else
-            {
-                (priority ? hot : warm).Enqueue(item);
-            }
-        }
 
-        bool GeneralLeft() => generalVisited < generalBudget && (hot.Count > 0 || warm.Count > 0);
-        bool TargetedLeft() => targetedVisited < targetedBudget && targeted.Count > 0;
-
-        while ((GeneralLeft() || TargetedLeft()) && !ct.IsCancellationRequested)
+        while ((hot.Count > 0 || warm.Count > 0) && visited.Count < MaxHttpPages && !ct.IsCancellationRequested)
         {
             var batch = new List<CrawlItem>();
-            while (batch.Count < FetchParallelism && (GeneralLeft() || TargetedLeft()))
+            while (batch.Count < FetchParallelism && visited.Count < MaxHttpPages && (hot.Count > 0 || warm.Count > 0))
             {
-                var fromTargeted = TargetedLeft();
-                var item = fromTargeted ? targeted.Dequeue() : hot.Count > 0 ? hot.Dequeue() : warm.Dequeue();
-                if (fromTargeted && item.Priority == 1 && oneTeamVisited >= oneTeamBudget)
-                {
-                    continue;
-                }
-
+                var item = hot.Count > 0 ? hot.Dequeue() : warm.Dequeue();
                 if (item.Depth <= 3 && visited.Add(NormalizePage(item.Url)))
                 {
                     batch.Add(item);
-                    if (fromTargeted)
-                    {
-                        targetedVisited++;
-                        oneTeamVisited += item.Priority == 1 ? 1 : 0;
-                        _targetedPages.Add(item.Url);
-                    }
-                    else
-                    {
-                        generalVisited++;
-                    }
                 }
             }
 
@@ -188,19 +132,12 @@ public partial class WebExtractor
 
                 var pageTitle = ExtractTitle(html);
                 titles[NormalizePage(url)] = pageTitle;
-                if (item.Game != null)
-                {
-                    _targetGames.TryAdd(NormalizePage(url), item.Game);
-                }
 
                 // An event page is its own naming context; everything deeper
-                // (embeds, player pages) inherits it. So is a page a link named a wanted game's teams on.
-                var origin = IsEventUrl(url) || item.GamePage ? url : item.Origin;
+                // (embeds, player pages) inherits it.
+                var origin = IsEventUrl(url) ? url : item.Origin;
                 ScanTextForStreams(html, url, pageTitle, origin, found);
                 ScanScripts(html, url, pageTitle, origin, found);
-
-                // What a page found for a wanted game links to or embeds is looked at for that game too.
-                var inherit = item.Priority > 0 && depth > 0 ? Math.Max(item.Priority, item.Game != null ? 3 : 1) : 0;
 
                 try
                 {
@@ -228,8 +165,7 @@ public partial class WebExtractor
 
                             if (depth < 3)
                             {
-                                var (priority, game) = inherit > 0 ? (inherit, item.Game) : Target(wanted, f.GetAttribute("title"), src);
-                                Enqueue(new CrawlItem(src, depth + 1, origin, priority, game), true);
+                                hot.Enqueue(new CrawlItem(src, depth + 1, origin));
 
                                 // The page's other links for this event ("Link 2", "HD", "Backup") are often buttons that
                                 // swap the player's id by script — invisible to a crawl unless the siblings are built here.
@@ -241,7 +177,7 @@ public partial class WebExtractor
                                         labels.TryAdd(NormalizePage(sibling), siblingLabel);
                                     }
 
-                                    Enqueue(new CrawlItem(sibling, depth + 1, origin, priority, game), true);
+                                    hot.Enqueue(new CrawlItem(sibling, depth + 1, origin));
                                 }
                             }
                         }
@@ -263,14 +199,7 @@ public partial class WebExtractor
                             // ending in a numeric id (/mlb/team-a-team-b/1376048).
                             var ev = IsEventPath(url, href);
                             var looksLikeEvent = StreamClassifier.LooksLikeEvent(text);
-                            var follow = ev || LinkHint.IsMatch(href) || LinkHint.IsMatch(text) || looksLikeEvent;
-
-                            // A link naming a wanted team is followed whatever it looks like ("/mlb/tb-phi", "Rays").
-                            var own = Target(wanted, text, href);
-                            var inherited = inherit > 0 && follow;
-                            var priority = Math.Max(own.Priority, inherited ? inherit : 0);
-                            var game = own.Game ?? (inherited ? item.Game : null);
-                            if (follow || priority > 0)
+                            if (ev || LinkHint.IsMatch(href) || LinkHint.IsMatch(text) || looksLikeEvent)
                             {
                                 _discoveredLinks.Add(href);
                                 if (LinkLabel(text) is { } label)
@@ -278,7 +207,7 @@ public partial class WebExtractor
                                     labels.TryAdd(NormalizePage(href), label);
                                 }
 
-                                Enqueue(new CrawlItem(href, depth + 1, ev ? href : origin, priority, game, own.Game != null), ev || looksLikeEvent);
+                                (ev || looksLikeEvent ? hot : warm).Enqueue(new CrawlItem(href, depth + 1, ev ? href : origin));
                             }
                         }
                     }
@@ -291,12 +220,45 @@ public partial class WebExtractor
         }
 
         PagesVisited = visited.Count;
-        TargetedPagesVisited = targetedVisited;
-        _logger.LogInformation("JellyTV: HTTP crawl visited {Pages} pages ({Targeted} for wanted games), found {Streams} manifest candidates", visited.Count, targetedVisited, found.Count);
+        _logger.LogInformation("JellyTV: HTTP crawl visited {Pages} pages, found {Streams} manifest candidates", visited.Count, found.Count);
 
-        // Name streams from the event page slug ("/mlb/yankees-diamondbacks/…" → "New York Yankees Arizona
-        // Diamondbacks"), then the matchup a link to the page said ("Yankees vs Diamondbacks"). Failing both, the event
-        // page's title is kept only as a hint (NameFromTitle): a title is mostly the site's name and tagline.
+        NameStreams(found, labels, titles);
+
+        // Validate candidates, FetchParallelism at a time — keep only live playlists.
+        var validated = new List<ExtractedStream>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using var gate = new SemaphoreSlim(FetchParallelism);
+        var checks = found.Where(f => seen.Add(f.Url)).Select(async s =>
+        {
+            await gate.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                if (await IsLiveManifest(s, ct).ConfigureAwait(false))
+                {
+                    lock (validated)
+                    {
+                        validated.Add(s);
+                    }
+                }
+            }
+            finally
+            {
+                gate.Release();
+            }
+        });
+        await Task.WhenAll(checks).ConfigureAwait(false);
+        return validated.OrderBy(s => found.FindIndex(f => f.Url == s.Url)).ToList();
+    }
+
+    /// <summary>
+    /// Names streams from the event page slug ("/mlb/yankees-diamondbacks/…" → "New York Yankees Arizona
+    /// Diamondbacks"), then the matchup a link to the page said ("Yankees vs Diamondbacks"). A stream found for a wanted
+    /// game on a page whose link named both its teams ("/mlb/tb-phi") is named after the game unless the page's own name
+    /// already says which game it is. Failing all that, the event page's title is kept only as a hint (NameFromTitle):
+    /// a title is mostly the site's name and tagline.
+    /// </summary>
+    private void NameStreams(List<ExtractedStream> found, Dictionary<string, string> labels, Dictionary<string, string> titles)
+    {
         foreach (var s in found)
         {
             var named = NameFromUrl(s.Context);
@@ -305,8 +267,6 @@ public partial class WebExtractor
                 named = label;
             }
 
-            // Found for a wanted game on a page whose link named both its teams ("/mlb/tb-phi"): named after the game
-            // unless the page's own name already says which game it is.
             if ((TargetGameFor(s.Context) ?? TargetGameFor(s.Referer)) is { } game && (named == null || !game.NamesBoth(named)))
             {
                 named = game.Name;
@@ -322,22 +282,6 @@ public partial class WebExtractor
                 s.Name = cleaned;
             }
         }
-
-        // Validate candidates in parallel — keep only live playlists.
-        var validated = new List<ExtractedStream>();
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var checks = found.Where(f => seen.Add(f.Url)).Select(async s =>
-        {
-            if (await IsLiveManifest(s, ct).ConfigureAwait(false))
-            {
-                lock (validated)
-                {
-                    validated.Add(s);
-                }
-            }
-        });
-        await Task.WhenAll(checks).ConfigureAwait(false);
-        return validated;
     }
 
     private async Task<string?> FetchPage(string url, CancellationToken ct)
@@ -489,29 +433,8 @@ public partial class WebExtractor
             .ToList();
     }
 
-    /// <summary>The best match among the wanted games for a link: its priority (2 for both teams of a game, 1 for
-    /// one team, 0 for none) and, for a match on both teams, the game.</summary>
-    private static (int Priority, WantedGame? Game) Target(IReadOnlyList<WantedGame> wanted, string? text, string url)
-    {
-        var best = 0;
-        WantedGame? game = null;
-        foreach (var w in wanted)
-        {
-            var score = w.Score(text, url);
-            if (score > best)
-            {
-                best = score;
-                game = score == 2 ? w : null;
-            }
-        }
-
-        return (best, game);
-    }
-
-    /// <summary>A page to visit. <paramref name="Priority"/> above 0 puts it in the wanted games' queue;
-    /// <paramref name="Game"/> is the game whose teams the link to it (or to a page embedding it) named;
-    /// <paramref name="GamePage"/>: the link itself named them, so the page is its streams' naming context.</summary>
-    private sealed record CrawlItem(string Url, int Depth, string Origin, int Priority = 0, WantedGame? Game = null, bool GamePage = false);
+    /// <summary>A page to visit, how deep it is, and the event page it was reached from (its streams' naming context).</summary>
+    private sealed record CrawlItem(string Url, int Depth, string Origin);
 
     [GeneratedRegex(@"^(.*/)(\d{3,})(/?(?:\?.*)?)$")]
     private static partial Regex TrailingId();

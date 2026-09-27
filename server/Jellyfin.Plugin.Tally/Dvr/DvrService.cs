@@ -400,7 +400,7 @@ public sealed class DvrService : IHostedService, IDisposable
         var ahead = open.Where(j => !onBoard.Contains(j.Game.Id)).Select(j => j.Game.LeaguePath).ToList();
         if (teamRules.Count > 0 || ahead.Count > 0)
         {
-            var configured = ScoreboardService.ParseLeagues(Plugin.Instance?.Configuration.ScoreLeagues);
+            var configured = _scoreboard.ActiveLeagues;
             var leagues = teamRules.Any(r => string.IsNullOrEmpty(r.LeaguePath))
                 ? configured
                 : configured.Where(l => teamRules.Any(r => string.Equals(r.LeaguePath, l, StringComparison.OrdinalIgnoreCase))

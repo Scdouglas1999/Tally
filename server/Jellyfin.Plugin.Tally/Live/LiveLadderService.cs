@@ -50,8 +50,8 @@ public sealed class LiveLadderService : IHostedService, IDisposable
     private readonly ConcurrentDictionary<string, (DateTimeOffset At, string Why)> _failures = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, (DateTimeOffset At, CadenceSummary Cadence)> _cadence = new(StringComparer.Ordinal);
     private readonly ConcurrentDictionary<string, LiveSession> _sessions = new(StringComparer.OrdinalIgnoreCase);
-    private readonly ConcurrentQueue<(SourceChannel Channel, int Index)> _hot = new();
-    private readonly ConcurrentQueue<(SourceChannel Channel, int Index)> _cold = new();
+    private readonly ConcurrentQueue<(SourceChannel Channel, int Index, ProbeRound? Round)> _hot = new();
+    private readonly ConcurrentQueue<(SourceChannel Channel, int Index, ProbeRound? Round)> _cold = new();
     private readonly SemaphoreSlim _work = new(0);
     private CancellationTokenSource? _cts;
     private Task[] _workers = Array.Empty<Task>();
@@ -241,6 +241,7 @@ public sealed class LiveLadderService : IHostedService, IDisposable
         var live = new HashSet<string>(StringComparer.Ordinal);
         var now = DateTimeOffset.UtcNow;
         var queued = 0;
+        var round = new ProbeRound();
         foreach (var c in channels)
         {
             var list = Candidates(c);
@@ -262,9 +263,8 @@ public sealed class LiveLadderService : IHostedService, IDisposable
             {
                 for (var i = 0; i < list.Count; i++)
                 {
-                    if (!_probes.TryGetValue(list[i].Url, out var p) || now - p.At > DiscoveryReprobe)
+                    if ((!_probes.TryGetValue(list[i].Url, out var p) || now - p.At > DiscoveryReprobe) && Enqueue(c, i, hot: false, round))
                     {
-                        Enqueue(c, i, hot: false);
                         queued++;
                     }
                 }
@@ -274,8 +274,10 @@ public sealed class LiveLadderService : IHostedService, IDisposable
             {
                 // one stream: one probe at discovery (it tells whether the stream has renditions to choose from)
                 _singleProbed[c.Id] = now;
-                Enqueue(c, 0, hot: false);
-                queued++;
+                if (Enqueue(c, 0, hot: false, round))
+                {
+                    queued++;
+                }
             }
         }
 
@@ -292,6 +294,7 @@ public sealed class LiveLadderService : IHostedService, IDisposable
         if (queued > 0)
         {
             _logger.LogInformation("JellyTV ladder: probing {Count} streams", queued);
+            WarnAllFailed(round.Seal(queued));
         }
     }
 
@@ -310,23 +313,24 @@ public sealed class LiveLadderService : IHostedService, IDisposable
         return copy;
     }
 
-    private void Enqueue(SourceChannel c, int index, bool hot)
+    private bool Enqueue(SourceChannel c, int index, bool hot, ProbeRound? round = null)
     {
         var key = Candidates(c)[index].Url;
         var now = DateTimeOffset.UtcNow;
         if (hot && _lastProbeRequest.TryGetValue(key, out var last) && now - last < HotProbeSpacing)
         {
-            return;
+            return false;
         }
 
         if (!_queued.TryAdd(key, 0))
         {
-            return;
+            return false;
         }
 
         _lastProbeRequest[key] = now;
-        (hot ? _hot : _cold).Enqueue((c, index));
+        (hot ? _hot : _cold).Enqueue((c, index, round));
         _work.Release();
+        return true;
     }
 
     private async Task WorkAsync(CancellationToken ct)
@@ -344,15 +348,25 @@ public sealed class LiveLadderService : IHostedService, IDisposable
                 var list = Candidates(job.Channel);
                 if (job.Index >= list.Count)
                 {
+                    Report(job.Round, null, null);
                     continue;
                 }
 
                 var cand = list[job.Index];
                 _queued.TryRemove(cand.Url, out _);
                 _probes.TryGetValue(cand.Url, out var previous);
-                // several streams: watch each one's playlist for a while too, so a bursty one is not ranked first
-                var probe = await _prober.ProbeAsync(job.Index, cand, previous, withSegment: true, ct,
-                    list.Count > 1 ? StreamProber.CadenceWatch : null).ConfigureAwait(false);
+                CandidateProbe probe;
+                try
+                {
+                    // several streams: watch each one's playlist for a while too, so a bursty one is not ranked first
+                    probe = await _prober.ProbeAsync(job.Index, cand, previous, withSegment: true, ct,
+                        list.Count > 1 ? StreamProber.CadenceWatch : null).ConfigureAwait(false);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
+                {
+                    Report(job.Round, false, ex.GetType().Name + ": " + ex.Message);
+                    throw;
+                }
 
                 if (!probe.Ok)
                 {
@@ -361,6 +375,7 @@ public sealed class LiveLadderService : IHostedService, IDisposable
 
                 _probes[cand.Url] = probe;
                 _logger.LogInformation("JellyTV ladder: probed {Channel} #{Index}: {Result}", job.Channel.Name, job.Index + 1, Summary(probe));
+                Report(job.Round, probe.Ok, probe.Error ?? "probe failed");
                 await Task.Delay(300, ct).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -371,6 +386,18 @@ public sealed class LiveLadderService : IHostedService, IDisposable
             {
                 _logger.LogWarning(ex, "JellyTV ladder: probe failed");
             }
+        }
+    }
+
+    /// <summary>One probe of a round is done (<paramref name="ok"/> null: skipped). When every probe of the round
+    /// failed, says so in one warning: nothing a viewer could be switched to answers.</summary>
+    private void Report(ProbeRound? round, bool? ok, string? why) => WarnAllFailed(round?.Done(ok, why));
+
+    private void WarnAllFailed((int Failed, string Reasons)? allFailed)
+    {
+        if (allFailed is { } f)
+        {
+            _logger.LogWarning("JellyTV ladder: no stream answered ({Failed} of {Total}): {Reasons}", f.Failed, f.Failed, f.Reasons);
         }
     }
 
@@ -406,5 +433,70 @@ public sealed class LiveLadderService : IHostedService, IDisposable
             (string.IsNullOrEmpty(t.Label) ? "?" : t.Label) + " @" + (t.Bitrate / 1e6).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture) + " Mbps"));
         return string.Create(System.Globalization.CultureInfo.InvariantCulture,
             $"{tiers}; downloads at {(p.Throughput ?? 0) / 1e6:0.0} Mbps; target {p.TargetDuration:0}s; {(!p.IsLive ? "VOD" : p.Fresh ? "live" : "stale")}{(p.IsTs ? string.Empty : "; not MPEG-TS")}{(p.Encrypted ? "; AES" : string.Empty)}{(p.Cadence is { } c ? "; " + (c.Irregular ? "BURSTY: " : string.Empty) + c.Describe() : string.Empty)}");
+    }
+}
+
+/// <summary>The probes one refresh queued: whether all of them failed, and why.</summary>
+public sealed class ProbeRound
+{
+    private readonly object _gate = new();
+    private readonly Dictionary<string, int> _reasons = new(StringComparer.Ordinal);
+    private int _total = -1;
+    private int _done;
+    private int _failed;
+    private int _skipped;
+    private bool _reported;
+
+    /// <summary>The round is complete: <paramref name="total"/> probes were queued.</summary>
+    public (int Failed, string Reasons)? Seal(int total)
+    {
+        lock (_gate)
+        {
+            _total = total;
+            return CheckLocked();
+        }
+    }
+
+    /// <summary>One probe is done; returns the failures and their reasons when this completes a round where every
+    /// probe failed.</summary>
+    public (int Failed, string Reasons)? Done(bool? ok, string? why)
+    {
+        lock (_gate)
+        {
+            _done++;
+            if (ok == null)
+            {
+                _skipped++;
+            }
+            else if (ok == false)
+            {
+                _failed++;
+                var reason = Reason(why);
+                _reasons[reason] = _reasons.GetValueOrDefault(reason) + 1;
+            }
+
+            return CheckLocked();
+        }
+    }
+
+    private (int Failed, string Reasons)? CheckLocked()
+    {
+        if (_reported || _total < 0 || _done < _total || _failed == 0 || _failed != _total - _skipped)
+        {
+            return null;
+        }
+
+        _reported = true;
+        var reasons = string.Join("; ", _reasons.OrderByDescending(kv => kv.Value).Take(4)
+            .Select(kv => kv.Value > 1 ? kv.Key + " ×" + kv.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : kv.Key));
+        return (_failed, reasons);
+    }
+
+    /// <summary>A probe's error without the stream's address: "HTTP 403", "timeout".</summary>
+    private static string Reason(string? why)
+    {
+        var text = string.IsNullOrWhiteSpace(why) ? "probe failed" : why.Trim();
+        text = System.Text.RegularExpressions.Regex.Replace(text, @"https?://\S+", "<url>");
+        return text.Length > 120 ? text[..120] : text;
     }
 }

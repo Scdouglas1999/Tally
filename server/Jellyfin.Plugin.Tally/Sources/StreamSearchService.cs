@@ -14,15 +14,16 @@ namespace Jellyfin.Plugin.Tally.Sources;
 
 /// <summary>
 /// Searches for games' streams around the time they start, and whenever a viewer asks (<c>find</c>). Driven by the
-/// scoreboard: every 30 seconds, while scores are on and a web page source is enabled, it reads the board (at most a
+/// scoreboard: every few seconds, while scores are on and a web page source is enabled, it reads the board (at most a
 /// minute old) and queues the games whose slot in <see cref="GameSearchSchedule"/> has come; a viewer's <c>find</c>
-/// queues its game at once. Queued games are searched together in one game-driven crawl
-/// (<see cref="SourceManager.SearchAsync"/>), and at most one crawl of any kind runs at a time. The regular crawl looks
-/// for the same games first (<see cref="SourceManager.WantedGames"/>). Each search is logged in one line.
+/// queues its game at once. Queued games are searched together in one surgical pass
+/// (<see cref="SourceManager.SearchAsync"/>): each source's listing once, a few pages per game, paced. Passes run one
+/// at a time; one the site pushes back on makes the next wait (the back-off, logged once as a warning). Each pass is
+/// logged in one line with what it read.
 /// </summary>
 public sealed class StreamSearchService : BackgroundService
 {
-    private static readonly TimeSpan Tick = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan Tick = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan BoardAge = TimeSpan.FromSeconds(60);
 
     private readonly SourceManager _sources;
@@ -30,11 +31,8 @@ public sealed class StreamSearchService : BackgroundService
     private readonly ILogger<StreamSearchService> _logger;
     private readonly SemaphoreSlim _wake = new(0, 1);
 
-    // the games the service has seen (the board, and games viewers asked for), for matching after a crawl
+    // the games the service has seen (the board, and games viewers asked for), for matching after a pass
     private readonly ConcurrentDictionary<string, GameInfo> _known = new(StringComparer.Ordinal);
-    private volatile IReadOnlyList<GameInfo> _board = Array.Empty<GameInfo>();
-    private volatile HashSet<string> _withStream = new(StringComparer.Ordinal);
-    private volatile string _reason = string.Empty;
 
     public StreamSearchService(SourceManager sources, ScoreboardService scoreboard, ILogger<StreamSearchService> logger)
     {
@@ -42,8 +40,6 @@ public sealed class StreamSearchService : BackgroundService
         _scoreboard = scoreboard;
         _logger = logger;
         Schedule = new GameSearchSchedule(TimeProvider.System);
-        _sources.WantedGames = WantedNow;
-        _sources.Crawled += OnCrawled;
     }
 
     public GameSearchSchedule Schedule { get; }
@@ -102,7 +98,7 @@ public sealed class StreamSearchService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // let the first regular crawl start first
+        // let the first full-site scan start first
         await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken).ConfigureAwait(false);
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -137,30 +133,14 @@ public sealed class StreamSearchService : BackgroundService
                 _known[g.Id] = g;
             }
 
-            _board = games;
-            _withStream = match.Where(kv => kv.Value.Found).Select(kv => kv.Key).ToHashSet(StringComparer.Ordinal);
             Schedule.QueueDue(games, g => match.TryGetValue(g.Id, out var m) && m.Found);
         }
 
-        while (true)
+        // one pass per tick at most: the next scheduled one waits for the gap anyway, and a find wakes the loop
+        var taken = Schedule.TakePending();
+        if (taken.Count > 0)
         {
-            var (wanted, reason) = Schedule.TakePending();
-            if (wanted.Count == 0)
-            {
-                break;
-            }
-
-            var started = DateTimeOffset.UtcNow;
-            _reason = reason;
-            try
-            {
-                await _sources.SearchAsync(wanted.Select(WantedGame.From).ToList(), ct).ConfigureAwait(false);
-            }
-            catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
-            {
-                _logger.LogWarning(ex, "JellyTV stream search ({Reason}) failed for {Games}", reason, string.Join(", ", wanted.Select(g => WantedGame.From(g).Label)));
-                Schedule.Searched(wanted.Select(g => g.Id), started, DateTimeOffset.UtcNow, _ => false, gameDriven: true);
-            }
+            await RunPassAsync(taken, ct).ConfigureAwait(false);
         }
 
         foreach (var stale in _known.Where(kv => kv.Value.State == "post" || DateTimeOffset.UtcNow - kv.Value.Start > TimeSpan.FromDays(1)).Select(kv => kv.Key).ToList())
@@ -169,54 +149,49 @@ public sealed class StreamSearchService : BackgroundService
         }
     }
 
-    /// <summary>What the regular crawl looks for first: the board's games in their search window without a stream.</summary>
-    private IReadOnlyList<WantedGame> WantedNow()
+    private async Task RunPassAsync(IReadOnlyList<(GameInfo Game, string Why)> taken, CancellationToken ct)
     {
-        var now = DateTimeOffset.UtcNow;
-        var withStream = _withStream;
-        return _board
-            .Where(g => !withStream.Contains(g.Id) && GameSearchSchedule.LatestSlot(g, now) != null)
-            .Select(WantedGame.From)
-            .ToList();
-    }
-
-    private void OnCrawled(CrawlReport report)
-    {
-        if (report.Wanted.Count == 0)
+        var wanted = taken.Select(t => WantedGame.From(t.Game)).ToList();
+        var reasons = string.Join('+', taken.Select(t => t.Why == "find" ? "find" : "schedule").Distinct(StringComparer.Ordinal));
+        CrawlReport report;
+        try
         {
+            report = await _sources.SearchAsync(wanted, ct).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
+        {
+            _logger.LogWarning(ex, "JellyTV stream search ({Reason}) failed for {Games}", reasons, string.Join(", ", wanted.Select(w => w.Label)));
+            Schedule.PassEnded(wanted.Select(w => w.GameId), DateTimeOffset.UtcNow, _ => false, null);
             return;
         }
 
         var games = _known.Values.Select(g => g.Clone()).ToList();
         var match = Match(games, _sources.GetChannels(), id => _sources.GetNowNext(id).Now?.Title);
-        Schedule.Searched(report.Wanted.Select(w => w.GameId), report.StartedAt, report.FinishedAt,
-            id => match.TryGetValue(id, out var m) && m.Found, report.GameDriven);
+        bool Found(string id) => match.TryGetValue(id, out var m) && m.Found;
+        var (backOff, recovered) = Schedule.PassEnded(wanted.Select(w => w.GameId), DateTimeOffset.UtcNow, Found, report.PushedBack);
 
-        var withStream = new HashSet<string>(_withStream, StringComparer.Ordinal);
-        foreach (var (id, m) in match)
-        {
-            if (m.Found)
-            {
-                withStream.Add(id);
-            }
-            else
-            {
-                withStream.Remove(id);
-            }
-        }
-
-        _withStream = withStream;
-
-        var perGame = string.Join(", ", report.Wanted.Select(w => w.Label + " " + (match.TryGetValue(w.GameId, out var m) ? m.Streams : 0)));
+        var label = taken.ToDictionary(t => t.Game.Id, t => t.Why, StringComparer.Ordinal);
         _logger.LogInformation(
-            "JellyTV stream search ({Kind}): {Count} games wanted ({Games}); {Pages} pages visited ({Targeted} for these games); streams per game: {PerGame}; {Seconds:0.0} s",
-            report.GameDriven ? "game-driven, " + _reason : "regular crawl, wanted games first",
-            report.Wanted.Count,
-            string.Join(", ", report.Wanted.Select(w => w.Label)),
-            report.Pages,
-            report.TargetedPages,
-            perGame,
+            "JellyTV stream search pass ({Reason}): {Count} games ({Games}); listing read {Listing}x; pages per game: {PerGame}; {Requests} requests, at most {InFlight} in flight, {Failures} failed; streams per game: {Streams}; {Seconds:0.0} s",
+            reasons,
+            wanted.Count,
+            string.Join(", ", wanted.Select(w => w.Label + " at " + label[w.GameId])),
+            report.ListingReads,
+            string.Join(", ", wanted.Select(w => w.Label + " " + report.PagesPerGame.GetValueOrDefault(w.GameId))),
+            report.Requests,
+            report.MaxInFlight,
+            report.Failures,
+            string.Join(", ", wanted.Select(w => w.Label + " " + (match.TryGetValue(w.GameId, out var m) ? m.Streams : 0))),
             (report.FinishedAt - report.StartedAt).TotalSeconds);
+
+        if (backOff is { } wait)
+        {
+            _logger.LogWarning("JellyTV stream search: the site pushed back ({Why}); the pass stopped and the next one waits {Minutes} min", report.PushedBack, (int)wait.TotalMinutes);
+        }
+        else if (recovered)
+        {
+            _logger.LogInformation("JellyTV stream search: a clean pass; searches are back to their schedule");
+        }
     }
 
     private void Wake()

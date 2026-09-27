@@ -300,7 +300,7 @@ public class ScoreboardServiceTests
     [Fact]
     public void League_Config_Falls_Back_To_Defaults_And_Rejects_Anything_Not_A_Path()
     {
-        Assert.Equal(new[] { "football/nfl", "baseball/mlb" }, ScoreboardService.ParseLeagues(null));
+        Assert.Equal(new[] { "football/nfl", "football/college-football", "baseball/mlb" }, ScoreboardService.ParseLeagues(null));
         Assert.Contains("football/nfl", ScoreboardService.ParseLeagues("  "));
 
         var parsed = ScoreboardService.ParseLeagues("football/nfl, soccer/eng.1\nfootball/nfl, ../../etc/passwd, nfl, a/b?x=1");

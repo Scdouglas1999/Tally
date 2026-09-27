@@ -41,6 +41,7 @@ public sealed class CardArtService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly SourceManager _sourceManager;
     private readonly ScoreboardService _scoreboard;
+    private readonly TeamDirectory? _teams;
     private readonly ILogger<CardArtService> _logger;
 
     private readonly ConcurrentDictionary<string, byte[]?> _logos = new(StringComparer.OrdinalIgnoreCase);
@@ -49,17 +50,21 @@ public sealed class CardArtService
     private Dictionary<string, GameInfo> _index = new(StringComparer.OrdinalIgnoreCase);
     private DateTimeOffset _indexAt = DateTimeOffset.MinValue;
 
-    public CardArtService(IHttpClientFactory httpClientFactory, SourceManager sourceManager, ScoreboardService scoreboard, ILogger<CardArtService> logger)
+    public CardArtService(IHttpClientFactory httpClientFactory, SourceManager sourceManager, ScoreboardService scoreboard, ILogger<CardArtService> logger, TeamDirectory? teams = null)
     {
         _httpClientFactory = httpClientFactory;
         _sourceManager = sourceManager;
         _scoreboard = scoreboard;
         _logger = logger;
+        _teams = teams;
     }
 
     /// <summary>Channel id → the game it is carrying. Only confident matches (channel or programme
     /// names both teams) — a broadcaster match can be a different regional game.</summary>
-    public async Task<IReadOnlyDictionary<string, GameInfo>> GetChannelGamesAsync(CancellationToken ct)
+    public Task<IReadOnlyDictionary<string, GameInfo>> GetChannelGamesAsync(CancellationToken ct) => GetChannelGamesAsync(ct, fresh: false);
+
+    /// <param name="fresh">Rebuild the index now instead of using one up to a minute old.</param>
+    public async Task<IReadOnlyDictionary<string, GameInfo>> GetChannelGamesAsync(CancellationToken ct, bool fresh)
     {
         if (!(Plugin.Instance?.Configuration.ScoresEnabled ?? true))
         {
@@ -73,7 +78,7 @@ public sealed class CardArtService
             return new Dictionary<string, GameInfo>();
         }
 
-        if (DateTimeOffset.UtcNow - _indexAt < TimeSpan.FromSeconds(60))
+        if (!fresh && DateTimeOffset.UtcNow - _indexAt < TimeSpan.FromSeconds(60))
         {
             return _index;
         }
@@ -81,7 +86,7 @@ public sealed class CardArtService
         await _indexLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            if (DateTimeOffset.UtcNow - _indexAt < TimeSpan.FromSeconds(60))
+            if (DateTimeOffset.UtcNow - _indexAt < (fresh ? TimeSpan.FromSeconds(2) : TimeSpan.FromSeconds(60)))
             {
                 return _index;
             }
@@ -153,7 +158,7 @@ public sealed class CardArtService
     {
         if (game == null)
         {
-            return "c";
+            return "c2"; // the channel's own card (c2: drawn as a matchup when its name reads as one)
         }
 
         return game.State == "in"
@@ -178,10 +183,19 @@ public sealed class CardArtService
 
     /// <summary>The channel's card, <paramref name="width"/> wide (null: full size, see <see cref="ArtRequest.SnapWidth"/>),
     /// with its times in <paramref name="zone"/> (null: the server's zone).</summary>
-    public async Task<byte[]> RenderAsync(SourceChannel channel, int? width, TimeZoneInfo? zone, CancellationToken ct)
+    public async Task<byte[]> RenderAsync(SourceChannel channel, int? width, TimeZoneInfo? zone, CancellationToken ct, string? wantedVersion = null)
     {
         var games = await GetChannelGamesAsync(ct).ConfigureAwait(false);
         games.TryGetValue(channel.Id, out var game);
+
+        // The board resolves games live while this index is up to a minute old: a card asked for as a game's
+        // ("v=g...") that the index does not know yet is looked up afresh, or its address (which clients cache)
+        // would get the channel's own card.
+        if (wantedVersion != null && wantedVersion.StartsWith('g') && (game == null || !wantedVersion.StartsWith("g" + game.Id + "-", StringComparison.Ordinal)))
+        {
+            games = await GetChannelGamesAsync(ct, fresh: true).ConfigureAwait(false);
+            games.TryGetValue(channel.Id, out game);
+        }
 
         var now = DateTimeOffset.UtcNow;
         zone ??= TimeZoneInfo.Local;
@@ -222,11 +236,121 @@ public sealed class CardArtService
         }
         else
         {
-            png = RenderTitle(channel.Name, channel.Group);
+            var (card, complete) = await RenderChannelAsync(channel, ct).ConfigureAwait(false);
+            if (!complete)
+            {
+                return card; // the team lists are still loading: draw it again next time
+            }
+
+            png = card;
         }
 
         return Store(key, png);
     }
+
+    /// <summary>
+    /// A channel no game on the scoreboard claims: when its name reads as two teams ("Mississippi State Bulldogs
+    /// Missouri Tigers", "Riverton Otters vs Lakeside Herons"), a matchup card without a time (their logos when a team
+    /// list knows them, see <see cref="TeamDirectory"/>); otherwise its name set large. Both carry the league or sport.
+    /// <c>complete</c> is false when the team lists did not answer in time (the card is then not kept).
+    /// </summary>
+    private async Task<(byte[] Png, bool Complete)> RenderChannelAsync(SourceChannel channel, CancellationToken ct)
+    {
+        ChannelMatchup? matchup;
+        var complete = true;
+        if (_teams == null)
+        {
+            matchup = TeamDirectory.SplitOnly(channel.Name);
+        }
+        else
+        {
+            using var wait = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            wait.CancelAfter(TimeSpan.FromSeconds(4));
+            try
+            {
+                matchup = await _teams.ReadAsync(channel.Name, channel.Group, _scoreboard.ActiveLeagues, wait.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            {
+                matchup = TeamDirectory.SplitOnly(channel.Name);
+                complete = false;
+            }
+        }
+
+        if (matchup == null)
+        {
+            return (RenderTitle(channel.Name, LeagueOrSport(null, channel.Group)), complete);
+        }
+
+        var away = matchup.Away is { Logo.Length: > 0 } a ? await GetDarkLogoAsync(a.Logo, ct).ConfigureAwait(false) : null;
+        var home = matchup.Home is { Logo.Length: > 0 } h ? await GetDarkLogoAsync(h.Logo, ct).ConfigureAwait(false) : null;
+        return (RenderChannelMatchup(matchup, LeagueOrSport(matchup.League, channel.Group), away, home), complete);
+    }
+
+    /// <summary>"COLLEGE FOOTBALL" for a league Tally knows, else the channel's sport ("AMERICAN FOOTBALL"); nothing for
+    /// the catch-all groups.</summary>
+    public static string? LeagueOrSport(string? league, string? group)
+        => league != null ? LeagueCatalog.Label(league)
+            : string.IsNullOrWhiteSpace(group) || group is "Live" or "Sports" ? null
+            : group;
+
+    /// <summary>
+    /// The card of a channel whose name reads as two teams but that no game on the scoreboard claims: the pre-game
+    /// template (league on top, both sides, "AT" or "VS" between) without a time. Teams a team list knows get their
+    /// logo (or a box with their abbreviation) and short name; names only split at "vs" / "at" are set as two lines.
+    /// </summary>
+    public static byte[] RenderChannelMatchup(ChannelMatchup m, string? label, byte[]? awayLogo, byte[]? homeLogo)
+    {
+        using var surface = SKSurface.Create(new SKImageInfo(Width, Height, SKColorType.Rgba8888, SKAlphaType.Premul));
+        var c = surface.Canvas;
+        DrawGround(c);
+        if (!string.IsNullOrWhiteSpace(label))
+        {
+            DrawText(c, label.ToUpperInvariant(), Mono.Value, 34, Accent, 64, 104, SKTextAlign.Left, 1150);
+        }
+
+        var joiner = m.At ? "AT" : "VS";
+        if (m.Away != null && m.Home != null)
+        {
+            DrawSide(c, AsTeam(m.Away), awayLogo, 340);
+            DrawSide(c, AsTeam(m.Home), homeLogo, 940);
+            DrawText(c, joiner, Mono.Value, 40, Muted, Width / 2f, 352, SKTextAlign.Center, 120);
+            return Encode(surface);
+        }
+
+        // two names, no team list: one per line, as large as both fit
+        using var paint = new SKPaint { Typeface = Sans.Value, IsAntialias = true };
+        float size = 120;
+        for (; size > 52; size -= 4)
+        {
+            paint.TextSize = size;
+            if (paint.MeasureText(m.AwayText) <= Width - 128 && paint.MeasureText(m.HomeText) <= Width - 128)
+            {
+                break;
+            }
+        }
+
+        // away name, the joiner on a line of its own, home name: the block (cap height 0.72 of the size) centered
+        // below the league line
+        var cap = size * 0.72f;
+        var block = cap + (size * 0.3f) + 46 + 34 + cap;
+        var away = 400f - (block / 2) + cap;
+        var join = away + (size * 0.3f) + 46;
+        DrawText(c, m.AwayText, Sans.Value, size, Text, 64, away, SKTextAlign.Left, Width - 128);
+        DrawText(c, joiner, Mono.Value, 36, Muted, 64, join, SKTextAlign.Left, 200);
+        DrawText(c, m.HomeText, Sans.Value, size, Text, 64, join + 34 + cap, SKTextAlign.Left, Width - 128);
+        return Encode(surface);
+    }
+
+    private static GameTeam AsTeam(DirectoryTeam t) => new()
+    {
+        Abbr = t.Abbr,
+        Name = t.Name,
+        ShortName = string.IsNullOrEmpty(t.ShortName) ? t.Name : t.ShortName,
+        Nickname = t.Nickname,
+        Location = t.Location,
+        Logo = t.Logo
+    };
 
     private byte[] Store(string key, byte[] png)
     {

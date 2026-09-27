@@ -7,7 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Tally.Sources;
 
-/// <summary>Periodically refreshes playlists + EPG data in the background.</summary>
+/// <summary>
+/// Refreshes sources in the background: everything on startup; then M3U and direct sources every refresh interval,
+/// and web page sources' full-site scan every "Full site scan" interval (<see cref="SourceManager.FullScanInterval"/>).
+/// Games without a stream are searched on their own schedule (<see cref="StreamSearchService"/>).
+/// </summary>
 public class RefreshService : BackgroundService
 {
     private readonly SourceManager _sourceManager;
@@ -36,20 +40,36 @@ public class RefreshService : BackgroundService
             _logger.LogWarning(ex, "JellyTV: proxy warm-up failed");
         }
 
+        var first = true;
+        var lastRegular = DateTimeOffset.UtcNow;
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                await _sourceManager.RefreshAsync(stoppingToken).ConfigureAwait(false);
+                if (first)
+                {
+                    await _sourceManager.RefreshAsync(stoppingToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    await _sourceManager.RefreshScheduledAsync(stoppingToken).ConfigureAwait(false);
+                }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException || !stoppingToken.IsCancellationRequested)
             {
                 _logger.LogWarning(ex, "JellyTV: scheduled refresh failed");
             }
 
+            first = false;
+            lastRegular = DateTimeOffset.UtcNow;
+
+            // wake for whichever comes first: the next regular refresh or the web page sources' next full-site scan
             var minutes = Plugin.Instance?.Configuration.RefreshIntervalMinutes ?? 30;
-            await Task.Delay(TimeSpan.FromMinutes(Math.Clamp(minutes, 1, 720)), stoppingToken)
-                .ConfigureAwait(false);
+            var regular = lastRegular + TimeSpan.FromMinutes(Math.Clamp(minutes, 1, 720));
+            var web = _sourceManager.NextWebScanAt;
+            var wake = web < regular ? web : regular;
+            var wait = wake - DateTimeOffset.UtcNow;
+            await Task.Delay(wait < TimeSpan.FromMinutes(1) ? TimeSpan.FromMinutes(1) : wait, stoppingToken).ConfigureAwait(false);
         }
     }
 }
