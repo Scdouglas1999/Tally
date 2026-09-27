@@ -8,7 +8,7 @@ import { ToastHost } from '../../kit/Toast';
 import { RecordingNoticeHost } from './RecordingNotice';
 import type { Route } from '../../router/router';
 import { tally } from '../../state/nav';
-import { board, boardError, redZone, tallyUserSettings, useBoardPolling, useRedZoneStatus } from '../../state/sportsData';
+import { board, boardError, redZone, redZoneAnswered, tallyUserSettings, useBoardPolling, useRedZoneStatus } from '../../state/sportsData';
 import { formatTime, tallyUppercase } from '../../util/format';
 import { createStore, useStore } from '../../util/store';
 import { ChannelsGrid } from './ChannelsGrid';
@@ -100,6 +100,7 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
   const queue = useStore(multiviewQueue);
   const list = useStore(dvrList);
   const rzStatus = useStore(redZone);
+  const rzAnswered = useStore(redZoneAnswered);
   const dvr = useDvrEnabled();
   useBoardPolling(props.active);
 
@@ -172,7 +173,7 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
       body = (
         <GamesBoard
           key="games"
-          data={{ games, loading, boardError: error, hasBoard: current !== null, feedErrors: current?.errors ?? {}, favorites, teams, hideScores, onlyWatchable, redZone: onAir }}
+          data={{ games, loading, boardError: error, hasBoard: current !== null, feedErrors: current?.errors ?? {}, favorites, teams, hideScores, onlyWatchable, redZone: onAir, redZoneKnown: rzChannel === null || rzAnswered }}
           focusedGameId={focusedGameId}
           takeFocus={true}
           active={props.active}

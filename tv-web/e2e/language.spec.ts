@@ -56,6 +56,8 @@ interface Setup {
   spanish: BoardGame;
   /** GET redzone calls so far. */
   calls: () => number;
+  /** Replaces what GET redzone answers from now on (serverTime is always the moment of the answer). */
+  answer: (status: Record<string, unknown>) => void;
 }
 
 /** The dev server's board, with the 2.3 fields added (see the file comment). Skips when fewer than 2 live games play. */
@@ -97,15 +99,13 @@ async function setUp(page: Page): Promise<Setup | null> {
     await route.fulfill({ response, json }).catch(() => undefined);
   });
   let calls = 0;
+  let status: Record<string, unknown> | null = null;
   await page.route(REDZONE, (route: Route) => {
     calls++;
-    return route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ active: true, gameId: both.id, title: title(both), reason: 'red zone', since: new Date().toISOString(), next: [spanish.id] }),
-    });
+    const body = status ?? { active: true, gameId: both.id, title: title(both), reason: 'red zone', since: new Date().toISOString(), next: [spanish.id] };
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...body, serverTime: new Date().toISOString() }) });
   });
-  return { both, spanishId, spanish, calls: () => calls };
+  return { both, spanishId, spanish, calls: () => calls, answer: (s) => (status = s) };
 }
 
 async function openSports(page: Page): Promise<void> {
@@ -285,6 +285,81 @@ test('Settings: Commentary language switches English / Español, the board is fe
   await page.keyboard.press('Enter');
   await expect(row.locator('.setting-value')).toHaveText(was);
   await back;
+});
+
+test('RedZone: the board opens on its tile, whole; the overlay names a new game only once the picture has reached the cut', async ({ page }, info) => {
+  const s = await setUp(page);
+  test.skip(s === null, 'needs two live games with streams and two spare channels on the dev board');
+  if (s === null) return;
+  // the channel has been on the first game for a minute
+  const opened = Date.now() - 60_000;
+  const onFirst = { active: true, gameId: s.both.id, title: title(s.both), reason: 'red zone', since: new Date(opened).toISOString() };
+  s.answer({ ...onFirst, next: [s.spanish.id], recent: [onFirst] });
+  await openSports(page);
+  const tile = page.locator('.page:not(.hidden) .game-card.redzone-card');
+  await expect(tile).toHaveCount(1);
+  const leadsBoard = await tile.evaluate((el) => el.closest('.media-row') === document.querySelector('.page:not(.hidden) .board-rows .media-row'));
+  if (leadsBoard) {
+    // a first visit lands on the first card of the first row: the tile, whole on screen
+    await expect(tile).toHaveAttribute('data-focused', /.*/);
+    await page.waitForTimeout(600); // the row's scroll settles
+    const box = await tile.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return { left: r.left, right: r.right, width: window.innerWidth };
+    });
+    expect(box.left).toBeGreaterThanOrEqual(0);
+    expect(box.right).toBeLessThanOrEqual(box.width);
+    await shot(page, info, 'redzone-first-focus');
+  }
+  await focusCard(page, 'redzone');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.page:not(.hidden) .player.live')).toBeVisible();
+  await playing(page);
+  await page.keyboard.press('Escape'); // hides the bar
+  const nowTitle = page.locator('.player.live .redzone-now .rz-title');
+  await expect(nowTitle).toHaveText(title(s.both));
+  await page.waitForTimeout(3000); // hls.js settles at its live distance
+
+  // the server cuts to the other game now; the player hears of it at its next ask (within 10 s)
+  const cutAt = Date.now();
+  const onSecond = { active: true, gameId: s.spanish.id, title: title(s.spanish), reason: 'score', since: new Date(cutAt).toISOString() };
+  s.answer({ ...onSecond, next: [s.both.id], recent: [onFirst, onSecond] });
+  // how far behind the live edge the player says its picture is (hls.js's latency, or what a native player has
+  // loaded ahead of the playhead), and, as a check on that, the end of what it has loaded minus the playhead
+  const behind = () =>
+    page.evaluate(() => {
+      const said = document.querySelector('.player.live [data-latency-ms]')?.getAttribute('data-latency-ms');
+      return said === undefined || said === null || said === 'unknown' ? null : Number(said);
+    });
+  const loadedAhead = () =>
+    page.evaluate(() => {
+      const v = document.querySelector('.player.live video') as HTMLVideoElement | null;
+      if (v === null || v.buffered.length === 0) return null;
+      return (v.buffered.end(v.buffered.length - 1) - v.currentTime) * 1000;
+    });
+  const ahead = await loadedAhead();
+  let latency: number | null = null;
+  let shownAt = 0;
+  for (let i = 0; i < 160 && shownAt === 0; i++) {
+    latency = (await behind()) ?? latency;
+    if ((await nowTitle.textContent()) === title(s.spanish)) shownAt = Date.now();
+    else await page.waitForTimeout(250);
+  }
+  expect(shownAt, 'the overlay never named the new game').toBeGreaterThan(0);
+  const after = shownAt - cutAt;
+  info.annotations.push({
+    type: 'redzone-sync',
+    description: `overlay switched ${after} ms after the cut; the player plays ${String(latency)} ms behind the edge (${String(ahead)} ms loaded ahead)`,
+  });
+  expect(latency).not.toBeNull();
+  // the picture is well behind the edge (hls.js keeps five 3-second segments back, Chromium's own HLS about two),
+  // and the player has loaded up to about that
+  expect(latency ?? 0).toBeGreaterThan(4000);
+  expect(ahead ?? 0).toBeGreaterThan((latency ?? 0) - 7000);
+  // not at the ask (up to 10 s after the cut), but when playback reaches the cut: the player's distance behind the edge
+  expect(Math.abs(after - (latency ?? 0))).toBeLessThanOrEqual(3000);
+  await page.waitForTimeout(300);
+  await shot(page, info, 'redzone-overlay-after-cut');
 });
 
 test('RedZone on a 2.3 server (nothing scripted): the tile when the server says it is on the air, and the channel plays', async ({ page }, info) => {

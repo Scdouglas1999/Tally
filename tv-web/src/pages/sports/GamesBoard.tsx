@@ -1,4 +1,4 @@
-import { useMemo } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { isFollowed, type TallyGame } from '../../api/tallyModels';
 import { MediaRow } from '../../kit/MediaRow';
 import { ScrollPage } from '../../kit/ScrollPage';
@@ -40,7 +40,12 @@ export interface BoardInput {
   onlyWatchable: boolean;
   /** The RedZone channel while it is on the air (its tile leads the live row); null otherwise. */
   redZone: RedZoneOnAir | null;
+  /** `redZone` is settled (no RedZone channel, or the server has answered what it shows). */
+  redZoneKnown?: boolean;
 }
+
+/** How long a board opening waits for the RedZone answer before it places focus anyway (ms). */
+const REDZONE_WAIT_MS = 2000;
 
 /** The panel alone follows focus (the board itself does not re-render when a card is focused). */
 function PanelHost(props: { rows: BoardRow[]; focusedGameId: Store<string | null>; hideScores: boolean; redZone: RedZoneOnAir | null; games: TallyGame[] }) {
@@ -71,12 +76,35 @@ export function GamesBoard(props: {
 }) {
   const d = props.data;
   const rows: BoardRow[] = useMemo(() => boardRows(d.games, d.favorites, d.onlyWatchable, d.teams), [d.games, d.favorites, d.onlyWatchable, d.teams]);
-  const focused = findGame(rows, props.focusedGameId.get()) ?? rows[0]?.games[0] ?? null;
+  // the card focused last before this visit (focus that lands while the board waits for RedZone is not a choice)
+  const [lastVisit] = useState(() => props.focusedGameId.get());
+  const remembered = findGame(rows, lastVisit);
+  const focused = remembered ?? rows[0]?.games[0] ?? null;
   const rz = d.redZone;
   const rzRow = rz !== null ? redZoneRowKey(rows) : null;
-  const onRedZone = rz !== null && props.focusedGameId.get() === REDZONE_TILE_ID;
-  const target = d.loading || (rows.length === 0 && rz === null) ? 'sg-empty' : onRedZone ? REDZONE_TILE_KEY : focused === null ? (rz !== null ? REDZONE_TILE_KEY : 'sg-empty') : gameFocusKey(focused);
-  useTabArrival(props.takeFocus && props.active, target, true);
+  const onRedZone = rz !== null && lastVisit === REDZONE_TILE_ID;
+  // with nothing focused before, the first card of the first row: the RedZone tile when it leads that row
+  const tileLeads = rz !== null && (rzRow === null || rzRow === rows[0]?.key);
+  const target =
+    d.loading || (rows.length === 0 && rz === null)
+      ? 'sg-empty'
+      : onRedZone || (remembered === null && tileLeads)
+        ? REDZONE_TILE_KEY
+        : focused === null
+          ? rz !== null
+            ? REDZONE_TILE_KEY
+            : 'sg-empty'
+          : gameFocusKey(focused);
+  // the RedZone answer comes a moment after the board: wait (briefly) for it, so a first visit lands on its tile
+  // rather than on the game the tile then pushes aside
+  const [waited, setWaited] = useState(false);
+  const hasCards = rows.length > 0 || rz !== null;
+  useEffect(() => {
+    if (!hasCards) return undefined;
+    const t = window.setTimeout(() => setWaited(true), REDZONE_WAIT_MS);
+    return () => window.clearTimeout(t);
+  }, [hasCards]);
+  useTabArrival(props.takeFocus && props.active, target, d.redZoneKnown !== false || waited);
   const errorLeagues = Object.keys(d.feedErrors);
 
   const redZoneCard = (onAir: RedZoneOnAir) => (

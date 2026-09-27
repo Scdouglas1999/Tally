@@ -21,6 +21,11 @@ export const tallyUserSettings = createStore<TallySettings | null>(null);
  * no RedZone channel. A failed request keeps the last answer (the tile does not blink out on one hiccup).
  */
 export const redZone = createStore<TallyRedZone | null>(null);
+/**
+ * True once `redZone` is settled: the board has no RedZone channel, or the server has answered (or failed to) at
+ * least once. The games board waits for it (briefly) before placing focus, so the tile already leads its row.
+ */
+export const redZoneAnswered = createStore<boolean>(false);
 let redZoneUsers = 0;
 
 let users = 0;
@@ -58,8 +63,10 @@ async function refresh(): Promise<void> {
 
 /** Asks the server what RedZone shows, when the board has the channel (older servers never have it: nothing asked). */
 export async function refreshRedZone(): Promise<void> {
-  if (redZoneChannel(board.get()) === null) {
+  const current = board.get();
+  if (redZoneChannel(current) === null) {
     redZone.set(null);
+    if (current !== null) redZoneAnswered.set(true);
     return;
   }
   try {
@@ -67,6 +74,7 @@ export async function refreshRedZone(): Promise<void> {
   } catch {
     // keep the last answer
   }
+  redZoneAnswered.set(true);
 }
 
 /** Fetches the board once now (after a change the board reflects: a recording, a followed team). */
