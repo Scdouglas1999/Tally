@@ -157,6 +157,22 @@ export interface TallyRedZone {
   reason: string | null;
   since: string | null;
   next: string[];
+  /**
+   * The channel's last cuts as its players got them, oldest first (2.3; empty from an older server and while nobody
+   * watches): each `since` is when that cut entered the channel's playlist.
+   */
+  recent: TallyRedZoneCut[];
+  /** The server's clock when it answered (ISO-8601; null from an older server). */
+  serverTime: string | null;
+}
+
+/** One of `TallyRedZone.recent`: from `since` on the channel carries `gameId` (inactive: the "No games live" slate). */
+export interface TallyRedZoneCut {
+  active: boolean;
+  gameId: string | null;
+  title: string | null;
+  reason: string | null;
+  since: string | null;
 }
 
 export interface TallyEvent {
@@ -359,6 +375,11 @@ export function decodeRedZone(v: unknown): TallyRedZone {
     reason: strOrNull(o.reason),
     since: strOrNull(o.since),
     next: arr(o.next).filter((x): x is string => typeof x === 'string'),
+    recent: arr(o.recent).map((c) => {
+      const x = obj(c);
+      return { active: bool(x.active), gameId: strOrNull(x.gameId), title: strOrNull(x.title), reason: strOrNull(x.reason), since: strOrNull(x.since) };
+    }),
+    serverTime: strOrNull(o.serverTime),
   };
 }
 

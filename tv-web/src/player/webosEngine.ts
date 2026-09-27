@@ -1,4 +1,4 @@
-import type { EngineEvents, NativeAudioTrack, PlayerEngine, Source } from './engine';
+import { videoLiveLatencyMs, type EngineEvents, type NativeAudioTrack, type PlayerEngine, type Source } from './engine';
 import { loadHls, type HlsInstance } from './html5Engine';
 
 /** A live stream that fails (the network dropped, the server restarted) is opened again this many times. */
@@ -290,6 +290,7 @@ export function createWebosEngine(host: HTMLElement, events: EngineEvents, bundl
       video.style.objectFit = scale === 'crop' ? 'cover' : scale === 'fill' ? 'fill' : 'contain';
     },
     scales: () => ['fit', 'crop', 'fill'],
+    liveLatencyMs: () => videoLiveLatencyMs(video, hls),
     bufferedMs: () => {
       const now = video.currentTime;
       const b = video.buffered;

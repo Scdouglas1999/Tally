@@ -98,8 +98,10 @@ describe('decoding the 2.3 fields', () => {
       reason: 'red zone',
       since: '2026-09-27T18:29:10+00:00',
       next: ['401772002', '401772003'],
+      recent: [],
+      serverTime: null,
     });
-    expect(decodeRedZone({})).toEqual({ active: false, gameId: null, title: null, reason: null, since: null, next: [] });
+    expect(decodeRedZone({})).toEqual({ active: false, gameId: null, title: null, reason: null, since: null, next: [], recent: [], serverTime: null });
     expect(decodeRedZone(null).active).toBe(false);
     expect(decodeChannel({ id: 'redzone', kind: 'redzone', hlsPath: '' }).kind).toBe('redzone');
   });

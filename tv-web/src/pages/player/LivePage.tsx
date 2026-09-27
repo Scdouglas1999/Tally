@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { absolute, tallyRedZone } from '../../api/tally';
 import { DvrState } from '../../api/tallyDvr';
-import { canWatch, isLive, otherFeed, playingFeed, type TallyBoard, type TallyEvent, type TallyGame } from '../../api/tallyModels';
+import { canWatch, isLive, otherFeed, playingFeed, type TallyBoard, type TallyEvent, type TallyGame, type TallyRedZone } from '../../api/tallyModels';
 import type { PageProps } from '../../app/page';
 import { currentFocusKey, setFocus } from '../../focus/focus';
 import { IndicatorSquare } from '../../kit/Bits';
@@ -12,6 +12,7 @@ import { useKeyHandler } from '../../platform/keyRouter';
 import { usePointerActivity } from '../../platform/pointer';
 import { back, replace, type Route } from '../../router/router';
 import { boardRows, gameForChannel } from '../../sports/boardOrganizer';
+import { RedZoneSync, UNKNOWN_LATENCY_MS } from '../../sports/redZoneSync';
 import { KeyHint, matchupTitle } from '../../sports/SportsBits';
 import { board, onBoardEvent, redZone, tallyUserSettings, useBoardPolling } from '../../state/sportsData';
 import { formatTime, tallyUppercase } from '../../util/format';
@@ -35,6 +36,8 @@ const BANNER_MS = 8000;
 const MAX_OTHERS = 12;
 /** While the RedZone channel plays, what it shows is asked this often (2.3 contract: 10 s, and only then). */
 const REDZONE_POLL_MS = 10_000;
+/** While the RedZone channel plays, how often the overlay checks whether the picture has reached the next cut. */
+const REDZONE_TICK_MS = 500;
 
 /**
  * Other live games on real channels (not this one, nor the game on screen in its other language), in board order:
@@ -164,22 +167,37 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   const channel = channels.find((c) => c.id === props.route.channelId) ?? null;
   // the server's RedZone channel (2.3): the game on screen is the one its status names, and it changes under us
   const onRedZone = channel !== null ? channel.kind === 'redzone' : props.route.channelId === 'redzone';
-  const rzStatus = useStore(redZone);
+  // what RedZone shows in this player's picture: the server reports a cut the moment it happens, the picture follows
+  // as far behind the live edge as the player sits, so each cut is applied only once playback has reached it
+  const [rzStatus, setRzStatus] = useState<TallyRedZone | null>(null);
   useEffect(() => {
     if (!props.active || !onRedZone) return undefined;
     let alive = true;
+    const sync = new RedZoneSync();
+    const tick = (): void => {
+      const latency = player.engine.current?.liveLatencyMs?.() ?? null;
+      // for diagnosis (and the e2e test): how far behind the live edge the picture is taken to be
+      host.current?.setAttribute('data-latency-ms', latency === null ? 'unknown' : String(Math.round(latency)));
+      setRzStatus(sync.at(Date.now(), latency ?? UNKNOWN_LATENCY_MS));
+    };
     const ask = (): void => {
       tallyRedZone()
         .then((s) => {
-          if (alive) redZone.set(s);
+          if (!alive) return;
+          redZone.set(s);
+          sync.offer(s, Date.now());
+          tick();
         })
         .catch(() => undefined);
     };
     ask();
     const t = window.setInterval(ask, REDZONE_POLL_MS);
+    const k = window.setInterval(tick, REDZONE_TICK_MS);
     return () => {
       alive = false;
       window.clearInterval(t);
+      window.clearInterval(k);
+      setRzStatus(null);
     };
   }, [props.active, onRedZone]);
   const rzGame = onRedZone && rzStatus !== null && rzStatus.active ? (games.find((g) => g.id === rzStatus.gameId && isLive(g)) ?? null) : null;

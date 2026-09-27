@@ -1,4 +1,4 @@
-import type { EngineEvents, EngineName, PlayerEngine, Source } from './engine';
+import { videoLiveLatencyMs, type EngineEvents, type EngineName, type PlayerEngine, type Source } from './engine';
 
 declare const __HLS_FILE__: string;
 
@@ -9,6 +9,8 @@ export interface HlsInstance {
   on(event: string, cb: (event: string, data: { fatal?: boolean; type?: string; details?: string }) => void): void;
   startLoad(position?: number): void;
   recoverMediaError(): void;
+  /** Live: seconds between the live edge (the playlist's end, advanced by its age) and the playhead. */
+  readonly latency?: number;
 }
 
 interface HlsStatic {
@@ -153,6 +155,7 @@ export function createHtml5Engine(host: HTMLElement, events: EngineEvents, bundl
       video.style.objectFit = scale === 'crop' ? 'cover' : scale === 'fill' ? 'fill' : 'contain';
     },
     scales: () => ['fit', 'crop', 'fill'],
+    liveLatencyMs: () => videoLiveLatencyMs(video, hls),
     bufferedMs: () => {
       const now = video.currentTime;
       const b = video.buffered;
