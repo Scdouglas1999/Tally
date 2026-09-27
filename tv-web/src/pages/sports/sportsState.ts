@@ -60,7 +60,9 @@ export function gameRoute(game: TallyGame): Extract<Route, { name: 'live' }> | n
 
 export function channelRoute(channel: TallyChannel): Extract<Route, { name: 'live' }> | null {
   if (channel.hlsPath === '') return null;
-  return { name: 'live', channelId: channel.id, hlsPath: channel.hlsPath, title: channel.now?.title ?? channel.name, gameId: channel.gameId ?? undefined };
+  // RedZone's programme is whichever game it shows: the channel keeps its own name
+  const title = channel.kind === 'redzone' ? channel.name : (channel.now?.title ?? channel.name);
+  return { name: 'live', channelId: channel.id, hlsPath: channel.hlsPath, title, gameId: channel.gameId ?? undefined };
 }
 
 /**
