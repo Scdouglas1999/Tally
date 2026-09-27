@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { DvrState, type DvrJob, type DvrRule } from '../../api/tallyDvr';
-import type { TallyChannel } from '../../api/tallyModels';
+import { redZoneChannel, redZoneTileShown, type TallyChannel } from '../../api/tallyModels';
 import type { PageProps } from '../../app/page';
 import { currentFocusKey, focusExists, FocusGroup, setFocus, useFocusable } from '../../focus/focus';
 import { IndicatorSquare } from '../../kit/Bits';
@@ -8,7 +8,7 @@ import { ToastHost } from '../../kit/Toast';
 import { RecordingNoticeHost } from './RecordingNotice';
 import type { Route } from '../../router/router';
 import { tally } from '../../state/nav';
-import { board, boardError, tallyUserSettings, useBoardPolling } from '../../state/sportsData';
+import { board, boardError, redZone, redZoneAnswered, tallyUserSettings, useBoardPolling, useRedZoneStatus } from '../../state/sportsData';
 import { formatTime, tallyUppercase } from '../../util/format';
 import { createStore, useStore } from '../../util/store';
 import { ChannelsGrid } from './ChannelsGrid';
@@ -19,7 +19,7 @@ import { GamesBoard } from './GamesBoard';
 import { ConfirmDeleteDialog, JobMenu } from './RecordingsMenus';
 import { RecordingsTab, recordingsTarget } from './RecordingsTab';
 import { MultiviewQueueTab, SportsSettingsTab } from './SportsTabs';
-import { addGameToMultiviewAction, addToMultiviewWithNotice, multiviewQueue, watchGameAction } from './sportsState';
+import { addGameToMultiviewAction, addToMultiviewWithNotice, multiviewQueue, watchGameAction, watchGameFeed } from './sportsState';
 import { StreamSearchHost, useStreamSearchOpen } from './StreamSearchDialog';
 import { useOkHold } from './useOkHold';
 import './sportsPage.css';
@@ -99,12 +99,15 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
   const settings = useStore(tallyUserSettings);
   const queue = useStore(multiviewQueue);
   const list = useStore(dvrList);
+  const rzStatus = useStore(redZone);
+  const rzAnswered = useStore(redZoneAnswered);
   const dvr = useDvrEnabled();
   useBoardPolling(props.active);
 
   const tabs = sportsTabs(dvr);
   const [selected, setSelected] = useState<SportsTab>('games');
   const tab = tabs.indexOf(selected) >= 0 ? selected : 'games';
+  useRedZoneStatus(props.active && tab === 'games');
   // what was focused last on the board and the grid: coming back to a tab lands there (no re-render on focus)
   const focusedGameId = useMemo(() => createStore<string | null>(null), []);
   const focusedChannelId = useRef<string | null>(null);
@@ -119,6 +122,8 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
   // "Only games with a stream": off until the viewer turns it on (null is off), so every game shows
   const onlyWatchable = settings?.onlyWatchable ?? false;
   const loading = current === null && error === null;
+  const rzChannel = redZoneChannel(current);
+  const onAir = useMemo(() => (rzChannel !== null && rzStatus !== null && redZoneTileShown(current, rzStatus) ? { channel: rzChannel, status: rzStatus } : null), [rzChannel, rzStatus]);
 
   // focus goes back to what the menu was opened on (before a chosen action runs: see MenuDialog)
   const closeMenu = (): void => {
@@ -168,7 +173,7 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
       body = (
         <GamesBoard
           key="games"
-          data={{ games, loading, boardError: error, hasBoard: current !== null, feedErrors: current?.errors ?? {}, favorites, teams, hideScores, onlyWatchable }}
+          data={{ games, loading, boardError: error, hasBoard: current !== null, feedErrors: current?.errors ?? {}, favorites, teams, hideScores, onlyWatchable, redZone: onAir, redZoneKnown: rzChannel === null || rzAnswered }}
           focusedGameId={focusedGameId}
           takeFocus={true}
           active={props.active}
@@ -210,7 +215,17 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
       );
       break;
     default:
-      body = <SportsSettingsTab key="settings" onlyWatchable={onlyWatchable} hideScores={hideScores} info={info} takeFocus={true} active={props.active} />;
+      body = (
+        <SportsSettingsTab
+          key="settings"
+          onlyWatchable={onlyWatchable}
+          hideScores={hideScores}
+          streamLanguage={settings?.streamLanguage ?? 'en'}
+          info={info}
+          takeFocus={true}
+          active={props.active}
+        />
+      );
   }
 
   const menuGame = menu?.kind === 'game' ? (games.find((g) => g.id === menu.gameId) ?? null) : null;
@@ -233,6 +248,7 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
           game={menuGame}
           actions={{
             watch: watchGameAction(menuGame),
+            watchFeed: (feed) => watchGameFeed(menuGame, feed),
             addToMultiview: addGameToMultiviewAction(menuGame),
             follow: true,
           }}

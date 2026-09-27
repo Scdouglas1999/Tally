@@ -147,6 +147,8 @@ fun PhoneSportsPage(
                         info = (state.availability as? TallyRepository.Availability.Available)?.info,
                         onToggleOnlyWatchable = viewModel::toggleOnlyWatchable,
                         onHideScoresChange = viewModel::setHideScores,
+                        streamLanguage = state.streamLanguage,
+                        onStreamLanguageChange = viewModel::setStreamLanguage,
                         modifier = Modifier.fillMaxSize(),
                     )
                 }

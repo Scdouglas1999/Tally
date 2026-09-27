@@ -385,7 +385,8 @@ test('Settings: "Only games with a stream" is off by default (null), on it hides
     delete withoutChoice.onlyWatchable;
     await call('PUT', withoutChoice);
     await openSports(page);
-    const all = await page.locator('.page:not(.hidden) .board-rows .game-card').count();
+    // the RedZone tile (2.3) is a card but no game
+    const all = await page.locator('.page:not(.hidden) .board-rows .game-card:not(.redzone-card)').count();
     const b = await board();
     expect(all).toBe(b.games.length); // every game shows
     await page.keyboard.press('ArrowUp');
@@ -405,7 +406,7 @@ test('Settings: "Only games with a stream" is off by default (null), on it hides
     for (let i = 0; i < 6 && ((await page.locator('.sports-tab[data-focused] .label').textContent()) ?? '') !== 'GAMES'; i++) await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('Enter');
     const streamed = b.games.filter((g) => g.watch != null).length;
-    if (streamed > 0) await expect(page.locator('.page:not(.hidden) .board-rows .game-card')).toHaveCount(streamed);
+    if (streamed > 0) await expect(page.locator('.page:not(.hidden) .board-rows .game-card:not(.redzone-card)')).toHaveCount(streamed);
   } finally {
     await call('PUT', saved);
   }
@@ -415,6 +416,8 @@ test('Settings: "Only games with a stream" is off by default (null), on it hides
   try {
     await editBoard(page, (json) => {
       for (const g of json.games) g.watch = null;
+      // nothing has a stream: nor does a 2.3 server's RedZone channel (its tile would lead the board)
+      if (Array.isArray(json.channels)) json.channels = (json.channels as Array<{ kind?: string }>).filter((c) => c.kind !== 'redzone');
     });
     await openSports(page, false);
     await expect(page.locator('.page:not(.hidden) .board-empty .title')).toHaveText('No game has a stream right now.');

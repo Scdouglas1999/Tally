@@ -186,6 +186,7 @@ fun GameCard(
                     )
                 }
                 RecTag(recording = game.recording, style = TallyType.label.copy(fontSize = 12.sp), dot = 6.dp)
+                LanguageTag(game = game, style = TallyType.label.copy(fontSize = 12.sp))
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = statusText,

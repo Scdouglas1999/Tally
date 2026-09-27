@@ -63,6 +63,11 @@ export interface PlayerEngine {
   /** End of the buffered range around the current position, ms (0 when unknown). */
   bufferedMs?(): number;
   /**
+   * Live: how far behind the stream's live edge the picture is, ms; null when the engine cannot tell (then the RedZone
+   * overlay assumes a typical distance). Absent: never known.
+   */
+  liveLatencyMs?(): number | null;
+  /**
    * Where a picture drawn outside the page goes, in canvas pixels (AVPlay's hardware plane). Engines that draw in
    * the page follow their host element instead and leave this out.
    */
@@ -73,3 +78,28 @@ export interface PlayerEngine {
 export type VideoScale = 'fit' | 'crop' | 'fill';
 
 export type EngineFactory = (host: HTMLElement, events: EngineEvents) => PlayerEngine;
+
+/**
+ * A native HLS player with no seekable range (Chromium's own HLS) reports only what it has loaded, which reaches the
+ * newest segment it has seen: the live edge runs this much further on average (half a 3-second segment), ms.
+ */
+export const LOADED_EDGE_ALLOWANCE_MS = 1500;
+
+/**
+ * How far behind the live edge a <video> plays: hls.js's own estimate when it drives the element, else the end of the
+ * element's seekable range (the live edge as far as the element knows), else the end of what it has loaded (a native
+ * player loads up to the newest segment) plus `LOADED_EDGE_ALLOWANCE_MS`. Null when none of those says.
+ */
+export function videoLiveLatencyMs(video: HTMLVideoElement, hls: { latency?: number } | null): number | null {
+  const byHls = hls?.latency;
+  if (typeof byHls === 'number' && isFinite(byHls) && byHls > 0) return byHls * 1000;
+  const s = video.seekable;
+  if (s.length > 0) {
+    const end = s.end(s.length - 1);
+    if (isFinite(end) && end > 0 && end >= video.currentTime) return (end - video.currentTime) * 1000;
+  }
+  const b = video.buffered;
+  if (b.length === 0) return null;
+  const loaded = b.end(b.length - 1);
+  return isFinite(loaded) && loaded > video.currentTime ? (loaded - video.currentTime) * 1000 + LOADED_EDGE_ALLOWANCE_MS : null;
+}

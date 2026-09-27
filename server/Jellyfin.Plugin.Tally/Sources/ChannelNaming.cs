@@ -26,6 +26,7 @@ public static class ChannelNaming
         }
 
         var names = new Dictionary<SourceChannel, string>();
+        var gameOf = new Dictionary<SourceChannel, GameInfo>();
         if (games is { Count: > 0 })
         {
             // the matcher mutates the games' channel lists: work on copies
@@ -37,7 +38,10 @@ public static class ChannelNaming
                 foreach (var gc in g.Channels.Where(x => x.Kind == "teams"))
                 {
                     var c = weak[int.Parse(gc.Id, System.Globalization.CultureInfo.InvariantCulture)];
-                    names.TryAdd(c, GameName(g));
+                    if (names.TryAdd(c, GameName(g)))
+                    {
+                        gameOf[c] = g;
+                    }
                 }
             }
         }
@@ -66,7 +70,8 @@ public static class ChannelNaming
                 c.NameFromTitle = false;
                 var key = ChannelGrouper.KeyFor(name);
                 c.GroupKey = key.Length > 0 ? "web:" + key : string.Empty;
-                c.Group = StreamClassifier.GroupFor(name, c.Group);
+                c.Group = (gameOf.TryGetValue(c, out var game) ? StreamClassifier.GroupForGame(game) : null)
+                    ?? StreamClassifier.GroupFor(name, c.Group);
                 kept.Add(c);
             }
             else

@@ -100,9 +100,15 @@ public sealed class LiveLadderService : IHostedService, IDisposable
     {
         var tiers = new List<Tier>();
         var candidates = Candidates(c);
+        var playable = InLanguage(c, candidates, candidates.Select(x => _probes.TryGetValue(x.Url, out var p) && p.Ok ? p.AudioLanguage : null).ToList());
         for (var i = 0; i < candidates.Count; i++)
         {
             var cand = candidates[i];
+            if (!playable[i])
+            {
+                continue; // never another language: a game must not switch to other commentary mid-play
+            }
+
             if (_probes.TryGetValue(cand.Url, out var p) && p.Ok && !p.IsLive)
             {
                 continue; // VOD / recordings: plain pass-through
@@ -121,9 +127,22 @@ public sealed class LiveLadderService : IHostedService, IDisposable
         return LadderRanking.Rank(tiers);
     }
 
+    /// <summary>
+    /// Which candidates the ladder may play: those in the channel's language. The grouper never merges streams of two
+    /// languages, so this is a guard. A candidate whose master declares only another language's audio
+    /// (<paramref name="heard"/>, from its last probe) is left out too, as long as one that does not remains.
+    /// </summary>
+    public static bool[] InLanguage(SourceChannel c, IReadOnlyList<StreamCandidate> candidates, IReadOnlyList<string?> heard)
+    {
+        var language = StreamLanguage.Of(c);
+        var declared = candidates.Select(x => StreamLanguage.Of(x) == language).ToArray();
+        var anyHeardRight = declared.Where((ok, i) => ok && (heard[i] == null || heard[i] == language)).Any();
+        return declared.Select((ok, i) => ok && !(anyHeardRight && heard[i] != null && heard[i] != language)).ToArray();
+    }
+
     public static IReadOnlyList<StreamCandidate> Candidates(SourceChannel c)
         => c.Candidates.Count > 0 ? c.Candidates
-            : new[] { new StreamCandidate { Url = c.StreamUrl, Headers = c.Headers, Name = c.Name, MemberId = c.Id } };
+            : new[] { new StreamCandidate { Url = c.StreamUrl, Headers = c.Headers, Name = c.Name, MemberId = c.Id, Language = StreamLanguage.Of(c) } };
 
     public LiveSession Session(SourceChannel channel)
     {
@@ -242,7 +261,7 @@ public sealed class LiveLadderService : IHostedService, IDisposable
         var now = DateTimeOffset.UtcNow;
         var queued = 0;
         var round = new ProbeRound();
-        foreach (var c in channels)
+        foreach (var c in channels.Where(c => !c.IsSynthetic))
         {
             var list = Candidates(c);
             foreach (var cand in list)

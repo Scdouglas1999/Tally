@@ -71,7 +71,7 @@ public class SourceDefinition
     public int MaxPages { get; set; } = 12;
 
     /// <summary>Web sources: comma-separated leagues/groups to include
-    /// ("NFL, MLB", "American Football", "Basketball"...). Empty = everything found.</summary>
+    /// ("NFL, MLB", "NCAAF", "American Football", "College Football", "Basketball"...). Empty = everything found.</summary>
     public string Include { get; set; } = string.Empty;
 
     public bool Enabled { get; set; } = true;
@@ -131,7 +131,12 @@ public class PluginConfiguration : BasePluginConfiguration
     /// of minutes while games are on, and re-run Jellyfin's guide refresh so channel order follows the heat.</summary>
     public bool LiveCardsEnabled { get; set; } = true;
 
-    /// <summary>Comma-separated ESPN league paths ("football/nfl,baseball/mlb"). Empty = built-in defaults.
+    /// <summary>Spanish channels ("… (Español)") in Jellyfin's Live TV, numbered after every English one. Off hides them
+    /// from Live TV only: the Tally board still lists them and offers a game's Spanish feed.</summary>
+    public bool SpanishInLiveTv { get; set; } = true;
+
+    /// <summary>Comma-separated ESPN league paths ("football/nfl,baseball/mlb") or short names ("nfl, ncaaf, mlb"; see
+    /// LeagueCatalog.ShortNames). Empty = built-in defaults (LeagueCatalog.Defaults: NFL, college football, MLB).
     /// A string, not a list: XmlSerializer appends to list defaults on every load.</summary>
     public string ScoreLeagues { get; set; } = string.Empty;
 
@@ -153,6 +158,18 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Empty (the default) splices the new stream's timestamps onto the old one's; "discontinuity" only marks the
     /// switch with #EXT-X-DISCONTINUITY (kept to compare the two).</summary>
     public string LiveSwitchMode { get; set; } = string.Empty;
+
+    /// <summary>The "Tally RedZone" channel: one full-screen stream that cuts to the hottest live game, made on this
+    /// server from the games' own streams without transcoding (see Live/RedZoneService.cs). Needs live scores.</summary>
+    public bool RedZoneEnabled { get; set; } = true;
+
+    /// <summary>RedZone: the least time it stays on a game before it may leave it for a hotter one (seconds). Scores,
+    /// red-zone entries and overtime elsewhere cut sooner.</summary>
+    public int RedZoneMinDwellSeconds { get; set; } = 60;
+
+    /// <summary>RedZone: comma-separated leagues it may show, as league paths ("football/nfl") or names ("NFL").
+    /// Empty = every league with a live game.</summary>
+    public string RedZoneLeagues { get; set; } = string.Empty;
 
     /// <summary>Where /JellyTV/app sends a TV to download the Android TV app. The default always resolves to
     /// the newest release of the fork, so the address people type never changes.</summary>

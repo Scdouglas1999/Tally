@@ -99,6 +99,50 @@ public class SourceManager
 
     public IReadOnlyList<SourceChannel> GetChannels() => _snapshot.Channels;
 
+    /// <summary>Channels the plugin makes itself (the RedZone channel, see <c>RedZoneService</c>), put in front of the
+    /// sources' channels after every refresh. Given the sources' channels; none are added when there are none.
+    /// <see cref="Refreshed"/> listeners still get only the sources' channels.</summary>
+    public Func<IReadOnlyList<SourceChannel>, IEnumerable<SourceChannel>>? Synthetic { get; set; }
+
+    /// <summary>Puts the <see cref="Synthetic"/> channels in (or takes them out of) the current list now, without a
+    /// refresh: when they are set up after the first scan, or switched on or off.</summary>
+    public void Reinject()
+    {
+        var old = _snapshot;
+        var real = old.Channels.Where(c => !c.IsSynthetic).ToList();
+        var next = new Snapshot { Channels = WithSynthetic(real), Aliases = old.Aliases, Programmes = old.Programmes, LoadedAt = old.LoadedAt };
+        foreach (var c in next.Channels)
+        {
+            next.ById.TryAdd(c.Id, c);
+            next.ByLegacyId.TryAdd(c.LegacyId, c);
+        }
+
+        foreach (var e in old.Errors)
+        {
+            next.Errors[e.Key] = e.Value;
+        }
+
+        _snapshot = next;
+    }
+
+    private List<SourceChannel> WithSynthetic(List<SourceChannel> channels)
+    {
+        if (channels.Count == 0 || Synthetic == null)
+        {
+            return channels;
+        }
+
+        try
+        {
+            return Synthetic(channels).Concat(channels).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "JellyTV: could not add the plugin's own channels");
+            return channels;
+        }
+    }
+
     /// <summary>A channel by id — also by the id of an entry that was merged into it.</summary>
     public SourceChannel? GetChannel(string id)
         => _snapshot.ById.TryGetValue(id, out var ch) ? ch
@@ -271,7 +315,7 @@ public class SourceManager
 
             var stats = crawled.Select(_ => new GamePassStats()).ToList();
             var tasks = crawled.Select((s, i) => gameDriven
-                ? new WebSourceAdapter(s, _httpClientFactory, _logger, _browser).SearchGamesAsync(wanted, Pacer, stats[i], cancellationToken)
+                ? new WebSourceAdapter(s, _httpClientFactory, _logger, _browser, ct => GamesAsync(1, ct)).SearchGamesAsync(wanted, Pacer, stats[i], cancellationToken)
                 : BuildAdapter(s).RefreshAsync(cancellationToken)).ToList();
             var results = new Dictionary<string, SourceSnapshot?>(StringComparer.OrdinalIgnoreCase);
 
@@ -404,6 +448,15 @@ public class SourceManager
                 channels = kept;
             }
 
+            // one channel per language: Spanish ones get their own name and group, other languages are left out
+            var (spoken, unspoken) = StreamLanguage.Apply(channels);
+            if (unspoken > 0)
+            {
+                _logger.LogInformation("JellyTV: left out {Count} channels in languages other than English and Spanish", unspoken);
+            }
+
+            channels = spoken;
+
             var fresh = results.Values.Where(r => r != null).SelectMany(r => r!.Channels).Select(c => c.StreamUrl).ToHashSet(StringComparer.Ordinal);
             Pin(channels, defs, games, next.LoadedAt, fresh);
 
@@ -412,8 +465,8 @@ public class SourceManager
             channels = grouped.Channels;
             next.Aliases = grouped.Aliases;
             channels.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
-            next.Channels = channels;
-            foreach (var c in channels)
+            next.Channels = WithSynthetic(channels);
+            foreach (var c in next.Channels)
             {
                 next.ById.TryAdd(c.Id, c);
                 next.ByLegacyId.TryAdd(c.LegacyId, c);
@@ -563,7 +616,8 @@ public class SourceManager
             return;
         }
 
-        var open = games.Where(g => g.State != "post").Select(g => g.Clone()).ToList();
+        // the whole board, so the matcher weighs every team's name (it ties no channel to a finished game)
+        var open = games.Select(g => g.Clone()).ToList();
         var probes = candidates.Select((c, i) => new Scores.ChannelProbe(i.ToString(System.Globalization.CultureInfo.InvariantCulture), c.Name, null)).ToList();
         Scores.GameChannelMatcher.Match(open, probes);
         foreach (var g in open)
@@ -589,14 +643,17 @@ public class SourceManager
     }
 
     /// <summary>Today's games, for naming and grouping; null without a scoreboard.</summary>
-    private async Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(List<SourceChannel> channels, CancellationToken ct)
+    private Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(List<SourceChannel> channels, CancellationToken ct)
+        => GamesAsync(channels.Count, ct);
+
+    private async Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(int channelCount, CancellationToken ct)
     {
         if (GamesOverride != null)
         {
             return GamesOverride().Select(g => g.Clone()).ToList();
         }
 
-        if (_scoreboard == null || !(Plugin.Instance?.Configuration.ScoresEnabled ?? true) || channels.Count == 0)
+        if (_scoreboard == null || !(Plugin.Instance?.Configuration.ScoresEnabled ?? true) || channelCount == 0)
         {
             return null;
         }
@@ -656,7 +713,7 @@ public class SourceManager
         return def.Kind switch
         {
             SourceKind.Direct => new DirectSourceAdapter(def, _httpClientFactory, _logger),
-            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser),
+            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser, ct => GamesAsync(1, ct)),
             _ => new M3uSourceAdapter(def, _httpClientFactory, _logger)
         };
     }

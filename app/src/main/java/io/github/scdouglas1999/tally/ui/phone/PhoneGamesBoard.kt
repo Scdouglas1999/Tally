@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import io.github.scdouglas1999.tally.data.BoardOrganizer
+import io.github.scdouglas1999.tally.data.RedZone
 import io.github.scdouglas1999.tally.data.isFollowed
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneEmptyState
 import io.github.scdouglas1999.tally.media.kit.phone.PhoneLoading
@@ -35,6 +36,7 @@ import io.github.scdouglas1999.tally.ui.TallyViewModel
 import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.gameActions
 import io.github.scdouglas1999.tally.ui.components.phone.PhoneGameCard
+import io.github.scdouglas1999.tally.ui.components.phone.PhoneRedZoneCard
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.PhoneType
@@ -45,7 +47,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
  * (`MLB / LIVE 3`) over its games as full-width [PhoneGameCard]s (on a tablet as many across as fit, each at most
  * [PhoneDimens.gameCardMaxWidth]). A tap or a long-press on a game opens its game sheet
  * (the TV's focused-game panel and game menu in one). The TV's loading, failed, filtered and empty states, and the
- * one-line notice naming the leagues whose feeds failed.
+ * one-line notice naming the leagues whose feeds failed. While RedZone is on, its tile leads the first live row.
  */
 @Composable
 internal fun PhoneGamesBoard(
@@ -125,6 +127,21 @@ internal fun PhoneGamesBoard(
                                     .padding(top = if (index == 0) 0.dp else PhoneDimens.rowGap - PhoneDimens.cardGap),
                         )
                         Spacer(Modifier.height(8.dp))
+                    }
+                    val redZone = state.redZone
+                    if (redZone != null && index == RedZone.rowIndex(rows)) {
+                        // The RedZone channel leads the first live row while RedZone is on.
+                        item(key = "redzone") {
+                            PhoneRedZoneCard(
+                                tile = redZone,
+                                onClick = { viewModel.watchChannel(redZone.channel) },
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = PhoneDimens.margin)
+                                        .padding(bottom = PhoneDimens.cardGap)
+                                        .then(if (cardWidth != null) Modifier.width(cardWidth) else Modifier.fillMaxWidth()),
+                            )
+                        }
                     }
                     // a tablet: games side by side, each at most gameCardMaxWidth, so a card never stretches
                     items(row.games.chunked(columns), key = { row.key + "|" + it.first().id }) { pair ->

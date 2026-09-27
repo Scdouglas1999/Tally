@@ -70,6 +70,7 @@ public sealed class TeamDirectory
     {
         var sport = sportGroup switch
         {
+            "College Football" => "football/college-football",
             "American Football" => "football/",
             "Basketball" => "basketball/",
             "Baseball" => "baseball/",

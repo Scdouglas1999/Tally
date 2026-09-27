@@ -78,6 +78,30 @@ data class TallyWatch(
     val cardPath: String = "",
     /** "teams" | "epg" | "network" (a broadcaster match may be a different regional game). */
     val confidence: String = "",
+    /** The commentary's language, "en" or "es"; empty from a server that predates it (which means English). */
+    val language: String = "",
+) {
+    /** The commentary's language, English when the server does not say. */
+    val commentary: String get() = language.ifBlank { TallyLanguage.ENGLISH }
+}
+
+/** Commentary languages as the server names them (ISO 639-1). */
+object TallyLanguage {
+    const val ENGLISH = "en"
+    const val SPANISH = "es"
+}
+
+/**
+ * One commentary of a game that has more than one (`GameInfo.feeds`, English first). [TallyGame.watch] is already the
+ * viewer's preferred one; the others are offered as "Watch in Español" / "Watch in English".
+ */
+@Serializable
+data class TallyFeed(
+    /** "en" | "es" */
+    val language: String = "",
+    /** "English" | "Español", as the server names it. */
+    val label: String = "",
+    val watch: TallyWatch? = null,
 )
 
 @Serializable
@@ -122,6 +146,11 @@ data class TallyGame(
      * Null when the game has a [watch], is final, or the server predates it.
      */
     val search: TallySearch? = null,
+    /**
+     * Every playable commentary, English first, when the game has more than one; empty otherwise and from a server
+     * that predates it.
+     */
+    val feeds: List<TallyFeed> = emptyList(),
 ) {
     val isLive: Boolean get() = state == "in"
 
@@ -186,6 +215,49 @@ data class TallyChannel(
     val gameId: String? = null,
     val now: TallyProgramme? = null,
     val next: TallyProgramme? = null,
+    /** "en" | "es"; empty from a server that predates it. */
+    val language: String = "",
+    /** "redzone" for the server's RedZone channel; empty for every ordinary channel. */
+    val kind: String = "",
+) {
+    val isRedZone: Boolean get() = kind == KIND_REDZONE
+
+    companion object {
+        const val KIND_REDZONE = "redzone"
+    }
+}
+
+/** The answer to `GET redzone`: what the RedZone channel is showing right now. */
+@Serializable
+data class TallyRedZone(
+    /** False while no live game has a stream (the channel shows its slate). */
+    val active: Boolean = false,
+    val gameId: String? = null,
+    /** "Chiefs at Bills" */
+    val title: String? = null,
+    /** "red zone" | "score" | "two-minute drill" | "overtime" | "close" | "hottest" */
+    val reason: String? = null,
+    /** ISO-8601: when it cut to this game. */
+    val since: String? = null,
+    /** Game ids it would cut to next, hottest first. */
+    val next: List<String> = emptyList(),
+    /**
+     * The channel's last cuts as its players got them, oldest first (2.3; empty from a server that predates it, and
+     * while nobody watches): each `since` is when that cut entered the channel's playlist.
+     */
+    val recent: List<TallyRedZoneCut> = emptyList(),
+    /** The server's clock when it answered (ISO-8601; empty from an older server). */
+    val serverTime: String? = null,
+)
+
+/** One of [TallyRedZone.recent]: from [since] on the channel carries [gameId] (inactive: the "No games live" slate). */
+@Serializable
+data class TallyRedZoneCut(
+    val active: Boolean = false,
+    val gameId: String? = null,
+    val title: String? = null,
+    val reason: String? = null,
+    val since: String? = null,
 )
 
 @Serializable
@@ -211,4 +283,6 @@ data class TallySettings(
     val onlyWatchable: Boolean? = null,
     /** Followed teams as "LEAGUE:ABBR" (e.g. "NFL:KC"); their games are pinned first and get start nudges. */
     val favoriteTeams: List<String> = emptyList(),
+    /** Commentary language WATCH prefers: "en" (also when unset) or "es". The server reads it to pick `watch`. */
+    val streamLanguage: String? = null,
 )

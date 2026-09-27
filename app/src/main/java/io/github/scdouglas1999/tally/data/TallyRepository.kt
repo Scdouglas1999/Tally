@@ -8,6 +8,7 @@ import io.github.scdouglas1999.tally.api.TallyException
 import io.github.scdouglas1999.tally.api.TallyFindResult
 import io.github.scdouglas1999.tally.api.TallyInfo
 import io.github.scdouglas1999.tally.api.TallyJson
+import io.github.scdouglas1999.tally.api.TallyRedZone
 import io.github.scdouglas1999.tally.api.TallySettings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -76,6 +77,11 @@ internal object SettingsJson {
         val next = if (teamKey in current) current - teamKey else current + teamKey
         return JsonObject(raw + ("favoriteTeams" to JsonArray(next.map(::JsonPrimitive))))
     }
+
+    fun setStreamLanguage(
+        raw: JsonObject,
+        language: String,
+    ): JsonObject = JsonObject(raw + ("streamLanguage" to JsonPrimitive(language)))
 
     fun setLastChannel(
         raw: JsonObject,
@@ -245,6 +251,29 @@ class TallyRepository
         suspend fun toggleFavoriteTeam(teamKey: String) = mutateSettings { SettingsJson.toggleFavoriteTeam(it, teamKey) }
 
         suspend fun setLastChannel(channelId: String) = mutateSettings { SettingsJson.setLastChannel(it, channelId) }
+
+        /**
+         * The commentary language WATCH prefers ("en" or "es"). The server picks each game's `watch` by it, so the
+         * board is fetched again at once.
+         */
+        suspend fun setStreamLanguage(language: String) {
+            mutateSettings { SettingsJson.setStreamLanguage(it, language) }
+            tick()
+        }
+
+        /**
+         * What the RedZone channel shows right now, or null when the server cannot say (an older server, a failed
+         * request). Never throws but for cancellation: RedZone is an extra, never an error.
+         */
+        suspend fun redZone(): TallyRedZone? =
+            try {
+                tallyApi.redZone()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.d(e, "RedZone status unavailable")
+                null
+            }
 
         /**
          * Optimistic read-modify-write of the shared settings document. Reverts the

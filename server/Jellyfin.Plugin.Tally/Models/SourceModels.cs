@@ -42,12 +42,23 @@ public class SourceChannel
     [JsonIgnore]
     public bool NameFromTitle { get; set; }
 
+    /// <summary>ISO 639-1 code of the commentary ("en", "es"), read by the adapter (see <c>StreamLanguage</c>); empty
+    /// means English. A channel's streams are all in its language.</summary>
+    public string Language { get; set; } = "en";
+
     /// <summary>Every stream that carries this channel, first the one the channel was built from. Filled by
     /// <c>ChannelGrouper</c>; a channel nobody merged into has exactly one, its own <see cref="StreamUrl"/>.</summary>
     public List<StreamCandidate> Candidates { get; set; } = new();
 
     /// <summary>Ids of the channels merged into this one (they no longer appear on their own).</summary>
     public List<string> MergedIds { get; set; } = new();
+
+    /// <summary>A channel the plugin makes itself rather than a source's: "redzone" (see <c>RedZoneService</c>); empty for
+    /// every source channel.</summary>
+    public string Kind { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public bool IsSynthetic => Kind.Length > 0;
 
     public SourceChannel ShallowCopy() => (SourceChannel)MemberwiseClone();
 
@@ -70,6 +81,9 @@ public class StreamCandidate
 
     /// <summary>Id that entry had (or would have had) as a channel of its own.</summary>
     public string MemberId { get; set; } = string.Empty;
+
+    /// <summary>The entry's language, as its channel's ("en", "es"); the ladder never plays one of another language.</summary>
+    public string Language { get; set; } = "en";
 }
 
 /// <summary>A scheduled programme on a channel (from XMLTV or synthetic).

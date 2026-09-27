@@ -72,7 +72,9 @@ public static partial class M3uParser
                     SourceId = sourceId,
                     SourceName = sourceName,
                     TvgId = pendingAttrs.TryGetValue("tvg-id", out var tvg) ? tvg : string.Empty,
-                    Headers = headers
+                    Headers = headers,
+                    // read before anything cleans the name: tvg-language, the name, group-title, tvg-country
+                    Language = StreamLanguage.ForM3u(channelName, pendingAttrs)
                 });
 
                 pendingName = null;

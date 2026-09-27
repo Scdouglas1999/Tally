@@ -114,6 +114,28 @@ public static partial class HlsParser
         return list;
     }
 
+    /// <summary>The LANGUAGE of each EXT-X-MEDIA TYPE=AUDIO rendition of a master (null for one that declares none).</summary>
+    public static List<string?> AudioLanguages(string text)
+    {
+        var list = new List<string?>();
+        using var reader = new StringReader(text);
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            line = line.Trim();
+            if (line.StartsWith("#EXT-X-MEDIA:", StringComparison.Ordinal))
+            {
+                var a = Attributes(line["#EXT-X-MEDIA:".Length..]);
+                if (a.TryGetValue("TYPE", out var type) && type == "AUDIO")
+                {
+                    list.Add(a.TryGetValue("LANGUAGE", out var language) ? language : null);
+                }
+            }
+        }
+
+        return list;
+    }
+
     public static HlsMediaPlaylist ParseMedia(string text, Uri baseUri)
     {
         var segments = new List<HlsSegment>();

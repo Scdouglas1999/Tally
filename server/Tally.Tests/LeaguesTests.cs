@@ -196,6 +196,7 @@ public class LeaguesTests
     {
         Assert.Equal("football/nfl", TeamDirectory.LeagueOrder("American Football", Array.Empty<string>())[0]);
         Assert.Equal("football/college-football", TeamDirectory.LeagueOrder("American Football", Array.Empty<string>())[1]);
+        Assert.Equal("football/college-football", TeamDirectory.LeagueOrder("College Football", Array.Empty<string>())[0]);
         Assert.Equal(LeagueCatalog.Known.Count, TeamDirectory.LeagueOrder("Baseball", new[] { "baseball/mlb" }).Count);
 
         // classified as baseball ("Tigers"), found in college football all the same

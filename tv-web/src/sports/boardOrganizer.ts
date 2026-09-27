@@ -95,3 +95,11 @@ export function boardRows(
 export function gameForChannel(channelId: string, games: readonly TallyGame[]): TallyGame | null {
   return games.find((g) => isLive(g) && g.watch !== null && g.watch.channelId === channelId) ?? null;
 }
+
+/**
+ * Where the RedZone tile goes (2.3 contract: first in the board's live row): the key of the first live row, or null
+ * when no row is live (the board then gives the tile a row of its own, on top).
+ */
+export function redZoneRowKey(rows: readonly BoardRow[]): string | null {
+  return rows.find((r) => r.state === 'in')?.key ?? null;
+}

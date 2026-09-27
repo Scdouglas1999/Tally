@@ -1,18 +1,31 @@
 package io.github.scdouglas1999.tally.ui.player
 
+import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.C
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.services.PlayerFactory
 import com.github.damontecres.wholphin.ui.launchIO
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.scdouglas1999.tally.api.TallyEvent
+import io.github.scdouglas1999.tally.api.TallyFeed
 import io.github.scdouglas1999.tally.api.TallyGame
+import io.github.scdouglas1999.tally.api.TallyRedZone
 import io.github.scdouglas1999.tally.data.BoardOrganizer
+import io.github.scdouglas1999.tally.data.PlayerLatency
+import io.github.scdouglas1999.tally.data.RedZone
+import io.github.scdouglas1999.tally.data.RedZoneSync
 import io.github.scdouglas1999.tally.data.TallyMultiviewState
 import io.github.scdouglas1999.tally.data.TallyRepository
 import io.github.scdouglas1999.tally.watch.TallyWatchLauncher
+import io.github.scdouglas1999.tally.watch.carries
+import io.github.scdouglas1999.tally.watch.commentary
+import io.github.scdouglas1999.tally.watch.commentaryFeeds
+import io.github.scdouglas1999.tally.watch.commentaryOn
+import io.github.scdouglas1999.tally.watch.onFeed
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,12 +36,23 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import javax.inject.Inject
+
+/** The playing [game]'s commentaries ([feeds], English first) and the one on screen ([current], "en" or "es"). */
+data class Commentary(
+    val game: TallyGame,
+    val feeds: List<TallyFeed>,
+    val current: String,
+)
 
 /**
  * Backs the Tally overlays on top of the unmodified upstream player: the score bug
@@ -72,10 +96,122 @@ class TallyPlayerViewModel
             }
         }
 
-        /** The live game carried on the bound channel, if the board shows one. */
+        /**
+         * What the RedZone channel is showing in this player's picture: asked every [RedZone.PLAYER_POLL_MS] while the
+         * bound channel is RedZone (always null otherwise: nothing is asked), and each cut applied only once the
+         * player's own playback has reached it ([RedZoneSync]): the server reports a cut the moment it happens, the
+         * picture follows as far behind the live edge as the player sits.
+         */
+        @OptIn(ExperimentalCoroutinesApi::class)
+        val redZone: StateFlow<TallyRedZone?> =
+            combine(channelId, repository.board) { id, board -> RedZone.isRedZone(id, board) }
+                .distinctUntilChanged()
+                .flatMapLatest { playingRedZone ->
+                    if (!playingRedZone) {
+                        flowOf<TallyRedZone?>(null)
+                    } else {
+                        flow {
+                            val sync = RedZoneSync()
+                            val edge = EdgeClock()
+                            var askAt = 0L
+                            var logged: TallyRedZone? = null
+                            while (true) {
+                                if (SystemClock.elapsedRealtime() >= askAt) {
+                                    askAt = SystemClock.elapsedRealtime() + RedZone.PLAYER_POLL_MS
+                                    sync.offer(repository.redZone(), System.currentTimeMillis())
+                                }
+                                val latency = playerLatencyMs(edge)
+                                val shown = sync.at(System.currentTimeMillis(), latency ?: RedZoneSync.UNKNOWN_LATENCY_MS)
+                                if (shown != logged) {
+                                    logged = shown
+                                    Timber.i(
+                                        "RedZone overlay: %s (%s, cut at %s; player %s s behind the edge)",
+                                        shown?.title ?: "nothing",
+                                        shown?.reason,
+                                        shown?.since,
+                                        latency?.let { "%.1f".format(it / 1000.0) } ?: "an unknown number of",
+                                    )
+                                }
+                                emit(shown)
+                                delay(REDZONE_TICK_MS)
+                            }
+                        }
+                    }
+                }.distinctUntilChanged()
+                .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+        /** When the end of the live window last moved: how far the real live edge has run ahead of the listed one. */
+        private class EdgeClock {
+            var windowMs = C.TIME_UNSET
+            var movedAt = 0L
+            var tracedAt = 0L
+        }
+
+        /** How far behind the channel's live edge the picture is ([PlayerLatency]), or null while it cannot say. */
+        private suspend fun playerLatencyMs(edge: EdgeClock): Long? =
+            withContext(Dispatchers.Main) {
+                val player = playerFactory.currentPlayer ?: return@withContext null
+                if (!player.isCurrentMediaItemLive) return@withContext null
+                val window = player.duration
+                val now = SystemClock.elapsedRealtime()
+                if (window != edge.windowMs) {
+                    edge.windowMs = window
+                    edge.movedAt = now
+                }
+                // the channel's own playlist (/JellyTV/Live/redzone.m3u8), or Jellyfin's remux of it (Live TV)
+                val uri =
+                    player.currentMediaItem
+                        ?.localConfiguration
+                        ?.uri
+                        ?.toString()
+                        .orEmpty()
+                val remux = !uri.contains("/JellyTV/Live/", ignoreCase = true)
+                PlayerLatency
+                    .of(
+                        liveOffsetMs = player.currentLiveOffset.takeIf { it != C.TIME_UNSET },
+                        windowMs = window.takeIf { it != C.TIME_UNSET },
+                        positionMs = player.currentPosition,
+                        edgeAgeMs = now - edge.movedAt,
+                        remux = remux,
+                    ).also { latency ->
+                        if (now - edge.tracedAt >= LATENCY_TRACE_MS) {
+                            edge.tracedAt = now
+                            Timber.d(
+                                "RedZone sync: window %d ms, position %d ms, window moved %d ms ago, live offset %d, remux %b: %s ms behind",
+                                window,
+                                player.currentPosition,
+                                now - edge.movedAt,
+                                player.currentLiveOffset,
+                                remux,
+                                latency,
+                            )
+                        }
+                    }
+            }
+
+        /**
+         * The live game carried on the bound channel, if the board shows one: on RedZone, the game RedZone is on right
+         * now, so the score bug and the box score follow its cuts.
+         */
         val game: StateFlow<TallyGame?> =
-            combine(channelId, repository.board) { id, board ->
-                id?.let { BoardOrganizer.gameFor(it, board?.games.orEmpty()) }
+            combine(channelId, repository.board, redZone) { id, board, status ->
+                when {
+                    id == null -> null
+                    RedZone.isRedZone(id, board) -> RedZone.gameOn(status, board?.games.orEmpty())
+                    else -> BoardOrganizer.gameFor(id, board?.games.orEmpty())
+                }
+            }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+        /**
+         * The player's Commentary choice: the playing game's commentaries and the one on screen, when the game has
+         * more than one (never on RedZone, which picks its own). Null otherwise.
+         */
+        val commentary: StateFlow<Commentary?> =
+            combine(channelId, game, redZone) { id, shown, status ->
+                if (id == null || shown == null || status != null) return@combine null
+                val feeds = shown.commentaryFeeds()
+                val current = shown.commentaryOn(id)
+                if (feeds.isEmpty() || current == null) null else Commentary(shown, feeds, current)
             }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
         val hideScores: StateFlow<Boolean> =
@@ -100,7 +236,7 @@ class TallyPlayerViewModel
          */
         val others: StateFlow<List<TallyGame>> =
             combine(channelId, repository.board, repository.settings) { id, board, settings ->
-                val live = board?.games.orEmpty().filter { it.isLive && it.watch?.channelId != id }
+                val live = board?.games.orEmpty().filter { it.isLive && (id == null || !it.carries(id)) }
                 val (playable, noStream) = live.partition { it.watch != null }
 
                 fun ordered(games: List<TallyGame>) =
@@ -149,6 +285,13 @@ class TallyPlayerViewModel
          * first (see [TallyWatchLauncher]).
          */
         fun switchTo(game: TallyGame) = watchLauncher.watch(game, replaceCurrent = true)
+
+        /** Plays [feed], the playing game's other commentary, in place of this player. */
+        fun switchCommentary(feed: TallyFeed) {
+            val choice = commentary.value ?: return
+            if (feed.commentary == choice.current) return
+            watchLauncher.watch(choice.game.onFeed(feed), replaceCurrent = true)
+        }
 
         /** Asks the corner overlay (owned elsewhere) to show [game]; a game without a stream looks for one first. */
         fun watchInCorner(game: TallyGame) {
@@ -217,5 +360,11 @@ class TallyPlayerViewModel
             const val HEALTH_LOG_MS = 10_000L
             const val MAX_OTHERS = 12
             const val BANNER_MS = 8_000L
+
+            /** How often, while RedZone plays, the overlay checks whether the picture has reached the next cut. */
+            const val REDZONE_TICK_MS = 500L
+
+            /** While RedZone plays, how often the numbers behind its latency go to the debug log. */
+            const val LATENCY_TRACE_MS = 1_000L
         }
     }

@@ -19,8 +19,8 @@ namespace Jellyfin.Plugin.Tally.Scores;
 public sealed class ScoreboardService
 {
     // Anything ESPN has a scoreboard for can be added under Settings → Live scores
-    // ("basketball/nba", "hockey/nhl", "soccer/eng.1"…); leagues the sources carry are added by themselves
-    // (LeagueDetector).
+    // ("basketball/nba", "hockey/nhl", "soccer/eng.1"…), or by a short name (LeagueCatalog.ShortNames); leagues the
+    // sources carry are added by themselves (LeagueDetector).
     public static readonly string DefaultLeagues = string.Join(',', LeagueCatalog.Defaults);
 
     // The feed sits behind a bot filter that is picky in non-obvious ways: site.api.espn.com
@@ -123,6 +123,7 @@ public sealed class ScoreboardService
     public static IReadOnlyList<string> ParseLeagues(string? configured)
         => (string.IsNullOrWhiteSpace(configured) ? DefaultLeagues : configured)
             .Split(new[] { ',', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(LeagueCatalog.Resolve)
             // path segments only — this string ends up in an outbound URL
             .Where(l => l.Count(ch => ch == '/') == 1 && l.All(ch => char.IsLetterOrDigit(ch) || ch is '/' or '.' or '-'))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -144,9 +145,11 @@ public sealed class ScoreboardService
             .ToList();
     }
 
-    /// <summary>A comma-separated list of league paths, as a set.</summary>
+    /// <summary>A comma-separated list of league paths (or short names, see <see cref="LeagueCatalog.ShortNames"/>), as a
+    /// set of paths.</summary>
     public static HashSet<string> ParseList(string? list)
         => (list ?? string.Empty).Split(new[] { ',', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(LeagueCatalog.Resolve)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Leagues added because the sources carry their games (set by <see cref="LeagueDetector"/>).</summary>
@@ -175,20 +178,25 @@ public sealed class ScoreboardService
     public Task<List<GameInfo>> GetGamesAsync(CancellationToken cancellationToken, TimeSpan minAge)
         => GetGamesAsync(ActiveLeagues, cancellationToken, minAge);
 
+    /// <summary>All games, a league with a live game refreshed once its board is <paramref name="maxLiveAge"/> old: the
+    /// RedZone channel polls every 10 s while someone watches it, a little faster than the board's live rate.</summary>
+    public Task<List<GameInfo>> GetLiveGamesAsync(TimeSpan maxLiveAge, CancellationToken cancellationToken)
+        => GetGamesAsync(ActiveLeagues, cancellationToken, TimeSpan.Zero, maxLiveAge);
+
     /// <summary>The games of <paramref name="leagues"/>, whether the scoreboard covers them or not (the league
     /// detector looks at leagues it does not cover yet), through the same cache.</summary>
-    public async Task<List<GameInfo>> GetGamesAsync(IReadOnlyList<string> leagues, CancellationToken cancellationToken, TimeSpan minAge)
+    public async Task<List<GameInfo>> GetGamesAsync(IReadOnlyList<string> leagues, CancellationToken cancellationToken, TimeSpan minAge, TimeSpan? maxLiveAge = null)
     {
         var now = DateTimeOffset.UtcNow;
 
-        if (leagues.Any(l => IsStale(l, now, minAge)))
+        if (leagues.Any(l => IsStale(l, now, minAge, maxLiveAge)))
         {
             // single flight: concurrent viewers share one refresh instead of each hitting upstream
             await _refreshLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 now = DateTimeOffset.UtcNow;
-                await Task.WhenAll(leagues.Where(l => IsStale(l, now, minAge)).Select(l => RefreshLeagueAsync(l, cancellationToken))).ConfigureAwait(false);
+                await Task.WhenAll(leagues.Where(l => IsStale(l, now, minAge, maxLiveAge)).Select(l => RefreshLeagueAsync(l, cancellationToken))).ConfigureAwait(false);
             }
             finally
             {
@@ -202,8 +210,9 @@ public sealed class ScoreboardService
             .ToList();
     }
 
-    private bool IsStale(string league, DateTimeOffset now, TimeSpan minAge)
-        => !_cache.TryGetValue(league, out var c) || (now - c.FetchedAt >= c.Ttl && now - c.FetchedAt >= minAge);
+    private bool IsStale(string league, DateTimeOffset now, TimeSpan minAge, TimeSpan? maxLiveAge = null)
+        => !_cache.TryGetValue(league, out var c) || (now - c.FetchedAt >= c.Ttl && now - c.FetchedAt >= minAge)
+           || (maxLiveAge is { } max && c.Ttl == LiveTtl && now - c.FetchedAt >= max);
 
     private async Task RefreshLeagueAsync(string league, CancellationToken cancellationToken)
     {

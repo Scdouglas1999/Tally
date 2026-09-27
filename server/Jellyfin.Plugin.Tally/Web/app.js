@@ -292,6 +292,80 @@ const state = {
 };
 
 const chanById = (id) => state.channels.find(c => c.id === id);
+// Tally 2.3: a channel's commentary language, "en" or "es". A newer server says so (`language`); any server names a
+// Spanish channel "… (Español)" in the group "… · Español".
+const chanLang = (c) => (c && c.language) || (c && (/\(espa[ñn]ol\)\s*$/i.test(c.name || '') || /·\s*espa[ñn]ol\s*$/i.test(c.group || '')) ? 'es' : 'en');
+const LANG_LABEL = { en: 'English', es: 'Español' };
+// the commentary language the viewer prefers (settings key streamLanguage, shared with the apps; English unless chosen)
+const prefLang = () => (state.settings && state.settings.streamLanguage === 'es' ? 'es' : 'en');
+// the server's RedZone channel (2.3): one stream that cuts to the hottest game
+const isRedZone = (c) => !!c && (c.kind === 'redzone' || c.id === 'redzone');
+const redZoneChan = () => state.channels.find(isRedZone) || null;
+
+// --- RedZone overlay sync (RedZoneSync.kt, tv-web redZoneSync.ts) ---
+// The server reports a cut the moment its playlist carries it; the player sits behind the live edge, so its picture
+// cuts that much later. Every status answer is offered; at() says which cut the player has reached: the last one that
+// entered the playlist at least `latency` ago. The first answer shows at once, several cuts inside one latency window
+// each get their turn, and it never steps back. Server times are read on this browser's clock (serverTime).
+const RZ_UNKNOWN_LATENCY_MS = 12000; // liveSyncDurationCount 3 x 3-second segments, plus the one being listed
+function rzTime(iso) {
+  if (!iso) return null;
+  const t = Date.parse(String(iso).replace(/(\.\d{3})\d+/, '$1'));
+  return isNaN(t) ? null : t;
+}
+function redZoneSync() {
+  let cuts = [], shown = null;
+  const same = (a, b) => !!a.active === !!b.active && (a.gameId || null) === (b.gameId || null);
+  return {
+    offer(status, nowMs) {
+      if (!status) return;
+      const kept = Object.assign({}, status, { recent: [], serverTime: null });
+      const server = rzTime(status.serverTime), skew = server === null ? 0 : server - nowMs;
+      const local = (iso) => { const t = rzTime(iso); return t === null ? null : t - skew; };
+      const fresh = [];
+      (status.recent || []).forEach(c => {
+        const since = local(c.since);
+        if (since !== null) fresh.push({ status: Object.assign({}, c, { next: status.next || [] }), sinceMs: since });
+      });
+      const last = fresh[fresh.length - 1];
+      if (last && same(last.status, status)) fresh[fresh.length - 1] = { status: kept, sinceMs: last.sinceMs };
+      else {
+        const floor = last ? last.sinceMs : -Infinity, since = local(status.since);
+        fresh.push({ status: kept, sinceMs: since === null ? floor : Math.max(since, floor) });
+      }
+      fresh.sort((a, b) => a.sinceMs - b.sinceMs);
+      const from = fresh[0].sinceMs;
+      cuts = cuts.filter(c => c.sinceMs < from).concat(fresh).sort((a, b) => a.sinceMs - b.sinceMs).slice(-16);
+      if (shown) { const on = shown; shown = cuts.find(c => c.sinceMs === on.sinceMs && same(c.status, on.status)) || on; }
+    },
+    at(nowMs, latencyMs) {
+      const reached = nowMs - latencyMs;
+      let cand = null;
+      cuts.forEach(c => { if (c.sinceMs <= reached) cand = c; });
+      if (cand && (!shown || cand.sinceMs >= shown.sinceMs)) shown = cand;
+      else if (!shown) shown = cuts[0] || null;
+      if (shown) { const s0 = shown.sinceMs; cuts = cuts.filter(c => c.sinceMs >= s0); }
+      return shown ? shown.status : null;
+    }
+  };
+}
+// How far behind the live edge a <video> plays: hls.js's own estimate, else the end of its seekable range, else what
+// a native player (Safari) has loaded, which reaches the newest segment, plus half a 3-second segment.
+function liveLatencyMs(video, hls) {
+  const l = hls && hls.latency;
+  if (typeof l === 'number' && isFinite(l) && l > 0) return l * 1000;
+  if (!video) return null;
+  const r = video.seekable;
+  if (r && r.length) {
+    const end = r.end(r.length - 1);
+    if (isFinite(end) && end > 0 && end >= video.currentTime) return (end - video.currentTime) * 1000;
+  }
+  const b = video.buffered;
+  if (!b || !b.length) return null;
+  const loaded = b.end(b.length - 1);
+  return isFinite(loaded) && loaded > video.currentTime ? (loaded - video.currentTime) * 1000 + 1500 : null;
+}
+// --- end RedZone overlay sync ---
 const favorites = () => new Set((state.settings && state.settings.favorites) || []);
 const isFav = (id) => favorites().has(id);
 function toggleFav(id) {
@@ -682,6 +756,13 @@ function renderLive(content) {
 const spoilerFree = () => !!(state.settings && state.settings.hideScores);
 const alertsOn = () => !(state.settings && state.settings.alerts === false);
 
+// What the RedZone channel shows now (GET Client/v1/redzone, 2.3). Asked only when the server has the channel; a
+// failed request keeps the last answer.
+async function loadRedZone() {
+  if (!redZoneChan()) { state.redzone = null; return; }
+  try { state.redzone = await api('Client/v1/redzone'); } catch (e) {}
+}
+
 async function loadScores() {
   if (state.status && state.status.scoresEnabled === false) { state.games = []; return; }
   const d = await api('Scores');
@@ -689,6 +770,7 @@ async function loadScores() {
   const prev = state.games;
   state.games = (d && d.games) || [];
   state.scoreErrors = (d && d.errors) || {};
+  await loadRedZone();
   state.scoresAt = Date.now();
   if (!first) noteChanges(prev, state.games);
 }
@@ -719,23 +801,41 @@ function noteChanges(prev, next) {
   }
 }
 
+// A game's channels, the viewer's commentary language first (in the server's order otherwise). Never the RedZone
+// channel: it carries whichever game is hottest, not this one.
+function gameChannels(g) {
+  const list = (g.channels || []).filter(gc => gc.id !== 'redzone' && !isRedZone(chanById(gc.id)));
+  const lang = prefLang();
+  return list.filter(gc => chanLang(chanById(gc.id)) === lang).concat(list.filter(gc => chanLang(chanById(gc.id)) !== lang));
+}
+
 // The channel to open for a game. A broadcaster-only match is trusted only when that
 // channel isn't also the broadcaster of another live game (regional feeds: eight games, one "FOX").
 function bestChannel(g) {
-  for (const gc of g.channels || []) {
+  for (const gc of gameChannels(g)) {
     const c = chanById(gc.id);
     if (!c) continue;
     if (gc.kind !== 'network') return c;
     const rivals = state.games.filter(o => o.id !== g.id && o.state === 'in' && o.channels.some(x => x.id === gc.id));
     if (!rivals.length || g.state !== 'in') return c;
   }
-  const any = (g.channels || []).map(gc => chanById(gc.id)).find(Boolean);
+  const any = gameChannels(g).map(gc => chanById(gc.id)).find(Boolean);
   return any || null;
+}
+
+// What RedZone shows: in the full-screen player, the cut its picture has reached; elsewhere, the server's answer.
+function redZoneOnScreen(id) {
+  const p = state.player;
+  return p && p.id === id && p.rzSync ? p.rzShown : state.redzone;
 }
 
 // The game a channel is showing, for score bugs. Ambiguous broadcaster matches get no bug.
 function gameForChannel(id) {
   if (spoilerFree()) return null;
+  if (isRedZone(chanById(id))) {
+    const rz = redZoneOnScreen(id);
+    return rz && rz.active ? state.games.find(g => g.id === rz.gameId && g.state === 'in') || null : null;
+  }
   const hits = state.games.filter(g => g.state === 'in' && g.channels.some(c => c.id === id));
   const sure = hits.find(g => g.channels.some(c => c.id === id && c.kind !== 'network'));
   return sure || (hits.length === 1 ? hits[0] : null);
@@ -853,7 +953,9 @@ function findStream(g) {
 
 function gameRow(g, hide) {
   const live = g.state === 'in', pre = g.state === 'pre', post = g.state === 'post';
-  const chans = (g.channels || []).map(gc => ({ kind: gc.kind, c: chanById(gc.id) })).filter(x => x.c).slice(0, 3);
+  const chans = gameChannels(g).map(gc => ({ kind: gc.kind, c: chanById(gc.id) })).filter(x => x.c).slice(0, 3);
+  // the commentary language on each button when the game has a Spanish stream (English alone is never labeled)
+  const langTags = chans.some(x => chanLang(x.c) === 'es');
   const start = new Date(g.start);
   const today = start.toDateString() === new Date().toDateString();
   const when = (today ? '' : start.toLocaleDateString([], { weekday: 'short' }) + ' ') + fmtTime(start);
@@ -861,7 +963,7 @@ function gameRow(g, hide) {
 
   const team = (t, other) => `<div class="g-team${post && !hide && !t.winner && other.winner ? ' lose' : ''}">
       ${t.logo ? `<img class="g-logo" src="${esc(t.logo)}" loading="lazy" referrerpolicy="no-referrer" alt="">` : '<span class="g-logo"></span>'}
-      <span class="g-name">${esc(t.shortName || t.abbr)}</span>
+      <span class="g-name">${t.rank ? `<span class="g-rank">${t.rank}</span>` : ''}${esc(t.shortName || t.abbr)}</span>
       ${t.record ? `<span class="g-rec">${esc(t.record)}</span>` : ''}
       ${live && !hide && t.possession ? '<i class="led on" title="Possession"></i>' : ''}
       <span class="g-score">${pre ? '' : hide ? '–' : (t.score ?? 0)}</span></div>`;
@@ -889,7 +991,7 @@ function gameRow(g, hide) {
   const label = searching ? 'Looking for a stream' : soon ? 'No stream yet' : '';
   const watch = chans.length
     ? chans.map((x, i) => `<button class="g-chan${i === 0 ? ' first' : ''}" data-watch="${esc(x.c.id)}" title="${x.kind === 'network' ? 'Broadcaster match — may be carrying a different regional game' : 'Watch'}">
-        <i class="led${live ? ' live' : ''}"></i><span class="nm">${esc(x.c.name)}</span>${x.kind === 'network' ? '<span class="q">NET</span>' : ''}</button>`).join('')
+        <i class="led${live ? ' live' : ''}"></i><span class="nm">${esc(x.c.name)}</span>${langTags ? `<span class="q${chanLang(x.c) === 'es' ? ' es' : ''}" title="${esc(LANG_LABEL[chanLang(x.c)] || chanLang(x.c))} commentary">${esc(chanLang(x.c).toUpperCase())}</span>` : ''}${x.kind === 'network' ? '<span class="q">NET</span>' : ''}</button>`).join('')
       + `<button class="icon-btn" data-gmv="${esc(chans[0].c.id)}" title="Add to multiview" aria-label="Add to multiview">${icons.grid}</button>`
     : post ? '' : `${label ? `<span class="g-none${searching ? ' on' : ''}">${label}</span>` : ''}
         <button class="g-chan first" data-find="${esc(g.id)}" title="Look for a stream and play it"><i class="led${searching ? ' on' : ''}"></i><span class="nm">Watch</span></button>`;
@@ -920,6 +1022,22 @@ function renderGames(content) {
   const sec = (label, arr) => arr.length
     ? `<div class="g-sec"><span class="jtv-k">${label} · ${arr.length}</span></div>${arr.map(g => gameRow(g, hide)).join('')}` : '';
 
+  // RedZone (2.3): its own row on top while the server says it is on the air
+  const rzChan = redZoneChan(), rz = state.redzone;
+  const rzGame = rz && rz.active ? state.games.find(g => g.id === rz.gameId) : null;
+  const rzTitle = rzGame ? (rzGame.away.shortName || rzGame.away.abbr) + ' at ' + (rzGame.home.shortName || rzGame.home.abbr) : (rz && rz.title) || '';
+  const rzReason = !hide && rz && rz.reason ? rz.reason.toUpperCase() : '';
+  const rzRow = rzChan && rz && rz.active
+    ? `<div class="g-sec"><span class="jtv-k">RedZone</span></div>
+      <div class="game live can rz" data-rz="${esc(rzChan.id)}">
+        <div class="g-status"><div class="jtv-k live">${esc(rzChan.name || 'Tally RedZone')}</div><div class="g-clock">Live</div></div>
+        <div class="g-teams"><div class="rz-on jtv-k">On now</div><div class="g-name">${esc(rzTitle || 'The hottest game')}</div></div>
+        <div class="g-sit">${rzReason ? `<div class="g-tags"><span class="jtv-tag live">${esc(rzReason)}</span></div>` : ''}
+          <div class="g-play">Cuts to the hottest game: red zones, scores, two-minute drills, overtime. One stream instead of several, so it is lighter than multiview.</div></div>
+        <div class="g-watch"><button class="g-chan first" data-watch="${esc(rzChan.id)}" title="Watch"><i class="led live"></i><span class="nm">Watch RedZone</span></button></div>
+      </div>` : '';
+  const lang = prefLang();
+
   // A feed failure must never pass for a quiet day — say which leagues are dark and why.
   const errs = Object.entries(state.scoreErrors || {});
   const feedNote = errs.length
@@ -936,8 +1054,10 @@ function renderGames(content) {
       <div class="jtv-chips">${chip('', 'All', !state.leagueFilter)}${leagues.map(l => chip(l, esc(l), state.leagueFilter === l)).join('')}</div>
       <button class="jtv-chip${onlyWatchable ? ' active' : ''}" id="g-mine"><i class="led${onlyWatchable ? ' on' : ''}"></i>Only games with a stream</button>
       <button class="jtv-chip${hide ? ' active' : ''}" id="g-hide"><i class="led${hide ? ' on' : ''}"></i>Hide scores</button>
+      <button class="jtv-chip${lang === 'es' ? ' active' : ''}" id="g-lang" title="Games streamed in both languages play in this one"><i class="led${lang === 'es' ? ' on' : ''}"></i>Commentary: ${LANG_LABEL[lang]}</button>
     </div>
     ${feedNote}
+    ${rzRow}
     ${list.length ? sec('Live', live) + sec('Upcoming', pre) + sec('Final', post)
       : `<div class="jtv-empty"><div>${state.scoresAt ? (onlyWatchable && state.games.length ? 'No game has a stream right now.' : 'No games to show.') : state.scoresErr ? 'Couldn’t reach the scores feed — retrying.' : 'Loading games…'}</div>${state.scoresAt ? `<div class="sub">${onlyWatchable ? 'Turn off “Only games with a stream” to see them all.' : errs.length ? 'The scores feed is failing — details above. The server log has more.' : 'Nothing scheduled today in the leagues you follow.'}</div>` : ''}</div>`}
   </div>`;
@@ -947,11 +1067,15 @@ function renderGames(content) {
   // shared with the TV and phone apps (settings key onlyWatchable; never chosen = off)
   $('#g-mine', content).onclick = () => { state.settings.onlyWatchable = !onlyWatchable; saveSettings(); render(); };
   $('#g-hide', content).onclick = () => { state.settings.hideScores = !hide; saveSettings(); render(); };
+  // commentary language (streamLanguage, shared with the apps): English or Español, where a game has both
+  $('#g-lang', content).onclick = () => { state.settings.streamLanguage = lang === 'es' ? 'en' : 'es'; saveSettings(); render(); };
   $('#g-fill', content).onclick = fillMultiview;
   content.firstElementChild.onclick = (ev) => {
     const mv = ev.target.closest('[data-gmv]'), w = ev.target.closest('[data-watch]'), row = ev.target.closest('.game.can');
+    const rzRowEl = ev.target.closest('[data-rz]');
     if (mv) addToMultiview(mv.dataset.gmv);
     else if (w) play(w.dataset.watch);
+    else if (rzRowEl) play(rzRowEl.dataset.rz);
     else if (row) {
       const g = state.games.find(x => x.id === row.dataset.game);
       if (!g) return;
@@ -1284,14 +1408,39 @@ async function play(id) {
   // remaining-time readout counts down and rolls over to the next programme.
   const paintInfo = () => {
     const cc = chanById(id) || c, g = gameForChannel(id);
+    const shown = redZoneOnScreen(id);
+    const rz = isRedZone(cc) && shown && shown.active ? shown : null;
+    const rzGame = rz ? state.games.find(x => x.id === rz.gameId) : null;
+    const rzTitle = rz ? (rzGame ? rzGame.away.name + ' at ' + rzGame.home.name : rz.title || '') : '';
     $('#jp-info', overlay).innerHTML =
-      `<div class="jp-title">${cc.now ? esc(cc.now.title || 'Untitled') : g ? esc(g.away.name + ' at ' + g.home.name) : 'Live'}</div>`
+      (rzTitle ? `<div class="jp-title"><span class="jtv-k live">On RedZone now</span> ${esc(rzTitle)}${rz.reason && !spoilerFree() ? ` · <span class="jtv-k">${esc(rz.reason.toUpperCase())}</span>` : ''}</div>`
+        : `<div class="jp-title">${cc.now ? esc(cc.now.title || 'Untitled') : g ? esc(g.away.name + ' at ' + g.home.name) : 'Live'}</div>`)
       + (g && (g.downDistance || g.lastPlay) ? `<div class="jp-play">${g.downDistance ? `<b>${esc(g.downDistance)}</b>` : ''}${esc(g.lastPlay || '')}</div>` : '')
       + progReadout(cc.now, cc.next, new Date(), true);
   };
   paintInfo();
   updateBugs();   // score bug now, not at the next scores poll
   player.timer = setInterval(paintInfo, 1000);
+  // RedZone: what it shows is asked every 10 s, only while it plays
+  // and what the overlay and the bug say follows the picture: a cut shows once playback has reached it
+  if (isRedZone(c)) {
+    player.rzSync = redZoneSync();
+    player.rzShown = null;
+    const tick = () => {
+      const lat = liveLatencyMs(video, player.hls && player.hls.h);
+      const shown = player.rzSync.at(Date.now(), lat === null ? RZ_UNKNOWN_LATENCY_MS : lat);
+      if (shown !== player.rzShown) { player.rzShown = shown; paintInfo(); updateBugs(); }
+    };
+    const ask = () => api('Client/v1/redzone').then(r => {
+      if (state.player !== player) return;
+      state.redzone = r;
+      player.rzSync.offer(r, Date.now());
+      tick();
+    }).catch(() => {});
+    ask();
+    player.rzTimer = setInterval(ask, 10e3);
+    player.rzTick = setInterval(tick, 500);
+  }
 
   let hideTimer;
   const poke = () => {
@@ -1344,6 +1493,8 @@ function closePlayer() {
   const p = state.player;
   if (!p) return;
   clearInterval(p.timer);
+  clearInterval(p.rzTimer);
+  clearInterval(p.rzTick);
   try { p.hls && p.hls.destroy(); } catch (e) {}
   try { p.video.pause(); p.video.removeAttribute('src'); p.video.load(); } catch (e) {}
   if (fsElement() === p.overlay) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
@@ -1443,15 +1594,20 @@ function leagueLabel(path) {
   return k ? k.label : path;
 }
 function splitList(s) { return (s || '').split(/[\s,]+/).map(x => x.trim()).filter(Boolean); }
+// A short name the Leagues setting takes ("ncaaf", "epl") → its ESPN path; anything else as given.
+function resolveLeague(s) {
+  const k = (leagueInfo().known || []).find(k => (k.names || []).some(n => n.toLowerCase() === s.toLowerCase()));
+  return k ? k.path : s;
+}
 function configuredLeagues(cfg) {
-  const own = splitList(cfg && cfg.ScoreLeagues);
+  const own = splitList(cfg && cfg.ScoreLeagues).map(resolveLeague);
   return own.length ? own : [...leagueInfo().defaults];
 }
 function leagueRows(cfg) {
   if (!cfg) return [];
   const info = leagueInfo();
   const defaults = new Set(info.defaults.map(p => p.toLowerCase()));
-  const excluded = new Set(splitList(cfg.ScoreLeaguesExcluded).map(p => p.toLowerCase()));
+  const excluded = new Set(splitList(cfg.ScoreLeaguesExcluded).map(p => resolveLeague(p).toLowerCase()));
   const rows = configuredLeagues(cfg).map(p => ({ path: p, why: defaults.has(p.toLowerCase()) ? 'default' : 'added' }));
   (info.fromSources || []).forEach(f => {
     if (!excluded.has(f.league.toLowerCase()) && !rows.some(r => r.path.toLowerCase() === f.league.toLowerCase())) {
@@ -1536,6 +1692,8 @@ async function renderAdmin(container, fresh) {
         Show the Games board, score bugs and switch alerts</label></div>
       <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.LiveCardsEnabled !== false ? ' on' : ''}" id="set-livecards" role="switch" aria-checked="${!!(cfg && cfg.LiveCardsEnabled !== false)}"></button>
         Live cards for TV apps — redraw channel cards with the current score every 2 minutes while games are on, and keep channels numbered hottest-first (re-runs Jellyfin's guide refresh each time)</label></div>
+      <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.SpanishInLiveTv !== false ? ' on' : ''}" id="set-spanish-livetv" role="switch" aria-checked="${!!(cfg && cfg.SpanishInLiveTv !== false)}"></button>
+        Spanish channels in Jellyfin Live TV — numbered after the English ones; off hides them from Live TV only (Tally still offers them)</label></div>
       <div class="f-row"><label>Leagues on the Games board</label>
         <div id="league-list">${leagueRows(cfg).map(r => `
           <div class="src-row league-row">
@@ -1545,8 +1703,8 @@ async function renderAdmin(container, fresh) {
           </div>`).join('')}</div>
         <div class="set-note">Tally adds a league by itself when your sources carry its games, so their channels get game cards, guide entries and stream searches. Remove it here and it stays off.</div></div>
       <div class="f-row"><label for="set-league-add">Add a league</label>
-        <select id="set-league-add"><option value="">Choose a league…</option>${leagueChoices(cfg).map(k => `<option value="${esc(k.path)}">${esc(k.label)}</option>`).join('')}<option value="other">Another ESPN league (path)…</option></select>
-        <input type="text" id="set-league-path" placeholder="soccer/ned.1" hidden autocapitalize="off" spellcheck="false"></div>
+        <select id="set-league-add"><option value="">Choose a league…</option>${leagueChoices(cfg).map(k => `<option value="${esc(k.path)}">${esc(k.label)}</option>`).join('')}<option value="other">Another league (ESPN path or short name)…</option></select>
+        <input type="text" id="set-league-path" placeholder="soccer/ned.1, ncaaf, epl…" hidden autocapitalize="off" spellcheck="false"></div>
     </div>
 
     <div class="set-card">
@@ -1575,6 +1733,7 @@ async function renderAdmin(container, fresh) {
   $('#set-weblook', container).onclick = () => { cfg.WebLook = cfg.WebLook === false; renderAdmin(container); };
   $('#set-takeover', container).onclick = () => { cfg.ReplaceLiveTv = cfg.ReplaceLiveTv === false; renderAdmin(container); };
   $('#set-livecards', container).onclick = () => { cfg.LiveCardsEnabled = cfg.LiveCardsEnabled === false; renderAdmin(container); };
+  $('#set-spanish-livetv', container).onclick = () => { cfg.SpanishInLiveTv = cfg.SpanishInLiveTv === false; renderAdmin(container); };
   $('#set-scores', container).onclick = () => { cfg.ScoresEnabled = cfg.ScoresEnabled === false; renderAdmin(container); };
 
   $$('[data-league-del]', container).forEach(b => b.onclick = () => {
@@ -1593,7 +1752,7 @@ async function renderAdmin(container, fresh) {
     if (path) addLeague(cfg, path, container);
   };
   $('#set-league-path', container).onkeydown = (e) => {
-    const path = e.target.value.trim().toLowerCase();
+    const path = resolveLeague(e.target.value.trim().toLowerCase());
     if (e.key === 'Enter' && /^[a-z0-9.-]+\/[a-z0-9.-]+$/.test(path)) addLeague(cfg, path, container);
   };
 
@@ -1611,7 +1770,7 @@ async function renderAdmin(container, fresh) {
           <div class="f-row"><label>Page URL — streams are auto-detected on the page and its embeds</label>
             <input type="text" id="ns-page" placeholder="https://example.com/live"></div>
           <div class="f-row"><label>Only include — leagues or groups, comma-separated (blank = everything)</label>
-            <input type="text" id="ns-include" placeholder="NFL, MLB"></div>
+            <input type="text" id="ns-include" placeholder="NFL, NCAAF, MLB"></div>
           <div class="f-row"><label class="check">
             <input type="checkbox" id="ns-browser" checked>
             Headless-browser fallback — sniff streams that only appear after JavaScript runs</label></div>

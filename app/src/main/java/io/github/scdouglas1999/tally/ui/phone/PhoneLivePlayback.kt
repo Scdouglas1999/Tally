@@ -51,6 +51,8 @@ import io.github.scdouglas1999.tally.ui.components.GameActionsDialog
 import io.github.scdouglas1999.tally.ui.components.gameActions
 import io.github.scdouglas1999.tally.ui.components.phone.PhoneGameCard
 import io.github.scdouglas1999.tally.ui.components.phone.PhoneGamePanel
+import io.github.scdouglas1999.tally.ui.player.PublishCommentary
+import io.github.scdouglas1999.tally.ui.player.RedZoneBanner
 import io.github.scdouglas1999.tally.ui.player.TallyPlayerViewModel
 import io.github.scdouglas1999.tally.ui.player.controls.phone.playerStatusStrip
 import io.github.scdouglas1999.tally.ui.player.gamelessChannelGames
@@ -106,6 +108,8 @@ fun PhoneLivePlayback(
     val hideScores by viewModel.hideScores.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
     val favoriteTeams by viewModel.favoriteTeams.collectAsState()
+    val redZone by viewModel.redZone.collectAsState()
+    PublishCommentary(viewModel)
 
     val context = LocalContext.current
     val repository =
@@ -182,7 +186,8 @@ fun PhoneLivePlayback(
         // The bug: shown on opening, when the score, period or situation changes, while the controls or the switcher
         // are up, and for BUG_LINGER_MS after; always composed and faded, so a score change can roll.
         var bugShownAt by remember { mutableStateOf(SystemClock.elapsedRealtime()) }
-        val bugKey = game?.let { "${it.away.score}-${it.home.score}|${it.detail}|${it.downDistance}" }
+        // The game's id too: on RedZone a cut to another game brings the bug (and the RedZone banner) back.
+        val bugKey = game?.let { "${it.id}|${it.away.score}-${it.home.score}|${it.detail}|${it.downDistance}" }
         LaunchedEffect(bugKey, controlsVisible) { bugShownAt = SystemClock.elapsedRealtime() }
         var bugVisible by remember { mutableStateOf(true) }
         LaunchedEffect(bugShownAt, panel, controlsVisible) {
@@ -206,6 +211,17 @@ fun PhoneLivePlayback(
                         .align(Alignment.TopStart)
                         .padding(start = OverlayMargin, top = overlayTop)
                         .graphicsLayer { alpha = bugAlpha },
+            )
+
+            // On RedZone: the game it is on and why, in the event banner's corner while no event is up.
+            RedZoneBanner(
+                status = redZone,
+                game = game,
+                visible = bugVisible && banner == null && panel == null,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(end = OverlayMargin, top = overlayTop),
             )
 
             var lastBanner by remember { mutableStateOf<TallyEvent?>(null) }

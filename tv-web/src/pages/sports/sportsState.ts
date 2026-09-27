@@ -3,7 +3,7 @@
  * player's switcher, read by the multiview page) and "watch this" for games and channels.
  */
 import { session } from '../../api/jellyfin';
-import { hasStream, isFinal, type TallyChannel, type TallyGame } from '../../api/tallyModels';
+import { hasStream, isFinal, withFeed, type TallyChannel, type TallyFeed, type TallyGame } from '../../api/tallyModels';
 import { showToast } from '../../kit/Toast';
 import { push, replace, type Route } from '../../router/router';
 import { setLastChannel } from '../../state/sportsData';
@@ -60,7 +60,9 @@ export function gameRoute(game: TallyGame): Extract<Route, { name: 'live' }> | n
 
 export function channelRoute(channel: TallyChannel): Extract<Route, { name: 'live' }> | null {
   if (channel.hlsPath === '') return null;
-  return { name: 'live', channelId: channel.id, hlsPath: channel.hlsPath, title: channel.now?.title ?? channel.name, gameId: channel.gameId ?? undefined };
+  // RedZone's programme is whichever game it shows: the channel keeps its own name
+  const title = channel.kind === 'redzone' ? channel.name : (channel.now?.title ?? channel.name);
+  return { name: 'live', channelId: channel.id, hlsPath: channel.hlsPath, title, gameId: channel.gameId ?? undefined };
 }
 
 /**
@@ -94,6 +96,21 @@ export function addGameToMultiviewAction(game: TallyGame): (() => void) | undefi
       const id = g.watch?.channelId ?? '';
       if (id !== '') addToMultiviewWithNotice(id);
     });
+}
+
+/** Plays `game` in the commentary language of `feed` (the menu's "Watch in Español"); `inPlace`: the player switches. */
+export function watchGameFeed(game: TallyGame, feed: TallyFeed, inPlace = false): void {
+  watchGame(withFeed(game, feed), inPlace);
+}
+
+/** The RedZone channel (2.3 contract), titled as the server names it: the game on screen changes under it. */
+export function watchRedZone(channel: TallyChannel): void {
+  if (channel.hlsPath === '') {
+    showToast(NO_PLAYLIST);
+    return;
+  }
+  push({ name: 'live', channelId: channel.id, hlsPath: channel.hlsPath, title: channel.name !== '' ? channel.name : 'Tally RedZone' });
+  void setLastChannel(channel.id);
 }
 
 /** The game's "Watch" in a menu: every game but a finished one with no channel (canWatch). */

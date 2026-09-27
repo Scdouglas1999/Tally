@@ -7,14 +7,26 @@
  * to `onBoardEvent` listeners, as the Android app's TallyRepository does.
  */
 import { useEffect } from 'preact/hooks';
-import { tallyBoard, tallySettings, updateTallySettings } from '../api/tally';
-import { decodeSettings, type TallyBoard, type TallyEvent, type TallySettings } from '../api/tallyModels';
+import { tallyBoard, tallyRedZone, tallySettings, updateTallySettings } from '../api/tally';
+import { decodeSettings, redZoneChannel, type StreamLanguage, type TallyBoard, type TallyEvent, type TallyRedZone, type TallySettings } from '../api/tallyModels';
 import { createStore, useStore } from '../util/store';
 import { tally } from './nav';
 
 export const board = createStore<TallyBoard | null>(null);
 export const boardError = createStore<string | null>(null);
 export const tallyUserSettings = createStore<TallySettings | null>(null);
+/**
+ * What the RedZone channel shows now (2.3 contract): asked with every board refresh while the games board is on
+ * screen and the board has the channel (the tile), every 10 s while the live player plays it; null when the board has
+ * no RedZone channel. A failed request keeps the last answer (the tile does not blink out on one hiccup).
+ */
+export const redZone = createStore<TallyRedZone | null>(null);
+/**
+ * True once `redZone` is settled: the board has no RedZone channel, or the server has answered (or failed to) at
+ * least once. The games board waits for it (briefly) before placing focus, so the tile already leads its row.
+ */
+export const redZoneAnswered = createStore<boolean>(false);
+let redZoneUsers = 0;
 
 let users = 0;
 let timer = 0;
@@ -37,6 +49,7 @@ async function refresh(): Promise<void> {
     const next = await tallyBoard(cursor ?? undefined);
     board.set(next);
     boardError.set(null);
+    if (redZoneUsers > 0) void refreshRedZone();
     const events = next.events.slice().sort((a, b) => a.id - b.id);
     for (const event of events) {
       if (cursor !== null && event.id <= cursor) continue;
@@ -46,6 +59,22 @@ async function refresh(): Promise<void> {
   } catch (e) {
     boardError.set(e instanceof Error ? e.message : 'Could not load games');
   }
+}
+
+/** Asks the server what RedZone shows, when the board has the channel (older servers never have it: nothing asked). */
+export async function refreshRedZone(): Promise<void> {
+  const current = board.get();
+  if (redZoneChannel(current) === null) {
+    redZone.set(null);
+    if (current !== null) redZoneAnswered.set(true);
+    return;
+  }
+  try {
+    redZone.set(await tallyRedZone());
+  } catch {
+    // keep the last answer
+  }
+  redZoneAnswered.set(true);
 }
 
 /** Fetches the board once now (after a change the board reflects: a recording, a followed team). */
@@ -67,7 +96,7 @@ function schedule(): void {
   }, pollSeconds() * 1000);
 }
 
-const EMPTY_SETTINGS: TallySettings = { favorites: [], hideScores: false, lastChannel: null, onlyWatchable: null, favoriteTeams: [] };
+const EMPTY_SETTINGS: TallySettings = { favorites: [], hideScores: false, lastChannel: null, onlyWatchable: null, favoriteTeams: [], streamLanguage: 'en' };
 
 /** Keeps the board fresh while `active` (the calling page is on screen and the plugin is there). */
 export function useBoardPolling(active: boolean): void {
@@ -90,6 +119,18 @@ export function useBoardPolling(active: boolean): void {
       if (users === 0) window.clearTimeout(timer);
     };
   }, [enabled]);
+}
+
+/** Asks what RedZone shows with each board refresh while `active` (the games board, for its tile). */
+export function useRedZoneStatus(active: boolean): void {
+  useEffect(() => {
+    if (!active) return undefined;
+    redZoneUsers++;
+    void refreshRedZone();
+    return () => {
+      redZoneUsers--;
+    };
+  }, [active]);
 }
 
 let settingsQueue: Promise<void> = Promise.resolve();
@@ -139,4 +180,9 @@ export function setOnlyWatchable(only: boolean): Promise<void> {
 
 export function setLastChannel(channelId: string): Promise<void> {
   return changeTallySettings((doc) => ({ ...doc, lastChannel: channelId }));
+}
+
+/** The commentary language (shared setting `streamLanguage`); the board is fetched again, since `watch` follows it. */
+export function setStreamLanguage(language: StreamLanguage): Promise<void> {
+  return changeTallySettings((doc) => ({ ...doc, streamLanguage: language })).then(() => refreshBoard());
 }

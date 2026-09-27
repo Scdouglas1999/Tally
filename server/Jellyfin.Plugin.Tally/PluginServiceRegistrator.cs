@@ -72,6 +72,9 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         services.AddSingleton<IBoardEnricher, Dvr.DvrEnricher>();
         services.AddHostedService(sp => sp.GetRequiredService<Dvr.DvrService>());
         services.AddHostedService(sp => sp.GetRequiredService<Live.LiveLadderService>());
+        // the RedZone channel: one stream cutting between the live games' sessions
+        services.AddSingleton<Live.RedZoneService>();
+        services.AddHostedService(sp => sp.GetRequiredService<Live.RedZoneService>());
         services.AddHostedService<RefreshService>();
         // searches for games' streams around their start and on a viewer's find
         services.AddSingleton<StreamSearchService>();

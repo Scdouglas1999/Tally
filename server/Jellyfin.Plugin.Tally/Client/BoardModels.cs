@@ -26,6 +26,21 @@ public class WatchTarget
 
     /// <summary>"teams", "epg" or "network" (a broadcaster match may be a different regional game).</summary>
     [JsonPropertyName("confidence")] public string Confidence { get; set; } = string.Empty;
+
+    /// <summary>The commentary's language: "en" or "es".</summary>
+    [JsonPropertyName("language")] public string Language { get; set; } = "en";
+}
+
+/// <summary>One language a game can be watched in (<c>game.feeds</c>, present when there are several).</summary>
+public class GameFeed
+{
+    /// <summary>"en" or "es".</summary>
+    [JsonPropertyName("language")] public string Language { get; set; } = "en";
+
+    /// <summary>"English" or "Español".</summary>
+    [JsonPropertyName("label")] public string Label { get; set; } = string.Empty;
+
+    [JsonPropertyName("watch")] public WatchTarget Watch { get; set; } = new();
 }
 
 public class BoardChannel
@@ -44,6 +59,9 @@ public class BoardChannel
 
     [JsonPropertyName("cardPath")] public string CardPath { get; set; } = string.Empty;
 
+    /// <summary>The commentary's language: "en" or "es" (a Spanish channel is named "… (Español)").</summary>
+    [JsonPropertyName("language")] public string Language { get; set; } = "en";
+
     /// <summary>Id of the game this channel is carrying, when known with confidence.</summary>
     [JsonPropertyName("gameId")] public string? GameId { get; set; }
 
@@ -54,6 +72,11 @@ public class BoardChannel
     /// <summary>The stream being played, or the one a viewer would start on ("1080p60", first choice or not);
     /// null until the plugin has probed the channel.</summary>
     [JsonPropertyName("stream")] public Live.StreamStatus? Stream { get; set; }
+
+    /// <summary>"redzone" for the Tally RedZone channel (what is on: <c>GET redzone</c>); absent for every other channel.</summary>
+    [JsonPropertyName("kind")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Kind { get; set; }
 }
 
 /// <summary>Something that happened. Clients keep the last id they showed; "new" is a comparison.</summary>

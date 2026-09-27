@@ -113,6 +113,27 @@ export function EventBanner(props: { event: TallyEvent; visible: boolean; onGone
   );
 }
 
+/**
+ * What the RedZone channel shows (2.3): "ON REDZONE NOW", the game and why, bottom-start of the picture, as a lower
+ * third. Faded with opacity like the score bug: back after each cut and after a key, gone while the bar, the box
+ * score or the switcher is up (the bar says the same).
+ */
+export function RedZoneNow(props: { title: string; reason: string; visible: boolean }) {
+  return (
+    <div class={'redzone-now' + (props.visible ? '' : ' faded')}>
+      <div class="lt-bar" />
+      <div class="lt-panel">
+        <div class="rz-kicker mono-label">
+          <IndicatorSquare tone="live" />
+          ON REDZONE NOW
+        </div>
+        <div class="rz-title ellipsis">{props.title}</div>
+        {props.reason !== '' ? <div class="rz-reason mono-label">{props.reason}</div> : null}
+      </div>
+    </div>
+  );
+}
+
 export const switcherKey = (game: TallyGame): string => 'lsw-' + game.id;
 
 /**

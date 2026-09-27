@@ -21,7 +21,8 @@ public sealed class GroupResult
 /// links for one game, an M3U's duplicates (same tvg-id, or the same name once quality words such as HD, 60FPS or
 /// BACKUP are ignored), and — within one source — channels the game matcher ties to the same game by team names.
 /// The merged channel keeps the id of one of its members, preferring the one that represented the group before,
-/// so favorites and Jellyfin's guide keep pointing at it.
+/// so favorites and Jellyfin's guide keep pointing at it. Entries of different languages are never folded together
+/// (see <see cref="StreamLanguage"/>): a game's English and Spanish streams make two channels.
 /// </summary>
 public static partial class ChannelGrouper
 {
@@ -74,7 +75,7 @@ public static partial class ChannelGrouper
         for (var i = 0; i < n; i++)
         {
             var c = channels[i];
-            var src = c.SourceId + "|";
+            var src = c.SourceId + "|" + StreamLanguage.Of(c) + "|";
             if (!string.IsNullOrEmpty(c.GroupKey))
             {
                 Join(i, src + "k:" + c.GroupKey);
@@ -119,7 +120,7 @@ public static partial class ChannelGrouper
         {
             if (index.TryGetValue(member, out var i))
             {
-                Join(i, channels[i].SourceId + "|game:" + game);
+                Join(i, channels[i].SourceId + "|" + StreamLanguage.Of(channels[i]) + "|game:" + game);
                 teamMatchesOut?.TryAdd(member, game);
             }
         }
@@ -154,7 +155,8 @@ public static partial class ChannelGrouper
                 Url = channels[i].StreamUrl,
                 Headers = new Dictionary<string, string>(channels[i].Headers, StringComparer.OrdinalIgnoreCase),
                 Name = channels[i].Name,
-                MemberId = channels[i].Id
+                MemberId = channels[i].Id,
+                Language = StreamLanguage.Of(channels[i])
             }).ToList();
             merged.MergedIds = ordered.Skip(1).Select(i => channels[i].Id).ToList();
             if (string.IsNullOrEmpty(merged.LogoUrl))

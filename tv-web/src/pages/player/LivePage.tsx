@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { absolute } from '../../api/tally';
+import { absolute, tallyRedZone } from '../../api/tally';
 import { DvrState } from '../../api/tallyDvr';
-import { canWatch, isLive, type TallyBoard, type TallyEvent, type TallyGame } from '../../api/tallyModels';
+import { canWatch, isLive, otherFeed, playingFeed, type TallyBoard, type TallyEvent, type TallyGame, type TallyRedZone } from '../../api/tallyModels';
 import type { PageProps } from '../../app/page';
 import { currentFocusKey, setFocus } from '../../focus/focus';
 import { IndicatorSquare } from '../../kit/Bits';
@@ -12,15 +12,17 @@ import { useKeyHandler } from '../../platform/keyRouter';
 import { usePointerActivity } from '../../platform/pointer';
 import { back, replace, type Route } from '../../router/router';
 import { boardRows, gameForChannel } from '../../sports/boardOrganizer';
+import { RedZoneSync, UNKNOWN_LATENCY_MS } from '../../sports/redZoneSync';
 import { KeyHint, matchupTitle } from '../../sports/SportsBits';
-import { board, onBoardEvent, tallyUserSettings, useBoardPolling } from '../../state/sportsData';
+import { board, onBoardEvent, redZone, tallyUserSettings, useBoardPolling } from '../../state/sportsData';
 import { formatTime, tallyUppercase } from '../../util/format';
 import { useStore } from '../../util/store';
 import { GameActionsDialog } from '../sports/GameActionsDialog';
-import { addGameToMultiviewAction, addToMultiviewWithNotice, channelRoute, watchGame } from '../sports/sportsState';
+import { addGameToMultiviewAction, addToMultiviewWithNotice, channelRoute, watchGame, watchGameFeed } from '../sports/sportsState';
+import { redZoneReason, redZoneTitle } from '../sports/RedZoneTile';
 import { StreamSearchHost, useStreamSearchOpen } from '../sports/StreamSearchDialog';
 import { useOkHold } from '../sports/useOkHold';
-import { BoxScoreOverlay, EventBanner, GameSwitcher, ScoreBug, switcherKey } from './liveOverlays';
+import { BoxScoreOverlay, EventBanner, GameSwitcher, RedZoneNow, ScoreBug, switcherKey } from './liveOverlays';
 import { TuneIn, useEngine } from './playerKit';
 
 const BAR_MS = 5000;
@@ -32,10 +34,17 @@ const BOX_SCORE_LINGER_MS = 12_000;
 const BANNER_MS = 8000;
 /** The switcher lists at most this many other games. */
 const MAX_OTHERS = 12;
+/** While the RedZone channel plays, what it shows is asked this often (2.3 contract: 10 s, and only then). */
+const REDZONE_POLL_MS = 10_000;
+/** While the RedZone channel plays, how often the overlay checks whether the picture has reached the next cut. */
+const REDZONE_TICK_MS = 500;
 
-/** Other live games on real channels (not this one), in board order: followed teams and favorite channels first. */
-function otherGames(current: TallyBoard | null, channelId: string, favorites: ReadonlySet<string>, teams: ReadonlySet<string>): TallyGame[] {
-  const games = (current?.games ?? []).filter((g) => isLive(g) && g.watch !== null && g.watch.channelId !== channelId);
+/**
+ * Other live games on real channels (not this one, nor the game on screen in its other language), in board order:
+ * followed teams and favorite channels first.
+ */
+function otherGames(current: TallyBoard | null, channelId: string, favorites: ReadonlySet<string>, teams: ReadonlySet<string>, playingId?: string): TallyGame[] {
+  const games = (current?.games ?? []).filter((g) => isLive(g) && g.watch !== null && g.watch.channelId !== channelId && g.id !== playingId);
   return boardRows(games, favorites, true, teams)
     .reduce<TallyGame[]>((acc, r) => acc.concat(r.games), [])
     .slice(0, MAX_OTHERS);
@@ -83,14 +92,18 @@ function gamelessChannelGames(current: TallyBoard | null, channelId: string): Ta
       onSecond: false,
       onThird: false,
       broadcasts: [],
-      watch: { channelId: c.id, channelName: c.name, liveTvItemId: c.liveTvItemId, hlsPath: c.hlsPath, cardPath: c.cardPath, confidence: '' },
+      watch: { channelId: c.id, channelName: c.name, liveTvItemId: c.liveTvItemId, hlsPath: c.hlsPath, cardPath: c.cardPath, confidence: '', language: c.language },
       backdropPath: null,
       recording: null,
       search: null,
+      feeds: [],
     }));
 }
 
 const START_OVER_KEY = 'live-start-over';
+const COMMENTARY_KEY = 'live-commentary';
+/** The bar's buttons, in order: the first one there takes focus when the bar comes up. */
+const BAR_BUTTONS = [COMMENTARY_KEY, START_OVER_KEY];
 
 /**
  * The live bar's WATCH FROM THE START while the game on screen is being recorded: a TallyButton labeled as Android's
@@ -150,16 +163,60 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   }, [props.route.hlsPath]);
 
   const games = current?.games ?? [];
+  const channels = current?.channels ?? [];
+  const channel = channels.find((c) => c.id === props.route.channelId) ?? null;
+  // the server's RedZone channel (2.3): the game on screen is the one its status names, and it changes under us
+  const onRedZone = channel !== null ? channel.kind === 'redzone' : props.route.channelId === 'redzone';
+  // what RedZone shows in this player's picture: the server reports a cut the moment it happens, the picture follows
+  // as far behind the live edge as the player sits, so each cut is applied only once playback has reached it
+  const [rzStatus, setRzStatus] = useState<TallyRedZone | null>(null);
+  useEffect(() => {
+    if (!props.active || !onRedZone) return undefined;
+    let alive = true;
+    const sync = new RedZoneSync();
+    const tick = (): void => {
+      const latency = player.engine.current?.liveLatencyMs?.() ?? null;
+      // for diagnosis (and the e2e test): how far behind the live edge the picture is taken to be
+      host.current?.setAttribute('data-latency-ms', latency === null ? 'unknown' : String(Math.round(latency)));
+      setRzStatus(sync.at(Date.now(), latency ?? UNKNOWN_LATENCY_MS));
+    };
+    const ask = (): void => {
+      tallyRedZone()
+        .then((s) => {
+          if (!alive) return;
+          redZone.set(s);
+          sync.offer(s, Date.now());
+          tick();
+        })
+        .catch(() => undefined);
+    };
+    ask();
+    const t = window.setInterval(ask, REDZONE_POLL_MS);
+    const k = window.setInterval(tick, REDZONE_TICK_MS);
+    return () => {
+      alive = false;
+      window.clearInterval(t);
+      window.clearInterval(k);
+      setRzStatus(null);
+    };
+  }, [props.active, onRedZone]);
+  const rzGame = onRedZone && rzStatus !== null && rzStatus.active ? (games.find((g) => g.id === rzStatus.gameId && isLive(g)) ?? null) : null;
   const byRoute = games.find((g) => g.id === props.route.gameId) ?? null;
-  const game = gameForChannel(props.route.channelId, games) ?? (byRoute !== null && isLive(byRoute) ? byRoute : null);
-  const others = otherGames(current, props.route.channelId, favorites, teams);
+  const game = onRedZone ? rzGame : (gameForChannel(props.route.channelId, games) ?? (byRoute !== null && isLive(byRoute) ? byRoute : null));
+  // the other commentary language of the game on screen (the bar's Commentary button switches to it)
+  const feedNow = game !== null && !onRedZone ? (playingFeed(game, props.route.channelId) ?? null) : null;
+  const feedOther = game !== null && !onRedZone ? otherFeed(game, props.route.channelId) : null;
+  const commentary = feedOther !== null ? (feedNow?.label ?? game?.feeds.find((f) => f.language !== feedOther.language)?.label ?? null) : null;
+  const others = otherGames(current, props.route.channelId, favorites, teams, onRedZone ? undefined : game?.id);
   const switcherGames = (others.length > 0 ? others : gamelessChannelGames(current, props.route.channelId))
     .concat(unstreamedGames(current, props.route.gameId, favorites, teams))
     .slice(0, MAX_OTHERS);
-  const channels = current?.channels ?? [];
-  const channelName = channels.find((c) => c.id === props.route.channelId)?.name ?? '';
+  const channelName = channel?.name ?? '';
+  const rzTitle = onRedZone && rzStatus !== null && rzStatus.active ? redZoneTitle(rzStatus, games) : '';
+  const rzReason = onRedZone && rzStatus !== null && rzStatus.active ? redZoneReason(rzStatus, hideScores) : '';
   const recording = game?.recording ?? null;
   const startOver = recording !== null && recording.state === DvrState.RECORDING && recording.startOverPath !== null && recording.startOverPath !== '' ? recording.startOverPath : null;
+  const barButtons = BAR_BUTTONS.filter((k) => (k === COMMENTARY_KEY ? commentary !== null : startOver !== null));
 
 
   useEffect(() => {
@@ -171,7 +228,7 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   // the bug (TallyPlaybackPage.kt): back when the game opens, when the score, period or situation changes, while the
   // switcher is up, and for 8 s after any key; hidden under the box score. Always drawn and faded with opacity, so a
   // change that brings it back can roll the digits it already showed.
-  const bugKey = game !== null ? `${game.away.score}-${game.home.score}|${game.detail}|${game.downDistance ?? ''}` : '';
+  const bugKey = (game !== null ? `${game.away.score}-${game.home.score}|${game.detail}|${game.downDistance ?? ''}` : '') + '|' + rzTitle;
   useEffect(() => setBugShownAt(Date.now()), [bugKey]);
   useEffect(() => {
     setBugVisible(!boxScore);
@@ -227,6 +284,12 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
     replace({ name: 'startover', path: startOver, title: matchupTitle(game) });
   }
 
+  /** The bar's Commentary button: the game on screen in its other language, in place. */
+  function switchCommentary(): void {
+    if (game === null || feedOther === null) return;
+    watchGameFeed(game, feedOther, true);
+  }
+
   const switchTo = (g: TallyGame): void => {
     setSwitcher(false);
     setActionsGameId(null);
@@ -271,8 +334,10 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
       }
       return false; // arrows and OK move through the cards
     }
-    // the bar's FROM THE START button has focus while the bar is up: OK presses it (the focus system delivers it)
-    if (key === 'enter' && bar && startOver !== null && currentFocusKey() === START_OVER_KEY) {
+    // the bar's buttons (COMMENTARY, FROM THE START) have focus while the bar is up: OK presses the focused one and
+    // LEFT/RIGHT move between them (the focus system does both)
+    const onButton = bar && BAR_BUTTONS.indexOf(currentFocusKey()) >= 0;
+    if (onButton && (key === 'enter' || ((key === 'left' || key === 'right') && barButtons.length > 1))) {
       showBar();
       return false;
     }
@@ -328,12 +393,14 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
   }, props.active);
 
   const barUp = bar && !switcher && !boxScore;
-  // the bar's one control takes focus while the bar is up; focus goes back to the page when it hides
+  // the bar's first control takes focus while the bar is up; focus goes back to the page when it hides
+  const firstButton = barButtons[0] ?? null;
   useEffect(() => {
     if (!props.active) return;
-    if (barUp && startOver !== null) setFocus(START_OVER_KEY);
-    else if (currentFocusKey() === START_OVER_KEY) setFocus(props.pageKey);
-  }, [barUp, startOver !== null, props.active]);
+    if (barUp && firstButton !== null) {
+      if (barButtons.indexOf(currentFocusKey()) < 0) setFocus(firstButton);
+    } else if (BAR_BUTTONS.indexOf(currentFocusKey()) >= 0) setFocus(props.pageKey);
+  }, [barUp, barButtons.join(','), props.active]);
 
   const actionsGame = actionsGameId !== null ? (switcherGames.find((g) => g.id === actionsGameId) ?? null) : null;
   // a real game (not a looping channel drawn as a card with blank teams)
@@ -344,6 +411,7 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
       <div ref={host} />
       <TuneIn key={props.route.channelId} title={props.route.title} firstFrame={player.firstFrame} error={player.error} />
       <ScoreBug game={game} hideScores={hideScores} visible={bugVisible && !boxScore} />
+      {onRedZone && rzTitle !== '' ? <RedZoneNow title={rzTitle} reason={rzReason} visible={bugVisible && !boxScore && !switcher && !bar} /> : null}
       {boxScore && game !== null ? <BoxScoreOverlay game={game} hideScores={hideScores} /> : null}
       {banner !== null ? <EventBanner event={banner} visible={bannerOn} onGone={() => setBanner((b) => (bannerOn ? b : null))} /> : null}
       {barUp ? (
@@ -359,13 +427,20 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
                 <IndicatorSquare tone="accent" />
                 LIVE
               </span>
-              <span class="channel mono-label ellipsis">{tallyUppercase(channelName)}</span>
+              <span class="channel mono-label ellipsis">
+                {onRedZone && rzTitle !== '' ? tallyUppercase(['On RedZone now', rzTitle, rzReason].filter((x) => x !== '').join(' · ')) : tallyUppercase(channelName)}
+              </span>
             </div>
             <div class="hints">
               {switcherGames.length > 0 ? <KeyHint keyName="DOWN" label="Games" /> : null}
               {game !== null ? <KeyHint keyName="UP" label="Box score" /> : null}
               <KeyHint keyName="CH +/−" label="Change channel" />
               <KeyHint keyName="BACK" label="Leave" />
+              {commentary !== null ? (
+                <span class="bar-buttons">
+                  <Button focusKey={COMMENTARY_KEY} glyph="volume" label={`Commentary: ${commentary}`} onPress={switchCommentary} />
+                </span>
+              ) : null}
               {startOver !== null ? <StartOverButton onPress={watchFromTheStart} /> : null}
             </div>
           </div>

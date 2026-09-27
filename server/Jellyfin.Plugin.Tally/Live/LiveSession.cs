@@ -52,6 +52,8 @@ public sealed class LiveSession
     private DateTimeOffset _lastReprobe = DateTimeOffset.MinValue;
     private DateTimeOffset _startedAt;
     private long _lastTouchedTicks;
+    private long _warmTicks;
+    private long _passthroughServedTicks;
 
     // cadence of the rung being played, and of the others while there is trouble (playlists only)
     private CadenceMeter? _meter;
@@ -106,12 +108,35 @@ public sealed class LiveSession
 
     public void Touch() => Interlocked.Exchange(ref _lastTouchedTicks, DateTimeOffset.UtcNow.UtcTicks);
 
+    /// <summary>The RedZone channel read this session within <see cref="IdleTimeout"/>: it runs even for one stream with
+    /// one rendition (pass-through has no segments in memory to cut to).</summary>
+    public bool KeptWarm => DateTimeOffset.UtcNow - new DateTimeOffset(Interlocked.Read(ref _warmTicks), TimeSpan.Zero) < IdleTimeout;
+
+    /// <summary>For the RedZone channel: keeps the session running (starting it if needed) without counting as a player.</summary>
+    public async Task WarmAsync(CancellationToken ct)
+    {
+        Interlocked.Exchange(ref _warmTicks, DateTimeOffset.UtcNow.UtcTicks);
+        Touch();
+        if (!Running)
+        {
+            await StartAsync(ct).ConfigureAwait(false);
+        }
+    }
+
     /// <summary>The channel's playlist, or null when this channel is served by plain pass-through
     /// (one candidate, one rendition — exactly as before the ladder existed).</summary>
     /// <param name="player">A viewer's player reads it (not the recorder): counts in the diagnostics.</param>
     public async Task<string?> GetPlaylistAsync(Func<long, string> segmentUri, CancellationToken ct, bool player = true)
     {
         var previousTouch = LastTouched;
+        if (player && DateTimeOffset.UtcNow - new DateTimeOffset(Interlocked.Read(ref _passthroughServedTicks), TimeSpan.Zero) < IdleTimeout)
+        {
+            // a player is following the upstream's own playlist (the RedZone channel may have started a session for
+            // this channel since): never swap it out under it
+            Interlocked.Exchange(ref _passthroughServedTicks, DateTimeOffset.UtcNow.UtcTicks);
+            return null;
+        }
+
         Touch();
         if (Passthrough && !Running && DateTimeOffset.UtcNow - previousTouch < IdleTimeout)
         {
@@ -125,6 +150,11 @@ public sealed class LiveSession
 
         if (Passthrough)
         {
+            if (player)
+            {
+                Interlocked.Exchange(ref _passthroughServedTicks, DateTimeOffset.UtcNow.UtcTicks);
+            }
+
             return null;
         }
 
@@ -243,7 +273,7 @@ public sealed class LiveSession
             }
 
             var ranked = _svc.RankedTiers(Channel);
-            if (Channel.Candidates.Count <= 1 && ranked.Count <= 1)
+            if (ranked.Count == 0 || (Channel.Candidates.Count <= 1 && ranked.Count <= 1 && !KeptWarm))
             {
                 Passthrough = true;
                 return;

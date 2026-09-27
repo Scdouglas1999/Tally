@@ -38,6 +38,20 @@ export interface TallyWatch {
   cardPath: string;
   /** "teams" | "epg" | "network" */
   confidence: string;
+  /** The commentary language of the channel: "en" (also when the server does not say) or "es" (2.3 contract). */
+  language: string;
+}
+
+/**
+ * One commentary language of a game (2.3 contract, `GameInfo.feeds`): present only when a game has more than one
+ * playable language, English first. `watch` plays that language; the game's own `watch` is already the viewer's
+ * preferred one (the server decides, from the `streamLanguage` setting).
+ */
+export interface TallyFeed {
+  language: string;
+  /** "English" | "Español" */
+  label: string;
+  watch: TallyWatch;
 }
 
 /**
@@ -97,6 +111,8 @@ export interface TallyGame {
   recording: TallyGameRecording | null;
   /** The server's stream search for this game (see TallySearch); null when the board has none. */
   search: TallySearch | null;
+  /** The game's commentary languages when it has more than one (see TallyFeed); empty otherwise and on older plugins. */
+  feeds: TallyFeed[];
 }
 
 export interface TallyProgramme {
@@ -124,6 +140,39 @@ export interface TallyChannel {
   now: TallyProgramme | null;
   next: TallyProgramme | null;
   stream: TallyStreamStatus | null;
+  /** "en" (also when the server does not say) or "es" (2.3 contract: a Spanish sibling is named "… (Español)"). */
+  language: string;
+  /** "redzone" for the server's RedZone channel (2.3 contract); empty for every other channel. */
+  kind: string;
+}
+
+/**
+ * What the RedZone channel shows now (`GET /JellyTV/Client/v1/redzone`, 2.3 contract). `reason`: "red zone" |
+ * "score" | "two-minute drill" | "overtime" | "close" | "hottest", or null.
+ */
+export interface TallyRedZone {
+  active: boolean;
+  gameId: string | null;
+  title: string | null;
+  reason: string | null;
+  since: string | null;
+  next: string[];
+  /**
+   * The channel's last cuts as its players got them, oldest first (2.3; empty from an older server and while nobody
+   * watches): each `since` is when that cut entered the channel's playlist.
+   */
+  recent: TallyRedZoneCut[];
+  /** The server's clock when it answered (ISO-8601; null from an older server). */
+  serverTime: string | null;
+}
+
+/** One of `TallyRedZone.recent`: from `since` on the channel carries `gameId` (inactive: the "No games live" slate). */
+export interface TallyRedZoneCut {
+  active: boolean;
+  gameId: string | null;
+  title: string | null;
+  reason: string | null;
+  since: string | null;
 }
 
 export interface TallyEvent {
@@ -152,7 +201,11 @@ export interface TallySettings {
   lastChannel: string | null;
   onlyWatchable: boolean | null;
   favoriteTeams: string[];
+  /** The commentary language the viewer prefers (2.3 contract): "en" unless the viewer chose "es". */
+  streamLanguage: StreamLanguage;
 }
+
+export type StreamLanguage = 'en' | 'es';
 
 type Json = Record<string, unknown>;
 
@@ -204,7 +257,28 @@ export function decodeWatch(v: unknown): TallyWatch | null {
     hlsPath: str(o.hlsPath),
     cardPath: str(o.cardPath),
     confidence: str(o.confidence),
+    language: language(o.language),
   };
+}
+
+/** A language code as the apps use it: lowercase, "en" when missing. */
+function language(v: unknown): string {
+  const code = str(v).trim().toLowerCase();
+  return code === '' ? 'en' : code;
+}
+
+/** English first; a feed without a stream is no feed; one language alone is no choice (empty). */
+function decodeFeeds(v: unknown): TallyFeed[] {
+  const feeds: TallyFeed[] = [];
+  for (const f of arr(v)) {
+    const o = obj(f);
+    const lang = language(o.language);
+    const watch = decodeWatch(o.watch);
+    if (watch === null || watch.hlsPath === '' || feeds.some((x) => x.language === lang)) continue;
+    feeds.push({ language: lang, label: str(o.label) !== '' ? str(o.label) : languageLabel(lang), watch: { ...watch, language: lang } });
+  }
+  feeds.sort((a, b) => (a.language === 'en' ? 0 : 1) - (b.language === 'en' ? 0 : 1));
+  return feeds.length > 1 ? feeds : [];
 }
 
 export function decodeGame(v: unknown): TallyGame {
@@ -235,6 +309,7 @@ export function decodeGame(v: unknown): TallyGame {
     backdropPath: strOrNull(o.backdropPath),
     recording: decodeRecording(o.recording),
     search: decodeSearch(o.search),
+    feeds: decodeFeeds(o.feeds),
   };
 }
 
@@ -286,6 +361,25 @@ export function decodeChannel(v: unknown): TallyChannel {
             candidates: num(stream.candidates),
             live: bool(stream.live),
           },
+    language: language(o.language),
+    kind: str(o.kind),
+  };
+}
+
+export function decodeRedZone(v: unknown): TallyRedZone {
+  const o = obj(v);
+  return {
+    active: bool(o.active),
+    gameId: strOrNull(o.gameId),
+    title: strOrNull(o.title),
+    reason: strOrNull(o.reason),
+    since: strOrNull(o.since),
+    next: arr(o.next).filter((x): x is string => typeof x === 'string'),
+    recent: arr(o.recent).map((c) => {
+      const x = obj(c);
+      return { active: bool(x.active), gameId: strOrNull(x.gameId), title: strOrNull(x.title), reason: strOrNull(x.reason), since: strOrNull(x.since) };
+    }),
+    serverTime: strOrNull(o.serverTime),
   };
 }
 
@@ -323,6 +417,7 @@ export function decodeSettings(v: unknown): TallySettings {
     lastChannel: strOrNull(o.lastChannel),
     onlyWatchable: typeof o.onlyWatchable === 'boolean' ? o.onlyWatchable : null,
     favoriteTeams: arr(o.favoriteTeams).filter((f): f is string => typeof f === 'string'),
+    streamLanguage: o.streamLanguage === 'es' ? 'es' : 'en',
   };
 }
 
@@ -350,3 +445,52 @@ export const teamKey = (g: TallyGame, t: TallyTeam): string => g.league.toUpperC
 
 export const isFollowed = (g: TallyGame, teams: ReadonlySet<string>): boolean =>
   teams.has(teamKey(g, g.away)) || teams.has(teamKey(g, g.home));
+
+/** How a language is named in the apps ("Español" on purpose: it is what a Spanish-speaking viewer looks for). */
+export function languageLabel(code: string): string {
+  switch (code) {
+    case 'en':
+      return 'English';
+    case 'es':
+      return 'Español';
+    default:
+      return code.toUpperCase();
+  }
+}
+
+/** A Spanish stream: the card's "ES" chip. */
+export const isSpanish = (w: TallyWatch | null): boolean => w !== null && w.language === 'es';
+
+/** The feed `channelId` plays (the game's own `watch` when the channel is none of its feeds). */
+export function playingFeed(game: TallyGame, channelId: string): TallyFeed | null {
+  return game.feeds.find((f) => f.watch.channelId === channelId) ?? null;
+}
+
+/**
+ * The game's other commentary language: the feed that is not the one playing (`channelId`), or not the game's
+ * `watch` when nothing plays. Null when the game has one language.
+ */
+export function otherFeed(game: TallyGame, channelId?: string): TallyFeed | null {
+  if (game.feeds.length < 2) return null;
+  const current = channelId !== undefined ? playingFeed(game, channelId) : null;
+  const lang = current !== null ? current.language : (game.watch?.language ?? 'en');
+  return game.feeds.find((f) => f.language !== lang) ?? null;
+}
+
+/** The game as it plays in `feed` (its `watch` swapped: the route, the title and the switcher follow). */
+export const withFeed = (game: TallyGame, feed: TallyFeed): TallyGame => ({ ...game, watch: feed.watch });
+
+/** The server's RedZone channel on the board (2.3 contract, `kind: "redzone"`), if it has one with a stream. */
+export function redZoneChannel(board: TallyBoard | null): TallyChannel | null {
+  return board?.channels.find((c) => c.kind === 'redzone' && c.hlsPath !== '') ?? null;
+}
+
+/** The games board's RedZone tile shows while the board has the channel and the server says it is on the air. */
+export function redZoneTileShown(board: TallyBoard | null, status: TallyRedZone | null): boolean {
+  return redZoneChannel(board) !== null && status !== null && status.active;
+}
+
+/** How a RedZone cut's reason is written on screen ("RED ZONE", "TWO-MINUTE DRILL"; nothing for none). */
+export function redZoneReasonLabel(reason: string | null): string {
+  return reason !== null ? reason.trim().toUpperCase() : '';
+}
