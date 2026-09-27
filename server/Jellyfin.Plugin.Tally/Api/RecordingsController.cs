@@ -404,7 +404,7 @@ public class RecordingsController : ControllerBase
     }
 
     private async Task<List<GameInfo>> Upcoming(CancellationToken ct)
-        => await _scoreboard.GetUpcomingAsync(ScoreboardService.ParseLeagues(Plugin.Instance?.Configuration.ScoreLeagues), 7, ct).ConfigureAwait(false);
+        => await _scoreboard.GetUpcomingAsync(_scoreboard.ActiveLeagues, 7, ct).ConfigureAwait(false);
 
     private static int Order(string state) => state switch
     {

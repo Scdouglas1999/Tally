@@ -77,7 +77,7 @@ public class CardArtTests
 
         Assert.Equal("401", index["named"].Id);          // the live game, not next week's rematch
         Assert.False(index.ContainsKey("fox"));           // broadcaster-only: could be either regional game
-        Assert.Equal("c", CardArtService.Version(null, DateTimeOffset.UtcNow));
+        Assert.Equal("c2", CardArtService.Version(null, DateTimeOffset.UtcNow));
     }
 
     [Fact]
@@ -128,7 +128,7 @@ public class CardArtTests
         Assert.NotEqual(CardArtService.StableKey(before.Name), CardArtService.StableKey("Cleveland Browns Tampa Bay Buccaneers"));
 
         var path = CardArtService.CardPath(before, null, t);
-        Assert.StartsWith("/JellyTV/Card/" + CardArtService.StableKey(before.Name) + ".png?v=c&n=Denver%20Broncos", path);
+        Assert.StartsWith("/JellyTV/Card/" + CardArtService.StableKey(before.Name) + ".png?v=c2&n=Denver%20Broncos", path);
         Assert.DoesNotContain("aaaa1111", path);
     }
 

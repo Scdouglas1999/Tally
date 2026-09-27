@@ -135,6 +135,10 @@ public class PluginConfiguration : BasePluginConfiguration
     /// A string, not a list: XmlSerializer appends to list defaults on every load.</summary>
     public string ScoreLeagues { get; set; } = string.Empty;
 
+    /// <summary>Comma-separated league paths the admin removed after Tally added them because the sources carry their
+    /// games (see Scores/LeagueDetector.cs): they are not added again.</summary>
+    public string ScoreLeaguesExcluded { get; set; } = string.Empty;
+
     /// <summary>Development only, never shown in the settings page: a base URL that replaces ESPN's hosts for the
     /// scoreboard feed ("http://172.17.0.1:8765"), so a simulator can serve an ESPN-shaped payload and bump scores
     /// on demand (Tally's tally/dev/score-sim.py). Empty, the default, means ESPN.</summary>

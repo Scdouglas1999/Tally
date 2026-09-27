@@ -792,6 +792,8 @@
 }
 #jellytv-app #src-list { margin-bottom: 16px; border-bottom: 1px solid var(--jtv-rule); }
 #jellytv-app #src-list:empty { border: 0; }
+#jellytv-app #league-list { border-bottom: 1px solid var(--jtv-rule); margin-bottom: 8px; }
+#jellytv-app .league-row { min-height: 52px; padding: 8px 0; }
 #jellytv-app .src-row .s-text { flex: 1; min-width: 0; }
 #jellytv-app .src-row .s-name { font-weight: 600; font-size: 14px; }
 #jellytv-app .src-row .s-meta { font: 400 11px/1.4 var(--jtv-mono); color: var(--jtv-muted); margin-top: 2px; word-break: break-all; }

@@ -1433,6 +1433,46 @@ function lgDevModeLine() {
 // The install page as the server says friends should reach it (its configured public address, else this one).
 function getUrl() { return (state.status && state.status.getUrl) || env.url('JellyTV/Get'); }
 
+// The scoreboard's leagues as Settings shows them: the Leagues setting (its defaults when empty) and the leagues the
+// server added because the sources carry their games, less those the admin removed.
+function leagueInfo() {
+  return (state.status && state.status.leagues) || { defaults: ['football/nfl', 'football/college-football', 'baseball/mlb'], fromSources: [], known: [] };
+}
+function leagueLabel(path) {
+  const k = (leagueInfo().known || []).find(k => k.path.toLowerCase() === path.toLowerCase());
+  return k ? k.label : path;
+}
+function splitList(s) { return (s || '').split(/[\s,]+/).map(x => x.trim()).filter(Boolean); }
+function configuredLeagues(cfg) {
+  const own = splitList(cfg && cfg.ScoreLeagues);
+  return own.length ? own : [...leagueInfo().defaults];
+}
+function leagueRows(cfg) {
+  if (!cfg) return [];
+  const info = leagueInfo();
+  const defaults = new Set(info.defaults.map(p => p.toLowerCase()));
+  const excluded = new Set(splitList(cfg.ScoreLeaguesExcluded).map(p => p.toLowerCase()));
+  const rows = configuredLeagues(cfg).map(p => ({ path: p, why: defaults.has(p.toLowerCase()) ? 'default' : 'added' }));
+  (info.fromSources || []).forEach(f => {
+    if (!excluded.has(f.league.toLowerCase()) && !rows.some(r => r.path.toLowerCase() === f.league.toLowerCase())) {
+      rows.push({ path: f.league, why: 'sources', channels: f.channels });
+    }
+  });
+  return rows;
+}
+function leagueChoices(cfg) {
+  const on = new Set(leagueRows(cfg).map(r => r.path.toLowerCase()));
+  return (leagueInfo().known || []).filter(k => !on.has(k.path.toLowerCase()));
+}
+function addLeague(cfg, path, container) {
+  const list = configuredLeagues(cfg);
+  if (!list.some(p => p.toLowerCase() === path.toLowerCase())) list.push(path);
+  cfg.ScoreLeagues = list.join(', ');
+  cfg.ScoreLeaguesExcluded = splitList(cfg.ScoreLeaguesExcluded).filter(p => p.toLowerCase() !== path.toLowerCase()).join(', ');
+  renderAdmin(container);
+  toast(leagueLabel(path) + ' added — remember to Save configuration');
+}
+
 async function renderAdmin(container, fresh) {
   // Keep the working config in state.adminCfg — mutating then re-rendering
   // must NOT refetch from the server or unsaved changes get discarded.
@@ -1496,8 +1536,17 @@ async function renderAdmin(container, fresh) {
         Show the Games board, score bugs and switch alerts</label></div>
       <div class="f-row"><label class="check"><button class="toggle${cfg && cfg.LiveCardsEnabled !== false ? ' on' : ''}" id="set-livecards" role="switch" aria-checked="${!!(cfg && cfg.LiveCardsEnabled !== false)}"></button>
         Live cards for TV apps — redraw channel cards with the current score every 2 minutes while games are on, and keep channels numbered hottest-first (re-runs Jellyfin's guide refresh each time)</label></div>
-      <div class="f-row"><label for="set-leagues">Leagues — comma-separated ESPN paths, blank for the defaults (NFL and MLB)</label>
-        <input type="text" id="set-leagues" value="${esc(cfg ? cfg.ScoreLeagues || '' : '')}" placeholder="football/nfl, baseball/mlb"></div>
+      <div class="f-row"><label>Leagues on the Games board</label>
+        <div id="league-list">${leagueRows(cfg).map(r => `
+          <div class="src-row league-row">
+            <div class="s-text"><div class="s-name">${esc(leagueLabel(r.path))}</div>
+            <div class="s-meta">${esc(r.path)} · ${r.why === 'sources' ? 'from your sources' + (r.channels && r.channels.length ? ': ' + esc(r.channels.slice(0, 3).join('; ')) : '') : r.why === 'default' ? 'default' : 'added by you'}</div></div>
+            <button class="btn btn-danger" data-league-del="${esc(r.path)}" data-league-why="${r.why}">Remove</button>
+          </div>`).join('')}</div>
+        <div class="set-note">Tally adds a league by itself when your sources carry its games, so their channels get game cards, guide entries and stream searches. Remove it here and it stays off.</div></div>
+      <div class="f-row"><label for="set-league-add">Add a league</label>
+        <select id="set-league-add"><option value="">Choose a league…</option>${leagueChoices(cfg).map(k => `<option value="${esc(k.path)}">${esc(k.label)}</option>`).join('')}<option value="other">Another ESPN league (path)…</option></select>
+        <input type="text" id="set-league-path" placeholder="soccer/ned.1" hidden autocapitalize="off" spellcheck="false"></div>
     </div>
 
     <div class="set-card">
@@ -1523,10 +1572,30 @@ async function renderAdmin(container, fresh) {
   $('#set-dl-code', container).oninput = (e) => { cfg.DownloaderCode = e.target.value.trim(); };
   $('#set-fullscan', container).oninput = (e) => { cfg.WebFullScanMinutes = +e.target.value || 180; };
 
-  $('#set-weblook', container).onclick = () => { cfg.WebLook = cfg.WebLook === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
-  $('#set-takeover', container).onclick = () => { cfg.ReplaceLiveTv = cfg.ReplaceLiveTv === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
-  $('#set-livecards', container).onclick = () => { cfg.LiveCardsEnabled = cfg.LiveCardsEnabled === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
-  $('#set-scores', container).onclick = () => { cfg.ScoresEnabled = cfg.ScoresEnabled === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
+  $('#set-weblook', container).onclick = () => { cfg.WebLook = cfg.WebLook === false; renderAdmin(container); };
+  $('#set-takeover', container).onclick = () => { cfg.ReplaceLiveTv = cfg.ReplaceLiveTv === false; renderAdmin(container); };
+  $('#set-livecards', container).onclick = () => { cfg.LiveCardsEnabled = cfg.LiveCardsEnabled === false; renderAdmin(container); };
+  $('#set-scores', container).onclick = () => { cfg.ScoresEnabled = cfg.ScoresEnabled === false; renderAdmin(container); };
+
+  $$('[data-league-del]', container).forEach(b => b.onclick = () => {
+    const path = b.dataset.leagueDel;
+    if (b.dataset.leagueWhy === 'sources') {
+      cfg.ScoreLeaguesExcluded = [...splitList(cfg.ScoreLeaguesExcluded), path].join(', ');
+    } else {
+      cfg.ScoreLeagues = configuredLeagues(cfg).filter(p => p.toLowerCase() !== path.toLowerCase()).join(', ');
+    }
+    renderAdmin(container);
+    toast('League removed — remember to Save configuration');
+  });
+  $('#set-league-add', container).onchange = (e) => {
+    const path = e.target.value;
+    if (path === 'other') { $('#set-league-path', container).hidden = false; $('#set-league-path', container).focus(); return; }
+    if (path) addLeague(cfg, path, container);
+  };
+  $('#set-league-path', container).onkeydown = (e) => {
+    const path = e.target.value.trim().toLowerCase();
+    if (e.key === 'Enter' && /^[a-z0-9.-]+\/[a-z0-9.-]+$/.test(path)) addLeague(cfg, path, container);
+  };
 
   $('#src-add', container).onclick = () => {
     $('#src-form', container).innerHTML = `
@@ -1604,7 +1673,6 @@ async function renderAdmin(container, fresh) {
   $('#save-cfg', container).onclick = async () => {
     cfg.RefreshIntervalMinutes = clamp(+$('#set-interval', container).value || 30, 1, 720);
     cfg.WebFullScanMinutes = clamp(+$('#set-fullscan', container).value || 180, 60, 720);
-    cfg.ScoreLeagues = $('#set-leagues', container).value.trim();
     try {
       await ApiClient.updatePluginConfiguration(state.status.pluginId, cfg);
       $('#cfg-msg', container).textContent = 'Saved — scanning sources…';

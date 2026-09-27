@@ -193,12 +193,16 @@ mode.
 Data comes from ESPN's public scoreboard feed, fetched **by the server** (one
 cached request per league, every ~12 s while a game is live and only while
 someone has Tally open or a recording is scheduled, and at most once a minute while a web page source is enabled, for
-the [stream search](#web-page-auto-extract)). The default leagues are **NFL and MLB**; admins can
-add others (`basketball/nba`, `hockey/nhl`, `football/college-football`,
-`soccer/eng.1`…) or switch the
-whole feature off under **Settings → Live scores**; off means the server makes
-no third-party requests of its own. Team logos are loaded by the browser from
-ESPN's CDN.
+the [stream search](#web-page-auto-extract)). The default leagues are the **NFL, college football and MLB**.
+**Leagues follow your sources**: when channels are named after a game of a league the board does not cover (both
+teams by their full names, "Boston Celtics Los Angeles Lakers"), Tally adds that league by itself, so those channels
+get their game's card, guide entry and stream searches like any other. It looks at the NFL, college football, MLB,
+the NBA, WNBA, NHL, men's college basketball, MLS and the major European soccer leagues, after a source refresh
+(at most every 10 minutes, or every 30 minutes when no new channel appeared), and lets a league go after 3 days without
+such a channel. **Settings → Live scores** lists the leagues on the board and why each is there (default, added by
+you, from your sources); admins can add any ESPN league (`hockey/nhl`, `soccer/ned.1`…) or remove one (a league
+removed there is not added back), or switch the whole feature off; off means the server makes no third-party
+requests of its own. Team logos are loaded by the browser from ESPN's CDN.
 
 ## Recording games (DVR)
 
@@ -287,7 +291,10 @@ web view — nothing can make them load the Tally web UI. Tally works *with* the
   every 2 minutes. Channels are numbered **hottest game first**, and the guide shows real entries
   ("Jets at Packers") instead of "Live". The native channel grid becomes a heat-sorted scoreboard where
   every card is a play button. Cards are minutes old, not seconds. Switch off under
-  **Settings → Live scores → Live cards for TV apps**.
+  **Settings → Live scores → Live cards for TV apps**. A channel no game claims (another league's game, a stream
+  named oddly) still gets a matchup card when its name reads as two teams: split at "vs" / "at", or two teams of one
+  league found in it ("Mississippi State Bulldogs Missouri Tigers"), with their logos from ESPN's team lists (fetched
+  when first needed, kept a week); otherwise its name set large. Both carry the league or sport.
 - **Sizes and time zones**: cards and game backdrops (`/JellyTV/Backdrop/{gameId}.png`) take `w=<px>`, the width the
   app draws them at: the server snaps it up to 320, 480, 640, 960, 1280 or 1920 (the art's own size when that is not
   smaller) and caches each size. `tz=<IANA zone>` (`America/New_York`) sets the zone of the times drawn on a card;

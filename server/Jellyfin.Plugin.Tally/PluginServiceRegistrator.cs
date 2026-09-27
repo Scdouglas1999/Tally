@@ -58,6 +58,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         services.AddSingleton<SourceManager>();
         services.AddSingleton<Live.LiveLadderService>();
         services.AddSingleton<ScoreboardService>();
+        services.AddSingleton<LeagueDetector>();
+        services.AddSingleton<TeamDirectory>();
         services.AddSingleton<CardArtService>();
         services.AddSingleton<GameArtService>();
         services.AddSingleton<TvAppService>();
@@ -74,6 +76,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         // searches for games' streams around their start and on a viewer's find
         services.AddSingleton<StreamSearchService>();
         services.AddHostedService(sp => sp.GetRequiredService<StreamSearchService>());
+        services.AddHostedService(sp => sp.GetRequiredService<LeagueDetector>());
         services.AddHostedService<LiveTvRegistrationService>();
         services.AddHostedService<LiveCardRefreshService>();
         services.AddHostedService<PluginRepositoryService>();

@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
@@ -35,8 +37,9 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
  * A channel on a phone (a cell of the Channels grid): the channel's 16:9 card art cropped on `screen`, the black
  * label bar with the channel name (the indicator `live` red, as the TV card's), then the programme on now and next
  * in mono; while the channel shows a live game and scores are not hidden, its scoreline ("TOR 3 · BAL 2") in accent
- * takes the NOW line, as it takes the TV card's label bar. A tap plays the channel; a long-press adds it to
- * multiview (the TV's long OK).
+ * takes the NOW line, as it takes the TV card's label bar. A channel with no guide at all (nothing on now or next,
+ * no game) shows no NOW / NEXT lines: its card art already names what it carries; the space stays, so the grid's
+ * rows keep one height. A tap plays the channel; a long-press adds it to multiview (the TV's long OK).
  */
 @Composable
 fun PhoneChannelCard(
@@ -73,14 +76,16 @@ fun PhoneChannelCard(
             }
         }
         PhoneGameFooter(text = channel.name, live = true)
+        val scoreline = if (game != null && !hideScores) scoreline(game) else null
+        val noGuide = scoreline == null && channel.now?.title.isNullOrBlank() && channel.next?.displayTitle() == null
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                    .padding(horizontal = 10.dp, vertical = 8.dp)
+                    .then(if (noGuide) Modifier.alpha(0f).clearAndSetSemantics {} else Modifier),
         ) {
-            val scoreline = if (game != null && !hideScores) scoreline(game) else null
             ProgrammeLine(
                 label = stringResource(R.string.tally_phone_sports_now),
                 text = scoreline ?: channel.now?.title,
