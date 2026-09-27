@@ -90,6 +90,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
     private Task<RedZoneSlate?>? _slate;
     private long _lastTouchedTicks;
     private DateTimeOffset _startedAt;
+    private RedZoneSwitch? _logged;
 
     public RedZoneService(
         SourceManager sources,
@@ -164,7 +165,9 @@ public sealed class RedZoneService : IHostedService, IDisposable
         Install(_sources, () => _loopback() + "/JellyTV/Live/" + ChannelId + ".m3u8?s=" + _signer.Sign("live:" + ChannelId, string.Empty));
         if (Enabled)
         {
-            _ = SlateAsync(); // made once, in the background: the first viewer with no game on finds it ready
+            // made once, in the background, once Jellyfin has found its ffmpeg: the first viewer with no game on finds
+            // it ready
+            _ = Task.Delay(TimeSpan.FromSeconds(30), CancellationToken.None).ContinueWith(_ => SlateAsync(), TaskScheduler.Default);
         }
 
         return Task.CompletedTask;
@@ -361,6 +364,11 @@ public sealed class RedZoneService : IHostedService, IDisposable
 
                 Warm(ct);
                 Session.Pump(now, WindowOf);
+                if (Session.LastSwitch is { How: not null } shown && !ReferenceEquals(shown, _logged))
+                {
+                    _logged = shown;
+                    _logger.LogInformation("JellyTV RedZone: now showing {What} ({How})", shown.Title ?? "the slate", shown.How);
+                }
 
                 if (Session.Starved(now) > StarvedAfter)
                 {

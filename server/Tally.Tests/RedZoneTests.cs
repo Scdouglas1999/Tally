@@ -305,6 +305,31 @@ public class RedZoneSessionTests
     }
 
     [Fact]
+    public void Cuts_Only_Once_The_New_Games_Entry_Segment_Is_In_Memory()
+    {
+        var a = new OutputWindow();
+        var b = new OutputWindow();
+        Feed(a, Chain(SegA, 3), T0);
+        var windows = new Dictionary<string, OutputWindow> { ["a"] = a, ["b"] = b };
+        var s = new RedZoneSession();
+        s.Target("a", "A", "hottest", T0);
+        s.Pump(T0, id => windows.GetValueOrDefault(id));
+
+        // b's session just started: its segments are listed while they download
+        var body = new TaskCompletionSource<byte[]?>();
+        b.Publish(new PublishedSegment { Duration = Seconds(SegB), Upstream = new Uri("http://x.example/b.ts"), Body = body.Task }, T0);
+        s.Target("b", "B", "score", T0.AddSeconds(1));
+        Feed(a, Chain(SegA, 4).Skip(3), T0.AddSeconds(1));
+        Assert.Equal(1, s.Pump(T0.AddSeconds(1), id => windows.GetValueOrDefault(id)));
+        Assert.Equal("a", s.Source);
+
+        body.SetResult(SegB);
+        Assert.Equal(1, s.Pump(T0.AddSeconds(2), id => windows.GetValueOrDefault(id)));
+        Assert.Equal("b", s.Source);
+        AssertContinuous(Served(s));
+    }
+
+    [Fact]
     public void A_Game_In_Another_Codec_Is_Cut_To_With_A_Discontinuity_And_The_Clock_Still_Never_Steps_Back()
     {
         var a = new OutputWindow();

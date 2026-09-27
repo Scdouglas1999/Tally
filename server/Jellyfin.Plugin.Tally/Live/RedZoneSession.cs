@@ -63,6 +63,17 @@ public sealed class RedZoneSession
         }
     }
 
+    public RedZoneSwitch? LastSwitch
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _switches.Count == 0 ? null : _switches[^1];
+            }
+        }
+    }
+
     /// <summary>What to show: a game's channel, or null for the slate. Takes effect at the next <see cref="Pump"/> that
     /// finds something to cut to.</summary>
     public void Target(string? channelId, string? title, string reason, DateTimeOffset now)
@@ -198,8 +209,14 @@ public sealed class RedZoneSession
             MediaSequence = listed[0].Sequence,
             Segments = listed.Select(s => new HlsSegment { Sequence = s.Sequence, Duration = s.Duration, Uri = s.Upstream }).ToList()
         };
+        var entry = SwitchAlignment.StartSequence(playlist, behind, urgent: true);
+        if (listed.FirstOrDefault(x => x.Sequence == entry) is { Body.IsCompleted: false })
+        {
+            return; // a session just started downloads its first segments in order: the old source flows until then
+        }
+
         Record(now, null);
-        _cursor = SwitchAlignment.StartSequence(playlist, behind, urgent: true);
+        _cursor = entry;
         _source = _target;
         _onSlate = false;
         _cutPending = true;

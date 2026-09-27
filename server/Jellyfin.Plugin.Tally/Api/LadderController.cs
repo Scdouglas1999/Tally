@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Jellyfin.Plugin.Tally.Api;
 
-/// <summary>Admin view of the live ladder: every multi-stream channel's rungs and probes, and what each watched
-/// channel is playing and why it last switched.</summary>
+/// <summary>Admin view of the live ladder: every multi-stream channel's rungs and probes, what each watched
+/// channel is playing and why it last switched, and the RedZone channel's session with its last cuts.</summary>
 [ApiController]
 [Route("JellyTV/Ladder")]
 [Authorize(Policy = "RequiresElevation")]

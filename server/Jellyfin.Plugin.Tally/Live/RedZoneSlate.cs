@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Tally.Services;
@@ -19,9 +19,12 @@ namespace Jellyfin.Plugin.Tally.Live;
 public sealed class RedZoneSlate
 {
     /// <summary>Bump when the picture or the encoding changes: the cached file is made again.</summary>
-    public const string FileName = "redzone-slate-v1.ts";
+    public const string FileName = "redzone-slate-v2.ts";
 
-    public const double Seconds = 4;
+    /// <summary>128 frames at 30 fps and 200 AAC frames at 48 kHz last exactly as long, so the loop joins onto itself
+    /// within a frame (the encoder's priming frame starts the audio 21 ms early; with plain seconds it drifted by 65 ms a
+    /// lap).</summary>
+    public const double Seconds = 128 / 30.0;
 
     public RedZoneSlate(byte[] bytes)
     {
@@ -73,6 +76,11 @@ public sealed class RedZoneSlate
 
             var bytes = await File.ReadAllBytesAsync(tmp, ct).ConfigureAwait(false);
             File.Move(tmp, path, overwrite: true);
+            foreach (var old in Directory.GetFiles(folder, "redzone-slate-*.ts").Where(f => Path.GetFileName(f) != FileName))
+            {
+                File.Delete(old); // an earlier version's
+            }
+
             logger.LogInformation("JellyTV RedZone: made the \"No games live\" slate ({Kb} KB)", bytes.Length / 1024);
             return new RedZoneSlate(bytes);
         }
@@ -83,14 +91,14 @@ public sealed class RedZoneSlate
         }
     }
 
-    /// <summary>A 720p30 still with a keyframe at the start and none after (one GOP), and silent stereo AAC.</summary>
+    /// <summary>A 720p30 still with a keyframe at the start and none after (one GOP), and silent stereo AAC; see
+    /// <see cref="Seconds"/>.</summary>
     public static IReadOnlyList<string> Arguments(string png, string output) => new[]
     {
         "-hide_banner", "-nostats", "-loglevel", "error", "-y",
         "-loop", "1", "-framerate", "30", "-i", png,
         "-f", "lavfi", "-i", "anullsrc=channel_layout=stereo:sample_rate=48000",
-        "-t", Seconds.ToString(CultureInfo.InvariantCulture),
-        "-map", "0:v", "-map", "1:a",
+        "-map", "0:v", "-map", "1:a", "-frames:v", "128", "-frames:a", "200",
         "-c:v", "libx264", "-preset", "veryfast", "-tune", "stillimage", "-pix_fmt", "yuv420p", "-profile:v", "high",
         "-g", "300", "-bf", "0", "-vf", "scale=1280:720",
         "-c:a", "aac", "-b:a", "96k", "-ac", "2",
