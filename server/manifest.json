@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
     "versions": [
       {
+        "version": "2.3.0.12",
+        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a RedZone channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.0/Tally-server-2.3.0-jf12.zip",
+        "checksum": "6edecac13221b30aa24198e0ac39225a",
+        "timestamp": "2026-09-27T23:07:41.0000000Z"
+      },
+      {
+        "version": "2.3.0.11",
+        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a RedZone channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.0/Tally-server-2.3.0-jf10.11.zip",
+        "checksum": "09d842b2e940b86fa3a3ee16fd9f4e7a",
+        "timestamp": "2026-09-27T23:07:41.0000000Z"
+      },
+      {
+        "version": "2.3.0.10",
+        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a RedZone channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.0/Tally-server-2.3.0-jf10.10.zip",
+        "checksum": "fa6f08b6c4f9704183b26a9fd38594c9",
+        "timestamp": "2026-09-27T23:07:41.0000000Z"
+      },
+      {
         "version": "2.2.2.12",
         "changelog": "Tally 2.2.2: gentler, game-by-game stream searches, and game pictures for every channel.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
