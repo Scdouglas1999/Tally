@@ -56,7 +56,8 @@ public sealed class RedZoneSlate
                 }
             }
 
-            if (string.IsNullOrEmpty(ffmpeg) || !File.Exists(ffmpeg))
+            ffmpeg = ToolPath.Resolve(ffmpeg);
+            if (ffmpeg == null)
             {
                 logger.LogWarning("JellyTV RedZone: Jellyfin's ffmpeg was not found, so there is no \"No games live\" slate");
                 return null;

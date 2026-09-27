@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Tally.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Tally.Dvr;
@@ -36,8 +37,8 @@ public sealed class RecordingFinisher
     /// <summary>Remuxes to <paramref name="output"/>; null when it worked, else the error.</summary>
     public async Task<string?> RemuxAsync(WorkFolder work, string output, string format, string title, CancellationToken ct)
     {
-        var ffmpeg = _ffmpeg();
-        if (string.IsNullOrEmpty(ffmpeg) || !File.Exists(ffmpeg))
+        var ffmpeg = ToolPath.Resolve(_ffmpeg());
+        if (ffmpeg == null)
         {
             return "Jellyfin's ffmpeg was not found";
         }
@@ -151,8 +152,8 @@ public sealed class RecordingFinisher
     /// cannot tell.</summary>
     public async Task<(double Duration, bool HasVideo)?> ProbeAsync(string file, CancellationToken ct)
     {
-        var ffprobe = _ffprobe();
-        if (string.IsNullOrEmpty(ffprobe) || !File.Exists(ffprobe))
+        var ffprobe = ToolPath.Resolve(_ffprobe());
+        if (ffprobe == null)
         {
             return null;
         }
