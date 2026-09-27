@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
     "versions": [
       {
+        "version": "2.3.1.12",
+        "changelog": "Tally 2.3.1: RedZone's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.1/Tally-server-2.3.1-jf12.zip",
+        "checksum": "e8e1a8723c8c5ee879f617a89a46c26a",
+        "timestamp": "2026-09-27T23:20:55.0000000Z"
+      },
+      {
+        "version": "2.3.1.11",
+        "changelog": "Tally 2.3.1: RedZone's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.1/Tally-server-2.3.1-jf10.11.zip",
+        "checksum": "fd27471a5e0c587fc2d5986eaf9cd1a1",
+        "timestamp": "2026-09-27T23:20:55.0000000Z"
+      },
+      {
+        "version": "2.3.1.10",
+        "changelog": "Tally 2.3.1: RedZone's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.1/Tally-server-2.3.1-jf10.10.zip",
+        "checksum": "33616aeca87280bfbce18d03fe45ae78",
+        "timestamp": "2026-09-27T23:20:55.0000000Z"
+      },
+      {
         "version": "2.3.0.12",
         "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a RedZone channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
