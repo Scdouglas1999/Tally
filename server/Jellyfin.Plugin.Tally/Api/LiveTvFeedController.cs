@@ -27,9 +27,11 @@ public class LiveTvFeedController : ControllerBase
     private readonly SourceManager _sourceManager;
     private readonly StreamSigner _signer;
     private readonly CardArtService _cards;
+    private readonly Live.RedZoneService _redZone;
 
-    public LiveTvFeedController(SourceManager sourceManager, StreamSigner signer, CardArtService cards)
+    public LiveTvFeedController(SourceManager sourceManager, StreamSigner signer, CardArtService cards, Live.RedZoneService redZone)
     {
+        _redZone = redZone;
         _sourceManager = sourceManager;
         _signer = signer;
         _cards = cards;
@@ -49,8 +51,10 @@ public class LiveTvFeedController : ControllerBase
         // proxy URLs must carry scheme + host (loopback when fetched by the server).
         var baseUrl = $"{Request.Scheme}://{Request.Host.ToUriComponent()}";
 
-        // numbered hottest-first: native apps list channels by number
-        var channels = LiveTvOrder(_sourceManager.GetChannels(), games, SpanishInLiveTv);
+        // numbered hottest-first, English before Spanish: native apps list channels by number (the RedZone channel
+        // is always number 1)
+        var all = _sourceManager.GetChannels();
+        var channels = all.Where(c => c.IsSynthetic).Concat(LiveTvOrder(all.Where(c => !c.IsSynthetic).ToList(), games, SpanishInLiveTv)).ToList();
         for (var i = 0; i < channels.Count; i++)
         {
             var c = channels[i];
@@ -107,7 +111,23 @@ public class LiveTvFeedController : ControllerBase
             {
                 var epgId = EpgChannelId(c);
                 var programmes = _sourceManager.GetProgrammes(c.Id, now.AddHours(-24), now.AddDays(7));
-                if (programmes.Count == 0 && games.TryGetValue(c.Id, out var game))
+                if (c.IsSynthetic)
+                {
+                    // the game on screen right now; the guide is re-read after a cut changes the live cards
+                    var on = await _redZone.StatusAsync(cancellationToken).ConfigureAwait(false);
+                    WriteProgramme(writer, epgId, new Programme
+                    {
+                        Title = on.Title ?? "No games live",
+                        SubTitle = on.Reason == null ? c.Name : c.Name + " · " + on.Reason.ToUpperInvariant(),
+                        Description = "One stream that cuts to the hottest live game: red zones, scores, two-minute drills and overtime.",
+                        Category = "Sports",
+                        IconUrl = ArtworkUrl(baseUrl, c, games),
+                        Start = on.Since ?? now.AddHours(-1),
+                        End = now.AddHours(12),
+                        IsLive = true
+                    });
+                }
+                else if (programmes.Count == 0 && games.TryGetValue(c.Id, out var game))
                 {
                     // No EPG of its own, but we know the game: give native guides ("On Now", channel
                     // cards) a real title, times and artwork instead of a blank "Live" block.

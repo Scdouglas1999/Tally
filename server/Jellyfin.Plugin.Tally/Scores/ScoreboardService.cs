@@ -175,20 +175,25 @@ public sealed class ScoreboardService
     public Task<List<GameInfo>> GetGamesAsync(CancellationToken cancellationToken, TimeSpan minAge)
         => GetGamesAsync(ActiveLeagues, cancellationToken, minAge);
 
+    /// <summary>All games, a league with a live game refreshed once its board is <paramref name="maxLiveAge"/> old: the
+    /// RedZone channel polls every 10 s while someone watches it, a little faster than the board's live rate.</summary>
+    public Task<List<GameInfo>> GetLiveGamesAsync(TimeSpan maxLiveAge, CancellationToken cancellationToken)
+        => GetGamesAsync(ActiveLeagues, cancellationToken, TimeSpan.Zero, maxLiveAge);
+
     /// <summary>The games of <paramref name="leagues"/>, whether the scoreboard covers them or not (the league
     /// detector looks at leagues it does not cover yet), through the same cache.</summary>
-    public async Task<List<GameInfo>> GetGamesAsync(IReadOnlyList<string> leagues, CancellationToken cancellationToken, TimeSpan minAge)
+    public async Task<List<GameInfo>> GetGamesAsync(IReadOnlyList<string> leagues, CancellationToken cancellationToken, TimeSpan minAge, TimeSpan? maxLiveAge = null)
     {
         var now = DateTimeOffset.UtcNow;
 
-        if (leagues.Any(l => IsStale(l, now, minAge)))
+        if (leagues.Any(l => IsStale(l, now, minAge, maxLiveAge)))
         {
             // single flight: concurrent viewers share one refresh instead of each hitting upstream
             await _refreshLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
                 now = DateTimeOffset.UtcNow;
-                await Task.WhenAll(leagues.Where(l => IsStale(l, now, minAge)).Select(l => RefreshLeagueAsync(l, cancellationToken))).ConfigureAwait(false);
+                await Task.WhenAll(leagues.Where(l => IsStale(l, now, minAge, maxLiveAge)).Select(l => RefreshLeagueAsync(l, cancellationToken))).ConfigureAwait(false);
             }
             finally
             {
@@ -202,8 +207,9 @@ public sealed class ScoreboardService
             .ToList();
     }
 
-    private bool IsStale(string league, DateTimeOffset now, TimeSpan minAge)
-        => !_cache.TryGetValue(league, out var c) || (now - c.FetchedAt >= c.Ttl && now - c.FetchedAt >= minAge);
+    private bool IsStale(string league, DateTimeOffset now, TimeSpan minAge, TimeSpan? maxLiveAge = null)
+        => !_cache.TryGetValue(league, out var c) || (now - c.FetchedAt >= c.Ttl && now - c.FetchedAt >= minAge)
+           || (maxLiveAge is { } max && c.Ttl == LiveTtl && now - c.FetchedAt >= max);
 
     private async Task RefreshLeagueAsync(string league, CancellationToken cancellationToken)
     {
