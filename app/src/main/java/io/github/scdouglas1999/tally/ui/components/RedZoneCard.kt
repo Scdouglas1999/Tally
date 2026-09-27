@@ -108,10 +108,11 @@ fun RedZoneCard(
                     modifier = Modifier.weight(1f),
                 )
                 tile.game?.detail?.takeIf { it.isNotBlank() }?.let { detail ->
+                    // as a live game card's clock
                     Text(
-                        text = detail.tallyUppercase(),
+                        text = detail,
                         style = TallyType.label,
-                        color = TallyColors.liveText,
+                        color = TallyColors.accent,
                         maxLines = 1,
                     )
                 }

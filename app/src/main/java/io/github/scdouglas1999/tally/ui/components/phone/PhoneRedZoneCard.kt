@@ -67,7 +67,7 @@ fun PhoneRedZoneCard(
                 Text(
                     text = detail.tallyUppercase(),
                     style = PhoneType.label,
-                    color = TallyColors.liveText,
+                    color = TallyColors.text,
                     maxLines = 1,
                 )
             }
