@@ -133,6 +133,15 @@ public sealed class OutputWindow
         }
     }
 
+    /// <summary>What is listed now, oldest first.</summary>
+    public List<PublishedSegment> Listed()
+    {
+        lock (_gate)
+        {
+            return _segments.ToList();
+        }
+    }
+
     public PublishedSegment? Get(long sequence)
     {
         lock (_gate)

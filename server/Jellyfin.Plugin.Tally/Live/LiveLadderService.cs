@@ -242,7 +242,7 @@ public sealed class LiveLadderService : IHostedService, IDisposable
         var now = DateTimeOffset.UtcNow;
         var queued = 0;
         var round = new ProbeRound();
-        foreach (var c in channels)
+        foreach (var c in channels.Where(c => !c.IsSynthetic))
         {
             var list = Candidates(c);
             foreach (var cand in list)

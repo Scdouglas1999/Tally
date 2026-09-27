@@ -49,6 +49,13 @@ public class SourceChannel
     /// <summary>Ids of the channels merged into this one (they no longer appear on their own).</summary>
     public List<string> MergedIds { get; set; } = new();
 
+    /// <summary>A channel the plugin makes itself rather than a source's: "redzone" (see <c>RedZoneService</c>); empty for
+    /// every source channel.</summary>
+    public string Kind { get; set; } = string.Empty;
+
+    [JsonIgnore]
+    public bool IsSynthetic => Kind.Length > 0;
+
     public SourceChannel ShallowCopy() => (SourceChannel)MemberwiseClone();
 
     public static string MakeId(string sourceId, string streamUrl)

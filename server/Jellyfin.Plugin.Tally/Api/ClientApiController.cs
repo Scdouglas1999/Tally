@@ -38,6 +38,7 @@ public class ClientApiController : ControllerBase
     private readonly Live.LiveLadderService _ladder;
     private readonly StreamSearchService _search;
     private readonly ScoreboardService _scoreboard;
+    private readonly Live.RedZoneService _redZone;
 
     public ClientApiController(
         SourceManager sourceManager,
@@ -49,8 +50,10 @@ public class ClientApiController : ControllerBase
         LiveTvItemIndex liveTv,
         Live.LiveLadderService ladder,
         StreamSearchService search,
-        ScoreboardService scoreboard)
+        ScoreboardService scoreboard,
+        Live.RedZoneService redZone)
     {
+        _redZone = redZone;
         _ladder = ladder;
         _search = search;
         _scoreboard = scoreboard;
@@ -69,6 +72,11 @@ public class ClientApiController : ControllerBase
     {
         var features = _enrichers.Where(e => e.IsEnabled).Select(e => e.Name).ToList();
         features.AddRange(new[] { "events", "multiview" });
+        if (Live.RedZoneService.Enabled && _sourceManager.GetChannel(Live.RedZoneService.ChannelId) != null)
+        {
+            features.Add("redzone");
+        }
+
         if (_sourceManager.GetChannels().Any(c => _sourceManager.GetNowNext(c.Id).Now != null))
         {
             features.Add("guide");
@@ -183,6 +191,12 @@ public class ClientApiController : ControllerBase
         return c == null ? NotFound() : Ok(ToChannel(c, null, DateTimeOffset.UtcNow));
     }
 
+    /// <summary>The game on the Tally RedZone channel right now (or the one it would open on while nobody watches).
+    /// Apps show "On RedZone now: …" from it, polling every 10 s while they play the channel.</summary>
+    [HttpGet("redzone")]
+    public async Task<IActionResult> RedZone(CancellationToken cancellationToken)
+        => Ok(await _redZone.StatusAsync(cancellationToken).ConfigureAwait(false));
+
     [HttpGet("settings")]
     public async Task<IActionResult> GetSettings()
     {
@@ -240,7 +254,8 @@ public class ClientApiController : ControllerBase
             GameId = game?.Id,
             Now = current,
             Next = next,
-            Stream = _ladder.Describe(c)
+            Stream = c.IsSynthetic ? null : _ladder.Describe(c),
+            Kind = c.IsSynthetic ? c.Kind : null
         };
     }
 }

@@ -32,10 +32,12 @@ public class ProxyController : ControllerBase
     private readonly ProxyCache _cache;
     private readonly Sources.SourceManager _sourceManager;
     private readonly Live.LiveLadderService _ladder;
+    private readonly Live.RedZoneService _redZone;
     private readonly ILogger<ProxyController> _logger;
 
-    public ProxyController(UpstreamFetcher fetcher, StreamSigner signer, ProxyCache cache, Sources.SourceManager sourceManager, Live.LiveLadderService ladder, ILogger<ProxyController> logger)
+    public ProxyController(UpstreamFetcher fetcher, StreamSigner signer, ProxyCache cache, Sources.SourceManager sourceManager, Live.LiveLadderService ladder, Live.RedZoneService redZone, ILogger<ProxyController> logger)
     {
+        _redZone = redZone;
         _sourceManager = sourceManager;
         _ladder = ladder;
         _fetcher = fetcher;
@@ -94,6 +96,19 @@ public class ProxyController : ControllerBase
             return StatusCode(403);
         }
 
+        if (Jellyfin.Plugin.Tally.Live.RedZoneService.IsRedZone(id))
+        {
+            if (_sourceManager.GetChannel(id) == null)
+            {
+                return NotFound(); // switched off
+            }
+
+            var pb = Request.PathBase.Value ?? string.Empty;
+            var playlist = await _redZone.GetPlaylistAsync(seq => $"{pb}/JellyTV/Live/{id}/{seq}.ts?s={s}", cancellationToken).ConfigureAwait(false);
+            Response.Headers.CacheControl = "no-store";
+            return Content(playlist, "application/vnd.apple.mpegurl");
+        }
+
         var channel = _sourceManager.GetChannel(id);
         if (channel == null || !Uri.TryCreate(channel.StreamUrl, UriKind.Absolute, out var uri)
             || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
@@ -127,6 +142,12 @@ public class ProxyController : ControllerBase
         }
 
         Response.Headers.CacheControl = "no-store";
+        if (Jellyfin.Plugin.Tally.Live.RedZoneService.IsRedZone(id))
+        {
+            var cut = await _redZone.GetSegmentAsync(seq).ConfigureAwait(false);
+            return cut == null ? NotFound() : File(cut, "video/mp2t");
+        }
+
         var channel = _sourceManager.GetChannel(id);
         var session = channel == null ? null : _ladder.FindSession(channel.Id);
         if (session == null)

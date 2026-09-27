@@ -54,6 +54,11 @@ public class BoardChannel
     /// <summary>The stream being played, or the one a viewer would start on ("1080p60", first choice or not);
     /// null until the plugin has probed the channel.</summary>
     [JsonPropertyName("stream")] public Live.StreamStatus? Stream { get; set; }
+
+    /// <summary>"redzone" for the Tally RedZone channel (what is on: <c>GET redzone</c>); absent for every other channel.</summary>
+    [JsonPropertyName("kind")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Kind { get; set; }
 }
 
 /// <summary>Something that happened. Clients keep the last id they showed; "new" is a comparison.</summary>

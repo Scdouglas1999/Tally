@@ -154,6 +154,18 @@ public class PluginConfiguration : BasePluginConfiguration
     /// switch with #EXT-X-DISCONTINUITY (kept to compare the two).</summary>
     public string LiveSwitchMode { get; set; } = string.Empty;
 
+    /// <summary>The "Tally RedZone" channel: one full-screen stream that cuts to the hottest live game, made on this
+    /// server from the games' own streams without transcoding (see Live/RedZoneService.cs). Needs live scores.</summary>
+    public bool RedZoneEnabled { get; set; } = true;
+
+    /// <summary>RedZone: the least time it stays on a game before it may leave it for a hotter one (seconds). Scores,
+    /// red-zone entries and overtime elsewhere cut sooner.</summary>
+    public int RedZoneMinDwellSeconds { get; set; } = 60;
+
+    /// <summary>RedZone: comma-separated leagues it may show, as league paths ("football/nfl") or names ("NFL").
+    /// Empty = every league with a live game.</summary>
+    public string RedZoneLeagues { get; set; } = string.Empty;
+
     /// <summary>Where /JellyTV/app sends a TV to download the Android TV app. The default always resolves to
     /// the newest release of the fork, so the address people type never changes.</summary>
     public string TvAppUrl { get; set; } = "https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk";

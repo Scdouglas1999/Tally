@@ -16,9 +16,11 @@ public class LadderController : ControllerBase
 {
     private readonly SourceManager _sources;
     private readonly LiveLadderService _ladder;
+    private readonly RedZoneService _redZone;
 
-    public LadderController(SourceManager sources, LiveLadderService ladder)
+    public LadderController(SourceManager sources, LiveLadderService ladder, RedZoneService redZone)
     {
+        _redZone = redZone;
         _sources = sources;
         _ladder = ladder;
     }
@@ -28,6 +30,7 @@ public class LadderController : ControllerBase
     {
         var now = DateTimeOffset.UtcNow;
         var channels = _sources.GetChannels()
+            .Where(c => !c.IsSynthetic)
             .Where(c => all || c.Candidates.Count > 1 || _ladder.FindSession(c.Id) != null)
             .Select(c =>
             {
@@ -74,6 +77,6 @@ public class LadderController : ControllerBase
                 };
             });
 
-        return Ok(new { serverTime = now, enabled = LiveLadderService.Enabled, continuous = _ladder.ContinuousMode, channels });
+        return Ok(new { serverTime = now, enabled = LiveLadderService.Enabled, continuous = _ladder.ContinuousMode, channels, redZone = _redZone.Diagnostics() });
     }
 }
