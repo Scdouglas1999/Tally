@@ -36,6 +36,8 @@ public class ClientApiController : ControllerBase
     private readonly EventFeed _events;
     private readonly LiveTvItemIndex _liveTv;
     private readonly Live.LiveLadderService _ladder;
+    private readonly StreamSearchService _search;
+    private readonly ScoreboardService _scoreboard;
 
     public ClientApiController(
         SourceManager sourceManager,
@@ -45,9 +47,13 @@ public class ClientApiController : ControllerBase
         IEnumerable<IBoardEnricher> enrichers,
         EventFeed events,
         LiveTvItemIndex liveTv,
-        Live.LiveLadderService ladder)
+        Live.LiveLadderService ladder,
+        StreamSearchService search,
+        ScoreboardService scoreboard)
     {
         _ladder = ladder;
+        _search = search;
+        _scoreboard = scoreboard;
         _sourceManager = sourceManager;
         _signer = signer;
         _settingsStore = settingsStore;
@@ -122,6 +128,12 @@ public class ClientApiController : ControllerBase
             }
         }
 
+        // a game that is live or about to start without a stream says how the server's search for one stands
+        foreach (var g in board.Games.Where(g => StreamSearchService.Shows(g, now)))
+        {
+            g.Search = _search.Describe(g);
+        }
+
         board.Channels = source.Select(c => ToChannel(c, carrying.TryGetValue(c.Id, out var g) ? g : null, now)).ToList();
 
         board.Events = since.HasValue ? _events.Since(since.Value) : new List<BoardEvent>();
@@ -132,6 +144,35 @@ public class ClientApiController : ControllerBase
         }
 
         return Ok(board);
+    }
+
+    /// <summary>
+    /// Look for a game's stream now (or join the search already running): answers at once with "found" and the
+    /// <c>watch</c> when the game has a stream, "searching" while a search covering it runs, or "none" when one ended
+    /// less than a minute ago with nothing. Clients poll the board (or call this again) every 3 s for up to 45 s.
+    /// </summary>
+    [HttpPost("games/{gameId}/find")]
+    public async Task<IActionResult> Find(string gameId, CancellationToken cancellationToken)
+    {
+        if (!(Plugin.Instance?.Configuration.ScoresEnabled ?? true))
+        {
+            return NotFound(new { error = "Live scores are switched off on this server" });
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var games = await _scoreboard.GetGamesAsync(cancellationToken).ConfigureAwait(false);
+        var game = games.FirstOrDefault(g => string.Equals(g.Id, gameId, StringComparison.Ordinal));
+        if (game == null)
+        {
+            return NotFound(new { error = "No such game on the scoreboard" });
+        }
+
+        var source = _sourceManager.GetChannels();
+        StreamSearchService.Match(games, source, id => _sourceManager.GetNowNext(id).Now?.Title);
+        var byId = source.ToDictionary(c => c.Id, StringComparer.OrdinalIgnoreCase);
+        var pick = WatchResolver.Resolve(game, games, byId.ContainsKey);
+        var watch = pick == null ? null : ToWatch(byId[pick.Id], game, pick.Kind, now);
+        return Ok(new FindResult { State = _search.Find(game, watch != null), Watch = watch });
     }
 
     /// <summary>One channel, fresh — call right before playback.</summary>

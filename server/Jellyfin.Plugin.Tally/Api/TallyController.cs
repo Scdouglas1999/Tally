@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 #if JF12
 using Jellyfin.Data;
@@ -10,6 +11,7 @@ using Jellyfin.Database.Implementations.Enums;
 #else
 using Jellyfin.Data.Enums;
 #endif
+using Jellyfin.Plugin.Tally.Client;
 using Jellyfin.Plugin.Tally.Scores;
 using Jellyfin.Plugin.Tally.Services;
 using Jellyfin.Plugin.Tally.Sources;
@@ -32,6 +34,7 @@ public class TallyController : ControllerBase
     private readonly BrowserRuntime _browser;
     private readonly LgDevModeService _lgDevMode;
     private readonly ILogger<TallyController> _logger;
+    private readonly StreamSearchService _search;
 
     public TallyController(
         SourceManager sourceManager,
@@ -41,8 +44,10 @@ public class TallyController : ControllerBase
         IAuthorizationContext authContext,
         BrowserRuntime browser,
         LgDevModeService lgDevMode,
-        ILogger<TallyController> logger)
+        ILogger<TallyController> logger,
+        StreamSearchService search)
     {
+        _search = search;
         _lgDevMode = lgDevMode;
         _sourceManager = sourceManager;
         _signer = signer;
@@ -168,9 +173,19 @@ public class TallyController : ControllerBase
             .Select(c => new ChannelProbe(c.Id, c.Name, _sourceManager.GetNowNext(c.Id).Now?.Title))
             .ToList();
         GameChannelMatcher.Match(games, probes);
+        var ids = _sourceManager.GetChannels().Select(c => c.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
         foreach (var g in games)
         {
             GameHeat.Apply(g, now);
+        }
+
+        // the web UI's "LOOKING FOR A STREAM" / "NO STREAM YET": the same search state the Client API's board carries
+        foreach (var g in games)
+        {
+            if (WatchResolver.Resolve(g, games, ids.Contains) == null && StreamSearchService.Shows(g, now))
+            {
+                g.Search = _search.Describe(g);
+            }
         }
 
         return Ok(new { serverTime = now, enabled = true, games, errors = _scoreboard.Errors });
@@ -214,7 +229,9 @@ public class TallyController : ControllerBase
     public async Task<IActionResult> Refresh()
     {
         _browser.RetryIfFailed();
-        await _sourceManager.RefreshAsync(HttpContext.RequestAborted).ConfigureAwait(false);
+        // The crawl is not the request's: a caller that gives up must not cut it short (a crawl stopped halfway would
+        // replace each source's list with the part it read). The caller only stops waiting.
+        await _sourceManager.RefreshAsync(CancellationToken.None).WaitAsync(HttpContext.RequestAborted).ConfigureAwait(false);
         return Ok(new { channelCount = _sourceManager.GetChannels().Count, errors = _sourceManager.SourceErrors });
     }
 }

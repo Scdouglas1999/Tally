@@ -270,11 +270,11 @@
 #jellytv-app .btn:disabled, .jtv-player .btn:disabled { opacity: .45; cursor: not-allowed; }
 #jellytv-app .btn.is-on { color: var(--jtv-accent); border-color: var(--jtv-accent); }
 
-#jellytv-app .btn-primary, .jtv-player .btn-primary {
+#jellytv-app .btn-primary, .jtv-player .btn-primary, .jtv-modal-veil .btn-primary {
   padding: 0 28px; font-weight: 600;
   background: var(--jtv-accent); border-color: var(--jtv-accent); color: var(--jtv-accent-ink);
 }
-#jellytv-app .btn-primary:hover, .jtv-player .btn-primary:hover { background: #ffc233; border-color: #ffc233; }
+#jellytv-app .btn-primary:hover, .jtv-player .btn-primary:hover, .jtv-modal-veil .btn-primary:hover { background: #ffc233; border-color: #ffc233; }
 #jellytv-app .btn-primary:active, .jtv-player .btn-primary:active { background: #e09b00; }
 #jellytv-app .btn-ghost, .jtv-player .btn-ghost { background: transparent; }
 #jellytv-app .btn-danger { color: var(--jtv-live-text); }
@@ -543,7 +543,12 @@
 #jellytv-app .g-chan .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #jellytv-app .g-chan .q { color: var(--jtv-muted); font-size: 9px; letter-spacing: 1.2px; }
 #jellytv-app .g-chan:hover, #jellytv-app .game.can:hover .g-chan.first { border-color: var(--jtv-accent); color: var(--jtv-accent); }
-#jellytv-app .g-none { font: 400 11px/1 var(--jtv-mono); letter-spacing: 1px; text-transform: uppercase; color: var(--jtv-dim); }
+#jellytv-app .g-none { font: 400 11px/1 var(--jtv-mono); letter-spacing: 1px; text-transform: uppercase; color: var(--jtv-muted); white-space: nowrap; }
+#jellytv-app .g-none.on { color: var(--jtv-accent); }
+.jtv-modal-veil .jtv-find { max-width: 440px; }
+.jtv-modal-veil .jtv-find .m-none { display: flex; align-items: center; justify-content: center; gap: 10px; line-height: 1.5; color: var(--jtv-text-2); }
+.jtv-modal-veil .jtv-find .m-none .led.on { background: var(--jtv-accent); }
+.jtv-modal-veil .jtv-find .f-grow { flex: 1; }
 
 /* live score bug wherever a channel is named: cards, multiview label bars, player */
 #jellytv-app .mv-bug { flex: none; font-variant-numeric: tabular-nums; }

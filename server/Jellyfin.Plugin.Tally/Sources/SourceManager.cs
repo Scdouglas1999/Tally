@@ -27,7 +27,16 @@ public class SourceManager
     // from the guide just because one scan ran during an anti-bot check.
     private readonly Dictionary<string, List<SourceChannel>> _lastGood = new(StringComparer.OrdinalIgnoreCase);
 
+    // Each enabled source's current list (what its last crawl gave, merged with what game-driven searches added since).
+    private readonly Dictionary<string, SourceState> _latest = new(StringComparer.OrdinalIgnoreCase);
+
+    // Source → stream URL → a web stream of a game that is not over (see KeepPinned).
+    private readonly Dictionary<string, Dictionary<string, Pinned>> _pins = new(StringComparer.OrdinalIgnoreCase);
+
     private volatile Snapshot _snapshot = new();
+    private volatile HashSet<string> _crawling = new(StringComparer.Ordinal);
+    private int _generalWaiting;
+    private bool _hadGeneral;
 
     public SourceManager(IHttpClientFactory httpClientFactory, ILogger<SourceManager> logger, Scores.ScoreboardService? scoreboard = null, Services.BrowserRuntime? browser = null)
     {
@@ -58,6 +67,21 @@ public class SourceManager
 
     /// <summary>Raised after every refresh with the new channel list.</summary>
     public event Action<IReadOnlyList<SourceChannel>>? Refreshed;
+
+    /// <summary>Raised after every crawl, regular or game-driven, once its channels are in place.</summary>
+    public event Action<CrawlReport>? Crawled;
+
+    /// <summary>The games the regular crawl looks for first (<see cref="StreamSearchService"/> sets it).</summary>
+    public Func<IReadOnlyList<WantedGame>>? WantedGames { get; set; }
+
+    /// <summary>Tests: the source list in place of the plugin's configuration.</summary>
+    internal Func<IReadOnlyList<SourceDefinition>>? DefinitionsOverride { get; set; }
+
+    /// <summary>Tests: the scoreboard's games in place of the scoreboard.</summary>
+    internal Func<IReadOnlyList<Scores.GameInfo>>? GamesOverride { get; set; }
+
+    /// <summary>Ids of the games the crawl running now looks for (empty when none runs).</summary>
+    public IReadOnlyCollection<string> CrawlingGameIds => _crawling;
 
     public IReadOnlyList<SourceChannel> GetChannels() => _snapshot.Channels;
 
@@ -122,66 +146,189 @@ public class SourceManager
         return (current, next);
     }
 
+    /// <summary>
+    /// The regular crawl: every enabled source, each one's list replaced by what the scan found (a failed scan keeps
+    /// the last good list; streams of a game that is not over survive while their playlist answers, see
+    /// <see cref="KeepPinned"/>). Web page sources look for <see cref="WantedGames"/> first. At most one crawl of any
+    /// kind runs at a time; a call made while one runs waits for it and then runs, and calls made while one is already
+    /// waiting join that one.
+    /// </summary>
     public async Task RefreshAsync(CancellationToken cancellationToken)
     {
-        if (!await _refreshLock.WaitAsync(0, cancellationToken).ConfigureAwait(false))
+        if (Interlocked.CompareExchange(ref _generalWaiting, 1, 0) != 0)
         {
-            return; // a refresh is already running
+            return; // one is already waiting to run after the current crawl: it covers this call
         }
 
         try
         {
+            await _refreshLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _generalWaiting, 0);
+        }
+
+        try
+        {
+            IReadOnlyList<WantedGame> wanted;
+            try
+            {
+                wanted = WantedGames?.Invoke() ?? Array.Empty<WantedGame>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "JellyTV: no wanted games for the crawl");
+                wanted = Array.Empty<WantedGame>();
+            }
+
+            await CrawlLockedAsync(gameDriven: false, wanted, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _refreshLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// A game-driven search: web page sources only, each reading its page and the pages that name a team of
+    /// <paramref name="wanted"/> (see <see cref="WebExtractor"/>). What it finds is added to the source's channels;
+    /// it removes nothing, and its errors do not replace the source's. Waits for a crawl that is running.
+    /// </summary>
+    public async Task<CrawlReport> SearchAsync(IReadOnlyList<WantedGame> wanted, CancellationToken cancellationToken)
+    {
+        await _refreshLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            return await CrawlLockedAsync(gameDriven: true, wanted, cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _refreshLock.Release();
+        }
+    }
+
+    private async Task<CrawlReport> CrawlLockedAsync(bool gameDriven, IReadOnlyList<WantedGame> wanted, CancellationToken cancellationToken)
+    {
+        var report = new CrawlReport { GameDriven = gameDriven, Wanted = wanted, StartedAt = DateTimeOffset.UtcNow };
+
+        // a search before the first regular crawl (right after startup) has nothing to add to: it does the regular crawl
+        gameDriven &= _hadGeneral;
+        _crawling = wanted.Select(w => w.GameId).ToHashSet(StringComparer.Ordinal);
+        try
+        {
             var config = Plugin.Instance?.Configuration;
             var next = new Snapshot { LoadedAt = DateTimeOffset.UtcNow };
-            var channels = new List<SourceChannel>();
-            var programmes = new Dictionary<string, List<Programme>>(StringComparer.OrdinalIgnoreCase);
 
-            var defs = (config?.Sources ?? new List<SourceDefinition>())
+            var defs = (DefinitionsOverride?.Invoke() ?? config?.Sources ?? new List<SourceDefinition>())
                 .Where(s => s.Enabled)
                 .ToList();
-            var tasks = defs.Select(s => BuildAdapter(s).RefreshAsync(cancellationToken)).ToList();
+            var crawled = defs.Where(d => !gameDriven || d.Kind == SourceKind.Web).ToList();
+            var tasks = crawled.Select(s => BuildAdapter(s, wanted, gameDriven).RefreshAsync(cancellationToken)).ToList();
+            var results = new Dictionary<string, SourceSnapshot?>(StringComparer.OrdinalIgnoreCase);
 
             for (var i = 0; i < tasks.Count; i++)
             {
-                SourceSnapshot result;
+                var def = crawled[i];
+                SourceSnapshot? result;
                 try
                 {
                     result = await tasks[i].ConfigureAwait(false);
+                    report.Pages += result.PagesVisited;
+                    report.TargetedPages += result.TargetedPagesVisited;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "JellyTV: source '{Name}' refresh failed", defs[i].Name);
-                    next.Errors[defs[i].Name] = ex.Message;
+                    _logger.LogWarning(ex, "JellyTV: source '{Name}' refresh failed", def.Name);
+                    result = null;
+                    if (!gameDriven)
+                    {
+                        result = new SourceSnapshot { SourceName = def.Name, Error = ex.Message };
+                    }
+                }
+
+                results[def.Name] = result;
+            }
+
+            foreach (var def in crawled)
+            {
+                var result = results[def.Name];
+                _latest.TryGetValue(def.Name, out var prev);
+                if (gameDriven)
+                {
+                    if (result == null)
+                    {
+                        continue;
+                    }
+
+                    // add what the search found; keep everything the source already had
+                    var urls = result.Channels.Select(c => c.StreamUrl).ToHashSet(StringComparer.Ordinal);
+                    var merged = result.Channels.Concat((prev?.Channels ?? new List<SourceChannel>()).Where(c => !urls.Contains(c.StreamUrl))).ToList();
+                    _latest[def.Name] = new SourceState(merged, prev?.Programmes ?? new Dictionary<string, List<Programme>>(), prev != null ? prev.Error : result.Error);
+                    if (result.Channels.Count > 0)
+                    {
+                        _lastGood[def.Name] = new List<SourceChannel>(merged);
+                    }
+
                     continue;
                 }
 
-                if (result.Error != null)
-                {
-                    next.Errors[defs[i].Name] = result.Error;
-                }
+                result ??= new SourceSnapshot { SourceName = def.Name };
+                List<SourceChannel> list;
 
                 // Failed scans keep the previous channel list for that source —
                 // a flaky upstream shouldn't blank out the guide.
                 if (result.Channels.Count == 0 && result.Error != null
-                    && _lastGood.TryGetValue(defs[i].Name, out var stale))
+                    && _lastGood.TryGetValue(def.Name, out var stale))
                 {
-                    _logger.LogInformation("JellyTV: keeping {Count} last-known channels for '{Name}'", stale.Count, defs[i].Name);
-                    channels.AddRange(stale);
+                    _logger.LogInformation("JellyTV: keeping {Count} last-known channels for '{Name}'", stale.Count, def.Name);
+                    list = new List<SourceChannel>(stale);
                 }
                 else
                 {
-                    channels.AddRange(result.Channels);
+                    list = new List<SourceChannel>(result.Channels);
                     if (result.Channels.Count > 0)
                     {
-                        _lastGood[defs[i].Name] = new List<SourceChannel>(result.Channels);
+                        _lastGood[def.Name] = new List<SourceChannel>(result.Channels);
                     }
                 }
+
+                var programmes = new Dictionary<string, List<Programme>>(StringComparer.OrdinalIgnoreCase);
                 foreach (var kv in result.ProgrammesByTvgId)
                 {
-                    if (!programmes.TryGetValue(kv.Key, out var list))
+                    programmes[kv.Key] = new List<Programme>(kv.Value);
+                }
+
+                _latest[def.Name] = new SourceState(list, programmes, result.Error);
+            }
+
+            foreach (var gone in _latest.Keys.Where(k => !defs.Any(d => string.Equals(d.Name, k, StringComparison.OrdinalIgnoreCase))).ToList())
+            {
+                _latest.Remove(gone);
+                _pins.Remove(gone);
+            }
+
+            var channels = new List<SourceChannel>();
+            var programmesAll = new Dictionary<string, List<Programme>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var def in defs)
+            {
+                if (!_latest.TryGetValue(def.Name, out var state))
+                {
+                    continue;
+                }
+
+                channels.AddRange(state.Channels);
+                if (state.Error != null)
+                {
+                    next.Errors[def.Name] = state.Error;
+                }
+
+                foreach (var kv in state.Programmes)
+                {
+                    if (!programmesAll.TryGetValue(kv.Key, out var list))
                     {
                         list = new List<Programme>();
-                        programmes[kv.Key] = list;
+                        programmesAll[kv.Key] = list;
                     }
 
                     list.AddRange(kv.Value);
@@ -189,6 +336,12 @@ public class SourceManager
             }
 
             var games = await GamesAsync(channels, cancellationToken).ConfigureAwait(false);
+            if (!gameDriven)
+            {
+                _hadGeneral = true;
+                channels = await KeepPinned(channels, crawled, games, cancellationToken).ConfigureAwait(false);
+            }
+
             if (channels.Any(c => c.NameFromTitle))
             {
                 var (kept, dropped) = ChannelNaming.Resolve(channels, games);
@@ -199,6 +352,8 @@ public class SourceManager
 
                 channels = kept;
             }
+
+            Pin(channels, defs, games, next.LoadedAt);
 
             ChannelIdentity.Assign(channels);
             var grouped = Group(channels, games);
@@ -212,15 +367,15 @@ public class SourceManager
                 next.ByLegacyId.TryAdd(c.LegacyId, c);
             }
 
-            next.Programmes = programmes;
+            next.Programmes = programmesAll;
             _snapshot = next;
 
-            var merged = channels.Where(c => c.Candidates.Count > 1).ToList();
-            _logger.LogInformation("JellyTV: loaded {Count} channels, {Epg} EPG feeds", channels.Count, programmes.Count);
-            if (merged.Count > 0)
+            var merged2 = channels.Where(c => c.Candidates.Count > 1).ToList();
+            _logger.LogInformation("JellyTV: loaded {Count} channels, {Epg} EPG feeds", channels.Count, programmesAll.Count);
+            if (merged2.Count > 0)
             {
-                _logger.LogInformation("JellyTV: {Count} channels have several streams: {List}", merged.Count,
-                    string.Join("; ", merged.Take(12).Select(c => $"{c.Name} ×{c.Candidates.Count}")));
+                _logger.LogInformation("JellyTV: {Count} channels have several streams: {List}", merged2.Count,
+                    string.Join("; ", merged2.Take(12).Select(c => $"{c.Name} ×{c.Candidates.Count}")));
             }
 
             try
@@ -231,16 +386,152 @@ public class SourceManager
             {
                 _logger.LogWarning(ex, "JellyTV: refresh listener failed");
             }
+
+            report.FinishedAt = DateTimeOffset.UtcNow;
+            try
+            {
+                Crawled?.Invoke(report);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "JellyTV: crawl listener failed");
+            }
+
+            return report;
         }
         finally
         {
-            _refreshLock.Release();
+            _crawling = new HashSet<string>(StringComparer.Ordinal);
+        }
+    }
+
+    /// <summary>
+    /// Web streams of a game that is not over, found by any crawl, survive the regular crawls that no longer reach
+    /// their page, until the game ends (or 3 hours after its expected end when it leaves the scoreboard). One whose
+    /// playlist no longer answers is let go.
+    /// </summary>
+    private async Task<List<SourceChannel>> KeepPinned(List<SourceChannel> channels, IReadOnlyList<SourceDefinition> crawled, IReadOnlyList<Scores.GameInfo>? games, CancellationToken ct)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var byId = games?.ToDictionary(g => g.Id, StringComparer.Ordinal);
+        var present = channels.Select(c => c.StreamUrl).ToHashSet(StringComparer.Ordinal);
+        var check = new List<(string Source, Pinned Pin)>();
+        foreach (var def in crawled)
+        {
+            if (!_pins.TryGetValue(def.Name, out var pins))
+            {
+                continue;
+            }
+
+            foreach (var (url, pin) in pins.ToList())
+            {
+                var game = byId != null && byId.TryGetValue(pin.GameId, out var g) ? g : null;
+                if ((game != null && game.State == "post") || (game == null && now > pin.Until))
+                {
+                    pins.Remove(url);
+                }
+                else if (!present.Contains(url))
+                {
+                    check.Add((def.Name, pin));
+                }
+            }
+        }
+
+        if (check.Count == 0)
+        {
+            return channels;
+        }
+
+        var http = _httpClientFactory.CreateClient("jellytv");
+        using var gate = new SemaphoreSlim(8);
+        var alive = await Task.WhenAll(check.Select(async x =>
+        {
+            await gate.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                timeout.CancelAfter(TimeSpan.FromSeconds(10));
+                return await WebExtractor.IsLiveAsync(http, x.Pin.Channel.StreamUrl, x.Pin.Channel.Headers, timeout.Token).ConfigureAwait(false);
+            }
+            finally
+            {
+                gate.Release();
+            }
+        })).ConfigureAwait(false);
+
+        var result = new List<SourceChannel>(channels);
+        var kept = 0;
+        for (var i = 0; i < check.Count; i++)
+        {
+            var (source, pin) = check[i];
+            if (!alive[i])
+            {
+                _pins[source].Remove(pin.Channel.StreamUrl);
+                continue;
+            }
+
+            var copy = pin.Channel.ShallowCopy();
+            copy.Candidates = new List<StreamCandidate>();
+            copy.MergedIds = new List<string>();
+            result.Add(copy);
+            if (_latest.TryGetValue(source, out var state))
+            {
+                state.Channels.Add(copy);
+            }
+
+            kept++;
+        }
+
+        _logger.LogInformation("JellyTV: kept {Kept} streams of games that are not over although the crawl did not reach them again ({Dropped} no longer answered)", kept, check.Count - kept);
+        return result;
+    }
+
+    /// <summary>Remembers the web streams that name a game that is not over (see <see cref="KeepPinned"/>).</summary>
+    private void Pin(List<SourceChannel> channels, IReadOnlyList<SourceDefinition> defs, IReadOnlyList<Scores.GameInfo>? games, DateTimeOffset now)
+    {
+        if (games == null || games.Count == 0)
+        {
+            return;
+        }
+
+        var web = defs.Where(d => d.Kind == SourceKind.Web).Select(d => d.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var candidates = channels.Where(c => web.Contains(c.SourceName) && !c.NameFromTitle).ToList();
+        if (candidates.Count == 0)
+        {
+            return;
+        }
+
+        var open = games.Where(g => g.State != "post").Select(g => g.Clone()).ToList();
+        var probes = candidates.Select((c, i) => new Scores.ChannelProbe(i.ToString(System.Globalization.CultureInfo.InvariantCulture), c.Name, null)).ToList();
+        Scores.GameChannelMatcher.Match(open, probes);
+        foreach (var g in open)
+        {
+            foreach (var gc in g.Channels.Where(x => x.Kind == "teams"))
+            {
+                var c = candidates[int.Parse(gc.Id, System.Globalization.CultureInfo.InvariantCulture)];
+                if (!_pins.TryGetValue(c.SourceName, out var pins))
+                {
+                    pins = new Dictionary<string, Pinned>(StringComparer.Ordinal);
+                    _pins[c.SourceName] = pins;
+                }
+
+                var until = Scores.GameSchedule.ExpectedEnd(g, now).AddHours(3);
+                var copy = c.ShallowCopy();
+                copy.Candidates = new List<StreamCandidate>();
+                copy.MergedIds = new List<string>();
+                pins[c.StreamUrl] = new Pinned(copy, g.Id, until);
+            }
         }
     }
 
     /// <summary>Today's games, for naming and grouping; null without a scoreboard.</summary>
     private async Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(List<SourceChannel> channels, CancellationToken ct)
     {
+        if (GamesOverride != null)
+        {
+            return GamesOverride().Select(g => g.Clone()).ToList();
+        }
+
         if (_scoreboard == null || !(Plugin.Instance?.Configuration.ScoresEnabled ?? true) || channels.Count == 0)
         {
             return null;
@@ -280,6 +571,10 @@ public class SourceManager
         return result;
     }
 
+    private sealed record SourceState(List<SourceChannel> Channels, Dictionary<string, List<Programme>> Programmes, string? Error);
+
+    private sealed record Pinned(SourceChannel Channel, string GameId, DateTimeOffset Until);
+
     public List<ISourceAdapter> BuildAdapters()
     {
         return (Plugin.Instance?.Configuration.Sources ?? new List<SourceDefinition>())
@@ -288,12 +583,14 @@ public class SourceManager
             .ToList();
     }
 
-    private ISourceAdapter BuildAdapter(SourceDefinition def)
+    private ISourceAdapter BuildAdapter(SourceDefinition def) => BuildAdapter(def, null, false);
+
+    private ISourceAdapter BuildAdapter(SourceDefinition def, IReadOnlyList<WantedGame>? wanted, bool targetedOnly)
     {
         return def.Kind switch
         {
             SourceKind.Direct => new DirectSourceAdapter(def, _httpClientFactory, _logger),
-            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser),
+            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser, wanted, targetedOnly),
             _ => new M3uSourceAdapter(def, _httpClientFactory, _logger)
         };
     }
@@ -318,4 +615,21 @@ public class SourceManager
 
         public DateTimeOffset LoadedAt { get; set; } = DateTimeOffset.MinValue;
     }
+}
+
+/// <summary>What one crawl did: for the game-driven search's log line and its schedule.</summary>
+public sealed class CrawlReport
+{
+    public bool GameDriven { get; set; }
+
+    public IReadOnlyList<WantedGame> Wanted { get; set; } = Array.Empty<WantedGame>();
+
+    public DateTimeOffset StartedAt { get; set; }
+
+    public DateTimeOffset FinishedAt { get; set; }
+
+    /// <summary>Pages web page sources visited, and of those, the ones visited for the wanted games.</summary>
+    public int Pages { get; set; }
+
+    public int TargetedPages { get; set; }
 }

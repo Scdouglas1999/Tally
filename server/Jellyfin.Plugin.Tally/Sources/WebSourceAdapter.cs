@@ -20,13 +20,20 @@ public class WebSourceAdapter : ISourceAdapter
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger;
     private readonly BrowserRuntime? _browser;
+    private readonly IReadOnlyList<WantedGame> _wanted;
+    private readonly bool _targetedOnly;
 
-    public WebSourceAdapter(SourceDefinition definition, IHttpClientFactory httpClientFactory, ILogger logger, BrowserRuntime? browser = null)
+    /// <param name="wanted">Games to look for first (see <see cref="WebExtractor"/>).</param>
+    /// <param name="targetedOnly">A game-driven search: only the page and what names a wanted team.</param>
+    public WebSourceAdapter(SourceDefinition definition, IHttpClientFactory httpClientFactory, ILogger logger, BrowserRuntime? browser = null,
+        IReadOnlyList<WantedGame>? wanted = null, bool targetedOnly = false)
     {
         Definition = definition;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _browser = browser;
+        _wanted = wanted ?? Array.Empty<WantedGame>();
+        _targetedOnly = targetedOnly;
     }
 
     public SourceDefinition Definition { get; }
@@ -49,8 +56,10 @@ public class WebSourceAdapter : ISourceAdapter
         try
         {
             extractor = new WebExtractor(_httpClientFactory.CreateClient("jellytv"), _logger, ua);
-            found = await extractor.ExtractAsync(Definition.PageUrl, Definition.MaxPages, cancellationToken)
+            found = await extractor.ExtractAsync(Definition.PageUrl, Definition.MaxPages, cancellationToken, _wanted, _targetedOnly)
                 .ConfigureAwait(false);
+            snapshot.PagesVisited = extractor.PagesVisited;
+            snapshot.TargetedPagesVisited = extractor.TargetedPagesVisited;
         }
         catch (Exception ex)
         {
@@ -59,7 +68,17 @@ public class WebSourceAdapter : ISourceAdapter
             return snapshot;
         }
 
-        if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null
+        if (_targetedOnly)
+        {
+            // A game-driven search uses the browser only when it is already there, and only on the pages it found for
+            // the wanted games: the general crawl is the one that sets it up.
+            if (found.Count == 0 && extractor.TargetedPages.Count > 0 && Definition.UseBrowserFallback && _browser != null
+                && await _browser.ReadyAsync(allowDownloads: false, TimeSpan.Zero, cancellationToken).ConfigureAwait(false))
+            {
+                found = await BrowserFallback(ua, extractor, extractor.TargetedPages, cancellationToken).ConfigureAwait(false);
+            }
+        }
+        else if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null
             && !await _browser.ReadyAsync(allowDownloads: true, TimeSpan.FromSeconds(60), cancellationToken).ConfigureAwait(false))
         {
             // First use: the browser is still being downloaded (or failed). Keep the last channels; the refresh
@@ -71,20 +90,9 @@ public class WebSourceAdapter : ISourceAdapter
                 : "Preparing the browser…";
             return snapshot;
         }
-
-        if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null)
+        else if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null)
         {
-            _logger.LogInformation("JellyTV: HTTP scan found nothing on {Url}; trying headless browser", Definition.PageUrl);
-            try
-            {
-                found = await new BrowserExtractor(_logger, ua, _browser)
-                    .ExtractAsync(Definition.PageUrl, Definition.MaxPages, cancellationToken, extractor?.DiscoveredLinks)
-                    .ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "JellyTV: browser fallback failed for {Url}", Definition.PageUrl);
-            }
+            found = await BrowserFallback(ua, extractor, extractor.TargetedPages.Concat(extractor.DiscoveredLinks), cancellationToken).ConfigureAwait(false);
         }
 
         var sourceId = Definition.Id.ToString("N");
@@ -159,6 +167,35 @@ public class WebSourceAdapter : ISourceAdapter
         }
 
         return snapshot;
+    }
+
+    private async Task<List<ExtractedStream>> BrowserFallback(string ua, WebExtractor extractor, IEnumerable<string> seeds, CancellationToken ct)
+    {
+        _logger.LogInformation("JellyTV: HTTP scan found nothing on {Url}; trying headless browser", Definition.PageUrl);
+        try
+        {
+            var found = await new BrowserExtractor(_logger, ua, _browser!)
+                .ExtractAsync(Definition.PageUrl, Definition.MaxPages, ct, seeds.Distinct(StringComparer.OrdinalIgnoreCase).ToList())
+                .ConfigureAwait(false);
+
+            // a stream on a page found for a wanted game is that game's, unless its page already names the game
+            foreach (var s in found)
+            {
+                if ((extractor.TargetGameFor(s.Context) ?? extractor.TargetGameFor(s.Referer)) is { } game
+                    && (string.IsNullOrEmpty(s.Name) || s.NameFromTitle || !game.NamesBoth(s.Name)))
+                {
+                    s.Name = game.Name;
+                    s.NameFromTitle = false;
+                }
+            }
+
+            return found;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "JellyTV: browser fallback failed for {Url}", Definition.PageUrl);
+            return new List<ExtractedStream>();
+        }
     }
 
     // League/group tokens expand to every way they can appear: the classifier's
