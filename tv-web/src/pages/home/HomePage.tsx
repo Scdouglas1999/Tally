@@ -17,7 +17,7 @@ import type { Route } from '../../router/router';
 import { DetailDialogs, cardMenu, type Dialog } from '../details/DetailDialogs';
 import { isPlayable, openDetails, playItem } from '../details/navigate';
 import { GameActionsDialog } from '../sports/GameActionsDialog';
-import { addGameToMultiviewAction, watchGame, watchGameAction } from '../sports/sportsState';
+import { addGameToMultiviewAction, watchGame, watchGameAction, watchGameFeed } from '../sports/sportsState';
 import { StreamSearchHost, useStreamSearchOpen } from '../sports/StreamSearchDialog';
 import { useOkHold } from '../sports/useOkHold';
 import { GameCard } from '../../sports/GameCard';
@@ -244,6 +244,7 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
           game={menuGame}
           actions={{
             watch: watchGameAction(menuGame),
+            watchFeed: (feed) => watchGameFeed(menuGame, feed),
             addToMultiview: addGameToMultiviewAction(menuGame),
             follow: true,
           }}

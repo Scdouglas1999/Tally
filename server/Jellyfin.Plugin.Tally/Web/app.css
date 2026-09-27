@@ -542,6 +542,11 @@
 }
 #jellytv-app .g-chan .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #jellytv-app .g-chan .q { color: var(--jtv-muted); font-size: 9px; letter-spacing: 1.2px; }
+/* the commentary language on a game's channel buttons (2.3): ES stands out, EN stays quiet */
+#jellytv-app .g-chan .q.es { color: var(--jtv-accent); }
+/* RedZone (2.3): its row on top of the games, what is on now under its name */
+#jellytv-app .game.rz .g-teams { gap: 4px; }
+#jellytv-app .game.rz .rz-on { color: var(--jtv-muted); }
 #jellytv-app .g-chan:hover, #jellytv-app .game.can:hover .g-chan.first { border-color: var(--jtv-accent); color: var(--jtv-accent); }
 #jellytv-app .g-none { font: 400 11px/1 var(--jtv-mono); letter-spacing: 1px; text-transform: uppercase; color: var(--jtv-muted); white-space: nowrap; }
 #jellytv-app .g-none.on { color: var(--jtv-accent); }

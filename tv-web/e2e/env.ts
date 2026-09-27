@@ -17,9 +17,15 @@ export async function api<T>(path: string): Promise<T> {
   return (await r.json()) as T;
 }
 
-/** Approves a Quick Connect code the way a phone would. */
+/**
+ * Approves a Quick Connect code the way a phone would, as the admin user (the token is an API key, which has no user of
+ * its own: the server wants the user named).
+ */
 export async function approveQuickConnect(code: string): Promise<void> {
-  const r = await fetch(`${SERVER}/QuickConnect/Authorize?code=${code}`, {
+  const users = await api<Array<{ Id: string; Name: string; Policy?: { IsAdministrator?: boolean } }>>('/Users');
+  const admin = users.find((u) => u.Name === 'admin') ?? users.find((u) => u.Policy?.IsAdministrator === true);
+  const user = admin !== undefined ? `&userId=${admin.Id}` : '';
+  const r = await fetch(`${SERVER}/QuickConnect/Authorize?code=${code}${user}`, {
     method: 'POST',
     headers: { Authorization: `MediaBrowser Token="${adminToken()}"` },
   });

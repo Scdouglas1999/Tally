@@ -13,7 +13,7 @@ import {
   watchOrSearch,
 } from '../src/pages/sports/streamSearch';
 
-const WATCH = { channelId: 'ch1', channelName: 'Rays Phillies', liveTvItemId: null, hlsPath: '/JellyTV/Live/ch1.m3u8?s=x', cardPath: '/c', confidence: 'teams' };
+const WATCH = { channelId: 'ch1', channelName: 'Rays Phillies', liveTvItemId: null, hlsPath: '/JellyTV/Live/ch1.m3u8?s=x', cardPath: '/c', confidence: 'teams', language: 'en' };
 
 function game(o: { id?: string; state?: string; watch?: unknown; search?: unknown } = {}): TallyGame {
   return decodeGame({

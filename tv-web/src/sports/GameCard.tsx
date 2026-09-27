@@ -6,7 +6,7 @@ import { IndicatorSquare, LabelBar } from '../kit/Bits';
 import { useRowReveal } from '../kit/MediaRow';
 import { gameStatusLabel, hasNoResult } from '../util/format';
 import { ScoreDigits } from './ScoreDigits';
-import { RecTag } from './SportsBits';
+import { LangTag, RecTag } from './SportsBits';
 import { startsIn, startsInText } from './startsIn';
 import { markFont, sizedLogo } from './teamMark';
 import './sports.css';
@@ -122,6 +122,7 @@ export function GameCard(props: {
             </span>
           ) : null}
           {extras ? <RecTag recording={game.recording} /> : null}
+          <LangTag language={game.watch?.language} />
           <span class="status mono-label" style={{ color: statusColor }}>
             {soon !== null ? startsInText(soon) : gameStatusLabel(game)}
           </span>

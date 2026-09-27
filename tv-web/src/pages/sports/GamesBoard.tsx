@@ -2,11 +2,12 @@ import { useMemo } from 'preact/hooks';
 import { isFollowed, type TallyGame } from '../../api/tallyModels';
 import { MediaRow } from '../../kit/MediaRow';
 import { ScrollPage } from '../../kit/ScrollPage';
-import { boardRows, POSTPONED, type BoardRow } from '../../sports/boardOrganizer';
+import { boardRows, POSTPONED, redZoneRowKey, type BoardRow } from '../../sports/boardOrganizer';
 import { GameCard } from '../../sports/GameCard';
 import { EmptyState } from '../../sports/SportsBits';
 import { FocusedGamePanel } from './FocusedGamePanel';
-import { watchGame } from './sportsState';
+import { RedZoneCard, RedZonePanel, REDZONE_TILE_ID, REDZONE_TILE_KEY, type RedZoneOnAir } from './RedZoneTile';
+import { watchGame, watchRedZone } from './sportsState';
 import { useTabArrival } from './tabArrival';
 import { useStore, type Store } from '../../util/store';
 
@@ -37,11 +38,14 @@ export interface BoardInput {
   teams: ReadonlySet<string>;
   hideScores: boolean;
   onlyWatchable: boolean;
+  /** The RedZone channel while it is on the air (its tile leads the live row); null otherwise. */
+  redZone: RedZoneOnAir | null;
 }
 
 /** The panel alone follows focus (the board itself does not re-render when a card is focused). */
-function PanelHost(props: { rows: BoardRow[]; focusedGameId: Store<string | null>; hideScores: boolean }) {
+function PanelHost(props: { rows: BoardRow[]; focusedGameId: Store<string | null>; hideScores: boolean; redZone: RedZoneOnAir | null; games: TallyGame[] }) {
   const id = useStore(props.focusedGameId);
+  if (id === REDZONE_TILE_ID && props.redZone !== null) return <RedZonePanel onAir={props.redZone} games={props.games} hideScores={props.hideScores} />;
   const game = findGame(props.rows, id) ?? props.rows[0]?.games[0] ?? null;
   return <FocusedGamePanel game={game} hideScores={props.hideScores} />;
 }
@@ -68,14 +72,28 @@ export function GamesBoard(props: {
   const d = props.data;
   const rows: BoardRow[] = useMemo(() => boardRows(d.games, d.favorites, d.onlyWatchable, d.teams), [d.games, d.favorites, d.onlyWatchable, d.teams]);
   const focused = findGame(rows, props.focusedGameId.get()) ?? rows[0]?.games[0] ?? null;
-  const target = d.loading || rows.length === 0 || focused === null ? 'sg-empty' : gameFocusKey(focused);
+  const rz = d.redZone;
+  const rzRow = rz !== null ? redZoneRowKey(rows) : null;
+  const onRedZone = rz !== null && props.focusedGameId.get() === REDZONE_TILE_ID;
+  const target = d.loading || (rows.length === 0 && rz === null) ? 'sg-empty' : onRedZone ? REDZONE_TILE_KEY : focused === null ? (rz !== null ? REDZONE_TILE_KEY : 'sg-empty') : gameFocusKey(focused);
   useTabArrival(props.takeFocus && props.active, target, true);
   const errorLeagues = Object.keys(d.feedErrors);
+
+  const redZoneCard = (onAir: RedZoneOnAir) => (
+    <RedZoneCard
+      key={REDZONE_TILE_ID}
+      onAir={onAir}
+      games={d.games}
+      hideScores={d.hideScores}
+      onWatch={() => watchRedZone(onAir.channel)}
+      onFocus={() => props.focusedGameId.set(REDZONE_TILE_ID)}
+    />
+  );
 
   let body;
   if (d.loading) body = <EmptyState focusKey="sg-empty" class="board-empty" title="Loading games…" subtitle="" />;
   else if (d.boardError !== null && !d.hasBoard) body = <EmptyState focusKey="sg-empty" class="board-empty" title="Board unavailable" subtitle={d.boardError} />;
-  else if (rows.length === 0 && d.games.length > 0)
+  else if (rows.length === 0 && d.games.length > 0 && rz === null)
     body = (
       <EmptyState
         focusKey="sg-empty"
@@ -84,13 +102,19 @@ export function GamesBoard(props: {
         subtitle="Turn off “Only games with a stream” to see them all."
       />
     );
-  else if (rows.length === 0) body = <EmptyState focusKey="sg-empty" class="board-empty" title="No games today" subtitle="There are no games on the board right now" />;
+  else if (rows.length === 0 && rz === null) body = <EmptyState focusKey="sg-empty" class="board-empty" title="No games today" subtitle="There are no games on the board right now" />;
   else
     body = (
       <div class="board-rows">
         <ScrollPage>
+          {rz !== null && rzRow === null ? (
+            <MediaRow key="redzone" focusKey="sgr-redzone" title="RedZone / Live">
+              {redZoneCard(rz)}
+            </MediaRow>
+          ) : null}
           {rows.map((row) => (
             <MediaRow key={row.key} focusKey={'sgr-' + row.key} title={`${row.league} / ${rowStateLabel(row.state)}`} count={row.games.length}>
+              {rz !== null && row.key === rzRow ? redZoneCard(rz) : null}
               {row.games.map((g) => (
                 <GameCard
                   key={g.id}
@@ -112,7 +136,7 @@ export function GamesBoard(props: {
 
   return (
     <div class="games-board">
-      <PanelHost rows={rows} focusedGameId={props.focusedGameId} hideScores={d.hideScores} />
+      <PanelHost rows={rows} focusedGameId={props.focusedGameId} hideScores={d.hideScores} redZone={rz} games={d.games} />
       {errorLeagues.length > 0 ? <div class="feed-errors mono-label ellipsis">Some feeds failed: {errorLeagues.join(', ')}</div> : null}
       {body}
     </div>

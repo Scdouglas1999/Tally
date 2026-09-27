@@ -93,6 +93,15 @@ export function RecTag(props: { recording: TallyGameRecording | null }) {
 }
 
 /**
+ * The "ES" chip (2.3 contract): the stream a card plays or offers is in Spanish. Nothing for English (the default,
+ * never labeled) and for a game without a stream. Drawn like the REC tag.
+ */
+export function LangTag(props: { language: string | null | undefined }) {
+  if (props.language !== 'es') return null;
+  return <span class="rec-tag lang-tag">ES</span>;
+}
+
+/**
  * The line score: a column per period, a row per team, the total at the end. Nothing when neither team has periods.
  * `compact` is the focused-game panel's size; otherwise the box score's. Columns have a fixed width (narrowed to fit
  * `maxWidth`) so the table does not jump as a number goes from 7 to 14.

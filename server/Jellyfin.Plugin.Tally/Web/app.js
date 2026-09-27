@@ -292,6 +292,15 @@ const state = {
 };
 
 const chanById = (id) => state.channels.find(c => c.id === id);
+// Tally 2.3: a channel's commentary language, "en" or "es". A newer server says so (`language`); any server names a
+// Spanish channel "… (Español)" in the group "… · Español".
+const chanLang = (c) => (c && c.language) || (c && (/\(espa[ñn]ol\)\s*$/i.test(c.name || '') || /·\s*espa[ñn]ol\s*$/i.test(c.group || '')) ? 'es' : 'en');
+const LANG_LABEL = { en: 'English', es: 'Español' };
+// the commentary language the viewer prefers (settings key streamLanguage, shared with the apps; English unless chosen)
+const prefLang = () => (state.settings && state.settings.streamLanguage === 'es' ? 'es' : 'en');
+// the server's RedZone channel (2.3): one stream that cuts to the hottest game
+const isRedZone = (c) => !!c && (c.kind === 'redzone' || c.id === 'redzone');
+const redZoneChan = () => state.channels.find(isRedZone) || null;
 const favorites = () => new Set((state.settings && state.settings.favorites) || []);
 const isFav = (id) => favorites().has(id);
 function toggleFav(id) {
@@ -682,6 +691,13 @@ function renderLive(content) {
 const spoilerFree = () => !!(state.settings && state.settings.hideScores);
 const alertsOn = () => !(state.settings && state.settings.alerts === false);
 
+// What the RedZone channel shows now (GET Client/v1/redzone, 2.3). Asked only when the server has the channel; a
+// failed request keeps the last answer.
+async function loadRedZone() {
+  if (!redZoneChan()) { state.redzone = null; return; }
+  try { state.redzone = await api('Client/v1/redzone'); } catch (e) {}
+}
+
 async function loadScores() {
   if (state.status && state.status.scoresEnabled === false) { state.games = []; return; }
   const d = await api('Scores');
@@ -689,6 +705,7 @@ async function loadScores() {
   const prev = state.games;
   state.games = (d && d.games) || [];
   state.scoreErrors = (d && d.errors) || {};
+  await loadRedZone();
   state.scoresAt = Date.now();
   if (!first) noteChanges(prev, state.games);
 }
@@ -719,23 +736,35 @@ function noteChanges(prev, next) {
   }
 }
 
+// A game's channels, the viewer's commentary language first (in the server's order otherwise). Never the RedZone
+// channel: it carries whichever game is hottest, not this one.
+function gameChannels(g) {
+  const list = (g.channels || []).filter(gc => gc.id !== 'redzone' && !isRedZone(chanById(gc.id)));
+  const lang = prefLang();
+  return list.filter(gc => chanLang(chanById(gc.id)) === lang).concat(list.filter(gc => chanLang(chanById(gc.id)) !== lang));
+}
+
 // The channel to open for a game. A broadcaster-only match is trusted only when that
 // channel isn't also the broadcaster of another live game (regional feeds: eight games, one "FOX").
 function bestChannel(g) {
-  for (const gc of g.channels || []) {
+  for (const gc of gameChannels(g)) {
     const c = chanById(gc.id);
     if (!c) continue;
     if (gc.kind !== 'network') return c;
     const rivals = state.games.filter(o => o.id !== g.id && o.state === 'in' && o.channels.some(x => x.id === gc.id));
     if (!rivals.length || g.state !== 'in') return c;
   }
-  const any = (g.channels || []).map(gc => chanById(gc.id)).find(Boolean);
+  const any = gameChannels(g).map(gc => chanById(gc.id)).find(Boolean);
   return any || null;
 }
 
 // The game a channel is showing, for score bugs. Ambiguous broadcaster matches get no bug.
 function gameForChannel(id) {
   if (spoilerFree()) return null;
+  if (isRedZone(chanById(id))) {
+    const rz = state.redzone;
+    return rz && rz.active ? state.games.find(g => g.id === rz.gameId && g.state === 'in') || null : null;
+  }
   const hits = state.games.filter(g => g.state === 'in' && g.channels.some(c => c.id === id));
   const sure = hits.find(g => g.channels.some(c => c.id === id && c.kind !== 'network'));
   return sure || (hits.length === 1 ? hits[0] : null);
@@ -853,7 +882,9 @@ function findStream(g) {
 
 function gameRow(g, hide) {
   const live = g.state === 'in', pre = g.state === 'pre', post = g.state === 'post';
-  const chans = (g.channels || []).map(gc => ({ kind: gc.kind, c: chanById(gc.id) })).filter(x => x.c).slice(0, 3);
+  const chans = gameChannels(g).map(gc => ({ kind: gc.kind, c: chanById(gc.id) })).filter(x => x.c).slice(0, 3);
+  // the commentary language on each button when the game has a Spanish stream (English alone is never labeled)
+  const langTags = chans.some(x => chanLang(x.c) === 'es');
   const start = new Date(g.start);
   const today = start.toDateString() === new Date().toDateString();
   const when = (today ? '' : start.toLocaleDateString([], { weekday: 'short' }) + ' ') + fmtTime(start);
@@ -889,7 +920,7 @@ function gameRow(g, hide) {
   const label = searching ? 'Looking for a stream' : soon ? 'No stream yet' : '';
   const watch = chans.length
     ? chans.map((x, i) => `<button class="g-chan${i === 0 ? ' first' : ''}" data-watch="${esc(x.c.id)}" title="${x.kind === 'network' ? 'Broadcaster match — may be carrying a different regional game' : 'Watch'}">
-        <i class="led${live ? ' live' : ''}"></i><span class="nm">${esc(x.c.name)}</span>${x.kind === 'network' ? '<span class="q">NET</span>' : ''}</button>`).join('')
+        <i class="led${live ? ' live' : ''}"></i><span class="nm">${esc(x.c.name)}</span>${langTags ? `<span class="q${chanLang(x.c) === 'es' ? ' es' : ''}" title="${esc(LANG_LABEL[chanLang(x.c)] || chanLang(x.c))} commentary">${esc(chanLang(x.c).toUpperCase())}</span>` : ''}${x.kind === 'network' ? '<span class="q">NET</span>' : ''}</button>`).join('')
       + `<button class="icon-btn" data-gmv="${esc(chans[0].c.id)}" title="Add to multiview" aria-label="Add to multiview">${icons.grid}</button>`
     : post ? '' : `${label ? `<span class="g-none${searching ? ' on' : ''}">${label}</span>` : ''}
         <button class="g-chan first" data-find="${esc(g.id)}" title="Look for a stream and play it"><i class="led${searching ? ' on' : ''}"></i><span class="nm">Watch</span></button>`;
@@ -920,6 +951,22 @@ function renderGames(content) {
   const sec = (label, arr) => arr.length
     ? `<div class="g-sec"><span class="jtv-k">${label} · ${arr.length}</span></div>${arr.map(g => gameRow(g, hide)).join('')}` : '';
 
+  // RedZone (2.3): its own row on top while the server says it is on the air
+  const rzChan = redZoneChan(), rz = state.redzone;
+  const rzGame = rz && rz.active ? state.games.find(g => g.id === rz.gameId) : null;
+  const rzTitle = rzGame ? (rzGame.away.shortName || rzGame.away.abbr) + ' at ' + (rzGame.home.shortName || rzGame.home.abbr) : (rz && rz.title) || '';
+  const rzReason = !hide && rz && rz.reason ? rz.reason.toUpperCase() : '';
+  const rzRow = rzChan && rz && rz.active
+    ? `<div class="g-sec"><span class="jtv-k">RedZone</span></div>
+      <div class="game live can rz" data-rz="${esc(rzChan.id)}">
+        <div class="g-status"><div class="jtv-k live">${esc(rzChan.name || 'Tally RedZone')}</div><div class="g-clock">Live</div></div>
+        <div class="g-teams"><div class="rz-on jtv-k">On now</div><div class="g-name">${esc(rzTitle || 'The hottest game')}</div></div>
+        <div class="g-sit">${rzReason ? `<div class="g-tags"><span class="jtv-tag live">${esc(rzReason)}</span></div>` : ''}
+          <div class="g-play">Cuts to the hottest game: red zones, scores, two-minute drills, overtime. One stream instead of several, so it is lighter than multiview.</div></div>
+        <div class="g-watch"><button class="g-chan first" data-watch="${esc(rzChan.id)}" title="Watch"><i class="led live"></i><span class="nm">Watch RedZone</span></button></div>
+      </div>` : '';
+  const lang = prefLang();
+
   // A feed failure must never pass for a quiet day — say which leagues are dark and why.
   const errs = Object.entries(state.scoreErrors || {});
   const feedNote = errs.length
@@ -936,8 +983,10 @@ function renderGames(content) {
       <div class="jtv-chips">${chip('', 'All', !state.leagueFilter)}${leagues.map(l => chip(l, esc(l), state.leagueFilter === l)).join('')}</div>
       <button class="jtv-chip${onlyWatchable ? ' active' : ''}" id="g-mine"><i class="led${onlyWatchable ? ' on' : ''}"></i>Only games with a stream</button>
       <button class="jtv-chip${hide ? ' active' : ''}" id="g-hide"><i class="led${hide ? ' on' : ''}"></i>Hide scores</button>
+      <button class="jtv-chip${lang === 'es' ? ' active' : ''}" id="g-lang" title="Games streamed in both languages play in this one"><i class="led${lang === 'es' ? ' on' : ''}"></i>Commentary: ${LANG_LABEL[lang]}</button>
     </div>
     ${feedNote}
+    ${rzRow}
     ${list.length ? sec('Live', live) + sec('Upcoming', pre) + sec('Final', post)
       : `<div class="jtv-empty"><div>${state.scoresAt ? (onlyWatchable && state.games.length ? 'No game has a stream right now.' : 'No games to show.') : state.scoresErr ? 'Couldn’t reach the scores feed — retrying.' : 'Loading games…'}</div>${state.scoresAt ? `<div class="sub">${onlyWatchable ? 'Turn off “Only games with a stream” to see them all.' : errs.length ? 'The scores feed is failing — details above. The server log has more.' : 'Nothing scheduled today in the leagues you follow.'}</div>` : ''}</div>`}
   </div>`;
@@ -947,11 +996,15 @@ function renderGames(content) {
   // shared with the TV and phone apps (settings key onlyWatchable; never chosen = off)
   $('#g-mine', content).onclick = () => { state.settings.onlyWatchable = !onlyWatchable; saveSettings(); render(); };
   $('#g-hide', content).onclick = () => { state.settings.hideScores = !hide; saveSettings(); render(); };
+  // commentary language (streamLanguage, shared with the apps): English or Español, where a game has both
+  $('#g-lang', content).onclick = () => { state.settings.streamLanguage = lang === 'es' ? 'en' : 'es'; saveSettings(); render(); };
   $('#g-fill', content).onclick = fillMultiview;
   content.firstElementChild.onclick = (ev) => {
     const mv = ev.target.closest('[data-gmv]'), w = ev.target.closest('[data-watch]'), row = ev.target.closest('.game.can');
+    const rzRowEl = ev.target.closest('[data-rz]');
     if (mv) addToMultiview(mv.dataset.gmv);
     else if (w) play(w.dataset.watch);
+    else if (rzRowEl) play(rzRowEl.dataset.rz);
     else if (row) {
       const g = state.games.find(x => x.id === row.dataset.game);
       if (!g) return;
@@ -1284,14 +1337,24 @@ async function play(id) {
   // remaining-time readout counts down and rolls over to the next programme.
   const paintInfo = () => {
     const cc = chanById(id) || c, g = gameForChannel(id);
+    const rz = isRedZone(cc) && state.redzone && state.redzone.active ? state.redzone : null;
+    const rzGame = rz ? state.games.find(x => x.id === rz.gameId) : null;
+    const rzTitle = rz ? (rzGame ? rzGame.away.name + ' at ' + rzGame.home.name : rz.title || '') : '';
     $('#jp-info', overlay).innerHTML =
-      `<div class="jp-title">${cc.now ? esc(cc.now.title || 'Untitled') : g ? esc(g.away.name + ' at ' + g.home.name) : 'Live'}</div>`
+      (rzTitle ? `<div class="jp-title"><span class="jtv-k live">On RedZone now</span> ${esc(rzTitle)}${rz.reason && !spoilerFree() ? ` · <span class="jtv-k">${esc(rz.reason.toUpperCase())}</span>` : ''}</div>`
+        : `<div class="jp-title">${cc.now ? esc(cc.now.title || 'Untitled') : g ? esc(g.away.name + ' at ' + g.home.name) : 'Live'}</div>`)
       + (g && (g.downDistance || g.lastPlay) ? `<div class="jp-play">${g.downDistance ? `<b>${esc(g.downDistance)}</b>` : ''}${esc(g.lastPlay || '')}</div>` : '')
       + progReadout(cc.now, cc.next, new Date(), true);
   };
   paintInfo();
   updateBugs();   // score bug now, not at the next scores poll
   player.timer = setInterval(paintInfo, 1000);
+  // RedZone: what it shows is asked every 10 s, only while it plays
+  if (isRedZone(c)) {
+    const ask = () => api('Client/v1/redzone').then(r => { state.redzone = r; updateBugs(); }).catch(() => {});
+    ask();
+    player.rzTimer = setInterval(ask, 10e3);
+  }
 
   let hideTimer;
   const poke = () => {
@@ -1344,6 +1407,7 @@ function closePlayer() {
   const p = state.player;
   if (!p) return;
   clearInterval(p.timer);
+  clearInterval(p.rzTimer);
   try { p.hls && p.hls.destroy(); } catch (e) {}
   try { p.video.pause(); p.video.removeAttribute('src'); p.video.load(); } catch (e) {}
   if (fsElement() === p.overlay) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }

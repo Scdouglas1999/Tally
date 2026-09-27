@@ -4,7 +4,7 @@
  */
 import axios, { type AxiosError } from 'axios';
 import { currentApi } from './jellyfin';
-import { decodeBoard, decodeInfo, decodeSettings, decodeWatch, type TallyBoard, type TallyInfo, type TallySettings, type TallyWatch } from './tallyModels';
+import { decodeBoard, decodeInfo, decodeRedZone, decodeSettings, decodeWatch, type TallyBoard, type TallyInfo, type TallyRedZone, type TallySettings, type TallyWatch } from './tallyModels';
 
 export class TallyNotInstalled extends Error {
   constructor() {
@@ -76,6 +76,11 @@ export async function tallyInfo(): Promise<TallyInfo> {
 /** Omit `since` on the first call (no events); afterwards pass the highest event id seen. */
 export async function tallyBoard(since?: number): Promise<TallyBoard> {
   return decodeBoard(await get('/JellyTV/Client/v1/board' + (since === undefined ? '' : '?since=' + String(since))));
+}
+
+/** What the RedZone channel shows now (2.3 contract). Only asked when the board has the channel. */
+export async function tallyRedZone(): Promise<TallyRedZone> {
+  return decodeRedZone(await get('/JellyTV/Client/v1/redzone'));
 }
 
 /** The raw settings document (kept whole: unknown keys belong to other clients and must survive a write). */
