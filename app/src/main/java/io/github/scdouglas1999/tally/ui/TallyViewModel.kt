@@ -45,6 +45,12 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.inject.Inject
 
+/** A RedZone status answer; [known] is false until the server has answered once (the status may still be null). */
+internal data class RedZoneAnswer(
+    val known: Boolean,
+    val status: TallyRedZone?,
+)
+
 /**
  * Everything the Tally screens need, in one state object.
  */
@@ -67,6 +73,11 @@ data class TallyUiState(
     val streamLanguage: String = TallyLanguage.ENGLISH,
     /** The RedZone channel's tile, first in the first live row; null when the server has none or it is not on. */
     val redZone: RedZoneTile? = null,
+    /**
+     * Whether [redZone] is settled: the board has no RedZone channel, or the server has answered what it shows. The
+     * board waits for it (briefly) before placing focus, so the tile is in its row when focus lands.
+     */
+    val redZoneKnown: Boolean = false,
 ) {
     /** The server records games (the plugin's `dvr` feature): Sports shows RECORDINGS. */
     val hasDvr: Boolean
@@ -109,27 +120,42 @@ class TallyViewModel
         /** The user's explicit "Only games with a stream" choice this session; null = the saved one (off when unset). */
         private val onlyWatchableChoice = MutableStateFlow<Boolean?>(null)
 
+        /** The last RedZone answer ([RedZoneAnswer.known] once one came back): a board shown again starts from it. */
+        @Volatile
+        private var lastRedZone = RedZoneAnswer(known = false, status = null)
+
         /**
          * What the RedZone channel shows, asked at the board's pace while a board screen collects [uiState] and the
-         * board lists a RedZone channel; never asked on a server without one.
+         * board lists a RedZone channel; never asked on a server without one (then it is known at once: no tile).
          */
         @OptIn(ExperimentalCoroutinesApi::class)
-        private val redZoneStatus: Flow<TallyRedZone?> =
+        private val redZoneStatus: Flow<RedZoneAnswer> =
             repository.board
-                .map { RedZone.channel(it) != null }
+                .map { board -> if (board == null) null else RedZone.channel(board) != null }
                 .distinctUntilChanged()
                 .flatMapLatest { hasChannel ->
-                    if (!hasChannel) {
-                        flowOf<TallyRedZone?>(null)
-                    } else {
-                        flow {
-                            while (true) {
-                                emit(repository.redZone())
-                                delay(RedZone.BOARD_POLL_MS)
+                    when (hasChannel) {
+                        null -> {
+                            flowOf(lastRedZone)
+                        }
+
+                        false -> {
+                            flowOf(RedZoneAnswer(known = true, status = null))
+                        }
+
+                        true -> {
+                            flow {
+                                emit(lastRedZone)
+                                while (true) {
+                                    val answer = RedZoneAnswer(known = true, status = repository.redZone())
+                                    lastRedZone = answer
+                                    emit(answer)
+                                    delay(RedZone.BOARD_POLL_MS)
+                                }
                             }
                         }
                     }
-                }.onStart { emit(null) }
+                }.onStart { emit(lastRedZone) }
 
         val uiState: StateFlow<TallyUiState> =
             combine(
@@ -162,7 +188,8 @@ class TallyViewModel
                     selectedTab = selectedTab,
                     multiview = repo.multiview,
                     streamLanguage = repo.settings.streamLanguage ?: TallyLanguage.ENGLISH,
-                    redZone = RedZone.tile(repo.board, redZone),
+                    redZone = RedZone.tile(repo.board, redZone.status),
+                    redZoneKnown = redZone.known,
                 )
             }.stateIn(
                 viewModelScope,

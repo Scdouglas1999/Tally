@@ -20,8 +20,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -56,7 +58,12 @@ import io.github.scdouglas1999.tally.ui.components.gameActions
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallyType
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+
+/** How long a board opening waits for the RedZone answer before it places focus anyway (ms). */
+private const val REDZONE_WAIT_MS = 2_000L
 
 /**
  * The games board: the large [FocusedGamePanel] mirroring the focused card on top,
@@ -103,9 +110,13 @@ fun GamesBoard(
         }
 
     // When the board appears or reappears (page open, back from the player), put
-    // focus on the card at the remembered position — the one that was played.
+    // focus on the card at the remembered position — the one that was played. The RedZone answer comes a moment
+    // after the board: wait (briefly) for it, so its tile already leads its row and a first visit lands on it
+    // rather than on the game the tile then pushes aside.
+    val redZoneKnown by rememberUpdatedState(ui.redZoneKnown)
     LaunchedEffect(rows.isNotEmpty()) {
         if (rows.isNotEmpty()) {
+            withTimeoutOrNull(REDZONE_WAIT_MS) { snapshotFlow { redZoneKnown }.first { it } }
             boardFocusRequester.tryRequestFocus("jellytv-games")
         }
     }
@@ -271,6 +282,13 @@ private fun GameRow(
     val firstFocus = remember { FocusRequester() }
     val rowFocus = remember { FocusRequester() }
     var position by rememberInt()
+    // The tile arriving in a row already on screen goes in front of its first card, and the row keeps that card
+    // where it was: the tile would sit half outside the margin. A row at its start shows the tile whole.
+    LaunchedEffect(redZone != null) {
+        if (redZone != null && state.firstVisibleItemIndex == 1 && state.firstVisibleItemScrollOffset == 0) {
+            state.scrollToItem(0)
+        }
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
