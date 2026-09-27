@@ -4,7 +4,7 @@
  */
 import axios, { type AxiosError } from 'axios';
 import { currentApi } from './jellyfin';
-import { decodeBoard, decodeInfo, decodeSettings, type TallyBoard, type TallyInfo, type TallySettings } from './tallyModels';
+import { decodeBoard, decodeInfo, decodeSettings, decodeWatch, type TallyBoard, type TallyInfo, type TallySettings, type TallyWatch } from './tallyModels';
 
 export class TallyNotInstalled extends Error {
   constructor() {
@@ -95,4 +95,39 @@ export async function updateTallySettings(change: (doc: Record<string, unknown>)
   await axios.put(api.basePath + '/JellyTV/Client/v1/settings', doc, {
     headers: { Authorization: api.authorizationHeader, 'Content-Type': 'application/json' },
   });
+}
+
+/**
+ * What `POST games/{id}/find` answered (2.2.1 contract): `found` with the stream, `searching` while a search runs,
+ * `none` when one finished within the last minute and found nothing. `unsupported`: the server has no such endpoint
+ * (HTTP 404: a plugin older than 2.2.1, or a game it does not know), which the app treats as `none` after one board
+ * refresh.
+ */
+export interface FindResult {
+  state: 'found' | 'searching' | 'none' | 'unsupported';
+  watch: TallyWatch | null;
+}
+
+export function decodeFind(v: unknown): FindResult {
+  const o = v !== null && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+  const watch = decodeWatch(o.watch);
+  const state = o.state === 'found' || o.state === 'searching' || o.state === 'none' ? o.state : 'searching';
+  // a stream is a stream, whatever the state says; "found" without one is not
+  if (watch !== null && watch.hlsPath !== '') return { state: 'found', watch };
+  return { state: state === 'found' ? 'searching' : state, watch: null };
+}
+
+/** Starts a search for the game's stream now, or joins the one running; answers at once. */
+export async function findGameStream(gameId: string): Promise<FindResult> {
+  const api = currentApi();
+  try {
+    const response = await axios.post(api.basePath + '/JellyTV/Client/v1/games/' + encodeURIComponent(gameId) + '/find', null, {
+      headers: { Authorization: api.authorizationHeader },
+      timeout: 20000,
+    });
+    return decodeFind(response.data);
+  } catch (e) {
+    if (status(e) === 404) return { state: 'unsupported', watch: null };
+    throw e;
+  }
 }

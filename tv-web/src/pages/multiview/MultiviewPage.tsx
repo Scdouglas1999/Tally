@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { absolute, artUrl } from '../../api/tally';
-import { isLive, type TallyGame, type TallyTeam } from '../../api/tallyModels';
+import { isLive, noStreamLabel, type TallyGame, type TallyTeam } from '../../api/tallyModels';
 import { app } from '../../app/context';
 import { useArrivalFocus, type PageProps } from '../../app/page';
 import { currentFocusKey, focusExists, setFocus, useFocusable } from '../../focus/focus';
@@ -21,6 +21,8 @@ import { useStore } from '../../util/store';
 import { GameActionsDialog } from '../sports/GameActionsDialog';
 import { MULTIVIEW_MAX, addToMultiview, channelRoute, multiviewQueue, removeFromMultiview, replaceInMultiview } from '../sports/sportsState';
 import { useOkHold } from '../sports/useOkHold';
+import { watchOrSearch } from '../sports/streamSearch';
+import { StreamSearchHost, useStreamSearchOpen } from '../sports/StreamSearchDialog';
 import { defaultLayout, multiviewDecoders, playingTiles, tileFocusMap, tileSlots, type FocusTarget, type MultiviewLayout } from './multiviewLayout';
 import './multiview.css';
 
@@ -33,8 +35,12 @@ interface Tile {
   game: TallyGame | null;
 }
 
-/** One row of the swap-in rail: a channel, with the live game it is showing when there is one. */
+/**
+ * One row of the swap-in rail: a channel, with the live game it is showing when there is one; or a live game with no
+ * stream yet (`channelId` ''), which looks for its stream when picked and swaps in once it has one.
+ */
 interface BenchEntry {
+  key: string;
   channelId: string;
   name: string;
   game: TallyGame | null;
@@ -250,6 +256,7 @@ function SwapInRow(props: { index: number; entry: BenchEntry; hideScores: boolea
           </div>
           <SwapTeamLine team={game.away} hideScores={props.hideScores} />
           <SwapTeamLine team={game.home} hideScores={props.hideScores} />
+          {entry.channelId === '' ? <div class="no-stream mono-label">{tallyUppercase(noStreamLabel(game))}</div> : null}
         </>
       )}
     </div>
@@ -294,11 +301,22 @@ export function MultiviewPage(props: PageProps<Extract<Route, { name: 'multiview
       for (const g of row.games) {
         if (!isLive(g) || g.watch === null || g.watch.channelId === '') continue;
         if (live.some((e) => e.channelId === g.watch?.channelId)) continue;
-        live.push({ channelId: g.watch.channelId, name: g.watch.channelName, game: g });
+        live.push({ key: g.watch.channelId, channelId: g.watch.channelId, name: g.watch.channelName, game: g });
       }
     }
-    const others = (current?.channels ?? []).filter((c) => !live.some((e) => e.channelId === c.id)).map((c) => ({ channelId: c.id, name: c.name, game: null }));
-    return live.concat(others).filter((e) => queue.indexOf(e.channelId) < 0).slice(0, MAX_BENCH);
+    // live games with no stream yet: picking one looks for it (2.2.1), a tile still needs a stream
+    const unstreamed: BenchEntry[] = [];
+    for (const row of boardRows(games, favorites, false, teams)) {
+      for (const g of row.games) if (isLive(g) && g.watch === null) unstreamed.push({ key: 'game-' + g.id, channelId: '', name: '', game: g });
+    }
+    const others = (current?.channels ?? [])
+      .filter((c) => !live.some((e) => e.channelId === c.id))
+      .map((c) => ({ key: c.id, channelId: c.id, name: c.name, game: null }));
+    return live
+      .filter((e) => queue.indexOf(e.channelId) < 0)
+      .concat(unstreamed)
+      .concat(others.filter((e) => queue.indexOf(e.channelId) < 0))
+      .slice(0, MAX_BENCH);
   }, [current, favorites, teams, queue]);
 
   const [audioIndex, setAudioIndex] = useState(0);
@@ -310,6 +328,7 @@ export function MultiviewPage(props: PageProps<Extract<Route, { name: 'multiview
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const lastTile = useRef(0);
   const [actionsChannel, setActionsChannel] = useState<string | null>(null);
+  const searching = useStreamSearchOpen();
   const railScroller = useRef<HTMLDivElement>(null);
 
   const layout = layoutChoice ?? defaultLayout(tiles.length);
@@ -359,10 +378,18 @@ export function MultiviewPage(props: PageProps<Extract<Route, { name: 'multiview
     removeFromMultiview(id);
   };
 
-  /** Put `entry` on screen: replaces the audio tile when the queue is full, otherwise appends. */
+  /** Put `channelId` on screen: replaces the audio tile when the queue is full, otherwise appends. */
+  const audioRef = useRef(audio);
+  audioRef.current = audio;
+  const swapInChannel = (channelId: string): void => {
+    if (channelId === '') return;
+    if (multiviewQueue.get().length >= MULTIVIEW_MAX) replaceInMultiview(audioRef.current, channelId);
+    else addToMultiview(channelId);
+  };
+  /** A rail row picked: its channel, or for a game with no stream yet, the stream a search finds. */
   const swapIn = (entry: BenchEntry): void => {
-    if (queue.length >= MULTIVIEW_MAX) replaceInMultiview(audio, entry.channelId);
-    else addToMultiview(entry.channelId);
+    if (entry.channelId !== '' || entry.game === null) swapInChannel(entry.channelId);
+    else watchOrSearch(entry.game, (g) => swapInChannel(g.watch?.channelId ?? ''));
   };
 
   const move = (target: FocusTarget): boolean => {
@@ -399,12 +426,12 @@ export function MultiviewPage(props: PageProps<Extract<Route, { name: 'multiview
       setActionsChannel(tile.channelId);
       return true;
     },
-    actionsChannel === null,
+    actionsChannel === null && !searching,
     props.active,
   );
 
   useKeyHandler((key) => {
-    if (key !== 'back' || actionsChannel !== null) return false;
+    if (key !== 'back' || actionsChannel !== null || searching) return false;
     back();
     return true;
   }, props.active);
@@ -466,7 +493,7 @@ export function MultiviewPage(props: PageProps<Extract<Route, { name: 'multiview
           <div ref={railScroller} class="mv-rail-list">
             {bench.map((entry, i) => (
               <SwapInRow
-                key={entry.channelId}
+                key={entry.key}
                 index={i}
                 entry={entry}
                 hideScores={hideScores}
@@ -509,6 +536,7 @@ export function MultiviewPage(props: PageProps<Extract<Route, { name: 'multiview
       ) : null}
       <ToastHost />
       <RecordingNoticeHost active={props.active} pageKey={props.pageKey} />
+      <StreamSearchHost active={props.active} pageKey={props.pageKey} />
     </div>
   );
 }

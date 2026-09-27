@@ -19,7 +19,8 @@ import { GamesBoard } from './GamesBoard';
 import { ConfirmDeleteDialog, JobMenu } from './RecordingsMenus';
 import { RecordingsTab, recordingsTarget } from './RecordingsTab';
 import { MultiviewQueueTab, SportsSettingsTab } from './SportsTabs';
-import { addToMultiviewWithNotice, gameRoute, multiviewQueue, watchGame } from './sportsState';
+import { addGameToMultiviewAction, addToMultiviewWithNotice, multiviewQueue, watchGameAction } from './sportsState';
+import { StreamSearchHost, useStreamSearchOpen } from './StreamSearchDialog';
 import { useOkHold } from './useOkHold';
 import './sportsPage.css';
 
@@ -108,13 +109,14 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
   const focusedGameId = useMemo(() => createStore<string | null>(null), []);
   const focusedChannelId = useRef<string | null>(null);
   const [menu, setMenu] = useState<Menu | null>(null);
+  const searching = useStreamSearchOpen();
   const content = useFocusable<HTMLDivElement>({ focusKey: 'sports-content', saveLastFocusedChild: true });
 
   const games = current?.games ?? [];
   const favorites = useMemo(() => new Set(settings?.favorites ?? []), [settings]);
   const teams = useMemo(() => new Set((settings?.favoriteTeams ?? []).map((t) => t.toUpperCase())), [settings]);
   const hideScores = settings?.hideScores === true;
-  // off until the viewer turns it on: every game shows, the ones not on their channels dimmed
+  // "Only games with a stream": off until the viewer turns it on (null is off), so every game shows
   const onlyWatchable = settings?.onlyWatchable ?? false;
   const loading = current === null && error === null;
 
@@ -152,7 +154,7 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
       }
       return false;
     },
-    menu === null,
+    menu === null && !searching,
     props.active,
   );
 
@@ -230,8 +232,8 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
         <GameActionsDialog
           game={menuGame}
           actions={{
-            watch: gameRoute(menuGame) !== null ? () => watchGame(menuGame) : undefined,
-            addToMultiview: menuGame.watch !== null && menuGame.watch.channelId !== '' ? () => addToMultiviewWithNotice(menuGame.watch?.channelId ?? '') : undefined,
+            watch: watchGameAction(menuGame),
+            addToMultiview: addGameToMultiviewAction(menuGame),
             follow: true,
           }}
           hideScores={hideScores}
@@ -268,6 +270,7 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
       ) : null}
       <ToastHost />
       <RecordingNoticeHost active={props.active} pageKey={props.pageKey} />
+      <StreamSearchHost active={props.active} pageKey={props.pageKey} />
     </div>
   );
 }

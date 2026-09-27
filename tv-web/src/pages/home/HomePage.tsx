@@ -17,7 +17,8 @@ import type { Route } from '../../router/router';
 import { DetailDialogs, cardMenu, type Dialog } from '../details/DetailDialogs';
 import { isPlayable, openDetails, playItem } from '../details/navigate';
 import { GameActionsDialog } from '../sports/GameActionsDialog';
-import { addToMultiviewWithNotice, gameRoute, watchGame } from '../sports/sportsState';
+import { addGameToMultiviewAction, watchGame, watchGameAction } from '../sports/sportsState';
+import { StreamSearchHost, useStreamSearchOpen } from '../sports/StreamSearchDialog';
 import { useOkHold } from '../sports/useOkHold';
 import { GameCard } from '../../sports/GameCard';
 import { selectHomeGames } from '../../sports/homeRow';
@@ -138,7 +139,8 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
     window.setTimeout(() => setFocus(target ?? props.pageKey), 0);
   };
   const [gameMenu, setGameMenu] = useState<{ gameId: string; returnKey: string } | null>(null);
-  const menuOpen = dialog !== null || gameMenu !== null;
+  const searching = useStreamSearchOpen();
+  const menuOpen = dialog !== null || gameMenu !== null || searching;
   useOkHold(
     () => {
       const key = currentFocusKey();
@@ -241,8 +243,8 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
         <GameActionsDialog
           game={menuGame}
           actions={{
-            watch: gameRoute(menuGame) !== null ? () => watchGame(menuGame) : undefined,
-            addToMultiview: menuGame.watch !== null && menuGame.watch.channelId !== '' ? () => addToMultiviewWithNotice(menuGame.watch?.channelId ?? '') : undefined,
+            watch: watchGameAction(menuGame),
+            addToMultiview: addGameToMultiviewAction(menuGame),
             follow: true,
           }}
           hideScores={hideScores}
@@ -253,6 +255,7 @@ export function HomePage(props: PageProps<Extract<Route, { name: 'home' }>>) {
       <DetailDialogs dialog={dialog} setDialog={setDialog} pageKey={props.pageKey} onChanged={load} />
       <ToastHost />
       <RecordingNoticeHost active={props.active} pageKey={props.pageKey} />
+      <StreamSearchHost active={props.active} pageKey={props.pageKey} />
     </div>
   );
 }

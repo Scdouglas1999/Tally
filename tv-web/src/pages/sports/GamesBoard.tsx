@@ -80,8 +80,8 @@ export function GamesBoard(props: {
       <EmptyState
         focusKey="sg-empty"
         class="board-empty"
-        title="Nothing on your channels"
-        subtitle="None of today’s games are on your channels. Turn off “My channels only” in Settings to see every game."
+        title="No game has a stream right now."
+        subtitle="Turn off “Only games with a stream” to see them all."
       />
     );
   else if (rows.length === 0) body = <EmptyState focusKey="sg-empty" class="board-empty" title="No games today" subtitle="There are no games on the board right now" />;

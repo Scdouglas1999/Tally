@@ -28,8 +28,9 @@ export function MultiviewQueueTab(props: { queue: string[]; channels: TallyChann
 }
 
 /**
- * SETTINGS (TallySettingsContent.kt): "My channels only" and "Hide scores" as rows with square switches, then the
- * server plugin's build, API version and features.
+ * SETTINGS (TallySettingsContent.kt): "Only games with a stream" (off unless the viewer turns it on: the shared
+ * setting's null is off) and "Hide scores" as rows with square switches, then the server plugin's build, API version
+ * and features.
  */
 export function SportsSettingsTab(props: { onlyWatchable: boolean; hideScores: boolean; info: TallyInfo | null; takeFocus: boolean; active: boolean }) {
   useTabArrival(props.takeFocus && props.active, 'sst-mine', true);
@@ -37,8 +38,8 @@ export function SportsSettingsTab(props: { onlyWatchable: boolean; hideScores: b
     <div class="tab-list">
       <TallyRow
         focusKey="sst-mine"
-        label="My channels only"
-        description="Only show games you can watch on your channels"
+        label="Only games with a stream"
+        description="Hide games that have no stream yet"
         onPress={() => void setOnlyWatchable(!props.onlyWatchable)}
       >
         <TallySwitch checked={props.onlyWatchable} />

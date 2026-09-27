@@ -3,12 +3,13 @@
  * player's switcher, read by the multiview page) and "watch this" for games and channels.
  */
 import { session } from '../../api/jellyfin';
-import type { TallyChannel, TallyGame } from '../../api/tallyModels';
+import { hasStream, isFinal, type TallyChannel, type TallyGame } from '../../api/tallyModels';
 import { showToast } from '../../kit/Toast';
 import { push, replace, type Route } from '../../router/router';
 import { setLastChannel } from '../../state/sportsData';
 import { createStore } from '../../util/store';
 import { matchupTitle } from '../../sports/SportsBits';
+import { watchOrSearch } from './streamSearch';
 
 /** At most four pictures at once (TallyMultiviewState.MAX). */
 export const MULTIVIEW_MAX = 4;
@@ -17,7 +18,8 @@ export const MULTIVIEW_MAX = 4;
 export const multiviewQueue = createStore<string[]>([]);
 session.subscribe(() => multiviewQueue.set([]));
 
-const REGISTERING = 'That channel is still registering with Jellyfin — try again in a minute';
+/** A channel without its continuous playlist (the board always gives one; an odd server might not). */
+const NO_PLAYLIST = 'That channel has no stream right now — try again in a minute';
 
 export type AddResult = 'added' | 'already' | 'full';
 
@@ -61,22 +63,49 @@ export function channelRoute(channel: TallyChannel): Extract<Route, { name: 'liv
   return { name: 'live', channelId: channel.id, hlsPath: channel.hlsPath, title: channel.now?.title ?? channel.name, gameId: channel.gameId ?? undefined };
 }
 
-/** Plays `game` on its channel (and remembers the channel, as the Android app does). `inPlace`: the player switches. */
+/**
+ * Plays `game` on its channel (and remembers the channel, as the Android app does). `inPlace`: the player switches.
+ * Never blocked (2.2.1): a game without a stream looks for one first ("Looking for a stream…") and plays when it
+ * appears. The stream is the channel's continuous playlist (`watch.hlsPath`), so a channel Jellyfin has not
+ * registered yet (`liveTvItemId` null) plays all the same.
+ */
 export function watchGame(game: TallyGame, inPlace = false): void {
-  const route = gameRoute(game);
-  if (route === null) {
-    showToast(REGISTERING);
-    return;
+  watchOrSearch(game, (g) => {
+    const route = gameRoute(g);
+    if (route === null) return; // watchOrSearch hands over only games with a stream
+    if (inPlace) replace(route);
+    else push(route);
+    void setLastChannel(route.channelId);
+  });
+}
+
+/**
+ * The game's "Add to multiview": its channel at once, or, for a game still to be found (not final), after the search
+ * finds its stream. Undefined when there is nothing to add (a finished game with no channel).
+ */
+export function addGameToMultiviewAction(game: TallyGame): (() => void) | undefined {
+  if (hasStream(game) && game.watch !== null && game.watch.channelId !== '') {
+    const channelId = game.watch.channelId;
+    return () => addToMultiviewWithNotice(channelId);
   }
-  if (inPlace) replace(route);
-  else push(route);
-  void setLastChannel(route.channelId);
+  if (isFinal(game)) return undefined;
+  return () =>
+    watchOrSearch(game, (g) => {
+      const id = g.watch?.channelId ?? '';
+      if (id !== '') addToMultiviewWithNotice(id);
+    });
+}
+
+/** The game's "Watch" in a menu: every game but a finished one with no channel (canWatch). */
+export function watchGameAction(game: TallyGame, inPlace = false): (() => void) | undefined {
+  if (!hasStream(game) && isFinal(game)) return undefined;
+  return () => watchGame(game, inPlace);
 }
 
 export function watchChannel(channel: TallyChannel): void {
   const route = channelRoute(channel);
   if (route === null) {
-    showToast(REGISTERING);
+    showToast(NO_PLAYLIST);
     return;
   }
   push(route);
