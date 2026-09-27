@@ -31,6 +31,7 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
 import io.github.scdouglas1999.tally.ui.theme.TallyType
+import io.github.scdouglas1999.tally.watch.otherFeed
 
 /**
  * The large panel mirroring the focused game card: kicker, big mono scores, situation,
@@ -309,18 +310,35 @@ private fun WatchBar(game: TallyGame) {
         val watch = game.watch
         if (watch != null) {
             IndicatorSquare(color = if (game.isLive) TallyColors.live else TallyColors.ruleStrong)
-            Text(
-                text = watch.channelName.uppercase(),
-                style = TallyType.label,
-                color = TallyColors.text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            // The channel, then ES when it plays with Spanish commentary.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.weight(1f),
-            )
+            ) {
+                Text(
+                    text = watch.channelName.uppercase(),
+                    style = TallyType.label,
+                    color = TallyColors.text,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                LanguageTag(game = game, style = TallyType.label)
+            }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(24.dp),
             ) {
+                // A second commentary is one HOLD away, in the game menu.
+                game.otherFeed()?.let { feed ->
+                    Text(
+                        text = stringResource(R.string.tally_23_also_in, feedName(feed)).tallyUppercase(),
+                        style = TallyType.label,
+                        color = TallyColors.muted,
+                        maxLines = 1,
+                    )
+                }
                 KeyHint(
                     key = stringResource(R.string.tally_key_ok),
                     label = stringResource(R.string.tally_watch),

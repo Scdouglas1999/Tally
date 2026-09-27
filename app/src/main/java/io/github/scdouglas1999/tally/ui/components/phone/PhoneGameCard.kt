@@ -26,6 +26,7 @@ import io.github.scdouglas1999.tally.api.TallyTeam
 import io.github.scdouglas1999.tally.dvr.spoilerGuarded
 import io.github.scdouglas1999.tally.dvr.ui.RecTag
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
+import io.github.scdouglas1999.tally.ui.components.LanguageTag
 import io.github.scdouglas1999.tally.ui.components.ScoreDigits
 import io.github.scdouglas1999.tally.ui.components.StartsIn
 import io.github.scdouglas1999.tally.ui.components.TeamMark
@@ -154,6 +155,7 @@ internal fun PhoneGameStatusLine(
             )
         }
         RecTag(recording = game.recording, style = PhoneType.label, dot = 5.dp)
+        LanguageTag(game = game, style = PhoneType.label)
         Spacer(Modifier.weight(1f))
         if (game.isLive) {
             IndicatorSquare(color = TallyColors.live, size = 6.dp)

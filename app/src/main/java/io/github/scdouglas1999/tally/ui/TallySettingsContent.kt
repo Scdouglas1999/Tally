@@ -23,7 +23,10 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.tryRequestFocus
 import io.github.scdouglas1999.tally.api.TallyInfo
+import io.github.scdouglas1999.tally.api.TallyLanguage
 import io.github.scdouglas1999.tally.ui.components.TallyRow
+import io.github.scdouglas1999.tally.ui.components.languageName
+import io.github.scdouglas1999.tally.ui.components.tallyUppercase
 import io.github.scdouglas1999.tally.ui.formfactor.LocalTallyFormFactor
 import io.github.scdouglas1999.tally.ui.formfactor.TallyFormFactor
 import io.github.scdouglas1999.tally.ui.phone.LocalPhoneContentPadding
@@ -48,8 +51,14 @@ fun TallySettingsContent(
     info: TallyInfo?,
     onToggleOnlyWatchable: () -> Unit,
     onHideScoresChange: (Boolean) -> Unit,
+    streamLanguage: String,
+    onStreamLanguageChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // Commentary language: two choices, so the row flips between them and shows the one in use.
+    val spanish = streamLanguage == TallyLanguage.SPANISH
+    val nextLanguage = if (spanish) TallyLanguage.ENGLISH else TallyLanguage.SPANISH
+    val languageLabel = languageName(streamLanguage).tallyUppercase()
     if (LocalTallyFormFactor.current == TallyFormFactor.PHONE) {
         // A phone: the settings rows of the phone's settings pages, then the server block.
         Column(
@@ -74,6 +83,20 @@ fun TallySettingsContent(
                 onLongClick = null,
                 interactionSource = null,
             ) { TallySquareSwitch(checked = hideScores) }
+            PhoneSettingsRow(
+                title = stringResource(R.string.tally_23_settings_commentary),
+                summary = stringResource(R.string.tally_23_settings_commentary_desc),
+                onClick = { onStreamLanguageChange(nextLanguage) },
+                onLongClick = null,
+                interactionSource = null,
+            ) {
+                Text(
+                    text = languageLabel,
+                    style = PhoneType.label,
+                    color = TallyColors.accent,
+                    maxLines = 1,
+                )
+            }
             ServerBlock(info = info, modifier = Modifier.padding(top = 24.dp))
         }
         return
@@ -102,6 +125,19 @@ fun TallySettingsContent(
             description = stringResource(R.string.tally_settings_hide_scores_desc),
             onClick = { onHideScoresChange(!hideScores) },
             trailing = { TallySwitch(checked = hideScores) },
+        )
+        TallyRow(
+            label = stringResource(R.string.tally_23_settings_commentary),
+            description = stringResource(R.string.tally_23_settings_commentary_desc),
+            onClick = { onStreamLanguageChange(nextLanguage) },
+            trailing = {
+                Text(
+                    text = languageLabel,
+                    style = TallyType.label,
+                    color = TallyColors.accent,
+                    maxLines = 1,
+                )
+            },
         )
         ServerBlock(info = info, modifier = Modifier.padding(top = 24.dp))
     }

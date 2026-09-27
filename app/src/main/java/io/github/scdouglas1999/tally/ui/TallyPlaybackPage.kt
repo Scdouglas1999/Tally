@@ -87,6 +87,8 @@ import io.github.scdouglas1999.tally.ui.player.CornerView
 import io.github.scdouglas1999.tally.ui.player.CornerViewController
 import io.github.scdouglas1999.tally.ui.player.EventBanner
 import io.github.scdouglas1999.tally.ui.player.GameSwitcher
+import io.github.scdouglas1999.tally.ui.player.PublishCommentary
+import io.github.scdouglas1999.tally.ui.player.RedZoneBanner
 import io.github.scdouglas1999.tally.ui.player.ScoreBug
 import io.github.scdouglas1999.tally.ui.player.TallyPlayerViewModel
 import io.github.scdouglas1999.tally.ui.player.cornerChannelName
@@ -135,6 +137,8 @@ fun TallyPlaybackPage(
     val hideScores by viewModel.hideScores.collectAsState()
     val favorites by viewModel.favorites.collectAsState()
     val favoriteTeams by viewModel.favoriteTeams.collectAsState()
+    val redZone by viewModel.redZone.collectAsState()
+    PublishCommentary(viewModel)
 
     var switcherOpen by remember { mutableStateOf(false) }
     var actionsGameId by remember { mutableStateOf<String?>(null) }
@@ -375,7 +379,8 @@ fun TallyPlaybackPage(
             // The bug is not a permanent fixture over the picture: it shows when the game opens, whenever the
             // score, period or situation changes, while the switcher is up, and for a moment after any key.
             var bugShownAt by remember { mutableStateOf(SystemClock.elapsedRealtime()) }
-            val bugKey = game?.let { "${it.away.score}-${it.home.score}|${it.detail}|${it.downDistance}" }
+            // The game's id too: on RedZone a cut to another game brings the bug (and the RedZone banner) back.
+            val bugKey = game?.let { "${it.id}|${it.away.score}-${it.home.score}|${it.detail}|${it.downDistance}" }
             LaunchedEffect(bugKey, upstreamControls.lastKeyAt) { bugShownAt = SystemClock.elapsedRealtime() }
             var bugVisible by remember { mutableStateOf(true) }
             LaunchedEffect(bugShownAt, switcherOpen, boxScoreOpen) {
@@ -430,6 +435,20 @@ fun TallyPlaybackPage(
                             ),
                 )
             }
+
+            // On RedZone: the game it is on and why, with the bug, out of the way of an event banner and the switcher.
+            RedZoneBanner(
+                status = redZone,
+                game = game,
+                visible = bugVisible && banner == null && !switcherOpen && !boxScoreOpen,
+                modifier =
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(
+                            start = TallyDimens.marginHorizontal,
+                            top = TallyDimens.marginVertical,
+                        ),
+            )
 
             if (cornerChannel != null) {
                 CornerView(

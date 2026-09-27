@@ -43,6 +43,7 @@ import androidx.tv.material3.Text
 import com.github.damontecres.wholphin.R
 import com.github.damontecres.wholphin.ui.PreviewTvSpec
 import com.github.damontecres.wholphin.ui.tryRequestFocus
+import io.github.scdouglas1999.tally.api.TallyFeed
 import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.api.TallyTeam
 import io.github.scdouglas1999.tally.dvr.ui.DvrKeepLastTvDialog
@@ -58,6 +59,8 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
 import io.github.scdouglas1999.tally.ui.theme.TallyType
+import io.github.scdouglas1999.tally.watch.onFeed
+import io.github.scdouglas1999.tally.watch.otherFeed
 import kotlinx.coroutines.delay
 
 /**
@@ -77,12 +80,16 @@ data class GameActions(
     val toggleHideScores: () -> Unit,
     val removeFromMultiview: (() -> Unit)? = null,
     @param:StringRes val watchLabel: Int = R.string.tally_actions_watch,
+    /** The game's other commentary ("Watch in Español"), when it has one; [watchFeed] plays it. */
+    val otherFeed: TallyFeed? = null,
+    val watchFeed: (() -> Unit)? = null,
 )
 
 /**
  * Builds [GameActions] from a game. Watch and multiview are offered for every game that is not final, and for a final
  * one a channel carries: without a stream the caller looks for one first ([io.github.scdouglas1999.tally.watch.TallyWatchLauncher]).
  * [onWatchInCorner] is null everywhere except the player's switcher, which is the only place that row appears.
+ * A game with a second commentary also offers "Watch in Español" (or English): [onWatch] with that feed as the watch.
  */
 fun gameActions(
     game: TallyGame,
@@ -96,6 +103,7 @@ fun gameActions(
 ): GameActions {
     val teams = favoriteTeams.map { it.uppercase() }.toSet()
     val channelId = game.watch?.channelId?.takeIf { it.isNotBlank() }
+    val otherFeed = game.otherFeed()
     return GameActions(
         watch = if (game.canWatch) ({ onWatch(game) }) else null,
         addToMultiview = if (channelId != null || !game.isFinal) ({ onAddToMultiview(game) }) else null,
@@ -106,6 +114,8 @@ fun gameActions(
         followedHome = game.teamKey(game.home) in teams,
         hideScores = hideScores,
         toggleHideScores = onToggleHideScores,
+        otherFeed = otherFeed,
+        watchFeed = otherFeed?.let { feed -> { onWatch(game.onFeed(feed)) } },
     )
 }
 
@@ -178,6 +188,17 @@ fun GameActionsDialog(
                         dismissOnClick = true,
                         onClick = watch,
                         dvr = noStream?.let { DvrMenuLine(label = label, info = it, dismiss = true, onClick = watch) },
+                    ),
+                )
+            }
+            val otherFeed = actions.otherFeed
+            val watchFeed = actions.watchFeed
+            if (otherFeed != null && watchFeed != null) {
+                add(
+                    ActionLine(
+                        stringResource(R.string.tally_23_watch_in, feedName(otherFeed)),
+                        dismissOnClick = true,
+                        onClick = watchFeed,
                     ),
                 )
             }

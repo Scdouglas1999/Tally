@@ -109,6 +109,9 @@ class TallyApi
 
         suspend fun channel(id: String): TallyChannel = getDecoded("/JellyTV/Client/v1/channels/$id")
 
+        /** What the RedZone channel shows right now. Only servers whose board lists a RedZone channel have it. */
+        suspend fun redZone(): TallyRedZone = getDecoded("/JellyTV/Client/v1/redzone")
+
         /**
          * Starts a search for [gameId]'s stream now, or joins the one already running; answers at once. A server
          * without it answers 404 ([TallyException.NotInstalled]).

@@ -12,14 +12,20 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.scdouglas1999.tally.api.TallyBoard
 import io.github.scdouglas1999.tally.api.TallyChannel
 import io.github.scdouglas1999.tally.api.TallyGame
+import io.github.scdouglas1999.tally.api.TallyLanguage
+import io.github.scdouglas1999.tally.api.TallyRedZone
 import io.github.scdouglas1999.tally.api.TallySettings
 import io.github.scdouglas1999.tally.data.BoardOrganizer
 import io.github.scdouglas1999.tally.data.BoardRow
+import io.github.scdouglas1999.tally.data.RedZone
+import io.github.scdouglas1999.tally.data.RedZoneTile
 import io.github.scdouglas1999.tally.data.TallyMultiviewState
 import io.github.scdouglas1999.tally.data.TallyRepository
 import io.github.scdouglas1999.tally.ui.components.TallyTab
 import io.github.scdouglas1999.tally.watch.TallyWatchLauncher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -27,7 +33,12 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -52,6 +63,10 @@ data class TallyUiState(
     val loading: Boolean = true,
     val selectedTab: TallyTab = TallyTab.GAMES,
     val multiview: List<String> = emptyList(),
+    /** The commentary WATCH prefers: "en" or "es". */
+    val streamLanguage: String = TallyLanguage.ENGLISH,
+    /** The RedZone channel's tile, first in the first live row; null when the server has none or it is not on. */
+    val redZone: RedZoneTile? = null,
 ) {
     /** The server records games (the plugin's `dvr` feature): Sports shows RECORDINGS. */
     val hasDvr: Boolean
@@ -94,12 +109,35 @@ class TallyViewModel
         /** The user's explicit "Only games with a stream" choice this session; null = the saved one (off when unset). */
         private val onlyWatchableChoice = MutableStateFlow<Boolean?>(null)
 
+        /**
+         * What the RedZone channel shows, asked at the board's pace while a board screen collects [uiState] and the
+         * board lists a RedZone channel; never asked on a server without one.
+         */
+        @OptIn(ExperimentalCoroutinesApi::class)
+        private val redZoneStatus: Flow<TallyRedZone?> =
+            repository.board
+                .map { RedZone.channel(it) != null }
+                .distinctUntilChanged()
+                .flatMapLatest { hasChannel ->
+                    if (!hasChannel) {
+                        flowOf<TallyRedZone?>(null)
+                    } else {
+                        flow {
+                            while (true) {
+                                emit(repository.redZone())
+                                delay(RedZone.BOARD_POLL_MS)
+                            }
+                        }
+                    }
+                }.onStart { emit(null) }
+
         val uiState: StateFlow<TallyUiState> =
             combine(
                 repositoryState,
                 selectedTabState,
                 onlyWatchableChoice,
-            ) { repo, selectedTab, onlyWatchableChoice ->
+                redZoneStatus,
+            ) { repo, selectedTab, onlyWatchableChoice, redZone ->
                 val games = repo.board?.games.orEmpty()
                 val favorites = repo.settings.favorites.toSet()
                 val teams =
@@ -123,6 +161,8 @@ class TallyViewModel
                     loading = repo.board == null && repo.boardError == null,
                     selectedTab = selectedTab,
                     multiview = repo.multiview,
+                    streamLanguage = repo.settings.streamLanguage ?: TallyLanguage.ENGLISH,
+                    redZone = RedZone.tile(repo.board, redZone),
                 )
             }.stateIn(
                 viewModelScope,
@@ -174,6 +214,11 @@ class TallyViewModel
 
         fun setHideScores(hide: Boolean) {
             viewModelScope.launchIO { repository.setHideScores(hide) }
+        }
+
+        /** The commentary WATCH prefers; the board is fetched again so every game's WATCH follows it. */
+        fun setStreamLanguage(language: String) {
+            viewModelScope.launchIO { repository.setStreamLanguage(language) }
         }
 
         fun toggleFavorite(channelId: String) {

@@ -36,6 +36,7 @@ import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.LineScore
 import io.github.scdouglas1999.tally.ui.components.ScoreDigits
 import io.github.scdouglas1999.tally.ui.components.TeamMark
+import io.github.scdouglas1999.tally.ui.components.feedName
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
 import io.github.scdouglas1999.tally.ui.components.hasNoResult
 import io.github.scdouglas1999.tally.ui.components.noStreamLabel
@@ -50,7 +51,8 @@ import io.github.scdouglas1999.tally.ui.theme.TallyColors
  * The game sheet: what a tap on a game opens on a phone (and a long-press, the TV's long OK). The focused-game
  * panel's content ([PhoneGamePanel]: matchup with records, the situation and last play, the line score, broadcasts,
  * the start time before the game), the channel's label bar and a full-width WATCH for every game that is not final
- * (without a stream it looks for one) and a final one a channel carries,
+ * (without a stream it looks for one) and a final one a channel carries, WATCH IN ESPAÑOL (or ENGLISH) under it for a
+ * game with a second commentary,
  * then the TV game menu's other actions: add to multiview, follow each team, hide / show scores, remove from
  * multiview. Follow and hide scores toggle in place (the sheet stays, its rows and the scores update); the others
  * close the sheet after they run, as on the TV. The corner view is not offered on a phone.
@@ -127,6 +129,25 @@ fun PhoneGameSheet(
                     primary = recordingItem == null,
                     onClick = {
                         watch()
+                        onDismiss()
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = PhoneDimens.margin),
+                )
+            }
+            val otherFeed = actions.otherFeed
+            val watchFeed = actions.watchFeed
+            if (otherFeed != null && watchFeed != null) {
+                // The game's other commentary, right under WATCH (which plays the viewer's own).
+                Spacer(Modifier.height(8.dp))
+                PhoneButton(
+                    label = stringResource(R.string.tally_23_watch_in, feedName(otherFeed)),
+                    glyph = stringResource(R.string.fa_play),
+                    primary = false,
+                    onClick = {
+                        watchFeed()
                         onDismiss()
                     },
                     modifier =
