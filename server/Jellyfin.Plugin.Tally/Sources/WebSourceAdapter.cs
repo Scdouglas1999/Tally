@@ -20,24 +20,22 @@ public class WebSourceAdapter : ISourceAdapter
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger _logger;
     private readonly BrowserRuntime? _browser;
-    private readonly IReadOnlyList<WantedGame> _wanted;
-    private readonly bool _targetedOnly;
 
-    /// <param name="wanted">Games to look for first (see <see cref="WebExtractor"/>).</param>
-    /// <param name="targetedOnly">A game-driven search: only the page and what names a wanted team.</param>
-    public WebSourceAdapter(SourceDefinition definition, IHttpClientFactory httpClientFactory, ILogger logger, BrowserRuntime? browser = null,
-        IReadOnlyList<WantedGame>? wanted = null, bool targetedOnly = false)
+    public WebSourceAdapter(SourceDefinition definition, IHttpClientFactory httpClientFactory, ILogger logger, BrowserRuntime? browser = null)
     {
         Definition = definition;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
         _browser = browser;
-        _wanted = wanted ?? Array.Empty<WantedGame>();
-        _targetedOnly = targetedOnly;
     }
 
     public SourceDefinition Definition { get; }
 
+    private static string UserAgent => Plugin.Instance?.Configuration.UserAgent
+        ?? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
+
+    /// <summary>The full-site scan (see <see cref="WebExtractor.ExtractAsync"/>), then the headless browser when plain
+    /// HTTP found nothing.</summary>
     public async Task<SourceSnapshot> RefreshAsync(CancellationToken cancellationToken)
     {
         var snapshot = new SourceSnapshot { SourceName = Definition.Name };
@@ -48,18 +46,14 @@ public class WebSourceAdapter : ISourceAdapter
             return snapshot;
         }
 
-        var ua = Plugin.Instance?.Configuration.UserAgent
-            ?? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
-
+        var ua = UserAgent;
         List<ExtractedStream> found;
         WebExtractor? extractor = null;
         try
         {
             extractor = new WebExtractor(_httpClientFactory.CreateClient("jellytv"), _logger, ua);
-            found = await extractor.ExtractAsync(Definition.PageUrl, Definition.MaxPages, cancellationToken, _wanted, _targetedOnly)
-                .ConfigureAwait(false);
+            found = await extractor.ExtractAsync(Definition.PageUrl, Definition.MaxPages, cancellationToken).ConfigureAwait(false);
             snapshot.PagesVisited = extractor.PagesVisited;
-            snapshot.TargetedPagesVisited = extractor.TargetedPagesVisited;
         }
         catch (Exception ex)
         {
@@ -68,17 +62,7 @@ public class WebSourceAdapter : ISourceAdapter
             return snapshot;
         }
 
-        if (_targetedOnly)
-        {
-            // A game-driven search uses the browser only when it is already there, and only on the pages it found for
-            // the wanted games: the general crawl is the one that sets it up.
-            if (found.Count == 0 && extractor.TargetedPages.Count > 0 && Definition.UseBrowserFallback && _browser != null
-                && await _browser.ReadyAsync(allowDownloads: false, TimeSpan.Zero, cancellationToken).ConfigureAwait(false))
-            {
-                found = await BrowserFallback(ua, extractor, extractor.TargetedPages, cancellationToken).ConfigureAwait(false);
-            }
-        }
-        else if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null
+        if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null
             && !await _browser.ReadyAsync(allowDownloads: true, TimeSpan.FromSeconds(60), cancellationToken).ConfigureAwait(false))
         {
             // First use: the browser is still being downloaded (or failed). Keep the last channels; the refresh
@@ -92,9 +76,34 @@ public class WebSourceAdapter : ISourceAdapter
         }
         else if (found.Count == 0 && Definition.UseBrowserFallback && _browser != null)
         {
-            found = await BrowserFallback(ua, extractor, extractor.TargetedPages.Concat(extractor.DiscoveredLinks), cancellationToken).ConfigureAwait(false);
+            found = await BrowserFallback(ua, extractor.DiscoveredLinks, cancellationToken).ConfigureAwait(false);
         }
 
+        return Build(snapshot, found, ua);
+    }
+
+    /// <summary>
+    /// A game-driven search pass on this source (see <see cref="WebExtractor.SearchGamesAsync"/>): plain HTTP only, the
+    /// listing read once for all <paramref name="wanted"/> games and at most a few pages per game, every request through
+    /// <paramref name="pacer"/>. <paramref name="stats"/> says what it read and whether the site pushed back.
+    /// </summary>
+    public async Task<SourceSnapshot> SearchGamesAsync(IReadOnlyList<WantedGame> wanted, SearchPacer pacer, GamePassStats stats, CancellationToken cancellationToken)
+    {
+        var snapshot = new SourceSnapshot { SourceName = Definition.Name };
+        if (string.IsNullOrWhiteSpace(Definition.PageUrl) || wanted.Count == 0)
+        {
+            return snapshot;
+        }
+
+        var ua = UserAgent;
+        var extractor = new WebExtractor(_httpClientFactory.CreateClient("jellytv"), _logger, ua);
+        var found = await extractor.SearchGamesAsync(Definition.PageUrl, wanted, pacer, stats, cancellationToken).ConfigureAwait(false);
+        snapshot.PagesVisited = stats.ListingReads + stats.PagesPerGame.Values.Sum();
+        return Build(snapshot, found, ua);
+    }
+
+    private SourceSnapshot Build(SourceSnapshot snapshot, List<ExtractedStream> found, string ua)
+    {
         var sourceId = Definition.Id.ToString("N");
         var sourceHeaders = Definition.Headers.ToDictionary();
         var channels = new List<SourceChannel>();
@@ -169,27 +178,14 @@ public class WebSourceAdapter : ISourceAdapter
         return snapshot;
     }
 
-    private async Task<List<ExtractedStream>> BrowserFallback(string ua, WebExtractor extractor, IEnumerable<string> seeds, CancellationToken ct)
+    private async Task<List<ExtractedStream>> BrowserFallback(string ua, IEnumerable<string> seeds, CancellationToken ct)
     {
         _logger.LogInformation("JellyTV: HTTP scan found nothing on {Url}; trying headless browser", Definition.PageUrl);
         try
         {
-            var found = await new BrowserExtractor(_logger, ua, _browser!)
+            return await new BrowserExtractor(_logger, ua, _browser!)
                 .ExtractAsync(Definition.PageUrl, Definition.MaxPages, ct, seeds.Distinct(StringComparer.OrdinalIgnoreCase).ToList())
                 .ConfigureAwait(false);
-
-            // a stream on a page found for a wanted game is that game's, unless its page already names the game
-            foreach (var s in found)
-            {
-                if ((extractor.TargetGameFor(s.Context) ?? extractor.TargetGameFor(s.Referer)) is { } game
-                    && (string.IsNullOrEmpty(s.Name) || s.NameFromTitle || !game.NamesBoth(s.Name)))
-                {
-                    s.Name = game.Name;
-                    s.NameFromTitle = false;
-                }
-            }
-
-            return found;
         }
         catch (Exception ex)
         {

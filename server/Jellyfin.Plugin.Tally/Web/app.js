@@ -1467,6 +1467,8 @@ async function renderAdmin(container, fresh) {
       ${sources.length ? '' : '<div class="set-note" style="margin-bottom:16px">No sources configured yet.</div>'}
       <button class="btn btn-ghost" id="src-add">+ Add source</button>
       <div id="src-form"></div>
+      <div class="f-row" style="margin-top:16px"><label for="set-fullscan">Full site scan (minutes) — web page sources are read whole on start-up, when sources change and this often. In between, each game without a stream is searched on its own: 5 minutes before it starts, at its start, then every 5 minutes until one turns up.</label>
+        <input type="number" id="set-fullscan" min="60" max="720" value="${cfg ? cfg.WebFullScanMinutes || 180 : 180}"></div>
     </div>
 
     <div class="set-card">
@@ -1500,7 +1502,7 @@ async function renderAdmin(container, fresh) {
 
     <div class="set-card">
       <h3>Refresh</h3>
-      <div class="hint">Playlists & EPG are re-fetched periodically and whenever sources change.</div>
+      <div class="hint">M3U playlists, direct streams and EPG are re-fetched this often and whenever sources change. Web page sources follow Full site scan, under Sources.</div>
       <div class="f-row"><label>Refresh interval (minutes)</label>
         <input type="number" id="set-interval" min="1" max="720" value="${cfg ? cfg.RefreshIntervalMinutes : 30}"></div>
       <div class="set-actions">
@@ -1519,6 +1521,7 @@ async function renderAdmin(container, fresh) {
   // written through on every keystroke: the toggles below re-render this whole panel from cfg
   $('#set-public-url', container).oninput = (e) => { cfg.PublicUrl = e.target.value.trim().replace(/\/+$/, ''); };
   $('#set-dl-code', container).oninput = (e) => { cfg.DownloaderCode = e.target.value.trim(); };
+  $('#set-fullscan', container).oninput = (e) => { cfg.WebFullScanMinutes = +e.target.value || 180; };
 
   $('#set-weblook', container).onclick = () => { cfg.WebLook = cfg.WebLook === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
   $('#set-takeover', container).onclick = () => { cfg.ReplaceLiveTv = cfg.ReplaceLiveTv === false; cfg.ScoreLeagues = $('#set-leagues', container).value; renderAdmin(container); };
@@ -1600,6 +1603,7 @@ async function renderAdmin(container, fresh) {
 
   $('#save-cfg', container).onclick = async () => {
     cfg.RefreshIntervalMinutes = clamp(+$('#set-interval', container).value || 30, 1, 720);
+    cfg.WebFullScanMinutes = clamp(+$('#set-fullscan', container).value || 180, 60, 720);
     cfg.ScoreLeagues = $('#set-leagues', container).value.trim();
     try {
       await ApiClient.updatePluginConfiguration(state.status.pluginId, cfg);

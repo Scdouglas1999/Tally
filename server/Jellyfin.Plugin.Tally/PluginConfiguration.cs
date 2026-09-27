@@ -100,6 +100,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// <summary>How often playlists/EPG are refreshed, in minutes.</summary>
     public int RefreshIntervalMinutes { get; set; } = 30;
 
+    /// <summary>"Full site scan": how often web page sources are read whole, in minutes (60 to 720). They are also read
+    /// whole on startup and whenever the configuration changes; in between, games without a stream are searched on
+    /// their own around their start.</summary>
+    public int WebFullScanMinutes { get; set; } = 180;
+
     /// <summary>Default User-Agent for upstream playlist/segment requests.</summary>
     public string UserAgent { get; set; } =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
