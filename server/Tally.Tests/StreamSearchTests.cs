@@ -34,11 +34,15 @@ public sealed class FixtureSite
 
     private static readonly string[] Leagues = { "mlb", "nba", "nhl", "nfl", "soccer" };
 
-    public FixtureSite(string wantedHref = "/mlb/tb-phi/5000120", string wantedText = "Watch")
+    public FixtureSite(string wantedHref = "/mlb/tb-phi/5000120", string wantedText = "Watch", string fillerTeam = "Riverton Otters")
     {
         WantedHref = wantedHref;
         WantedText = wantedText;
+        FillerTeam = fillerTeam;
     }
+
+    /// <summary>The away team of every other listed game ("Riverton Otters 3 vs Lakeside Herons 3").</summary>
+    public string FillerTeam { get; }
 
     public string WantedHref { get; }
 
@@ -81,7 +85,7 @@ public sealed class FixtureSite
                 }
 
                 var league = Leagues[i % Leagues.Length];
-                sb.Append($"<li><a href=\"/{league}/{FillerSlug(i)}/{5000000 + i}\">Riverton Otters {i} vs Lakeside Herons {i}</a></li>");
+                sb.Append($"<li><a href=\"/{league}/{FillerSlug(i)}/{5000000 + i}\">{FillerTeam} {i} vs Lakeside Herons {i}</a></li>");
             }
 
             return Html(sb.Append("</ul></body></html>").ToString());
@@ -460,6 +464,20 @@ public class TargetedCrawlTests
         Assert.Equal(2, streams.Count);
         Assert.All(streams, s => Assert.Equal(name, s.Name)); // the page's own name stands when it names the game
         Assert.True(WantedGame.From(WantedGameTests.RaysAtPhillies()).NamesBoth(name));
+    }
+
+    [Fact]
+    public async Task Pages_Naming_One_Team_Are_Only_A_Hint()
+    {
+        // every other listed game is a Tampa Bay team's: all 159 links name the Rays' city
+        var site = new FixtureSite(fillerTeam: "Tampa Bay Lightning");
+        var ex = Extractor(site);
+        var streams = await ex.ExtractAsync(FixtureSite.Home, 12, CancellationToken.None, Wanted(), targetedOnly: true);
+
+        Assert.Equal(2, streams.Count(s => s.Url.Contains("/wanted/", StringComparison.Ordinal)));
+        Assert.Equal(3 + 8, ex.TargetedPagesVisited); // the game's own pages first, then 8 hints
+        var order = site.Requests.Where(r => !r.Contains("cdn.example.test", StringComparison.Ordinal)).ToList();
+        Assert.Contains("tb-phi", order[1], StringComparison.Ordinal);
     }
 
     [Fact]

@@ -106,8 +106,12 @@ public partial class WebExtractor
         wanted ??= Array.Empty<WantedGame>();
         var generalBudget = targetedOnly ? 1 : MaxHttpPages;
         var targetedBudget = TargetedBudget(wanted.Count);
+        // A page naming one team (a city, a nickname shared with other leagues' teams: "Philadelphia", "Kings") is only
+        // a hint: those take at most 8 pages per wanted game, after every page that names both teams of one.
+        var oneTeamBudget = Math.Min(targetedBudget / 2, 8 * wanted.Count);
         var generalVisited = 0;
         var targetedVisited = 0;
+        var oneTeamVisited = 0;
         var found = new List<ExtractedStream>();
         var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var titles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -145,12 +149,18 @@ public partial class WebExtractor
             {
                 var fromTargeted = TargetedLeft();
                 var item = fromTargeted ? targeted.Dequeue() : hot.Count > 0 ? hot.Dequeue() : warm.Dequeue();
+                if (fromTargeted && item.Priority == 1 && oneTeamVisited >= oneTeamBudget)
+                {
+                    continue;
+                }
+
                 if (item.Depth <= 3 && visited.Add(NormalizePage(item.Url)))
                 {
                     batch.Add(item);
                     if (fromTargeted)
                     {
                         targetedVisited++;
+                        oneTeamVisited += item.Priority == 1 ? 1 : 0;
                         _targetedPages.Add(item.Url);
                     }
                     else

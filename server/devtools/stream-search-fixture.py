@@ -10,6 +10,8 @@ STREAM (a live HLS playlist the dev server can play).
   stream-search-fixture.py serve --away ROT --home LKH [--league mlb] [--port 8000] [--stream URL] [--hidden]
   curl -X POST http://<fixture>:8000/_ctl/list      # the front page lists the wanted game
   curl -X POST http://<fixture>:8000/_ctl/unlist    # it does not (a site that adds a game's link near game time)
+  curl -X POST 'http://<fixture>:8000/_ctl/slow?s=3' # each page takes 3 s to answer (0: back to normal), to watch
+                                                    # the board say "searching"
   curl http://<fixture>:8000/_ctl/log               # the pages the plugin read, in order
 
 The dev server runs in Docker and this host's firewall blocks containers from reaching host ports, so run it in a
@@ -21,6 +23,7 @@ and add http://<its address>:8000/ as a web page source.
 import argparse
 import json
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 LEAGUES = ["mlb", "nba", "nhl", "nfl", "soccer"]
@@ -31,6 +34,7 @@ EVENT_BASE = 5000000
 
 opts = None
 listed = True
+slow = 0.0
 log = []
 lock = threading.Lock()
 
@@ -64,7 +68,10 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
-        global listed
+        global listed, slow
+        if self.path.startswith("/_ctl/slow"):
+            slow = float(self.path.partition("s=")[2] or 0)
+            return self.send(200, json.dumps({"slow": slow}), "application/json")
         if self.path == "/_ctl/list":
             listed = True
         elif self.path == "/_ctl/unlist":
@@ -81,6 +88,8 @@ class Handler(BaseHTTPRequestHandler):
         with lock:
             log.append(path)
             del log[:-2000]
+        if slow and not path.endswith(".m3u8"):
+            time.sleep(slow)
 
         if path == "/":
             items = []

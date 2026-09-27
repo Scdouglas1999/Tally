@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
 #if JF12
 using Jellyfin.Data;
@@ -228,7 +229,9 @@ public class TallyController : ControllerBase
     public async Task<IActionResult> Refresh()
     {
         _browser.RetryIfFailed();
-        await _sourceManager.RefreshAsync(HttpContext.RequestAborted).ConfigureAwait(false);
+        // The crawl is not the request's: a caller that gives up must not cut it short (a crawl stopped halfway would
+        // replace each source's list with the part it read). The caller only stops waiting.
+        await _sourceManager.RefreshAsync(CancellationToken.None).WaitAsync(HttpContext.RequestAborted).ConfigureAwait(false);
         return Ok(new { channelCount = _sourceManager.GetChannels().Count, errors = _sourceManager.SourceErrors });
     }
 }
