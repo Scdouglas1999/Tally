@@ -91,7 +91,13 @@ public class TallyController : ControllerBase
                 active = _scoreboard.ActiveLeagues,
                 defaults = LeagueCatalog.Defaults,
                 fromSources = _leagues.FromSources.Select(x => new { league = x.League, label = LeagueCatalog.Label(x.League), channels = x.Channels }),
-                known = LeagueCatalog.Known.Select(k => new { path = k.Path, label = k.Label })
+                known = LeagueCatalog.Known.Select(k => new
+                {
+                    path = k.Path,
+                    label = k.Label,
+                    // short names the Leagues setting takes for it ("ncaaf", "cfb")
+                    names = LeagueCatalog.ShortNames.Where(n => string.Equals(n.Value, k.Path, StringComparison.OrdinalIgnoreCase)).Select(n => n.Key)
+                })
             }
         });
     }

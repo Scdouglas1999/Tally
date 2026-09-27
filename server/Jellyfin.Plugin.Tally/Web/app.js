@@ -892,7 +892,7 @@ function gameRow(g, hide) {
 
   const team = (t, other) => `<div class="g-team${post && !hide && !t.winner && other.winner ? ' lose' : ''}">
       ${t.logo ? `<img class="g-logo" src="${esc(t.logo)}" loading="lazy" referrerpolicy="no-referrer" alt="">` : '<span class="g-logo"></span>'}
-      <span class="g-name">${esc(t.shortName || t.abbr)}</span>
+      <span class="g-name">${t.rank ? `<span class="g-rank">${t.rank}</span>` : ''}${esc(t.shortName || t.abbr)}</span>
       ${t.record ? `<span class="g-rec">${esc(t.record)}</span>` : ''}
       ${live && !hide && t.possession ? '<i class="led on" title="Possession"></i>' : ''}
       <span class="g-score">${pre ? '' : hide ? '–' : (t.score ?? 0)}</span></div>`;
@@ -1507,15 +1507,20 @@ function leagueLabel(path) {
   return k ? k.label : path;
 }
 function splitList(s) { return (s || '').split(/[\s,]+/).map(x => x.trim()).filter(Boolean); }
+// A short name the Leagues setting takes ("ncaaf", "epl") → its ESPN path; anything else as given.
+function resolveLeague(s) {
+  const k = (leagueInfo().known || []).find(k => (k.names || []).some(n => n.toLowerCase() === s.toLowerCase()));
+  return k ? k.path : s;
+}
 function configuredLeagues(cfg) {
-  const own = splitList(cfg && cfg.ScoreLeagues);
+  const own = splitList(cfg && cfg.ScoreLeagues).map(resolveLeague);
   return own.length ? own : [...leagueInfo().defaults];
 }
 function leagueRows(cfg) {
   if (!cfg) return [];
   const info = leagueInfo();
   const defaults = new Set(info.defaults.map(p => p.toLowerCase()));
-  const excluded = new Set(splitList(cfg.ScoreLeaguesExcluded).map(p => p.toLowerCase()));
+  const excluded = new Set(splitList(cfg.ScoreLeaguesExcluded).map(p => resolveLeague(p).toLowerCase()));
   const rows = configuredLeagues(cfg).map(p => ({ path: p, why: defaults.has(p.toLowerCase()) ? 'default' : 'added' }));
   (info.fromSources || []).forEach(f => {
     if (!excluded.has(f.league.toLowerCase()) && !rows.some(r => r.path.toLowerCase() === f.league.toLowerCase())) {
@@ -1611,8 +1616,8 @@ async function renderAdmin(container, fresh) {
           </div>`).join('')}</div>
         <div class="set-note">Tally adds a league by itself when your sources carry its games, so their channels get game cards, guide entries and stream searches. Remove it here and it stays off.</div></div>
       <div class="f-row"><label for="set-league-add">Add a league</label>
-        <select id="set-league-add"><option value="">Choose a league…</option>${leagueChoices(cfg).map(k => `<option value="${esc(k.path)}">${esc(k.label)}</option>`).join('')}<option value="other">Another ESPN league (path)…</option></select>
-        <input type="text" id="set-league-path" placeholder="soccer/ned.1" hidden autocapitalize="off" spellcheck="false"></div>
+        <select id="set-league-add"><option value="">Choose a league…</option>${leagueChoices(cfg).map(k => `<option value="${esc(k.path)}">${esc(k.label)}</option>`).join('')}<option value="other">Another league (ESPN path or short name)…</option></select>
+        <input type="text" id="set-league-path" placeholder="soccer/ned.1, ncaaf, epl…" hidden autocapitalize="off" spellcheck="false"></div>
     </div>
 
     <div class="set-card">
@@ -1660,7 +1665,7 @@ async function renderAdmin(container, fresh) {
     if (path) addLeague(cfg, path, container);
   };
   $('#set-league-path', container).onkeydown = (e) => {
-    const path = e.target.value.trim().toLowerCase();
+    const path = resolveLeague(e.target.value.trim().toLowerCase());
     if (e.key === 'Enter' && /^[a-z0-9.-]+\/[a-z0-9.-]+$/.test(path)) addLeague(cfg, path, container);
   };
 
@@ -1678,7 +1683,7 @@ async function renderAdmin(container, fresh) {
           <div class="f-row"><label>Page URL — streams are auto-detected on the page and its embeds</label>
             <input type="text" id="ns-page" placeholder="https://example.com/live"></div>
           <div class="f-row"><label>Only include — leagues or groups, comma-separated (blank = everything)</label>
-            <input type="text" id="ns-include" placeholder="NFL, MLB"></div>
+            <input type="text" id="ns-include" placeholder="NFL, NCAAF, MLB"></div>
           <div class="f-row"><label class="check">
             <input type="checkbox" id="ns-browser" checked>
             Headless-browser fallback — sniff streams that only appear after JavaScript runs</label></div>

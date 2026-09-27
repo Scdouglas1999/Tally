@@ -19,8 +19,8 @@ namespace Jellyfin.Plugin.Tally.Scores;
 public sealed class ScoreboardService
 {
     // Anything ESPN has a scoreboard for can be added under Settings → Live scores
-    // ("basketball/nba", "hockey/nhl", "soccer/eng.1"…); leagues the sources carry are added by themselves
-    // (LeagueDetector).
+    // ("basketball/nba", "hockey/nhl", "soccer/eng.1"…), or by a short name (LeagueCatalog.ShortNames); leagues the
+    // sources carry are added by themselves (LeagueDetector).
     public static readonly string DefaultLeagues = string.Join(',', LeagueCatalog.Defaults);
 
     // The feed sits behind a bot filter that is picky in non-obvious ways: site.api.espn.com
@@ -123,6 +123,7 @@ public sealed class ScoreboardService
     public static IReadOnlyList<string> ParseLeagues(string? configured)
         => (string.IsNullOrWhiteSpace(configured) ? DefaultLeagues : configured)
             .Split(new[] { ',', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(LeagueCatalog.Resolve)
             // path segments only — this string ends up in an outbound URL
             .Where(l => l.Count(ch => ch == '/') == 1 && l.All(ch => char.IsLetterOrDigit(ch) || ch is '/' or '.' or '-'))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -144,9 +145,11 @@ public sealed class ScoreboardService
             .ToList();
     }
 
-    /// <summary>A comma-separated list of league paths, as a set.</summary>
+    /// <summary>A comma-separated list of league paths (or short names, see <see cref="LeagueCatalog.ShortNames"/>), as a
+    /// set of paths.</summary>
     public static HashSet<string> ParseList(string? list)
         => (list ?? string.Empty).Split(new[] { ',', '\n', ' ' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(LeagueCatalog.Resolve)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>Leagues added because the sources carry their games (set by <see cref="LeagueDetector"/>).</summary>

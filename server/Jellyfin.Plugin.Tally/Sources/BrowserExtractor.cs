@@ -32,7 +32,17 @@ public partial class BrowserExtractor
         _runtime = runtime;
     }
 
-    public async Task<List<ExtractedStream>> ExtractAsync(string url, int maxPages, CancellationToken ct, IEnumerable<string>? seedUrls = null)
+    /// <summary>Most pages one crawl visits, whatever the source's Max pages says.</summary>
+    public const int MaxBudget = 16;
+
+    /// <param name="priority">Rank of a page (lower is visited first; 0 = a game that is live now), from the
+    /// scoreboard. See <see cref="PlanCrawl"/>.</param>
+    public async Task<List<ExtractedStream>> ExtractAsync(
+        string url,
+        int maxPages,
+        CancellationToken ct,
+        IEnumerable<string>? seedUrls = null,
+        Func<string, int>? priority = null)
     {
         var found = new ConcurrentBag<ExtractedStream>();
         try
@@ -126,21 +136,8 @@ public partial class BrowserExtractor
                     // Seed with pages the HTTP pass already found (event links,
                     // embeds) — the landing page may redirect-loop headless while
                     // direct game pages load fine.
-                    if (seedUrls != null)
-                    {
-                        // Event pages first: /sport/team-a-team-b/1376048-shaped
-                        // URLs hold players; category pages rarely do.
-                        var seeds = seedUrls
-                            .OrderByDescending(u =>
-                            {
-                                var p = new Uri(u).AbsolutePath.Trim('/').Split('/');
-                                return p.Length >= 2 && p[^1].All(char.IsDigit) && p[^1].Length >= 4;
-                            })
-                            .Take(16);
-                        toVisit.AddRange(seeds);
-                    }
-
-                    var pageBudget = Math.Clamp(maxPages, 1, 16);
+                    var (seeds, pageBudget) = PlanCrawl(seedUrls ?? Enumerable.Empty<string>(), maxPages, priority);
+                    toVisit.AddRange(seeds);
                     _logger.LogInformation("JellyTV: browser crawl starting — {Count} queued pages", toVisit.Count);
 
                     while (toVisit.Count > 0 && visited.Count < pageBudget && !ct.IsCancellationRequested)
@@ -313,8 +310,34 @@ public partial class BrowserExtractor
         }
     }
 
+    /// <summary>
+    /// The seed pages to visit after the landing page, in order, and how many pages the crawl may visit in all. Event
+    /// pages (/sport/team-a-team-b/1376048: they hold the players; category pages rarely do) come first, by
+    /// <paramref name="priority"/> and then page order, so a Saturday listing with 60 college games ahead of the
+    /// baseball does not spend the whole budget on games that have not started. The order only decides which pages the
+    /// budget buys: it stays the source's Max pages (at most <see cref="MaxBudget"/>, the landing page included), live
+    /// games or not, so a busy Saturday is no burst of requests to the site.
+    /// </summary>
+    public static (List<string> Seeds, int Budget) PlanCrawl(IEnumerable<string> seedUrls, int maxPages, Func<string, int>? priority)
+    {
+        var ordered = seedUrls
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select((u, i) => (Url: u, Index: i, Event: IsEventPage(u), Rank: priority?.Invoke(u) ?? 0))
+            .OrderByDescending(s => s.Event)
+            .ThenBy(s => s.Rank)
+            .ThenBy(s => s.Index)
+            .ToList();
+        return (ordered.Take(MaxBudget).Select(s => s.Url).ToList(), Math.Clamp(maxPages, 1, MaxBudget));
+    }
+
+    private static bool IsEventPage(string url)
+    {
+        var p = new Uri(url).AbsolutePath.Trim('/').Split('/');
+        return p.Length >= 2 && p[^1].All(char.IsDigit) && p[^1].Length >= 4;
+    }
+
     // "/nfl/carolina-panthers-atlanta-falcons/1360794" → "Carolina Panthers Atlanta Falcons"
-    private static string? NameFromUrl(string url)
+    public static string? NameFromUrl(string url)
     {
         try
         {

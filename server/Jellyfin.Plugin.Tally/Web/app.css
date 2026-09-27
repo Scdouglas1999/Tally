@@ -502,6 +502,7 @@
 #jellytv-app .g-team.lose { color: var(--jtv-dim); }
 #jellytv-app .g-logo { width: 22px; height: 22px; flex: none; object-fit: contain; }
 #jellytv-app .g-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#jellytv-app .g-rank { font: 500 11px/1 var(--jtv-mono); color: var(--jtv-muted); margin-right: 5px; }
 #jellytv-app .g-rec { font: 400 11px/1 var(--jtv-mono); color: var(--jtv-muted); flex: none; }
 #jellytv-app .g-score {
   margin-left: auto; padding-left: 8px; flex: none;

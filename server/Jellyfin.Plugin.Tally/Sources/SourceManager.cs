@@ -315,7 +315,7 @@ public class SourceManager
 
             var stats = crawled.Select(_ => new GamePassStats()).ToList();
             var tasks = crawled.Select((s, i) => gameDriven
-                ? new WebSourceAdapter(s, _httpClientFactory, _logger, _browser).SearchGamesAsync(wanted, Pacer, stats[i], cancellationToken)
+                ? new WebSourceAdapter(s, _httpClientFactory, _logger, _browser, ct => GamesAsync(1, ct)).SearchGamesAsync(wanted, Pacer, stats[i], cancellationToken)
                 : BuildAdapter(s).RefreshAsync(cancellationToken)).ToList();
             var results = new Dictionary<string, SourceSnapshot?>(StringComparer.OrdinalIgnoreCase);
 
@@ -616,7 +616,8 @@ public class SourceManager
             return;
         }
 
-        var open = games.Where(g => g.State != "post").Select(g => g.Clone()).ToList();
+        // the whole board, so the matcher weighs every team's name (it ties no channel to a finished game)
+        var open = games.Select(g => g.Clone()).ToList();
         var probes = candidates.Select((c, i) => new Scores.ChannelProbe(i.ToString(System.Globalization.CultureInfo.InvariantCulture), c.Name, null)).ToList();
         Scores.GameChannelMatcher.Match(open, probes);
         foreach (var g in open)
@@ -642,14 +643,17 @@ public class SourceManager
     }
 
     /// <summary>Today's games, for naming and grouping; null without a scoreboard.</summary>
-    private async Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(List<SourceChannel> channels, CancellationToken ct)
+    private Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(List<SourceChannel> channels, CancellationToken ct)
+        => GamesAsync(channels.Count, ct);
+
+    private async Task<IReadOnlyList<Scores.GameInfo>?> GamesAsync(int channelCount, CancellationToken ct)
     {
         if (GamesOverride != null)
         {
             return GamesOverride().Select(g => g.Clone()).ToList();
         }
 
-        if (_scoreboard == null || !(Plugin.Instance?.Configuration.ScoresEnabled ?? true) || channels.Count == 0)
+        if (_scoreboard == null || !(Plugin.Instance?.Configuration.ScoresEnabled ?? true) || channelCount == 0)
         {
             return null;
         }
@@ -709,7 +713,7 @@ public class SourceManager
         return def.Kind switch
         {
             SourceKind.Direct => new DirectSourceAdapter(def, _httpClientFactory, _logger),
-            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser),
+            SourceKind.Web => new WebSourceAdapter(def, _httpClientFactory, _logger, _browser, ct => GamesAsync(1, ct)),
             _ => new M3uSourceAdapter(def, _httpClientFactory, _logger)
         };
     }
