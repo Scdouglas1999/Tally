@@ -178,7 +178,7 @@ data class TallySettings(
     val favorites: List<String> = emptyList(),
     val hideScores: Boolean = false,
     val lastChannel: String? = null,
-    /** "My channels only" on the Games board; null = never chosen, so the app decides from the board. */
+    /** "My channels only" on the Games board; null = never chosen, which means off. */
     val onlyWatchable: Boolean? = null,
     /** Followed teams as "LEAGUE:ABBR" (e.g. "NFL:KC"); their games are pinned first and get start nudges. */
     val favoriteTeams: List<String> = emptyList(),

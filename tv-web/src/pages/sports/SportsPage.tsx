@@ -114,8 +114,8 @@ export function SportsPage(props: PageProps<Extract<Route, { name: 'sports' }>>)
   const favorites = useMemo(() => new Set(settings?.favorites ?? []), [settings]);
   const teams = useMemo(() => new Set((settings?.favoriteTeams ?? []).map((t) => t.toUpperCase())), [settings]);
   const hideScores = settings?.hideScores === true;
-  // default on when at least one game is watchable, so the board is never mysteriously empty
-  const onlyWatchable = settings?.onlyWatchable ?? games.some((g) => g.watch !== null);
+  // off until the viewer turns it on: every game shows, the ones not on their channels dimmed
+  const onlyWatchable = settings?.onlyWatchable ?? false;
   const loading = current === null && error === null;
 
   // focus goes back to what the menu was opened on (before a chosen action runs: see MenuDialog)

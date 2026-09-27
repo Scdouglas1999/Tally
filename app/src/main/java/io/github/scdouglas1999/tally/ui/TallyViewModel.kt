@@ -106,9 +106,8 @@ class TallyViewModel
                     repo.settings.favoriteTeams
                         .map { it.uppercase() }
                         .toSet()
-                // Default on when at least one game is watchable so the board is
-                // never mysteriously empty.
-                val onlyWatchable = onlyWatchableChoice ?: repo.settings.onlyWatchable ?: games.any { it.watch != null }
+                // Off until the viewer turns it on: every game shows, the ones not on their channels dimmed.
+                val onlyWatchable = onlyWatchableChoice ?: repo.settings.onlyWatchable ?: false
                 TallyUiState(
                     availability = repo.availability,
                     rows = BoardOrganizer.rows(games, favorites, onlyWatchable, teams),
