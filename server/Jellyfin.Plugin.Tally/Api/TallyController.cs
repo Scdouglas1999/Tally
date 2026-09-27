@@ -116,6 +116,8 @@ public class TallyController : ControllerBase
                 name = c.Name,
                 logo = c.LogoUrl,
                 group = c.Group,
+                language = StreamLanguage.Of(c),
+                kind = c.IsSynthetic ? c.Kind : null,
                 source = c.SourceName,
                 tvgId = c.TvgId,
                 hasEpg = current != null || next != null,

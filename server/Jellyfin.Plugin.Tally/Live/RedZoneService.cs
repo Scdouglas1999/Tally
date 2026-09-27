@@ -428,12 +428,15 @@ public sealed class RedZoneService : IHostedService, IDisposable
     private List<RedZoneGame> Snapshot(List<GameInfo> games, DateTimeOffset now)
     {
         var leagues = ScoreboardService.ParseList(Plugin.Instance?.Configuration.RedZoneLeagues);
-        var ids = _sources.GetChannels().Where(c => !c.IsSynthetic).Select(c => c.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var languages = _sources.GetChannels().Where(c => !c.IsSynthetic)
+            .GroupBy(c => c.Id, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => StreamLanguage.Of(x.First()), StringComparer.OrdinalIgnoreCase);
         return games
             .Where(g => g.State == "in" && (leagues.Count == 0 || leagues.Contains(g.LeaguePath) || leagues.Contains(g.League)))
             .Select(g =>
             {
-                var pick = WatchResolver.Resolve(g, games, ids.Contains);
+                // English only: RedZone never cuts to a Spanish feed
+                var pick = WatchResolver.Resolve(g, games, id => languages.TryGetValue(id, out var l) && l == StreamLanguage.English);
                 var usable = pick != null && !(_failing.TryGetValue(pick.Id, out var until) && until > now);
                 return RedZoneGame.From(g, usable ? pick!.Id : null);
             })
