@@ -139,6 +139,12 @@ public class GameInfo
     /// <summary>Where to watch it — filled in by the Client API (null on the legacy /Scores endpoint).</summary>
     [JsonPropertyName("watch")] public Client.WatchTarget? Watch { get; set; }
 
+    /// <summary>Every language the game can be watched in, English first — only when there is more than one;
+    /// <see cref="Watch"/> is the viewer's preferred one of them. Filled in by the Client API.</summary>
+    [JsonPropertyName("feeds")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<Client.GameFeed>? Feeds { get; set; }
+
     /// <summary>Root-relative, anonymous 16:9 PNG of text-free matchup art for app backdrops — filled in by the
     /// Client API. It does not change with the score, so clients may cache it for the life of the game.</summary>
     [JsonPropertyName("backdropPath")] public string? BackdropPath { get; set; }
@@ -176,6 +182,7 @@ public class GameInfo
         copy.Tags = new List<string>();
         copy.Extras = new Dictionary<string, object>();
         copy.Watch = null;
+        copy.Feeds = null;
         copy.Recording = null;
         copy.Search = null;
         return copy;

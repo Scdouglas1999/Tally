@@ -26,6 +26,21 @@ public class WatchTarget
 
     /// <summary>"teams", "epg" or "network" (a broadcaster match may be a different regional game).</summary>
     [JsonPropertyName("confidence")] public string Confidence { get; set; } = string.Empty;
+
+    /// <summary>The commentary's language: "en" or "es".</summary>
+    [JsonPropertyName("language")] public string Language { get; set; } = "en";
+}
+
+/// <summary>One language a game can be watched in (<c>game.feeds</c>, present when there are several).</summary>
+public class GameFeed
+{
+    /// <summary>"en" or "es".</summary>
+    [JsonPropertyName("language")] public string Language { get; set; } = "en";
+
+    /// <summary>"English" or "Español".</summary>
+    [JsonPropertyName("label")] public string Label { get; set; } = string.Empty;
+
+    [JsonPropertyName("watch")] public WatchTarget Watch { get; set; } = new();
 }
 
 public class BoardChannel
@@ -43,6 +58,9 @@ public class BoardChannel
     [JsonPropertyName("hlsPath")] public string HlsPath { get; set; } = string.Empty;
 
     [JsonPropertyName("cardPath")] public string CardPath { get; set; } = string.Empty;
+
+    /// <summary>The commentary's language: "en" or "es" (a Spanish channel is named "… (Español)").</summary>
+    [JsonPropertyName("language")] public string Language { get; set; } = "en";
 
     /// <summary>Id of the game this channel is carrying, when known with confidence.</summary>
     [JsonPropertyName("gameId")] public string? GameId { get; set; }
