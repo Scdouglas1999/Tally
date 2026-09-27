@@ -98,9 +98,14 @@ def set_status(event, name):
     }
 
 
-def team(spec, home_away):
+def team(spec, home_away, events=()):
     abbr, location, name = (spec.split(":") + ["", ""])[:3]
-    team_id = str(900000 + sum(ord(c) * (i + 1) for i, c in enumerate(abbr)))  # stable per team, like ESPN's ids
+    # stable per team, like ESPN's ids: a team the captured board already has keeps its real id (the plugin tells two
+    # teams apart by id, so a fictional "TOR" beside the real Blue Jays with another id would be a second team of the
+    # same name, and no channel named after it would match either)
+    known = next((c["team"]["id"] for e in events for c in competitors(e)
+                  if c.get("team", {}).get("abbreviation") == abbr and c["team"].get("id")), None)
+    team_id = known or str(900000 + sum(ord(c) * (i + 1) for i, c in enumerate(abbr)))
     return {
         "id": team_id, "homeAway": home_away, "score": "0",
         "team": {"id": team_id, "abbreviation": abbr, "location": location, "name": name,
@@ -113,7 +118,8 @@ def add_game(league, event_id, away, home, start, status="pre", broadcast=None):
     payload = board(league)
     with lock:
         payload["events"] = [e for e in payload.get("events", []) if e.get("id") != event_id]
-        away_c, home_c = team(away, "away"), team(home, "home")
+        events = payload.get("events", [])
+        away_c, home_c = team(away, "away", events), team(home, "home", events)
         event = {
             "id": event_id, "date": when(start),
             "name": f'{away_c["team"]["displayName"]} at {home_c["team"]["displayName"]}',
