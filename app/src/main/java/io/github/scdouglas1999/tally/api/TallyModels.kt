@@ -241,6 +241,23 @@ data class TallyRedZone(
     val since: String? = null,
     /** Game ids it would cut to next, hottest first. */
     val next: List<String> = emptyList(),
+    /**
+     * The channel's last cuts as its players got them, oldest first (2.3; empty from a server that predates it, and
+     * while nobody watches): each `since` is when that cut entered the channel's playlist.
+     */
+    val recent: List<TallyRedZoneCut> = emptyList(),
+    /** The server's clock when it answered (ISO-8601; empty from an older server). */
+    val serverTime: String? = null,
+)
+
+/** One of [TallyRedZone.recent]: from [since] on the channel carries [gameId] (inactive: the "No games live" slate). */
+@Serializable
+data class TallyRedZoneCut(
+    val active: Boolean = false,
+    val gameId: String? = null,
+    val title: String? = null,
+    val reason: String? = null,
+    val since: String? = null,
 )
 
 @Serializable
