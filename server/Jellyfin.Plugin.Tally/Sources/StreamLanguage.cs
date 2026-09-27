@@ -300,7 +300,7 @@ public static partial class StreamLanguage
 
     /// <summary>
     /// A Spanish channel gets " (Español)" after its name and " · Español" after its group, once (names that already
-    /// say "Español" keep theirs), so it never shares a name, an id or a group with its English sibling. English
+    /// say so, "Español" or "ESPN Deportes", keep theirs), so it never shares a name, an id or a group with its English sibling. English
     /// channels are left exactly as they are: their ids key favorites, DVR rules and Jellyfin's Live TV items.
     /// </summary>
     public static void Decorate(SourceChannel c)
@@ -311,7 +311,7 @@ public static partial class StreamLanguage
         }
 
         c.Language = Spanish;
-        if (!Fold(c.Name).Contains("espanol", StringComparison.Ordinal))
+        if (FromText(c.Name) != Spanish)
         {
             c.Name = c.Name.TrimEnd() + NameSuffix;
         }

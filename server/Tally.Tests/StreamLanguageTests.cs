@@ -165,7 +165,7 @@ public class StreamLanguageDetectorTests
 
         var (kept, dropped) = StreamLanguage.Apply(channels);
         Assert.Equal(1, dropped);
-        Assert.Equal(new[] { "Colts at Texans", "Colts at Texans (Español)", "ESPN Deportes (Español)", "Colts at Texans (Español)" }, kept.Select(c => c.Name));
+        Assert.Equal(new[] { "Colts at Texans", "Colts at Texans (Español)", "ESPN Deportes", "Colts at Texans (Español)" }, kept.Select(c => c.Name));
         Assert.Equal(new[] { "American Football", "American Football · Español", "Sports Networks · Español", "American Football · Español" }, kept.Select(c => c.Group));
 
         StreamLanguage.Apply(kept); // a second pass (a kept "last good" list) changes nothing
