@@ -56,7 +56,9 @@ public class DirectSourceAdapter : ISourceAdapter
                 SourceId = sourceId,
                 SourceName = Definition.Name,
                 TvgId = s.TvgId,
-                Headers = headers
+                Headers = headers,
+                Language = StreamLanguage.First(StreamLanguage.FromText(name), StreamLanguage.FromGroup(s.Group), StreamLanguage.FromUrl(s.Url))
+                    ?? StreamLanguage.English
             });
         }
 

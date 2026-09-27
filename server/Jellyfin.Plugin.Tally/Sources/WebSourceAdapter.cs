@@ -111,10 +111,20 @@ public class WebSourceAdapter : ISourceAdapter
         var counter = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         var skipped = 0;
 
+        var otherLanguages = 0;
         foreach (var s in found)
         {
             if (!seen.Add(s.Url))
             {
+                continue;
+            }
+
+            var language = s.Language
+                ?? StreamLanguage.First(StreamLanguage.FromText(s.RawName), StreamLanguage.FromUrl(s.Url), StreamLanguage.FromUrl(s.Referer), StreamLanguage.FromUrl(s.Context))
+                ?? StreamLanguage.English;
+            if (!StreamLanguage.IsKept(language))
+            {
+                otherLanguages++;
                 continue;
             }
 
@@ -138,8 +148,15 @@ public class WebSourceAdapter : ISourceAdapter
             // Disambiguate identical names ("Stream" repeated per page). Entries of one event share a group key,
             // so the several links a page offers for a game end up as one channel with several candidates. A name
             // taken from a page title gets its key once ChannelNaming has matched it to a game (or dropped it).
+            // A Spanish stream is named (and numbered) apart from the English ones: "Colts at Texans (Español)", so an
+            // English channel keeps its name, and its id, whether or not a Spanish feed turns up beside it.
             var groupKey = s.NameFromTitle ? string.Empty : ChannelGrouper.KeyFor(s.Name);
             var name = s.Name;
+            if (language == StreamLanguage.Spanish && !s.NameFromTitle)
+            {
+                name += StreamLanguage.NameSuffix;
+            }
+
             if (counter.TryGetValue(name, out var n))
             {
                 counter[name] = n + 1;
@@ -160,8 +177,14 @@ public class WebSourceAdapter : ISourceAdapter
                 SourceName = Definition.Name,
                 Headers = headers,
                 GroupKey = groupKey.Length > 0 ? "web:" + groupKey : string.Empty,
-                NameFromTitle = s.NameFromTitle
+                NameFromTitle = s.NameFromTitle,
+                Language = language
             });
+        }
+
+        if (otherLanguages > 0)
+        {
+            _logger.LogInformation("JellyTV: {Source}: left out {Count} streams in languages other than English and Spanish", Definition.Name, otherLanguages);
         }
 
         if (skipped > 0)

@@ -196,6 +196,11 @@ public partial class BrowserExtractor
                                 s.Name = pageName;
                                 s.NameFromTitle = slugName == null;
                             }
+
+                            if (string.IsNullOrEmpty(s.RawName))
+                            {
+                                s.RawName = title; // (the raw title: the language hint CleanName would lose, see StreamLanguage)
+                            }
                         }
 
                         foreach (var l in links)

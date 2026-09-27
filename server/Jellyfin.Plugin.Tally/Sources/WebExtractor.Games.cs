@@ -71,6 +71,7 @@ public partial class WebExtractor
         var found = new List<ExtractedStream>();
         var titles = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var labels = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var linkTexts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         try
         {
@@ -85,7 +86,7 @@ public partial class WebExtractor
                         break;
                     }
 
-                    await SearchGameAsync(pass, listingUrl, links, game, found, titles, labels).ConfigureAwait(false);
+                    await SearchGameAsync(pass, listingUrl, links, game, found, titles, labels, linkTexts).ConfigureAwait(false);
                 }
             }
         }
@@ -97,7 +98,7 @@ public partial class WebExtractor
         var validated = new List<ExtractedStream>();
         if (stats.PushedBack == null && !ct.IsCancellationRequested)
         {
-            NameStreams(found, labels, titles);
+            NameStreams(found, labels, titles, linkTexts);
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             await Task.WhenAll(found.Where(f => seen.Add(f.Url)).Select(async s =>
             {
@@ -120,7 +121,7 @@ public partial class WebExtractor
     }
 
     private async Task SearchGameAsync(Pass pass, string listingUrl, IReadOnlyList<(string Href, string Text)> links, WantedGame game,
-        List<ExtractedStream> found, Dictionary<string, string> titles, Dictionary<string, string> labels)
+        List<ExtractedStream> found, Dictionary<string, string> titles, Dictionary<string, string> labels, Dictionary<string, string> linkTexts)
     {
         // best first: what an event page embeds (4), a player link on it (3), an event page (2), a page naming one team (1)
         var queue = new PriorityQueue<GameItem, (int, long)>();
@@ -133,6 +134,11 @@ public partial class WebExtractor
             if (LinkLabel(text) is { } label)
             {
                 labels.TryAdd(NormalizePage(href), label);
+            }
+
+            if (text.Length > 0)
+            {
+                linkTexts.TryAdd(NormalizePage(href), text);
             }
 
             Enqueue(new GameItem(href, 1, href, 2, true));
@@ -187,6 +193,7 @@ public partial class WebExtractor
                 continue;
             }
 
+            var switchLabels = SwitchLabels(doc);
             foreach (var f in doc.QuerySelectorAll("iframe[src], frame[src], embed[src], video[src], source[src]"))
             {
                 var src = Resolve(url, f.GetAttribute("src"));
@@ -206,6 +213,7 @@ public partial class WebExtractor
                         labels.TryAdd(NormalizePage(src), parentLabel);
                     }
 
+                    NoteLinkText(linkTexts, src, url, switchLabels);
                     Enqueue(new GameItem(src, item.Depth + 1, origin, 4, item.ForGame));
                     foreach (var sibling in SiblingEmbeds(src, html))
                     {
@@ -213,6 +221,8 @@ public partial class WebExtractor
                         {
                             labels.TryAdd(NormalizePage(sibling), siblingLabel);
                         }
+
+                        NoteLinkText(linkTexts, sibling, url, switchLabels);
 
                         Enqueue(new GameItem(sibling, item.Depth + 1, origin, 4, item.ForGame));
                     }
@@ -239,12 +249,23 @@ public partial class WebExtractor
                             labels.TryAdd(NormalizePage(href), label);
                         }
 
+                        if (text.Length > 0)
+                        {
+                            linkTexts.TryAdd(NormalizePage(href), text);
+                        }
+
                         Enqueue(new GameItem(href, item.Depth + 1, href, 2, true));
                     }
-                    else if (item.Priority == 2 && (PlayerLinkText().IsMatch(text) || PlayerLinkPath().IsMatch(new Uri(href).AbsolutePath))
+                    else if (item.Priority == 2 && (PlayerLinkText().IsMatch(text) || PlayerLinkPath().IsMatch(new Uri(href).AbsolutePath)
+                                 || (text.Length <= 40 && StreamLanguage.FromText(text) != null))
                              && !IsEventUrl(href) && !StreamClassifier.LooksLikeEvent(text))
                     {
-                        // (an event page's links to other games are not this game's players)
+                        // (an event page's links to other games are not this game's players; its "Español" player is)
+                        if (text.Length > 0)
+                        {
+                            linkTexts.TryAdd(NormalizePage(href), text);
+                        }
+
                         Enqueue(new GameItem(href, item.Depth + 1, origin, 3, item.ForGame));
                     }
                 }
