@@ -16,19 +16,24 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     public void RegisterServices(IServiceCollection services, IServerApplicationHost applicationHost)
     {
         services.AddHttpClient("jellytv")
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
                 AutomaticDecompression = System.Net.DecompressionMethods.All,
                 // Sites often gate pages behind a Set-Cookie + redirect dance —
                 // without a jar the request loops until redirect-limit errors.
                 UseCookies = true,
-                CookieContainer = new System.Net.CookieContainer()
+                CookieContainer = new System.Net.CookieContainer(),
+                // logos and pages named by sources: never the cloud metadata service (see NetworkGuard)
+                ConnectCallback = NetworkGuard.ConnectCallback((_, address, _) => !NetworkGuard.IsForbidden(address))
             })
             .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(30));
 
         services.AddHttpClient("jellytv-proxy")
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler
             {
+                // what upstream playlists name is fetched for viewers: never the server's own network, unless a
+                // source is there (NetworkGuard)
+                ConnectCallback = NetworkGuard.ConnectCallback(sp.GetRequiredService<UpstreamGuard>().Allows),
                 // Raw pass-through: no Accept-Encoding advertised, so upstreams
                 // never gzip — avoids decompression latency on multi-MB segments
                 // and content-length mismatches.
@@ -50,6 +55,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         services.AddTransient<IStartupFilter, WebInjectionStartupFilter>();
 
         services.AddSingleton<StreamSigner>();
+        services.AddSingleton<UpstreamGuard>();
         services.AddSingleton<BrowserRuntime>();
         services.AddSingleton<BrowserFetchService>();
         services.AddSingleton<UpstreamFetcher>();

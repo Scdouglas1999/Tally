@@ -16,9 +16,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace Jellyfin.Plugin.Tally.Api;
 
 /// <summary>
-/// Anonymous feeds consumed by Jellyfin's built-in Live TV stack: an M3U tuner playlist
-/// and an XMLTV guide. No [Authorize] — the server itself fetches these as an anonymous
-/// client, and the embedded stream URLs are already HMAC-signed by the proxy.
+/// Feeds consumed by Jellyfin's built-in Live TV stack: an M3U tuner playlist and an XMLTV guide. No [Authorize]:
+/// Jellyfin's tuner fetches them as an anonymous client. But the playlist hands out every channel's signed stream
+/// address (which plays the owner's paid sources through this server), so both answer only Jellyfin itself: a
+/// request over loopback that carries the feed key (<see cref="FeedKey"/>), which only the registered tuner and
+/// guide addresses have (<see cref="LiveTvRegistrationService"/>). The key keeps out the rest of the internet
+/// even behind a reverse proxy on the same machine, where every visitor arrives over loopback.
 /// </summary>
 [ApiController]
 [Route("JellyTV")]
@@ -37,11 +40,33 @@ public class LiveTvFeedController : ControllerBase
         _cards = cards;
     }
 
+    /// <summary>The query key (<c>?k=</c>) the feeds require; derived from the proxy secret.</summary>
+    public static string FeedKey(StreamSigner signer) => signer.Sign("feed:livetv", string.Empty);
+
+    /// <summary>Whether a feed request comes from this machine (Jellyfin's own tuner) with the feed key.</summary>
+    public static bool IsFeedRequestAllowed(System.Net.IPAddress? remote, string? key, StreamSigner signer)
+    {
+        if (remote == null)
+        {
+            return false;
+        }
+
+        var ip = remote.IsIPv4MappedToIPv6 ? remote.MapToIPv4() : remote;
+        return System.Net.IPAddress.IsLoopback(ip) && signer.Validate("feed:livetv", string.Empty, key);
+    }
+
+    private bool Allowed(string? key) => IsFeedRequestAllowed(HttpContext.Connection.RemoteIpAddress, key, _signer);
+
     /// <summary>M3U playlist fetched by Jellyfin's "m3u" tuner host.</summary>
     [HttpGet("livetv.m3u")]
     [Produces("audio/x-mpegurl")]
-    public async Task<IActionResult> Playlist(CancellationToken cancellationToken)
+    public async Task<IActionResult> Playlist([FromQuery] string? k, CancellationToken cancellationToken)
     {
+        if (!Allowed(k))
+        {
+            return StatusCode(403);
+        }
+
         var games = await _cards.GetChannelGamesAsync(cancellationToken).ConfigureAwait(false);
 
         var sb = new StringBuilder();
@@ -75,8 +100,13 @@ public class LiveTvFeedController : ControllerBase
     /// <summary>XMLTV guide fetched by Jellyfin's "xmltv" listings provider.</summary>
     [HttpGet("epg.xml")]
     [Produces("application/xml")]
-    public async Task<IActionResult> Epg(CancellationToken cancellationToken)
+    public async Task<IActionResult> Epg([FromQuery] string? k, CancellationToken cancellationToken)
     {
+        if (!Allowed(k))
+        {
+            return StatusCode(403);
+        }
+
         var now = DateTimeOffset.UtcNow;
         var games = await _cards.GetChannelGamesAsync(cancellationToken).ConfigureAwait(false);
         var baseUrl = $"{Request.Scheme}://{Request.Host.ToUriComponent()}";
@@ -98,10 +128,10 @@ public class LiveTvFeedController : ControllerBase
             foreach (var c in channels)
             {
                 writer.WriteStartElement("channel");
-                writer.WriteAttributeString("id", EpgChannelId(c));
-                writer.WriteElementString("display-name", c.Name);
+                writer.WriteAttributeString("id", X(EpgChannelId(c)));
+                writer.WriteElementString("display-name", X(c.Name));
                 writer.WriteStartElement("icon");
-                writer.WriteAttributeString("src", ArtworkUrl(baseUrl, c, games));
+                writer.WriteAttributeString("src", X(ArtworkUrl(baseUrl, c, games)));
                 writer.WriteEndElement();
 
                 writer.WriteEndElement();
@@ -221,34 +251,60 @@ public class LiveTvFeedController : ControllerBase
         }
     }
 
+    /// <summary>Text from a source without the characters XML cannot hold (control characters, lone surrogates): one
+    /// such character in a provider's guide would otherwise make the writer throw and blank the whole guide.</summary>
+    public static string X(string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return string.Empty;
+        }
+
+        var sb = new StringBuilder(text.Length);
+        for (var i = 0; i < text.Length; i++)
+        {
+            var ch = text[i];
+            if (char.IsHighSurrogate(ch) && i + 1 < text.Length && char.IsLowSurrogate(text[i + 1]))
+            {
+                sb.Append(ch).Append(text[++i]);
+            }
+            else if (XmlConvert.IsXmlChar(ch))
+            {
+                sb.Append(ch);
+            }
+        }
+
+        return sb.ToString();
+    }
+
     private static void WriteProgramme(XmlWriter writer, string epgId, Programme p)
     {
         writer.WriteStartElement("programme");
-        writer.WriteAttributeString("channel", epgId);
+        writer.WriteAttributeString("channel", X(epgId));
         // XMLTV date format: yyyyMMddHHmmss +zzzz
         writer.WriteAttributeString("start", p.Start.UtcDateTime.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + " +0000");
         writer.WriteAttributeString("stop", p.End.UtcDateTime.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + " +0000");
 
-        writer.WriteElementString("title", string.IsNullOrEmpty(p.Title) ? "Live" : p.Title);
+        writer.WriteElementString("title", string.IsNullOrEmpty(p.Title) ? "Live" : X(p.Title));
         if (!string.IsNullOrEmpty(p.SubTitle))
         {
-            writer.WriteElementString("sub-title", p.SubTitle);
+            writer.WriteElementString("sub-title", X(p.SubTitle));
         }
 
         if (!string.IsNullOrEmpty(p.Description))
         {
-            writer.WriteElementString("desc", p.Description);
+            writer.WriteElementString("desc", X(p.Description));
         }
 
         if (!string.IsNullOrEmpty(p.Category))
         {
-            writer.WriteElementString("category", p.Category);
+            writer.WriteElementString("category", X(p.Category));
         }
 
         if (!string.IsNullOrEmpty(p.IconUrl))
         {
             writer.WriteStartElement("icon");
-            writer.WriteAttributeString("src", p.IconUrl);
+            writer.WriteAttributeString("src", X(p.IconUrl));
             writer.WriteEndElement();
         }
 

@@ -95,8 +95,19 @@ public class GetController : ControllerBase
     /// <summary>The address friends should use: the configured public one, else the one the request came in on.</summary>
     public static string ServerAddress(Microsoft.AspNetCore.Http.HttpRequest request)
     {
-        var configured = (Plugin.Instance?.Configuration.PublicUrl ?? string.Empty).Trim().TrimEnd('/');
-        return configured.Length > 0 ? configured : $"{request.Scheme}://{request.Host}{request.PathBase}".TrimEnd('/');
+        var configured = PublicAddress(Plugin.Instance?.Configuration.PublicUrl);
+        return configured ?? $"{request.Scheme}://{request.Host}{request.PathBase}".TrimEnd('/');
+    }
+
+    /// <summary>The configured public address when it is an absolute http(s) address, else null. It becomes links
+    /// on the install page and in the settings (a <c>javascript:</c> address would run there).</summary>
+    public static string? PublicAddress(string? configured)
+    {
+        var value = (configured ?? string.Empty).Trim().TrimEnd('/');
+        return value.Length > 0 && Uri.TryCreate(value, UriKind.Absolute, out var uri)
+               && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+            ? value
+            : null;
     }
 
     private string ServerAddress() => ServerAddress(Request);

@@ -33,6 +33,7 @@ public class LiveTvRegistrationService : BackgroundService
     private readonly IConfigurationManager _config;
     private readonly IServerApplicationHost _appHost;
     private readonly SourceManager _sourceManager;
+    private readonly StreamSigner _signer;
     private readonly ILogger<LiveTvRegistrationService> _logger;
 
     public LiveTvRegistrationService(
@@ -41,8 +42,10 @@ public class LiveTvRegistrationService : BackgroundService
         IConfigurationManager config,
         IServerApplicationHost appHost,
         SourceManager sourceManager,
+        StreamSigner signer,
         ILogger<LiveTvRegistrationService> logger)
     {
+        _signer = signer;
         _tunerHostManager = tunerHostManager;
         _listingsManager = listingsManager;
         _config = config;
@@ -91,8 +94,10 @@ public class LiveTvRegistrationService : BackgroundService
     private async Task RegisterAsync()
     {
         var baseUrl = LoopbackBaseUrl();
-        var playlistUrl = baseUrl + PlaylistMarker;
-        var epgUrl = baseUrl + EpgMarker;
+        // the feeds answer only loopback requests with the feed key (see LiveTvFeedController)
+        var key = "?k=" + Api.LiveTvFeedController.FeedKey(_signer);
+        var playlistUrl = baseUrl + PlaylistMarker + key;
+        var epgUrl = baseUrl + EpgMarker + key;
 
         var options = _config.GetConfiguration<LiveTvOptions>("livetv") ?? new LiveTvOptions();
 
@@ -143,7 +148,7 @@ public class LiveTvRegistrationService : BackgroundService
 
         _logger.LogInformation(
             "JellyTV: registered Live TV tuner '{Playlist}' and xmltv guide '{Epg}'",
-            playlistUrl, epgUrl);
+            baseUrl + PlaylistMarker, baseUrl + EpgMarker);
     }
 
     private string LoopbackBaseUrl()
