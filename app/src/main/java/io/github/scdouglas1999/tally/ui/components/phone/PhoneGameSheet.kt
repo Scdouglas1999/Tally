@@ -40,7 +40,9 @@ import io.github.scdouglas1999.tally.ui.components.feedName
 import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
 import io.github.scdouglas1999.tally.ui.components.hasNoResult
 import io.github.scdouglas1999.tally.ui.components.noStreamLabel
+import io.github.scdouglas1999.tally.ui.components.rankedName
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.components.upsetAlertLabel
 import io.github.scdouglas1999.tally.ui.phone.PhoneSheet
 import io.github.scdouglas1999.tally.ui.settings.phone.PhoneDialogRow
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
@@ -275,7 +277,18 @@ fun PhoneGamePanel(
                 color = if (game.isLive) TallyColors.liveText else TallyColors.muted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false),
             )
+            // A situation tag, as the Pulse banner shows RED ZONE.
+            upsetAlertLabel(game, hideScores)?.let {
+                Text(
+                    text = it,
+                    style = PhoneType.labelLarge,
+                    color = TallyColors.accent,
+                    maxLines = 1,
+                    modifier = Modifier.padding(start = 6.dp),
+                )
+            }
         }
         Spacer(Modifier.height(12.dp))
         PanelTeamLine(team = game.away, game = game, home = false, hideScores = hideScores)
@@ -369,7 +382,7 @@ private fun PanelTeamLine(
         TeamMark(team = team, size = 44.dp)
         Column(Modifier.weight(1f)) {
             Text(
-                text = team.shortName.ifBlank { team.abbr },
+                text = rankedName(team, team.shortName.ifBlank { team.abbr }, PhoneType.title.fontSize),
                 style = PhoneType.title,
                 color = if (loser) TallyColors.muted else TallyColors.text,
                 maxLines = 1,

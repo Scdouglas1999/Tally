@@ -42,10 +42,11 @@ import io.github.scdouglas1999.tally.ui.theme.TallySurface
 import io.github.scdouglas1999.tally.ui.theme.TallyType
 
 /**
- * The RedZone channel's tile, first in the Games board's live row: a game card's frame (same size, same focus
- * treatment) with `■ TALLY REDZONE` and the game's clock in its strip, ON NOW and the game RedZone is showing, a muted
- * line saying it is the lighter choice (one stream, where multiview plays several), and the channel's label bar with
- * why it is on that game (RED ZONE, SCORE, …). OK plays the channel full screen, like any channel.
+ * The RedZone channel's tile (Pulse to the viewer), first in the Games board's live row: a game card's frame
+ * (same size, same focus treatment) with `■ TALLY PULSE` and the game's clock in its strip, ON NOW and the game
+ * it is showing, a muted line saying it is the lighter choice (one stream, where multiview plays several), and the
+ * channel's label bar with why it is on that game (RED ZONE, SCORE, …). OK plays the channel full screen, like any
+ * channel.
  */
 @Composable
 fun RedZoneCard(
@@ -181,7 +182,7 @@ private fun RedZoneCardPreview() {
         RedZoneCard(
             tile =
                 RedZoneTile(
-                    channel = TallyChannel(id = "redzone", name = "Tally RedZone", kind = TallyChannel.KIND_REDZONE),
+                    channel = TallyChannel(id = "redzone", name = "Tally Pulse", kind = TallyChannel.KIND_REDZONE),
                     status = TallyRedZone(active = true, gameId = "1", title = "Chiefs at Bills", reason = "red zone"),
                     game = TallySamples.liveFootball,
                 ),

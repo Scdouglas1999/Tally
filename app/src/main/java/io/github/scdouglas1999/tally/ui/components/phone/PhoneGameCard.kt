@@ -34,9 +34,11 @@ import io.github.scdouglas1999.tally.ui.components.gameStatusLabel
 import io.github.scdouglas1999.tally.ui.components.hasNoResult
 import io.github.scdouglas1999.tally.ui.components.noStreamLabel
 import io.github.scdouglas1999.tally.ui.components.parseGameStart
+import io.github.scdouglas1999.tally.ui.components.rankedName
 import io.github.scdouglas1999.tally.ui.components.rememberCardNow
 import io.github.scdouglas1999.tally.ui.components.startsInLabel
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.components.upsetAlertLabel
 import io.github.scdouglas1999.tally.ui.phone.phoneClickable
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.PhoneType
@@ -115,6 +117,8 @@ fun PhoneGameCard(
                 text = game.watch?.channelName ?: noStreamLabel(game),
                 live = game.isLive && watchable,
                 muted = !watchable,
+                // UPSET ALERT sits where the Pulse tile shows RED ZONE.
+                trailing = upsetAlertLabel(game, scoresHidden),
             )
         }
     }
@@ -226,7 +230,7 @@ private fun PhoneTeamLine(
     ) {
         TeamMark(team = team, size = MarkSize)
         Text(
-            text = team.shortName.ifBlank { team.abbr },
+            text = rankedName(team, team.shortName.ifBlank { team.abbr }, PhoneType.headline.fontSize),
             style = PhoneType.headline,
             color = if (loser) TallyColors.muted else TallyColors.text,
             maxLines = 1,

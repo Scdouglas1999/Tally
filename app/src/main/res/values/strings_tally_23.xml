@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tally 2.3: commentary language and the RedZone channel (app-23). American English; "Español" is the language's own name, on purpose. -->
+<!-- Tally 2.3: commentary language and the Pulse channel (app-23; ids keep the old "redzone" name). American English; "Español" is the language's own name, on purpose. -->
 <resources>
     <!-- Settings: which commentary WATCH plays when a game has English and Spanish streams (settings key streamLanguage) -->
     <string name="tally_23_settings_commentary">Commentary language</string>
@@ -15,13 +15,13 @@
     <string name="tally_23_player_commentary">Commentary</string>
     <!-- Card chip: the game plays with Spanish commentary -->
     <string name="tally_23_es_chip" translatable="false">ES</string>
-    <!-- The RedZone channel's tile on the Games board and its overlay in the player -->
-    <string name="tally_23_redzone">Tally RedZone</string>
-    <!-- %1$s is the game on RedZone right now ("Chiefs at Bills") -->
+    <!-- The Pulse channel's tile on the Games board and its overlay in the player -->
+    <string name="tally_23_redzone">Tally Pulse</string>
+    <!-- %1$s is the game on Pulse right now ("Chiefs at Bills") -->
     <string name="tally_23_redzone_on_now">On now: %1$s</string>
-    <string name="tally_23_redzone_on_redzone_now">On RedZone now</string>
+    <string name="tally_23_redzone_on_redzone_now">On Pulse now</string>
     <string name="tally_23_redzone_desc">One stream that cuts to the hottest game. Lighter than multiview.</string>
-    <!-- Why RedZone is on the game it shows (the status endpoint's reason) -->
+    <!-- Why Pulse is on the game it shows (the status endpoint's reason) -->
     <string name="tally_23_redzone_reason_red_zone">Red zone</string>
     <string name="tally_23_redzone_reason_score">Score</string>
     <string name="tally_23_redzone_reason_two_minute">Two-minute drill</string>
