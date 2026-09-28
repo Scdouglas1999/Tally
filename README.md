@@ -194,6 +194,9 @@ requests.
 The bug form asks for the few things that help most: your device, the app and plugin versions, and your Jellyfin
 version. [CONTRIBUTING.md](CONTRIBUTING.md) has more on reporting problems and sending changes.
 
+**Privacy.** Tally has no ads, analytics or tracking, and sends nothing to its developer.
+[tally/PRIVACY.md](tally/PRIVACY.md) lists what each part stores and which servers it talks to.
+
 **Support Tally.** Tally is free, and it will stay free. If it's become part of your evenings and you're able to chip
 in, you can support its development on [Patreon](https://www.patreon.com/SeanDouglas). It pays for the time that goes
 into it. Either way, thanks for using it.
