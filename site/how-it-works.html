@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it works · Tally</title>
+<meta name="description" content="How Tally fits together: the Tally plugin inside your Jellyfin server turns your own live TV sources into channels with a guide, matches them to live scores from a public scoreboard feed, keeps playback smooth, and serves every Tally app.">
+<link rel="canonical" href="https://tally.example/how-it-works">
+<meta name="theme-color" content="#0e0f0e">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tally">
+<meta property="og:title" content="How Tally works: your sources, a scoreboard feed, a Jellyfin plugin and the apps">
+<meta property="og:description" content="How Tally fits together: the Tally plugin inside your Jellyfin server turns your own live TV sources into channels with a guide, matches them to live scores from a public scoreboard feed, keeps playback smooth, and serves every Tally app.">
+<meta property="og:url" content="https://tally.example/how-it-works">
+<meta property="og:image" content="https://tally.example/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tally: a Jellyfin app with a live sports board, score bug and multiview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How Tally works: your sources, a scoreboard feed, a Jellyfin plugin and the apps">
+<meta name="twitter:description" content="How Tally fits together: the Tally plugin inside your Jellyfin server turns your own live TV sources into channels with a guide, matches them to live scores from a public scoreboard feed, keeps playback smooth, and serves every Tally app.">
+<meta name="twitter:image" content="https://tally.example/assets/og.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plex-mono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav"><span class="bars" aria-hidden="true"></span>Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="features.html"><span class="sq" aria-hidden="true"></span>Features</a><a href="live-sports.html"><span class="sq" aria-hidden="true"></span>Live sports</a><a href="how-it-works.html" aria-current="page"><span class="sq" aria-hidden="true"></span>How it works</a><a href="download.html"><span class="sq" aria-hidden="true"></span>Download</a><a href="faq.html"><span class="sq" aria-hidden="true"></span>FAQ</a><a href="changelog.html" class="nav-extra"><span class="sq" aria-hidden="true"></span>Changelog</a><a href="support.html"><span class="sq" aria-hidden="true"></span>Support</a>
+    </nav>
+    <div class="head-cta">
+      <a class="ver-chip" href="changelog.html"><span class="sq" aria-hidden="true"></span>V<span data-version>2.3.3</span><span class="visually-hidden">, what's new</span></a>
+      <a class="btn btn-primary btn-sm" href="download.html">Get Tally</a>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker amber"><span class="sq on" aria-hidden="true"></span>How it works</p>
+    <h1>Four parts, one picture.</h1>
+    <p class="lede">Your live TV sources, a public scoreboard feed, the Tally plugin inside your Jellyfin server, and the apps on your screens. The server does the thinking, so every screen in the house sees the same games, the same scores and the same smooth stream.</p>
+  </div>
+</section>
+
+<section class="band flush" aria-labelledby="diag-h">
+  <div class="wrap">
+    <h2 id="diag-h" class="visually-hidden">The diagram</h2>
+    <div class="arch reveal" id="arch-main"><svg class="h" viewBox="0 0 1000 500" role="img" aria-labelledby="arch-h-t arch-h-d"><title id="arch-h-t">How Tally fits together</title><desc id="arch-h-d">Video comes from your own sources (paid IPTV, an HDHomeRun or antenna, your own streams) into the Tally plugin on your Jellyfin server. The plugin also reads a public scoreboard feed for scores, clocks and situations. It runs the live ladder, the guide and channels, game matching, Tally Pulse, the DVR and a signed proxy, and serves the Tally apps on Android TV, Fire TV, phones, Samsung and LG TVs, Jellyfin in a browser and other Jellyfin apps.</desc><text class="k" x="20" y="72" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">SOURCES YOU HAVE RIGHTS TO</text><text class="k" x="750" y="50" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">YOUR SCREENS</text><path class="wire" d="M250 128 C300 128 290 228 340 228"/><path class="flow vid" id="hs0" d="M250 128 C300 128 290 228 340 228"/><path class="wire" d="M250 216 C300 216 290 284 340 284"/><path class="flow vid" id="hs1" d="M250 216 C300 216 290 284 340 284"/><path class="wire" d="M250 304 C300 304 290 340 340 340"/><path class="flow vid" id="hs2" d="M250 304 C300 304 290 340 340 340"/><path class="wire" d="M660 238 C705 238 705 98 750 98"/><path class="flow vid" id="ha0" d="M660 238 C705 238 705 98 750 98"/><path class="wire" d="M660 282 C705 282 705 174 750 174"/><path class="flow vid" id="ha1" d="M660 282 C705 282 705 174 750 174"/><path class="wire" d="M660 326 C705 326 705 250 750 250"/><path class="flow vid" id="ha2" d="M660 326 C705 326 705 250 750 250"/><path class="wire" d="M660 370 C705 370 705 326 750 326"/><path class="flow vid" id="ha3" d="M660 370 C705 370 705 326 750 326"/><path class="wire" d="M660 414 C705 414 705 402 750 402"/><path class="flow vid" id="ha4" d="M660 414 C705 414 705 402 750 402"/><path class="wire" d="M500 96 L500 152"/><path class="flow sc" id="hf0" d="M500 96 L500 152"/><g class="node g-sources"><rect x="20" y="96" width="230" height="64"/><text class="k " x="34" y="118">M3U + XMLTV GUIDE</text><text x="34" y="140">Paid IPTV</text></g><g class="node g-sources"><rect x="20" y="184" width="230" height="64"/><text class="k " x="34" y="206">TUNER LINEUP</text><text x="34" y="228">HDHomeRun, antenna</text></g><g class="node g-sources"><rect x="20" y="272" width="230" height="64"/><text class="k " x="34" y="294">M3U · HLS</text><text x="34" y="316">Your own streams</text></g><g class="node g-feed"><rect x="380" y="20" width="240" height="76"/><text class="k a" x="394" y="42">PUBLIC SCOREBOARD FEED</text><text x="394" y="64">Scores, clocks, situations</text></g><g class="node core g-plugin"><rect x="340" y="152" width="320" height="300"/><text class="k a" x="360" y="182">INSIDE YOUR JELLYFIN SERVER</text><text x="360" y="212" style="font-size:24px;font-weight:600">Tally plugin</text><rect class="lamp-dot" x="630" y="170" width="10" height="10"/><g class="chip"><rect x="360" y="236" width="135" height="30"/><text x="370" y="255">LIVE LADDER</text></g><g class="chip"><rect x="505" y="236" width="135" height="30"/><text x="515" y="255">GUIDE + CHANNELS</text></g><g class="chip"><rect x="360" y="278" width="135" height="30"/><text x="370" y="297">GAME MATCHING</text></g><g class="chip"><rect x="505" y="278" width="135" height="30"/><text x="515" y="297">TALLY PULSE</text></g><g class="chip"><rect x="360" y="320" width="135" height="30"/><text x="370" y="339">DVR</text></g><g class="chip"><rect x="505" y="320" width="135" height="30"/><text x="515" y="339">SIGNED PROXY</text></g><text class="k" x="360" y="382">ONE CHANNEL PER GAME,</text><text class="k" x="360" y="400">THE BEST STREAM, SCORES MATCHED</text><text class="k" x="360" y="418">TO EVERY CHANNEL</text></g><g class="node g-apps"><rect x="750" y="70" width="230" height="56"/><text class="k " x="764" y="92">TALLY APP</text><text x="764" y="114">Android TV, Fire TV</text></g><g class="node g-apps"><rect x="750" y="146" width="230" height="56"/><text class="k " x="764" y="168">TALLY APP</text><text x="764" y="190">Phones and tablets</text></g><g class="node g-apps"><rect x="750" y="222" width="230" height="56"/><text class="k " x="764" y="244">TALLY TV</text><text x="764" y="266">Samsung and LG TVs</text></g><g class="node g-apps"><rect x="750" y="298" width="230" height="56"/><text class="k " x="764" y="320">TALLY LOOK</text><text x="764" y="342">Jellyfin in a browser</text></g><g class="node g-apps"><rect x="750" y="374" width="230" height="56"/><text class="k " x="764" y="396">LIVE TV + GUIDE</text><text x="764" y="418">Other Jellyfin apps</text></g><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.2s" begin="0.00s" repeatCount="indefinite"><mpath href="#hs0"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.2s" begin="0.37s" repeatCount="indefinite"><mpath href="#hs1"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.2s" begin="0.74s" repeatCount="indefinite"><mpath href="#hs2"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="0.30s" repeatCount="indefinite"><mpath href="#ha0"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="0.67s" repeatCount="indefinite"><mpath href="#ha1"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="1.04s" repeatCount="indefinite"><mpath href="#ha2"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="1.41s" repeatCount="indefinite"><mpath href="#ha3"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="1.78s" repeatCount="indefinite"><mpath href="#ha4"/></animateMotion></rect><rect class="pkt " x="-4" y="-4" width="8" height="8"><animateMotion dur="1.4s" begin="0.00s" repeatCount="indefinite"><mpath href="#hf0"/></animateMotion></rect><rect class="pkt " x="-4" y="-4" width="8" height="8"><animateMotion dur="1.4s" begin="0.37s" repeatCount="indefinite"><mpath href="#hf0"/></animateMotion></rect><g transform="translate(20 476)"><path d="M0 0 H34" class="flow vid"/><text x="44" y="4" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">VIDEO FROM YOUR SOURCES</text><path d="M260 0 H294" class="flow sc"/><text x="304" y="4" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">SCORES AND GAME DATA</text></g></svg><svg class="v" viewBox="0 0 400 1010" role="img" aria-labelledby="arch-v-t arch-v-d"><title id="arch-v-t">How Tally fits together</title><desc id="arch-v-d">Your own video sources and a public scoreboard feed go into the Tally plugin on your Jellyfin server, which serves every Tally app and other Jellyfin apps.</desc><text x="10" y="112" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">SOURCES YOU HAVE RIGHTS TO</text><path class="wire" d="M70 172 L70 218 L130 218 L130 262"/><path class="flow vid" id="vs0" d="M70 172 L70 218 L130 218 L130 262"/><path class="wire" d="M200 172 L200 218 L200 218 L200 262"/><path class="flow vid" id="vs1" d="M200 172 L200 218 L200 218 L200 262"/><path class="wire" d="M330 172 L330 218 L270 218 L270 262"/><path class="flow vid" id="vs2" d="M330 172 L330 218 L270 218 L270 262"/><path class="wire" d="M390 52 C398 52 398 60 398 70 L398 300 C398 310 394 312 390 312"/><path class="flow sc" id="vf0" d="M390 52 C398 52 398 60 398 70 L398 300 C398 310 394 312 390 312"/><g class="node g-feed"><rect x="10" y="10" width="360" height="64"/><text class="k a" x="24" y="32">PUBLIC SCOREBOARD FEED</text><text x="24" y="54">Scores, clocks, situations</text></g><g class="node g-sources"><rect x="10" y="124" width="120" height="48"/><text class="k" x="20" y="144">IPTV</text><text x="20" y="162" style="font-size:13.5px">Paid IPTV</text></g><g class="node g-sources"><rect x="140" y="124" width="120" height="48"/><text class="k" x="150" y="144">TUNER</text><text x="150" y="162" style="font-size:13.5px">HDHomeRun</text></g><g class="node g-sources"><rect x="270" y="124" width="120" height="48"/><text class="k" x="280" y="144">M3U · HLS</text><text x="280" y="162" style="font-size:13.5px">Your streams</text></g><g class="node core g-plugin"><rect x="10" y="262" width="380" height="250"/><text class="k a" x="28" y="290">INSIDE YOUR JELLYFIN SERVER</text><text x="28" y="320" style="font-size:22px;font-weight:600">Tally plugin</text><rect class="lamp-dot" x="362" y="280" width="10" height="10"/><g class="chip"><rect x="28" y="342" width="167" height="30"/><text x="38" y="361">LIVE LADDER</text></g><g class="chip"><rect x="205" y="342" width="167" height="30"/><text x="215" y="361">GUIDE + CHANNELS</text></g><g class="chip"><rect x="28" y="384" width="167" height="30"/><text x="38" y="403">GAME MATCHING</text></g><g class="chip"><rect x="205" y="384" width="167" height="30"/><text x="215" y="403">TALLY PULSE</text></g><g class="chip"><rect x="28" y="426" width="167" height="30"/><text x="38" y="445">DVR</text></g><g class="chip"><rect x="205" y="426" width="167" height="30"/><text x="215" y="445">SIGNED PROXY</text></g><text class="k" x="28" y="488">THE BEST STREAM PER GAME</text></g><text x="48" y="566" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">YOUR SCREENS</text><path class="wire" d="M24 512 L24 608 L48 608"/><path class="flow vid" id="va0" d="M24 512 L24 608 L48 608"/><path class="wire" d="M24 512 L24 688 L48 688"/><path class="flow vid" id="va1" d="M24 512 L24 688 L48 688"/><path class="wire" d="M24 512 L24 768 L48 768"/><path class="flow vid" id="va2" d="M24 512 L24 768 L48 768"/><path class="wire" d="M24 512 L24 848 L48 848"/><path class="flow vid" id="va3" d="M24 512 L24 848 L48 848"/><path class="wire" d="M24 512 L24 928 L48 928"/><path class="flow vid" id="va4" d="M24 512 L24 928 L48 928"/><g class="node g-apps"><rect x="48" y="580" width="342" height="60"/><text class="k " x="62" y="602">TALLY APP</text><text x="62" y="624">Android TV, Fire TV</text></g><g class="node g-apps"><rect x="48" y="660" width="342" height="60"/><text class="k " x="62" y="682">TALLY APP</text><text x="62" y="704">Phones and tablets</text></g><g class="node g-apps"><rect x="48" y="740" width="342" height="60"/><text class="k " x="62" y="762">TALLY TV</text><text x="62" y="784">Samsung and LG TVs</text></g><g class="node g-apps"><rect x="48" y="820" width="342" height="60"/><text class="k " x="62" y="842">TALLY LOOK</text><text x="62" y="864">Jellyfin in a browser</text></g><g class="node g-apps"><rect x="48" y="900" width="342" height="60"/><text class="k " x="62" y="922">LIVE TV + GUIDE</text><text x="62" y="944">Other Jellyfin apps</text></g><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="1.8s" begin="0.00s" repeatCount="indefinite"><mpath href="#vs0"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="1.8s" begin="0.37s" repeatCount="indefinite"><mpath href="#vs1"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="1.8s" begin="0.74s" repeatCount="indefinite"><mpath href="#vs2"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="0.20s" repeatCount="indefinite"><mpath href="#va0"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="0.57s" repeatCount="indefinite"><mpath href="#va1"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="0.94s" repeatCount="indefinite"><mpath href="#va2"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="1.31s" repeatCount="indefinite"><mpath href="#va3"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="1.68s" repeatCount="indefinite"><mpath href="#va4"/></animateMotion></rect><rect class="pkt " x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="0.00s" repeatCount="indefinite"><mpath href="#vf0"/></animateMotion></rect><g transform="translate(10 990)"><path d="M0 0 H30" class="flow vid"/><text x="38" y="4" style="fill:var(--muted);font:500 10px var(--mono);letter-spacing:.12em">VIDEO</text><path d="M110 0 H140" class="flow sc"/><text x="148" y="4" style="fill:var(--muted);font:500 10px var(--mono);letter-spacing:.12em">SCORES + GAME DATA</text></g></svg></div>
+    <div class="arch-legend reveal" data-arch-legend="arch-main">
+      <div data-part="sources" tabindex="0"><p class="label"><span class="sq" aria-hidden="true" style="background:var(--text-2)"></span>01 · Your sources</p><h3>Live TV you already have</h3><p>A paid IPTV service's M3U playlist and XMLTV guide, an HDHomeRun or antenna tuner's lineup, or your own HLS streams. Tally brings no channels of its own.</p></div>
+      <div data-part="feed" tabindex="0"><p class="label"><span class="sq on" aria-hidden="true"></span>02 · The scoreboard feed</p><h3>Scores, clocks, situations</h3><p>A public scoreboard feed, read by your server, never by the apps. One cached request per league, and only while someone has Tally open or a recording is due.</p></div>
+      <div data-part="plugin" tabindex="0"><p class="label"><span class="sq on" aria-hidden="true"></span>03 · The Tally plugin</p><h3>Inside your Jellyfin</h3><p>Turns sources into channels with a guide, matches games to channels, ranks streams, builds Tally Pulse, records games, and proxies every stream with signed addresses.</p></div>
+      <div data-part="apps" tabindex="0"><p class="label"><span class="sq" aria-hidden="true" style="background:var(--text-2)"></span>04 · Your screens</p><h3>Every app, same picture</h3><p>Tally on Android TV, Fire TV, phones, Samsung and LG. The Tally look in Jellyfin web. Live channels and game cards in every other Jellyfin app.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="night-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>Rundown</b><span>A game night, step by step</span></div>
+    <div>
+      <h2 id="night-h" class="sec-title wide reveal">What happens between the first pitch and your screen.</h2>
+      <ol class="steps reveal" style="margin-top:32px">
+        <li><h3>Your sources become channels</h3><p>The plugin reads your playlists and guides on a schedule. Entries that carry the same thing, like an HD and an FHD copy of one channel, become one channel with several streams. Each stream is probed once: its renditions, how fresh its playlist is, one timed download, and fifteen seconds of watching how steadily new video arrives.</p></li>
+        <li><h3>The scoreboard comes in</h3><p>While someone has Tally open, the server reads the scoreboard: one cached request per league, about every 12 seconds while a game is live. Every app in the house shares those same requests.</p></li>
+        <li><h3>Games meet channels</h3><p>Each game is matched to the channels that carry it: by a channel named after the matchup, by what the channel's guide says is on, or by the network. Your guide gets real entries, "Foxes at Gulls" instead of "Live", and every channel a card with its game.</p></li>
+        <li><h3>You press Watch</h3><p>The app plays the channel's address on your server. Behind it, the plugin serves one continuous stream of its own through a signed proxy, fetching the next few seconds of video ahead of the player into memory, so the player's next request is already waiting.</p></li>
+        <li><h3>A stream stumbles, the ladder steps in</h3><p>If the stream in use slows, fails or starts arriving in bursts, the next segments come from the next healthy stream, rewritten to continue the old one's timeline. The player never sees a break. After three stable minutes it steps back up.</p></li>
+        <li><h3>Pulse and the DVR ride along</h3><p>Tally Pulse cuts between the games' own continuous streams, and recordings save the same stream viewers share, so neither adds traffic to your sources.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" aria-labelledby="adds-h">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="sq on" aria-hidden="true"></span>Inside the plugin</p>
+    <h2 id="adds-h" class="sec-title wide reveal">What the plugin adds to Jellyfin.</h2>
+    <div class="grid-3" style="margin-top:32px">
+      <div class="card reveal"><p class="label">Live TV</p><h3>A tuner and a guide</h3><p>The plugin registers itself as a Jellyfin Live TV tuner with an XMLTV guide, so Tally's channels appear in Jellyfin's Live TV on every client, with Tally Pulse as channel 1.</p></div>
+      <div class="card reveal d1"><p class="label">Security</p><h3>A signed proxy</h3><p>Every stream plays through addresses signed with a secret your server makes on first run, so the proxy can't be used as an open relay. Headers your provider needs are added for you.</p></div>
+      <div class="card reveal d2"><p class="label">Web</p><h3>The Tally look and Sports page</h3><p>Added to Jellyfin's web client as the page is served. No Jellyfin files are changed, and each is a switch in the plugin's settings.</p></div>
+      <div class="card reveal"><p class="label">TVs</p><h3>The Samsung and LG app</h3><p>A small shell installed once on the TV loads Tally from your server, so a plugin update updates every TV. For LG, the server also keeps Developer Mode renewed.</p></div>
+      <div class="card reveal d1"><p class="label">Friends</p><h3>An install page</h3><p>A link and QR code that walk a friend through installing Tally. The copy of the app your server hands out carries your server's address inside it, and the address is never published anywhere.</p></div>
+      <div class="card reveal d2"><p class="label">Recordings</p><h3>A game-aware DVR</h3><p>Starts when the game starts, stops when it's final, remuxes with Jellyfin's own ffmpeg into MP4 with no transcode, and adds it to a library.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="leave-h">
+  <div class="wrap split" style="align-items:start">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq on" aria-hidden="true"></span>On the wire</p>
+      <h2 id="leave-h">What leaves your server, and what doesn't.</h2>
+      <p>Tally has no service of its own. Nothing is sent to the developer, by the apps or by the plugin.</p>
+    </div>
+    <ul class="specs reveal d1" style="margin-top:0">
+      <li><b>Your sources</b><span>The plugin fetches your playlists, guides and streams, with the headers you set for them.</span></li>
+      <li><b>Scoreboard</b><span>Requests for today's games, only while someone has Tally open or a recording needs them. Switch live scores off and the server makes none.</span></li>
+      <li><b>Team art</b><span>Browsers showing the Sports page load team logos from the scoreboard provider's image server.</span></li>
+      <li><b>GitHub</b><span>Jellyfin checks Tally's plugin repository for updates. The plugin keeps a copy of the newest app for the install page, checked every 10 minutes. Apps installed outside a store check for a newer release.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="band raised tight">
+  <div class="wrap" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+    <p class="lede" style="margin:0">Running the server and want the details? The plugin's README covers every setting, endpoint and log line.</p>
+    <div class="btn-row"><a class="btn" href="https://github.com/Scdouglas1999/Tally/blob/main/server/README.md" rel="noopener"><span class="sq" aria-hidden="true"></span>Server README</a><a class="btn btn-primary" href="download.html#server">Install the plugin</a></div>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+        <p>A free, open-source Jellyfin app for TVs and phones, with a server plugin for live TV and sports. No ads, no accounts, no tracking.</p>
+        <a class="btn btn-sm" href="https://www.patreon.com/SeanDouglas" rel="noopener"><span class="sq" aria-hidden="true"></span>Support on Patreon</a>
+      </div>
+      <div>
+        <h2>Tally</h2>
+        <ul>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="live-sports.html">Live sports</a></li>
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="download.html">Download and install</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Help</h2>
+        <ul>
+          <li><a href="faq.html">FAQ and troubleshooting</a></li>
+          <li><a href="download.html#server">Server setup</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">Report a bug</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="support.html">Support Tally</a></li>
+          <li><a href="legal.html">Open source and legal</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally" rel="noopener">Source code</a></li>
+          <li><a href="https://github.com/damontecres/Wholphin" rel="noopener">Wholphin, the app Tally builds on</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>Tally is free software under the GNU General Public License, version 2, and a fork of Wholphin. Jellyfin is a trademark of the Jellyfin project. Tally isn't affiliated with or endorsed by Jellyfin, Wholphin, or any league, team, network or data provider. Tally provides no channels or streams. The teams and scores on this site are made up.</p>
+      <p class="mono">No cookies · No tracking</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

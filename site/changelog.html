@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog · Tally</title>
+<meta name="description" content="Every Tally release from 2.0 on: Tally Pulse, commentary language, college football, Tally for Samsung and LG TVs, recording games, phone downloads, the stream ladder and more.">
+<link rel="canonical" href="https://tally.example/changelog">
+<meta name="theme-color" content="#0e0f0e">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tally">
+<meta property="og:title" content="What&#x27;s new in Tally">
+<meta property="og:description" content="Every Tally release from 2.0 on: Tally Pulse, commentary language, college football, Tally for Samsung and LG TVs, recording games, phone downloads, the stream ladder and more.">
+<meta property="og:url" content="https://tally.example/changelog">
+<meta property="og:image" content="https://tally.example/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tally: a Jellyfin app with a live sports board, score bug and multiview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What&#x27;s new in Tally">
+<meta name="twitter:description" content="Every Tally release from 2.0 on: Tally Pulse, commentary language, college football, Tally for Samsung and LG TVs, recording games, phone downloads, the stream ladder and more.">
+<meta name="twitter:image" content="https://tally.example/assets/og.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plex-mono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav"><span class="bars" aria-hidden="true"></span>Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="features.html"><span class="sq" aria-hidden="true"></span>Features</a><a href="live-sports.html"><span class="sq" aria-hidden="true"></span>Live sports</a><a href="how-it-works.html"><span class="sq" aria-hidden="true"></span>How it works</a><a href="download.html"><span class="sq" aria-hidden="true"></span>Download</a><a href="faq.html"><span class="sq" aria-hidden="true"></span>FAQ</a><a href="changelog.html" aria-current="page" class="nav-extra"><span class="sq" aria-hidden="true"></span>Changelog</a><a href="support.html"><span class="sq" aria-hidden="true"></span>Support</a>
+    </nav>
+    <div class="head-cta">
+      <a class="ver-chip" href="changelog.html"><span class="sq" aria-hidden="true"></span>V<span data-version>2.3.3</span><span class="visually-hidden">, what's new</span></a>
+      <a class="btn btn-primary btn-sm" href="download.html">Get Tally</a>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker amber"><span class="sq on" aria-hidden="true"></span>Changelog</p>
+    <h1>What's new.</h1>
+    <p class="lede">Android apps offer each update by themselves. The server plugin updates through Jellyfin's plugin catalog, and Samsung and LG TVs update with it. The latest release is <strong>v<span data-version>2.3.3</span></strong>; every release's files are on <a href="https://github.com/Scdouglas1999/Tally/releases" rel="noopener">GitHub</a>.</p>
+  </div>
+</section>
+
+<section class="band flush">
+  <div class="wrap">
+    <div class="log">
+
+      <!-- Edit this entry when 2.3.3 ships: its date, and anything else the release notes add. -->
+      <article class="rel reveal" id="v2.3.3">
+        <div class="rel-meta"><span class="v">2.3.3</span><span class="d">September 2026</span><span class="tag accent">Latest</span></div>
+        <div>
+          <h2>Tally Pulse gets its name, and the TV apps show their real version.</h2>
+          <ul>
+            <li><strong>Tally Pulse.</strong> The channel that follows the pulse of every live game and cuts to the hottest one, formerly called RedZone, is now Tally Pulse. While it plays, the lower third reads "On Pulse now". Favorites, recordings and apps that know the channel keep working.</li>
+            <li><strong>Samsung and LG:</strong> Settings shows the version of Tally you're running.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.3.2">
+        <div class="rel-meta"><span class="v">2.3.2</span><span class="d">September 28, 2026</span></div>
+        <div>
+          <h2>Video shows again in Jellyfin Media Player and Jellyfin Desktop with the Tally look on.</h2>
+          <h3>Fixed</h3>
+          <ul>
+            <li>With "Tally look for Jellyfin web" on, Jellyfin Media Player and Jellyfin Desktop played the sound of every video but showed a dark screen. These apps draw the picture behind the page, and the Tally look kept the page dark over it. The look now clears while the video plays. <a href="faq.html#jmp">More in the FAQ</a>.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.3.1">
+        <div class="rel-meta"><span class="v">2.3.1</span><span class="d">September 27, 2026</span></div>
+        <div>
+          <h2>Recordings and stream checks work on servers that find ffmpeg by name.</h2>
+          <h3>For server owners</h3>
+          <ul>
+            <li>On a server where Jellyfin finds ffmpeg by itself (its setting shows just "ffmpeg", common on Windows), Tally couldn't find it: the Pulse channel had no "No games live" card, finished recordings weren't turned into MP4 files, and streams were ranked without checking their picture. Tally now finds ffmpeg and ffprobe on the system path or next to Jellyfin.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.3.0">
+        <div class="rel-meta"><span class="v">2.3.0</span><span class="d">September 27, 2026</span></div>
+        <div>
+          <h2>A channel that cuts to the hottest game, English and Spanish commentary kept apart, and college football.</h2>
+          <h3>New</h3>
+          <ul>
+            <li><strong>Tally Pulse</strong> (released as RedZone, renamed in 2.3.3). A new channel follows the hottest live game full screen: it cuts right away when a game gets into the red zone, scores or goes to overtime, and otherwise stays on a game at least a minute. It's lighter than multiview: your TV plays one stream, and your server does the cutting without transcoding. It's first in the live row of the games board and channel 1 in Jellyfin's Live TV, and while it plays it shows the game it's on and why. With no game live it shows a "No games live" card.</li>
+            <li><strong>Commentary language.</strong> Streams are now English or Spanish, and each language gets its own channel, so a game no longer switches to Spanish commentary in the middle. English is the default; choose Español under Settings → Commentary language in every Tally app.</li>
+            <li><strong>Watch in Español.</strong> A game with both commentaries has "Watch in Español" (or "Watch in English") in its menu, a Commentary switch in the player, and an ES mark on its card when the Spanish feed is the one offered.</li>
+            <li><strong>College football.</strong> On the Sports page in Jellyfin's web app, games show each team's AP Top 25 rank and an UPSET ALERT when a ranked team is losing late. College streams get their own College Football group.</li>
+          </ul>
+          <h3>For server owners</h3>
+          <ul>
+            <li>Streams in other languages (Portuguese, French, Arabic and so on) are left out.</li>
+            <li>Spanish channels are named after their game with "(Español)" and sit after every English channel in Live TV. A new setting, "Spanish channels in Jellyfin Live TV", hides them there; the Tally apps still list them. Favorites and recording rules keep pointing at the same English channels.</li>
+            <li>The new channel takes channel 1 in Live TV, so every other channel number goes up by one. It reads the games' own live streams, adds no load on your sources, and checks nothing while nobody watches. The Ladder page lists its recent cuts and why.</li>
+            <li>The Leagues setting takes short names (nfl, ncaaf, mlb, nba, nhl).</li>
+            <li>Team matching handles college names that contain one another ("Texas" and "Texas Tech") and nicknames shared by several schools.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.2.2">
+        <div class="rel-meta"><span class="v">2.2.2</span><span class="d">September 27, 2026</span></div>
+        <div>
+          <h2>Gentler, game-by-game stream searches, and game pictures for every channel.</h2>
+          <h3>Changed</h3>
+          <ul>
+            <li><strong>Game-by-game searches.</strong> The server looks for a game's stream in your sources 5 minutes before it starts, at the start, then every 5 minutes until it finds one, one request at a time. It backs off when a source pushes back.</li>
+            <li><strong>Leagues follow your sources.</strong> College football is on the scoreboard by default, and a league your sources carry (NBA, NHL and others) is added by itself, so its channels get game pictures, a guide and game-time searches. Settings → Live scores shows which leagues are on and why.</li>
+          </ul>
+          <h3>Fixed</h3>
+          <ul>
+            <li>Channels that match no game get a proper card, with team names where known, instead of a plain text tile, and phones no longer show empty NOW / NEXT lines.</li>
+            <li>When a source stops answering, the server log now says so plainly.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.2.1">
+        <div class="rel-meta"><span class="v">2.2.1</span><span class="d">September 27, 2026</span></div>
+        <div>
+          <h2>Every game can be watched, and the server looks for streams around game time.</h2>
+          <ul>
+            <li><strong>Games no longer go gray and unwatchable.</strong> Every game that isn't over has WATCH. If the server has no stream for it yet, Tally looks for one right then ("Looking for a stream…") and plays as soon as it turns up, on Android TV, phones, Samsung, LG and Jellyfin in the browser.</li>
+            <li><strong>Clearer labels:</strong> "Not on your channels" is now NO STREAM YET, or LOOKING FOR A STREAM while a search runs.</li>
+            <li><strong>"My channels only" is now "Only games with a stream"</strong>, and it's off unless you turn it on.</li>
+            <li>A "Refresh now" that gave up could cut a source's refresh short and leave only part of its channels.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.2.0">
+        <div class="rel-meta"><span class="v">2.2.0</span><span class="d">September 26, 2026</span></div>
+        <div>
+          <h2>Tally for LG TVs, and the Samsung app catches up with Android TV.</h2>
+          <h3>New</h3>
+          <ul>
+            <li><strong>Tally for LG TVs</strong> (webOS, 2020 and newer). The full Tally, with sports, the player and the Magic Remote pointer, served by your server's plugin. Install it with Tally for LG. The plugin keeps the TV's Developer Mode on, so the app doesn't expire.</li>
+            <li><strong>Samsung:</strong> collection and playlist pages, Remove from Continue watching, FROM THE START in the live bar, the league name in the live header, and a score bug that shows and fades the way it does on Android TV. It all arrives with the server update; nothing to reinstall on the TV.</li>
+            <li><strong>Install guide:</strong> one page per device.</li>
+          </ul>
+          <h3>Fixed and improved</h3>
+          <ul>
+            <li>Recordings: focus stays put when a recording finishes, and a recording that isn't in a library says why. The server creates the recordings library once if it's missing. Recording pictures show the day, not the server's time.</li>
+            <li>Live channels: each quality step plays at its size on Jellyfin 10.10.</li>
+            <li>Game art is fetched at the size it's drawn and in your time zone; pictures that fail to load are tried again.</li>
+            <li>A server address that stops answering is left within seconds.</li>
+            <li>Phones and tablets: Back from setup returns to the app, the video player has a media notification with artwork, tablet widths, landscape player bars, and home loads again when you come back online after starting offline.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.1.0">
+        <div class="rel-meta"><span class="v">2.1.0</span><span class="d">September 25, 2026</span></div>
+        <div>
+          <h2>Downloads on phones, recording games, and Tally on Samsung TVs.</h2>
+          <h3>New</h3>
+          <ul>
+            <li><strong>Downloads (phones).</strong> Download a film, an episode, a season or an album at its original quality or a smaller size, and watch with no connection. With no server in reach, Tally opens to your downloads; what you watch offline is marked watched once you're back.</li>
+            <li><strong>Record games (DVR).</strong> Press and hold a game and choose Record, or record every game of a team. The server records in the background, stops when the game is over, checks there's room first, and lets you watch from the beginning while the game is still on. Recorded games never show the score before you watch.</li>
+            <li><strong>Tally for Samsung TVs</strong> (2020 and newer). The full Tally, with sports, multiview and the player, as a TV web app served by your server's plugin.</li>
+            <li><strong>The Tally look for Jellyfin in the browser</strong>, with a Sports page. It can be turned off in the plugin's settings.</li>
+            <li><strong>Home network fallback.</strong> If you reach your server over the internet and the internet goes down, Tally switches to the server's home-network address and keeps playing.</li>
+          </ul>
+          <h3>Fixed and improved</h3>
+          <ul>
+            <li>Live channels: changing quality or audio no longer cuts the stream off, and it restarts at the live point in seconds.</li>
+            <li>Live channels on Jellyfin 12.1 servers play again.</li>
+            <li>Choosing 480p in the player really plays at 480p on Jellyfin 10.10.</li>
+            <li>Settings → About: a quiet "Support Tally" row.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.0.3">
+        <div class="rel-meta"><span class="v">2.0.3</span><span class="d">September 25, 2026</span></div>
+        <div>
+          <h2>Live games that arrive in bursts no longer buffer.</h2>
+          <ul>
+            <li><strong>Server plugin:</strong> some streams publish video in stop-and-go bursts. The plugin now notices, prefers a steadier copy of the game when there is one, and switches to it mid-game without stopping the picture. For a game with no steady copy it starts a little further behind live to keep a cushion. While someone watches, it logs a one-line health summary every minute.</li>
+            <li>A stream that matches no game is no longer named after the page address it came from.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.0.2">
+        <div class="rel-meta"><span class="v">2.0.2</span><span class="d">September 24, 2026</span></div>
+        <div>
+          <h2>Downloads named after Tally.</h2>
+          <ul>
+            <li>The app's downloads are now <code>Tally.apk</code>, plus per-chip builds like <code>Tally-arm64-v8a.apk</code> for the in-app updater. Older names stay for a while so older installs can still update.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.0.1">
+        <div class="rel-meta"><span class="v">2.0.1</span><span class="d">September 24, 2026</span></div>
+        <div>
+          <h2>A server plugin fix for fresh installs.</h2>
+          <ul>
+            <li>A fresh install of the 2.0 plugin was missing a component some sources need. The plugin now downloads it for its own system the first time it's needed, and shows the progress. The app itself was unchanged.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="v2.0.0">
+        <div class="rel-meta"><span class="v">2.0.0</span><span class="d">September 24, 2026</span></div>
+        <div>
+          <h2>Tally on phones, and the server plugin goes public, with installers.</h2>
+          <h3>On your phone (new)</h3>
+          <ul>
+            <li>A bar at the bottom (Home, Movies, Shows, Sports, More), pages you scroll with your thumb, and a full-screen player you control by touch. Music keeps playing with the screen off. Sports, multiview and watch parties are all there.</li>
+          </ul>
+          <h3>On your TV</h3>
+          <ul>
+            <li>Back in the player hides the controls first and never drops you out of the app.</li>
+            <li>Home opens settled: no menu flashing open, no rows jumping in after it appears.</li>
+            <li>Watch parties started right after a dropped connection work for everyone who joins.</li>
+            <li>Live games no longer stutter from small playback speed changes.</li>
+            <li>Postponed games get their own row, and team abbreviations are no longer cut off.</li>
+          </ul>
+          <h3>Live games and servers</h3>
+          <ul>
+            <li>With the new plugin, Tally picks the best stream it can find for each game and, if that stream starts to struggle, moves to another one without stopping the picture.</li>
+            <li>The plugin works with Jellyfin 10.10, 10.11 and 12.1. Install it with the Windows setup, Docker Compose, the Linux script, or Tally's plugin repository in Jellyfin, which then keeps it updated.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="rel reveal" id="before">
+        <div class="rel-meta"><span class="v">1.x</span><span class="d">September 2026</span></div>
+        <div>
+          <h2>Before 2.0</h2>
+          <ul>
+            <li>Tally began in September 2026 as a fork of Wholphin 1.0.8 for Android TV, with a Sports section, the score bug, the game switcher and multiview, and was redrawn screen by screen in the Tally look. Test builds were published on GitHub before the 2.0 release.</li>
+          </ul>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+        <p>A free, open-source Jellyfin app for TVs and phones, with a server plugin for live TV and sports. No ads, no accounts, no tracking.</p>
+        <a class="btn btn-sm" href="https://www.patreon.com/SeanDouglas" rel="noopener"><span class="sq" aria-hidden="true"></span>Support on Patreon</a>
+      </div>
+      <div>
+        <h2>Tally</h2>
+        <ul>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="live-sports.html">Live sports</a></li>
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="download.html">Download and install</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Help</h2>
+        <ul>
+          <li><a href="faq.html">FAQ and troubleshooting</a></li>
+          <li><a href="download.html#server">Server setup</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">Report a bug</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="support.html">Support Tally</a></li>
+          <li><a href="legal.html">Open source and legal</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally" rel="noopener">Source code</a></li>
+          <li><a href="https://github.com/damontecres/Wholphin" rel="noopener">Wholphin, the app Tally builds on</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>Tally is free software under the GNU General Public License, version 2, and a fork of Wholphin. Jellyfin is a trademark of the Jellyfin project. Tally isn't affiliated with or endorsed by Jellyfin, Wholphin, or any league, team, network or data provider. Tally provides no channels or streams. The teams and scores on this site are made up.</p>
+      <p class="mono">No cookies · No tracking</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

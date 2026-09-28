@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Download and install · Tally</title>
+<meta name="description" content="Install Tally on Android TV, Google TV, Fire TV, Android phones and tablets, Samsung and LG TVs, and add the Tally plugin to your Jellyfin server with Windows setup, Docker, a Linux script or the plugin catalog.">
+<link rel="canonical" href="https://tally.example/download">
+<meta name="theme-color" content="#0e0f0e">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tally">
+<meta property="og:title" content="Download Tally for Android TV, Fire TV, phones, Samsung and LG TVs">
+<meta property="og:description" content="Install Tally on Android TV, Google TV, Fire TV, Android phones and tablets, Samsung and LG TVs, and add the Tally plugin to your Jellyfin server with Windows setup, Docker, a Linux script or the plugin catalog.">
+<meta property="og:url" content="https://tally.example/download">
+<meta property="og:image" content="https://tally.example/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tally: a Jellyfin app with a live sports board, score bug and multiview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Download Tally for Android TV, Fire TV, phones, Samsung and LG TVs">
+<meta name="twitter:description" content="Install Tally on Android TV, Google TV, Fire TV, Android phones and tablets, Samsung and LG TVs, and add the Tally plugin to your Jellyfin server with Windows setup, Docker, a Linux script or the plugin catalog.">
+<meta name="twitter:image" content="https://tally.example/assets/og.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plex-mono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav"><span class="bars" aria-hidden="true"></span>Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="features.html"><span class="sq" aria-hidden="true"></span>Features</a><a href="live-sports.html"><span class="sq" aria-hidden="true"></span>Live sports</a><a href="how-it-works.html"><span class="sq" aria-hidden="true"></span>How it works</a><a href="download.html" aria-current="page"><span class="sq" aria-hidden="true"></span>Download</a><a href="faq.html"><span class="sq" aria-hidden="true"></span>FAQ</a><a href="changelog.html" class="nav-extra"><span class="sq" aria-hidden="true"></span>Changelog</a><a href="support.html"><span class="sq" aria-hidden="true"></span>Support</a>
+    </nav>
+    <div class="head-cta">
+      <a class="ver-chip" href="changelog.html"><span class="sq" aria-hidden="true"></span>V<span data-version>2.3.3</span><span class="visually-hidden">, what's new</span></a>
+      <a class="btn btn-primary btn-sm" href="download.html">Get Tally</a>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker amber"><span class="sq on" aria-hidden="true"></span>Download and install</p>
+    <h1>Pick your screen.</h1>
+    <p class="lede">Tally is free and isn't in an app store yet, so each guide shows where to get it. You do this once per device: after that, Tally updates itself. Running the server? Start with <a href="#server">the plugin</a>: the Sports section needs it, and so do Samsung and LG TVs.</p>
+    <div class="release-box">
+      <div><p class="label">Latest release</p><span class="v">v<span data-version>2.3.3</span></span></div>
+      <div><p class="label">Published</p><span class="mono" data-release-date>September 2026</span></div>
+      <div><p class="label">License</p><span class="mono">GPL-2 · free</span></div>
+      <a class="btn btn-sm" href="changelog.html" style="margin-left:auto"><span class="sq" aria-hidden="true"></span>What's new</a>
+    </div>
+  </div>
+</section>
+
+<section class="band tight" aria-labelledby="pick-h">
+  <div class="wrap">
+    <h2 id="pick-h" class="visually-hidden">Choose a device</h2>
+    <div class="dl-grid">
+      <a class="dl-card" href="#android-tv"><p class="label">Android TV · Google TV · Fire TV · Shield</p><b>With the Downloader app</b><span>Install it straight from the TV, with one address.</span><span class="time">About 5 minutes</span></a>
+      <a class="dl-card" href="#phones"><p class="label">Android phone or tablet</p><b>A download in the browser</b><span>Android 6 or newer.</span><span class="time">About 2 minutes</span></a>
+      <a class="dl-card" href="#samsung"><p class="label">Samsung TV · 2020 and newer</p><b>Tally for Samsung</b><span>A computer on the same network and Developer Mode on the TV. The server needs the plugin.</span><span class="time">About 15 minutes</span></a>
+      <a class="dl-card" href="#lg"><p class="label">LG TV · 2020 and newer</p><b>Tally for LG</b><span>A computer, LG's Developer Mode app and a free LG developer account. The server needs the plugin.</span><span class="time">About 20 minutes</span></a>
+      <a class="dl-card" href="#server"><p class="label">Your Jellyfin server</p><b>The Tally plugin</b><span>Windows setup, Docker, a Linux script or Jellyfin's plugin catalog.</span><span class="time">About 5 minutes</span></a>
+      <a class="dl-card" href="#other"><p class="label">Browser · Xbox · iPhone · Roku</p><b>Other devices</b><span>What works where there's no Tally app.</span><span class="time">Nothing to install</span></a>
+    </div>
+    <div class="note warn" id="warnings" style="margin-top:32px">
+      <p class="label">About the security warnings</p>
+      <p>Tally's installers aren't signed with a paid code-signing certificate, and the app isn't installed from a store, so your devices will warn you the first time: Android asks you to allow installs from Downloader or your browser, Windows SmartScreen says "Windows protected your PC", and macOS refuses a program from an unidentified developer. Each guide below shows the exact step past the warning. Every file comes from the <a href="https://github.com/Scdouglas1999/Tally/releases/latest" rel="noopener">official release</a>, built from the public source at its tag.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-label="Install guides">
+  <div class="wrap">
+
+    <div class="platform-sec" id="android-tv">
+      <p class="kicker"><span class="sq on" aria-hidden="true"></span>Android TV · Google TV · Fire TV · Nvidia Shield</p>
+      <h2>Android TV and Fire TV</h2>
+      <p class="lede">For Android TV, Google TV (including the Chromecast with Google TV), Fire TV and the Nvidia Shield. If the server's owner sent you a link, open it on your phone and follow it instead: it's the same steps, and the Tally it gives you already knows the server's address.</p>
+      <ol class="steps">
+        <li><h3>Get Downloader on the TV</h3><p>Open the TV's app store, search for <strong>Downloader</strong> (orange icon, by AFTVnews) and install it. It's only used to install Tally.</p></li>
+        <li><h3>Open Downloader</h3><p>Choose <strong>Allow</strong> if it asks about files.</p></li>
+        <li><h3>Type this address and press Go</h3>
+          <div class="code"><pre id="c-apk">https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk</pre><button class="copy" type="button" data-copy="#c-apk"><span class="sq" aria-hidden="true"></span><span class="t">Copy</span></button></div>
+        </li>
+        <li><h3>Press Install</h3><p>The first time, the TV says it isn't allowed to install unknown apps: choose <strong>Settings</strong>, switch <strong>Downloader</strong> on, press <strong>Back</strong>, then <strong>Install</strong> again. This is Android's normal step for an app from outside the store.</p></li>
+        <li><h3>Open Tally and sign in</h3><p>With Quick Connect, the TV shows a 6-digit code: in Jellyfin on your phone, open your profile, then <strong>Quick Connect</strong>, and type it. Nobody types a password with the remote.</p></li>
+      </ol>
+      <p style="margin-top:20px;color:var(--text-2)">You can delete Downloader afterward. When a new version is out, Tally shows an update screen by itself: press <strong>Download &amp; Update</strong>. Tally installs next to the official Jellyfin app and Wholphin, and doesn't replace either.</p>
+    </div>
+
+    <div class="platform-sec" id="phones">
+      <p class="kicker"><span class="sq on" aria-hidden="true"></span>Android 6 or newer</p>
+      <h2>Phones and tablets</h2>
+      <p class="lede">It's the same app as on the TV, laid out for a touch screen.</p>
+      <div class="files">
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk"><span><b>Tally.apk</b><small>Every Android phone, tablet and TV · about 30 MB</small></span><span class="arrow">Download</span></a>
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-arm64-v8a.apk"><span><b>For 64-bit ARM only</b><small>Tally-arm64-v8a.apk · smaller, most devices from recent years</small></span><span class="arrow">Download</span></a>
+      </div>
+      <ol class="steps">
+        <li><h3>Download Tally.apk on the phone</h3><p>Open this page on the phone and tap the download above.</p></li>
+        <li><h3>Open the downloaded file</h3><p>If Android asks, let your browser install apps (Android calls this <strong>Install unknown apps</strong>), then press <strong>Install</strong>.</p></li>
+        <li><h3>Open Tally and sign in</h3><p>With your Jellyfin name and password, or with Quick Connect.</p></li>
+      </ol>
+    </div>
+
+    <div class="platform-sec" id="samsung">
+      <p class="kicker"><span class="sq on" aria-hidden="true"></span>Samsung smart TVs · 2020 and newer · Tizen</p>
+      <h2>Samsung TVs</h2>
+      <p class="lede">The full Tally, with sports, multiview and the player, built as a TV web app. The TV app comes from your server's plugin, so plugin updates also update the TV.</p>
+      <ul class="specs">
+        <li><b>Server</b><span>The Jellyfin server needs the Tally plugin, 2.1 or newer. Ask its owner.</span></li>
+        <li><b>Computer</b><span>Windows 10 or 11, a Mac, or Linux, on the same network as the TV, with internet the first time.</span></li>
+        <li><b>2023 and newer</b><span>These TVs also need a free Samsung account, once.</span></li>
+      </ul>
+      <div class="files">
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-Samsung-Installer-windows.exe"><span><b>Windows</b><small>Tally-Samsung-Installer-windows.exe</small></span><span class="arrow">Download</span></a>
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-Samsung-Installer-macos-arm64"><span><b>Mac with Apple silicon</b><small>Tally-Samsung-Installer-macos-arm64</small></span><span class="arrow">Download</span></a>
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-Samsung-Installer-macos-x64"><span><b>Mac with Intel</b><small>Tally-Samsung-Installer-macos-x64</small></span><span class="arrow">Download</span></a>
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-Samsung-Installer-linux"><span><b>Linux</b><small>Tally-Samsung-Installer-linux</small></span><span class="arrow">Download</span></a>
+      </div>
+      <ol class="steps">
+        <li><h3>Open the installer on the computer</h3>
+          <ul>
+            <li><strong>Windows:</strong> double-click it. The first time, Windows may show <strong>"Windows protected your PC"</strong>, because the program is new and not from a large company. Click <strong>More info</strong>, then <strong>Run anyway</strong>. A black window opens: that's the installer.</li>
+            <li><strong>Mac:</strong> macOS won't open a downloaded program from an unidentified developer by double-clicking. Open <strong>Terminal</strong> and run these lines (use <code>x64</code> instead of <code>arm64</code> on an Intel Mac):</li>
+          </ul>
+          <div class="code"><pre id="c-sam-mac">cd ~/Downloads
+chmod +x Tally-Samsung-Installer-macos-arm64
+xattr -d com.apple.quarantine Tally-Samsung-Installer-macos-arm64
+./Tally-Samsung-Installer-macos-arm64</pre><button class="copy" type="button" data-copy="#c-sam-mac"><span class="sq" aria-hidden="true"></span><span class="t">Copy</span></button></div>
+          <ul><li><strong>Linux:</strong></li></ul>
+          <div class="code"><pre id="c-sam-lin">chmod +x Tally-Samsung-Installer-linux &amp;&amp; ./Tally-Samsung-Installer-linux</pre><button class="copy" type="button" data-copy="#c-sam-lin"><span class="sq" aria-hidden="true"></span><span class="t">Copy</span></button></div>
+          <p>Near the top it shows <strong>This PC's address</strong>, like <code>192.168.1.20</code>. Write it down and leave the installer open.</p>
+        </li>
+        <li><h3>Turn on Developer Mode on the TV</h3><p>Open <strong>Apps</strong> and type <strong>1 2 3 4 5</strong> with the remote (on a slim remote, press <strong>123</strong> to bring up numbers). Switch <strong>Developer mode</strong> on, type the computer's address as <strong>Host PC IP</strong>, and press <strong>OK</strong>. Then restart the TV fully: hold the power button for about 5 seconds until the Samsung logo appears.</p></li>
+        <li><h3>Let the installer put Tally on the TV</h3><p>Back at the computer, pick your TV, type the Jellyfin server's address and press <strong>Enter</strong>. It installs Tally and starts it. TVs from 2023 on ask you to sign in with a Samsung account once.</p></li>
+        <li><h3>Sign in on the TV with a code</h3><p>Tally shows a 6-digit code. In Jellyfin on your phone, open your profile, then <strong>Quick Connect</strong>, and type it.</p></li>
+      </ol>
+      <p style="margin-top:20px;color:var(--text-2)">Keep the installer's folder (<code>%APPDATA%\Tally\Samsung</code> on Windows, <code>~/.config/Tally/Samsung</code> on Linux): a reinstall later has to come from the same computer or a copy of it. Stuck? <a href="https://github.com/Scdouglas1999/Tally/blob/main/tv-web/INSTALL-SAMSUNG.md" rel="noopener">The full Samsung guide</a> covers every screen and every installer message.</p>
+    </div>
+
+    <div class="platform-sec" id="lg">
+      <p class="kicker"><span class="sq on" aria-hidden="true"></span>LG smart TVs · 2020 and newer · webOS 5+</p>
+      <h2>LG TVs</h2>
+      <p class="lede">The same full Tally as on Samsung, and the Magic Remote's pointer works as well as its arrow keys. Multiview plays the tile you're on and shows live cards for the others, because LG TVs play one video at a time.</p>
+      <ul class="specs">
+        <li><b>Server</b><span>The Jellyfin server needs the Tally plugin, 2.2 or newer.</span></li>
+        <li><b>Computer</b><span>Windows, Mac or Linux, on the same network as the TV.</span></li>
+        <li><b>LG account</b><span>A free LG developer account, from <a href="https://webostv.developer.lge.com" rel="noopener">webostv.developer.lge.com</a>.</span></li>
+      </ul>
+      <div class="files">
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-LG-Installer-windows.exe"><span><b>Windows</b><small>Tally-LG-Installer-windows.exe</small></span><span class="arrow">Download</span></a>
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-LG-Installer-macos-arm64"><span><b>Mac with Apple silicon</b><small>Tally-LG-Installer-macos-arm64</small></span><span class="arrow">Download</span></a>
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-LG-Installer-macos-x64"><span><b>Mac with Intel</b><small>Tally-LG-Installer-macos-x64</small></span><span class="arrow">Download</span></a>
+        <a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-LG-Installer-linux"><span><b>Linux</b><small>Tally-LG-Installer-linux</small></span><span class="arrow">Download</span></a>
+      </div>
+      <ol class="steps">
+        <li><h3>Download the installer, but don't open it yet</h3><p>Set up the TV first.</p></li>
+        <li><h3>Turn on Developer Mode on the TV</h3><p>Install <strong>Developer Mode</strong> from the TV's app store, open it and sign in with your LG developer account. Switch <strong>Dev Mode Status</strong> on and let the TV restart. Open Developer Mode again and switch <strong>Key Server</strong> on. Leave that screen up: it shows a <strong>passphrase</strong>.</p></li>
+        <li><h3>Open the installer</h3>
+          <p><strong>Windows:</strong> double-click it; at <strong>"Windows protected your PC"</strong>, click <strong>More info</strong>, then <strong>Run anyway</strong>. <strong>Mac:</strong> in Terminal (use <code>x64</code> on an Intel Mac):</p>
+          <div class="code"><pre id="c-lg-mac">cd ~/Downloads
+chmod +x Tally-LG-Installer-macos-arm64
+xattr -d com.apple.quarantine Tally-LG-Installer-macos-arm64
+./Tally-LG-Installer-macos-arm64</pre><button class="copy" type="button" data-copy="#c-lg-mac"><span class="sq" aria-hidden="true"></span><span class="t">Copy</span></button></div>
+          <p><strong>Linux:</strong> <code>chmod +x Tally-LG-Installer-linux &amp;&amp; ./Tally-LG-Installer-linux</code></p>
+          <p>Pick your TV, type the passphrase from the TV, then the server's address. It installs Tally and starts it.</p>
+        </li>
+        <li><h3>Sign in on the TV with a code</h3><p>Tally shows a 6-digit code. In Jellyfin on your phone, open your profile, then <strong>Quick Connect</strong>, and type it.</p></li>
+      </ol>
+      <div class="note" style="margin-top:20px"><p class="label">Developer Mode, kept on</p><p>LG's Developer Mode normally runs out after about 50 hours and removes the app. Once someone has signed in to Tally on the TV, your Jellyfin server renews Developer Mode every day, so Tally stays. Stuck? <a href="https://github.com/Scdouglas1999/Tally/blob/main/tv-web/INSTALL-LG.md" rel="noopener">The full LG guide</a> covers every screen.</p></div>
+    </div>
+
+    <div class="platform-sec" id="server">
+      <p class="kicker live"><span class="sq live" aria-hidden="true"></span>Jellyfin 10.10 · 10.11 · 12.1 and later</p>
+      <h2>The server plugin</h2>
+      <p class="lede">The plugin runs inside Jellyfin. It adds the Sports section, live channels with a guide, the stream ladder, Tally Pulse, the DVR, Tally for Samsung and LG TVs, the Tally look for Jellyfin web, and an install page for your friends. Pick the way that matches how you run Jellyfin; every one keeps the plugin updated through Jellyfin's own plugin updates.</p>
+
+      <h3 style="font-size:22px;margin:40px 0 12px">Windows</h3>
+      <div class="files"><a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally-Server-Setup.exe"><span><b>Tally-Server-Setup.exe</b><small>Adds Tally to your Jellyfin, or installs the official Jellyfin first · about 58 MB</small></span><span class="arrow">Download</span></a></div>
+      <p style="color:var(--text-2)">Run it and press <strong>Install</strong>; Windows asks for administrator rights so the setup can stop and start Jellyfin. It finds your Jellyfin, adds Tally, keeps your libraries, users and settings, and starts Jellyfin again. With no Jellyfin, it downloads the official one from repo.jellyfin.org first. If SmartScreen warns about an unrecognized app, choose <strong>More info</strong> → <strong>Run anyway</strong>.</p>
+
+      <h3 style="font-size:22px;margin:40px 0 12px">Docker</h3>
+      <div class="files"><a class="file" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/docker-compose.yml"><span><b>docker-compose.yml</b><small>The official jellyfin/jellyfin image with Tally added before it starts</small></span><span class="arrow">Download</span></a></div>
+      <p style="color:var(--text-2)">Put the file in an empty folder, add your media folders to its <code>volumes:</code> list, set <code>TZ</code> to your time zone, and run:</p>
+      <div class="code"><pre id="c-dc">docker compose up -d</pre><button class="copy" type="button" data-copy="#c-dc"><span class="sq" aria-hidden="true"></span><span class="t">Copy</span></button></div>
+      <p style="color:var(--text-2)">It uses Jellyfin 12.1 unless you set <code>JELLYFIN_VERSION</code> (for example <code>10.10.7</code>). Already running Jellyfin in Docker? Copy the file's <code>tally-plugin</code> service into your own compose file.</p>
+
+      <h3 style="font-size:22px;margin:40px 0 12px">Debian and Ubuntu</h3>
+      <div class="code"><pre id="c-lin">curl -fsSL https://github.com/Scdouglas1999/Tally/releases/latest/download/install-linux.sh | sudo bash</pre><button class="copy" type="button" data-copy="#c-lin"><span class="sq" aria-hidden="true"></span><span class="t">Copy</span></button></div>
+      <p style="color:var(--text-2)">Installs the official Jellyfin first if it's missing (from Jellyfin's own apt repository), then puts the right Tally build in place and restarts Jellyfin. It needs systemd. <a href="https://github.com/Scdouglas1999/Tally/releases/latest/download/install-linux.sh">Read the script</a> before you run it, if you like.</p>
+
+      <h3 style="font-size:22px;margin:40px 0 12px">Any server: Jellyfin's plugin catalog</h3>
+      <p style="color:var(--text-2)">In Jellyfin, go to <strong>Dashboard → Plugins → Manage Repositories</strong> (on 10.10: <strong>Dashboard → Catalog</strong>, then the gear icon), and add a repository named <strong>Tally</strong> with this URL:</p>
+      <div class="code"><pre id="c-repo">https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/manifest.json</pre><button class="copy" type="button" data-copy="#c-repo"><span class="sq" aria-hidden="true"></span><span class="t">Copy</span></button></div>
+      <p style="color:var(--text-2)">Install <strong>Tally</strong> from the catalog (under Live TV), then restart Jellyfin. Jellyfin picks the build for its own version.</p>
+
+      <h3 style="font-size:22px;margin:40px 0 12px">Manual install</h3>
+      <p style="color:var(--text-2)">Unpack the zip for your Jellyfin line into a <code>Tally_&lt;version&gt;</code> folder in Jellyfin's <code>plugins</code> folder, owned by the user Jellyfin runs as, and restart Jellyfin.</p>
+      <div class="files">
+        <a class="file" data-zip="10.10" href="https://github.com/Scdouglas1999/Tally/releases/latest"><span><b>Jellyfin 10.10</b><small>Tally-server-&lt;version&gt;-jf10.10.zip</small></span><span class="arrow">Download</span></a>
+        <a class="file" data-zip="10.11" href="https://github.com/Scdouglas1999/Tally/releases/latest"><span><b>Jellyfin 10.11</b><small>Tally-server-&lt;version&gt;-jf10.11.zip</small></span><span class="arrow">Download</span></a>
+        <a class="file" data-zip="12" href="https://github.com/Scdouglas1999/Tally/releases/latest"><span><b>Jellyfin 12.1 and later</b><small>Tally-server-&lt;version&gt;-jf12.zip</small></span><span class="arrow">Download</span></a>
+      </div>
+
+      <div class="note" style="margin-top:28px"><p class="label">Then invite people</p><p>In Jellyfin, open the Tally page (<strong>Sports</strong> in the menu, or <strong>Dashboard → Tally</strong>), then <strong>Settings → Tally on a TV</strong>: a link, a QR code and a Share button. A friend who opens the link gets the Android TV steps with your server filled in and signs in from their phone. If friends reach your server from outside your home, set <strong>Public server address</strong> under <strong>TV app install link</strong> first.</p></div>
+      <div class="note live" style="margin-top:16px"><p class="label">Then add your live TV</p><p>In the Tally page, <strong>Settings → Sources → Add source</strong>: an M3U playlist with an optional XMLTV guide (your IPTV service's, or your HDHomeRun's lineup), or single HLS streams by name and address. Only add sources you have the rights to watch. Reload the browser tab once after installing the plugin to see the Tally look.</p></div>
+    </div>
+
+    <div class="platform-sec" id="other">
+      <p class="kicker"><span class="sq on" aria-hidden="true"></span>Everything else</p>
+      <h2>Other devices</h2>
+      <ul class="specs">
+        <li><b>Web browser</b><span>Nothing to install. With the plugin, Jellyfin's web client gets the Tally look and a Sports page. The server's owner can turn this off in Tally's settings.</span></li>
+        <li><b>Xbox, JMP</b><span>Their Jellyfin apps load the server's web client, so the Xbox app and Jellyfin Media Player on a computer get the same Tally look.</span></li>
+        <li><b>iPhone, iPad</b><span>No Tally app yet. The official Jellyfin app for iPhone and iPad is built on Jellyfin's web client, so it gets the Tally look and Sports page, as does Jellyfin in Safari.</span></li>
+        <li><b>Apple TV, Roku</b><span>No Tally app yet. Their Jellyfin apps still get Tally's live channels, guide and game cards through Jellyfin's Live TV.</span></li>
+      </ul>
+    </div>
+
+    <div class="platform-sec" id="requirements">
+      <p class="kicker"><span class="sq on" aria-hidden="true"></span>At a glance</p>
+      <h2>Requirements</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">Part</th><th scope="col">Needs</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Android TV, Google TV, Fire TV</strong></td><td>Android TV 6 or newer, or Fire OS</td><td>Installs next to the official Jellyfin app. Updates itself.</td></tr>
+            <tr><td><strong>Phones and tablets</strong></td><td>Android 6 or newer</td><td>Same app, touch layout, downloads for offline.</td></tr>
+            <tr><td><strong>Samsung TVs</strong></td><td>2020 or newer (Tizen), plugin 2.1+</td><td>One-time install from a computer. 2023+ needs a free Samsung account.</td></tr>
+            <tr><td><strong>LG TVs</strong></td><td>2020 or newer (webOS 5+), plugin 2.2+</td><td>One-time install from a computer, free LG developer account.</td></tr>
+            <tr><td><strong>Jellyfin server</strong></td><td>10.10, 10.11, or 12.1 and later</td><td>12.0 has no build: update it to 12.1 first. Quick Connect on for code sign-in.</td></tr>
+            <tr><td><strong>Live TV and sports</strong></td><td>The Tally plugin and your own live sources</td><td>M3U + XMLTV, an HDHomeRun, or HLS streams you have rights to.</td></tr>
+            <tr><td><strong>Recording</strong></td><td>Plugin 2.1+ and room on a drive</td><td>Users need Jellyfin's permission to manage Live TV recordings.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+        <p>A free, open-source Jellyfin app for TVs and phones, with a server plugin for live TV and sports. No ads, no accounts, no tracking.</p>
+        <a class="btn btn-sm" href="https://www.patreon.com/SeanDouglas" rel="noopener"><span class="sq" aria-hidden="true"></span>Support on Patreon</a>
+      </div>
+      <div>
+        <h2>Tally</h2>
+        <ul>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="live-sports.html">Live sports</a></li>
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="download.html">Download and install</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Help</h2>
+        <ul>
+          <li><a href="faq.html">FAQ and troubleshooting</a></li>
+          <li><a href="download.html#server">Server setup</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">Report a bug</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="support.html">Support Tally</a></li>
+          <li><a href="legal.html">Open source and legal</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally" rel="noopener">Source code</a></li>
+          <li><a href="https://github.com/damontecres/Wholphin" rel="noopener">Wholphin, the app Tally builds on</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>Tally is free software under the GNU General Public License, version 2, and a fork of Wholphin. Jellyfin is a trademark of the Jellyfin project. Tally isn't affiliated with or endorsed by Jellyfin, Wholphin, or any league, team, network or data provider. Tally provides no channels or streams. The teams and scores on this site are made up.</p>
+      <p class="mono">No cookies · No tracking</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

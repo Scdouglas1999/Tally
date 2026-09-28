@@ -1,0 +1,63 @@
+Tally site preview: publish as ONE Artifact with supporting files.
+
+Page (the Artifact itself; single file, no doctype, everything inlined):
+  site/preview/index.html  ->  (the page)            1.12 MB
+
+Supporting files (published path  <-  source file):
+  features.html  <-  site/preview/features.html
+  live-sports.html  <-  site/preview/live-sports.html
+  download.html  <-  site/preview/download.html
+  how-it-works.html  <-  site/preview/how-it-works.html
+  faq.html  <-  site/preview/faq.html
+  changelog.html  <-  site/preview/changelog.html
+  support.html  <-  site/preview/support.html
+  privacy.html  <-  site/preview/privacy.html
+  legal.html  <-  site/preview/legal.html
+  assets/fonts/OFL.txt  <-  site/preview/assets/fonts/OFL.txt
+  assets/img/album-640.webp  <-  site/preview/assets/img/album-640.webp
+  assets/img/album.webp  <-  site/preview/assets/img/album.webp
+  assets/img/boxscore-640.webp  <-  site/preview/assets/img/boxscore-640.webp
+  assets/img/boxscore.webp  <-  site/preview/assets/img/boxscore.webp
+  assets/img/bug-baseball-640.webp  <-  site/preview/assets/img/bug-baseball-640.webp
+  assets/img/bug-baseball.webp  <-  site/preview/assets/img/bug-baseball.webp
+  assets/img/bug-football-640.webp  <-  site/preview/assets/img/bug-football-640.webp
+  assets/img/bug-football.webp  <-  site/preview/assets/img/bug-football.webp
+  assets/img/film-640.webp  <-  site/preview/assets/img/film-640.webp
+  assets/img/film.webp  <-  site/preview/assets/img/film.webp
+  assets/img/foot-baseball.webp  <-  site/preview/assets/img/foot-baseball.webp
+  assets/img/foot-football.webp  <-  site/preview/assets/img/foot-football.webp
+  assets/img/home-tv-640.webp  <-  site/preview/assets/img/home-tv-640.webp
+  assets/img/home-tv.webp  <-  site/preview/assets/img/home-tv.webp
+  assets/img/library-640.webp  <-  site/preview/assets/img/library-640.webp
+  assets/img/library.webp  <-  site/preview/assets/img/library.webp
+  assets/img/multiview-640.webp  <-  site/preview/assets/img/multiview-640.webp
+  assets/img/multiview.webp  <-  site/preview/assets/img/multiview.webp
+  assets/img/music-640.webp  <-  site/preview/assets/img/music-640.webp
+  assets/img/music.webp  <-  site/preview/assets/img/music.webp
+  assets/img/phone-800.webp  <-  site/preview/assets/img/phone-800.webp
+  assets/img/phone-live-800.webp  <-  site/preview/assets/img/phone-live-800.webp
+  assets/img/phone-live.webp  <-  site/preview/assets/img/phone-live.webp
+  assets/img/phone.webp  <-  site/preview/assets/img/phone.webp
+  assets/img/player-640.webp  <-  site/preview/assets/img/player-640.webp
+  assets/img/player.webp  <-  site/preview/assets/img/player.webp
+  assets/img/quality-640.webp  <-  site/preview/assets/img/quality-640.webp
+  assets/img/quality.webp  <-  site/preview/assets/img/quality.webp
+  assets/img/series-640.webp  <-  site/preview/assets/img/series-640.webp
+  assets/img/series.webp  <-  site/preview/assets/img/series.webp
+  assets/img/signin-640.webp  <-  site/preview/assets/img/signin-640.webp
+  assets/img/signin.webp  <-  site/preview/assets/img/signin.webp
+  assets/img/surprise-640.webp  <-  site/preview/assets/img/surprise-640.webp
+  assets/img/surprise.webp  <-  site/preview/assets/img/surprise.webp
+  assets/img/switcher-640.webp  <-  site/preview/assets/img/switcher-640.webp
+  assets/img/switcher.webp  <-  site/preview/assets/img/switcher.webp
+  assets/img/together-640.webp  <-  site/preview/assets/img/together-640.webp
+  assets/img/together.webp  <-  site/preview/assets/img/together.webp
+  assets/img/web-home-640.webp  <-  site/preview/assets/img/web-home-640.webp
+  assets/img/web-home.webp  <-  site/preview/assets/img/web-home.webp
+  assets/media/score-poster.webp  <-  site/preview/assets/media/score-poster.webp
+  assets/media/score.mp4  <-  site/preview/assets/media/score.mp4
+  assets/media/tour-poster.webp  <-  site/preview/assets/media/tour-poster.webp
+  assets/media/tour.mp4  <-  site/preview/assets/media/tour.mp4
+
+Not included: 404.html (it only makes sense on the real host).
+Rebuild with: python3 site/tools/build-preview.py
