@@ -86,7 +86,8 @@ if [ "${1:-}" = "--stores" ] || [ "${2:-}" = "--stores" ]; then
   ls -lh "$OUT"/Tally-play.aab "$OUT"/Tally-amazon.apk
 fi
 
-# The server plugin: a zip per Jellyfin version, the Windows installer (which embeds the zips), the Docker Compose
+# The server plugin (and the Tally TV web app inside it, built as $SERVER_VERSION: server/build.sh passes it on as
+# TALLY_VERSION): a zip per Jellyfin version, the Windows installer (which embeds the zips), the Docker Compose
 # file and the Linux script with this version as their default, and the plugin repository with this release added.
 TALLY_VERSION="$SERVER_VERSION" TALLY_CHANGELOG="$SERVER_CHANGELOG" server/build.sh
 cp server/dist/Tally-server-"$SERVER_VERSION"-jf*.zip "$OUT/"
