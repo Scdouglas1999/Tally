@@ -1,7 +1,27 @@
-name: "Something's wrong"
-description: A screen looks off, a button does the wrong thing, the app crashed
+name: "Bug report"
+description: Something's wrong. A screen looks off, a button does the wrong thing, the app or the plugin crashed
 labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting it. Tally doesn't provide any channels or streams, so it can't help with a source that
+        stopped working or with finding one. Anything about Tally itself is welcome here.
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Where it happens
+      multiple: true
+      options:
+        - Android TV, Google TV or Fire TV
+        - Android phone or tablet
+        - Samsung TV (Tally TV)
+        - LG TV (Tally TV)
+        - Jellyfin in a web browser (the Tally look or the Sports page)
+        - The server plugin itself (settings, recordings, Live TV in other Jellyfin apps)
+        - An installer (Tally-Server-Setup, Tally for Samsung, Tally for LG, Docker, the Linux script)
+    validations:
+      required: true
   - type: textarea
     id: description
     attributes:
@@ -12,7 +32,7 @@ body:
   - type: textarea
     id: steps
     attributes:
-      label: How to make it happen again
+      label: Steps to make it happen again
       placeholder: |
         1. Open Sports
         2. Press right twice on the first row
@@ -22,40 +42,43 @@ body:
   - type: input
     id: app-version
     attributes:
-      label: Tally version
-      description: At the bottom of Settings.
-      placeholder: "v1.0.8-156-gd202ea17"
+      label: Tally app version
+      description: At the bottom of Settings on Android; on a Samsung or LG TV, the "Tally TV" line in Settings. Leave empty if the problem is only in the plugin.
+      placeholder: "v2.3.3"
+    validations:
+      required: false
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Tally server plugin version
+      description: In Jellyfin, Dashboard → Plugins → Tally. Write "not installed" if the server doesn't have it.
+      placeholder: "2.3.3.12"
     validations:
       required: true
   - type: input
     id: server
     attributes:
       label: Jellyfin server version
-      placeholder: "10.10.7"
+      description: At the bottom of the Jellyfin dashboard.
+      placeholder: "10.11.0"
     validations:
       required: false
-  - type: dropdown
-    id: plugin
-    attributes:
-      label: Is the Tally server plugin installed?
-      options:
-        - "Yes"
-        - "No"
-        - "I don't know"
-    validations:
-      required: true
   - type: input
     id: device
     attributes:
-      label: TV or streaming box
-      placeholder: "Chromecast with Google TV, Fire TV Stick 4K, Nvidia Shield..."
+      label: Device
+      description: The TV, streaming box, phone or browser, and for a plugin problem how Jellyfin runs (Windows, Docker, Linux).
+      placeholder: "Chromecast with Google TV, Samsung QN90B (2022), Fire TV Stick 4K, Jellyfin in Docker..."
     validations:
       required: false
   - type: textarea
     id: logs
     attributes:
       label: Logs
-      description: In Tally, Settings → Advanced Settings → Send app logs to current server. Whoever runs the server finds them in the Jellyfin dashboard under Logs. Check them for anything private before pasting.
+      description: |
+        Android app: Settings → Advanced Settings → Send app logs to current server. Whoever runs the server finds
+        them, and the plugin's own lines (they start with "JellyTV"), in the Jellyfin dashboard under Logs.
+        Check them for anything private (server addresses, stream addresses, tokens) before pasting.
       render: text
     validations:
       required: false

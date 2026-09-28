@@ -19,6 +19,8 @@ export CHANGELOG="${TALLY_CHANGELOG:-Tally $VERSION}"
 # The Tally TV web app (../tv-web) is built first and embedded in every build (served at /JellyTV/TV/, see
 # Api/TvAppController.cs): the Samsung/LG apps load it from the server, so each plugin release updates every TV.
 # Needs Node.js 20+ and npm. TALLY_SKIP_TV_WEB=1 skips it (the plugin then serves no TV app; never for a release).
+# The TV app carries the plugin's version: TALLY_VERSION=$VERSION is passed to its build, and tv-web/vite.config.ts
+# puts it in the bundle (Settings, the Jellyfin client info, manifest.json) instead of package.json's version.
 tv_web() {
   local out="Jellyfin.Plugin.Tally/TvWeb"
   rm -rf "$out"
@@ -26,10 +28,12 @@ tv_web() {
     echo "TALLY_SKIP_TV_WEB=1: building without the TV app" >&2
     return
   fi
-  (cd ../tv-web && npm ci --no-audit --no-fund && npm test && npm run build)
+  (cd ../tv-web && export TALLY_VERSION="$VERSION" && npm ci --no-audit --no-fund && npm test && npm run build)
   mkdir -p "$out"
   cp -r ../tv-web/dist/bundle/. "$out/"
   [[ -f "$out/manifest.json" ]] || { echo "tv-web build wrote no manifest.json" >&2; exit 1; }
+  grep -q "\"version\": \"$VERSION\"" "$out/manifest.json" \
+    || { echo "the TV app was not built as $VERSION (tv-web/vite.config.ts reads TALLY_VERSION)" >&2; exit 1; }
 }
 tv_web
 

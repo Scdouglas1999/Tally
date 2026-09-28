@@ -86,7 +86,8 @@ if [ "${1:-}" = "--stores" ] || [ "${2:-}" = "--stores" ]; then
   ls -lh "$OUT"/Tally-play.aab "$OUT"/Tally-amazon.apk
 fi
 
-# The server plugin: a zip per Jellyfin version, the Windows installer (which embeds the zips), the Docker Compose
+# The server plugin (and the Tally TV web app inside it, built as $SERVER_VERSION: server/build.sh passes it on as
+# TALLY_VERSION): a zip per Jellyfin version, the Windows installer (which embeds the zips), the Docker Compose
 # file and the Linux script with this version as their default, and the plugin repository with this release added.
 TALLY_VERSION="$SERVER_VERSION" TALLY_CHANGELOG="$SERVER_CHANGELOG" server/build.sh
 cp server/dist/Tally-server-"$SERVER_VERSION"-jf*.zip "$OUT/"
@@ -113,6 +114,9 @@ ls -lh "$OUT"
 ASSETS=("$OUT"/Tally.apk "$OUT"/Tally-arm64-v8a.apk "$OUT"/Tally-armeabi-v7a.apk "$OUT"/Tally-x86_64.apk "$OUT"/Wholphin-release*.apk
         "$OUT"/Tally-server-"$SERVER_VERSION"-jf*.zip "$OUT"/Tally-Server-Setup.exe "$OUT"/docker-compose.yml "$OUT"/install-linux.sh
         "${TV_INSTALLERS[@]/#/$OUT/}")
+# SHA-256 of every download, published with them (INSTALL.md points people at it: the installers are not code-signed)
+( cd "$OUT" && sha256sum "${ASSETS[@]#$OUT/}" > SHA256SUMS.txt )
+ASSETS+=("$OUT"/SHA256SUMS.txt)
 # After the release exists (so its zips can be downloaded), main gets the plugin repository entry and the new
 # default version for the Docker and Linux installs.
 publish_repository() {

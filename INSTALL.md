@@ -17,7 +17,8 @@ Tally is a Jellyfin app. It connects to a Jellyfin server that you or a friend r
 | **A web browser** | Nothing: the server plugin gives Jellyfin's web client the Tally look | | [Other devices](#other-devices) |
 
 Tally isn't in an app store yet, so each guide shows where to get it. You only do this once per device: after that,
-Tally updates itself.
+Tally updates itself. Your computer, TV or phone will warn you about a download that isn't from a store:
+[Security warnings](#security-warnings) shows how to get past each warning, and why it appears.
 
 ## Android TV and Fire TV
 
@@ -47,7 +48,8 @@ You can delete Downloader afterward. When a new version is out, Tally shows an u
 
 1. On the phone, open this link in the browser:
    [Tally.apk](https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk)
-2. Open the downloaded file. If Android asks, let the browser install apps, then press **Install**.
+2. Open the downloaded file. If Android asks, let the browser install apps, then press **Install**
+   ([more on this warning](#android-install-unknown-apps)).
 3. Open Tally and sign in to your Jellyfin server.
 
 It's the same app as on the TV, laid out for a touch screen.
@@ -68,7 +70,8 @@ player, built as a TV web app.
 
 1. **Get Tally for Samsung** for your computer from the
    [latest release](https://github.com/Scdouglas1999/Tally/releases/latest): `Tally-Samsung-Installer-windows.exe`,
-   `-macos-arm64`, `-macos-x64` or `-linux`. Open it. It shows **This PC's address**: write it down.
+   `-macos-arm64`, `-macos-x64` or `-linux`. Open it (Windows and Mac warn the first time:
+   [here's what to do](#security-warnings)). It shows **This PC's address**: write it down.
 2. **Turn on Developer Mode on the TV.** Open **Apps**, type **1 2 3 4 5** with the remote, switch **Developer mode**
    on, type the computer's address as **Host PC IP**, and press **OK**. Then restart the TV fully by holding the power
    button for 5 seconds.
@@ -97,7 +100,8 @@ because LG TVs play one video at a time.
 
 1. **Get Tally for LG** for your computer from the
    [latest release](https://github.com/Scdouglas1999/Tally/releases/latest): `Tally-LG-Installer-windows.exe`,
-   `-macos-arm64`, `-macos-x64` or `-linux`. Don't open it yet.
+   `-macos-arm64`, `-macos-x64` or `-linux`. Don't open it yet. (When you do, Windows and Mac warn the first time:
+   [here's what to do](#security-warnings).)
 2. **Turn on Developer Mode on the TV.** Install **Developer Mode** from the TV's app store, open it and sign in with
    your LG developer account. Switch **Dev Mode Status** on and let the TV restart. Then open Developer Mode again
    and switch **Key Server** on. Leave that screen up: it shows a **passphrase**.
@@ -118,8 +122,9 @@ DVR, Tally for Samsung and LG TVs, and an install page for your friends. Pick th
 Jellyfin:
 
 - **Windows:** download `Tally-Server-Setup.exe` from the
-  [latest release](https://github.com/Scdouglas1999/Tally/releases/latest) and run it. It adds Tally to your
-  Jellyfin, or installs the official Jellyfin first if the computer has none.
+  [latest release](https://github.com/Scdouglas1999/Tally/releases/latest) and run it. If Windows says it protected
+  your PC, click **More info**, then **Run anyway** ([why](#security-warnings)). It adds Tally to your Jellyfin, or
+  installs the official Jellyfin first if the computer has none.
 - **Docker:** put the release's `docker-compose.yml` in an empty folder, add your media folders and time zone to it,
   and run `docker compose up -d`.
 - **Debian or Ubuntu:**
@@ -151,3 +156,74 @@ fits which Jellyfin version, and how to remove the plugin.
   the same Tally look.
 - **iPhone, iPad, Apple TV and Roku:** there's no Tally app yet. The official Jellyfin apps work with the server
   as usual.
+
+## Security warnings
+
+Tally's downloads come from its [GitHub releases](https://github.com/Scdouglas1999/Tally/releases/latest), not from an
+app store. The programs for Windows, Mac and Linux (`Tally-Server-Setup.exe` and the Samsung and LG installers) aren't
+code-signed, because that takes a paid certificate from Microsoft and Apple. So the first time you open one, your
+computer warns you that it doesn't know the program. That's expected, and you only see it once per file.
+
+To make sure a file is the one that was published, compare its SHA-256 checksum with the release page: GitHub shows
+one next to each download, and each release has them all in `SHA256SUMS.txt`. To get a file's checksum:
+`certutil -hashfile <file> SHA256` on Windows, `shasum -a 256 <file>` on a Mac, `sha256sum <file>` on Linux. Only
+download Tally from the release page.
+
+### Windows: "Windows protected your PC"
+
+This is SmartScreen. It appears for `Tally-Server-Setup.exe`, `Tally-Samsung-Installer-windows.exe` and
+`Tally-LG-Installer-windows.exe`.
+
+1. Click **More info**.
+2. Click **Run anyway**.
+
+If your browser holds the download back first ("isn't commonly downloaded"), open its downloads list, choose **Keep**
+from the file's menu, then **Keep anyway**.
+
+### Mac: "cannot be opened" or "can't be checked for malicious software"
+
+The Samsung and LG installers are programs that run in Terminal. Open **Terminal** and type the lines below (use
+`x64` instead of `arm64` on an Intel Mac, and `LG` instead of `Samsung` for the LG installer):
+
+```sh
+cd ~/Downloads
+chmod +x Tally-Samsung-Installer-macos-arm64
+xattr -d com.apple.quarantine Tally-Samsung-Installer-macos-arm64
+./Tally-Samsung-Installer-macos-arm64
+```
+
+`chmod +x` makes the file runnable again (browsers drop that when they download it), and
+`xattr -d com.apple.quarantine` removes the "downloaded from the internet" mark that makes the Mac block it.
+
+You can also skip the `xattr` line and let the Mac ask:
+
+1. After `chmod +x`, double-click the file in Finder. When the Mac says it can't be opened, click **Done**.
+2. Open **System Settings → Privacy & Security** and scroll down to **Security**. It names the installer: click
+   **Open Anyway**, then confirm with your password.
+
+On macOS 14 and older, right-clicking (or Control-clicking) the file and choosing **Open**, then **Open** again, does
+the same.
+
+### Linux: "Permission denied"
+
+Downloads aren't runnable until you allow it. In a terminal, in the folder with the file:
+
+```sh
+chmod +x Tally-Samsung-Installer-linux
+./Tally-Samsung-Installer-linux
+```
+
+(The same for `Tally-LG-Installer-linux`.)
+
+### Android: "Install unknown apps"
+
+Android only installs apps from outside an app store after you allow the app that opens the file.
+
+- **On a TV:** when Downloader says it isn't allowed to install unknown apps, choose **Settings**, switch
+  **Downloader** on, press **Back**, then **Install** again. On a Fire TV the switch is under **Settings → My Fire TV
+  → Developer options → Install unknown apps**.
+- **On a phone or tablet:** when you open `Tally.apk`, Android asks to allow your browser (or Files app): tap
+  **Settings**, switch on **Allow from this source**, go back and tap **Install**. You can switch it off again
+  afterward, under **Settings → Apps → Special app access → Install unknown apps**.
+- If **Google Play Protect** says it hasn't seen the app before, you can let it scan the app, or choose
+  **More details → Install anyway**.

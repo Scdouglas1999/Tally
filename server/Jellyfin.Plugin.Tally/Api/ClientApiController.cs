@@ -194,8 +194,8 @@ public class ClientApiController : ControllerBase
         return c == null ? NotFound() : Ok(ToChannel(c, null, DateTimeOffset.UtcNow));
     }
 
-    /// <summary>The game on the Tally RedZone channel right now (or the one it would open on while nobody watches).
-    /// Apps show "On RedZone now: …" from it, polling every 10 s while they play the channel.</summary>
+    /// <summary>The game on the Tally Pulse channel right now (or the one it would open on while nobody watches).
+    /// Apps show "On Pulse now: …" from it, polling every 10 s while they play the channel.</summary>
     [HttpGet("redzone")]
     public async Task<IActionResult> RedZone(CancellationToken cancellationToken)
         => Ok(await _redZone.StatusAsync(cancellationToken).ConfigureAwait(false));

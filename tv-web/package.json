@@ -1,6 +1,6 @@
 {
   "name": "tally-tv-web",
-  "version": "0.1.0",
+  "version": "2.3.3",
   "private": true,
   "description": "Tally TV (web): the Tally client for Samsung (Tizen), LG (webOS) and browsers",
   "license": "GPL-2.0-only",
