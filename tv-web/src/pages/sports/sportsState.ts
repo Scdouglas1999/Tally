@@ -109,7 +109,7 @@ export function watchRedZone(channel: TallyChannel): void {
     showToast(NO_PLAYLIST);
     return;
   }
-  push({ name: 'live', channelId: channel.id, hlsPath: channel.hlsPath, title: channel.name !== '' ? channel.name : 'Tally RedZone' });
+  push({ name: 'live', channelId: channel.id, hlsPath: channel.hlsPath, title: channel.name !== '' ? channel.name : 'Tally Pulse' });
   void setLastChannel(channel.id);
 }
 

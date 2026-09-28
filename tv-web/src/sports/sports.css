@@ -33,3 +33,7 @@
 .game-card.no-stream .label-bar .text { color: var(--text-secondary); }
 /* the "ES" chip: a Spanish stream (drawn like the REC tag, after it) */
 .game-card .strip .lang-tag { margin-left: 13px; }
+/* college poll rank before a team's name: a small mono "#7", quieter than the name (TeamRank) */
+.team-rank { font-family: var(--mono); font-weight: 500; font-size: 22px; letter-spacing: 1px; color: var(--muted); margin-right: 10px; }
+/* UPSET ALERT: live red like the REC tag, after the ES chip */
+.game-card .strip .upset-tag { margin-left: 13px; }

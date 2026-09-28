@@ -66,7 +66,7 @@ function unstreamedGames(current: TallyBoard | null, playingId: string | undefin
  */
 function gamelessChannelGames(current: TallyBoard | null, channelId: string): TallyGame[] {
   if (current === null) return [];
-  const blank = { id: '', abbr: '', name: '', shortName: '', location: '', logo: '', score: null, record: null, possession: false, winner: false, periods: [], color: '', altColor: '' };
+  const blank = { id: '', abbr: '', name: '', shortName: '', location: '', logo: '', score: null, record: null, possession: false, winner: false, periods: [], color: '', altColor: '', rank: null };
   return current.channels
     .filter((c) => (c.gameId === null || c.gameId === '') && c.id !== channelId && c.hlsPath !== '')
     .sort((a, b) => (a.name.toLowerCase() < b.name.toLowerCase() ? -1 : a.name.toLowerCase() > b.name.toLowerCase() ? 1 : 0))
@@ -97,6 +97,7 @@ function gamelessChannelGames(current: TallyBoard | null, channelId: string): Ta
       recording: null,
       search: null,
       feeds: [],
+      upsetAlert: false,
     }));
 }
 
@@ -428,7 +429,7 @@ export function LivePage(props: PageProps<Extract<Route, { name: 'live' }>>) {
                 LIVE
               </span>
               <span class="channel mono-label ellipsis">
-                {onRedZone && rzTitle !== '' ? tallyUppercase(['On RedZone now', rzTitle, rzReason].filter((x) => x !== '').join(' · ')) : tallyUppercase(channelName)}
+                {onRedZone && rzTitle !== '' ? tallyUppercase(['On Pulse now', rzTitle, rzReason].filter((x) => x !== '').join(' · ')) : tallyUppercase(channelName)}
               </span>
             </div>
             <div class="hints">

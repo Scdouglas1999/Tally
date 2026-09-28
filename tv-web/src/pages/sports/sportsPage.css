@@ -164,3 +164,6 @@
 .redzone-panel .rz-hero-on { margin-top: 38px; color: var(--muted); }
 .redzone-panel .rz-hero-title { margin-top: 10px; font-family: var(--sans); font-weight: 600; font-size: 70px; line-height: 84px; color: var(--text); }
 .redzone-panel .rz-hero-reason { margin-top: 16px; font-family: var(--mono); font-weight: 500; font-size: 42px; line-height: 52px; color: var(--accent); }
+/* college poll rank in the focused-game panel ("#7" before the name) and the UPSET ALERT tag under the situation */
+.hero-team .name .team-rank { font-size: 38px; margin-right: 18px; }
+.hero-right .hero-tags { display: flex; margin-top: 16px; }

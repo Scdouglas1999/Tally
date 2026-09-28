@@ -35,6 +35,8 @@ test('Sports: the games board, its tabs and the focused-game panel', async ({ pa
   expect(await tabs.allTextContents()).toEqual(['GAMES', 'CHANNELS', 'MULTIVIEW', 'RECORDINGS', 'SETTINGS']);
   // the first card of the first row takes focus; the panel describes it
   await expect(page.locator('.game-card[data-focused]')).toBeVisible();
+  // a 2.3 server's Pulse tile leads the live row while it is on the air (its panel is its own): the first game is next
+  if ((await page.locator('.game-card[data-focused]').getAttribute('data-game')) === 'redzone') await page.keyboard.press('ArrowRight');
   await expect(page.locator('.hero-panel .hero-team')).toHaveCount(2);
   await shot(page, info, 'sports-games');
   // RIGHT moves along the row and the panel follows

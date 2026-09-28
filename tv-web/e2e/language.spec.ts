@@ -94,7 +94,7 @@ async function setUp(page: Page): Promise<Setup | null> {
       }
     }
     json.channels = json.channels.filter((c) => c.kind !== 'redzone'); // a 2.3 server's own: this test's stands in
-    json.channels.unshift({ id: 'redzone', name: 'Tally RedZone', group: 'RedZone', hlsPath: rzStream.hlsPath, cardPath: '', gameId: null, kind: 'redzone', language: 'en' });
+    json.channels.unshift({ id: 'redzone', name: 'Tally Pulse', group: 'Pulse', hlsPath: rzStream.hlsPath, cardPath: '', gameId: null, kind: 'redzone', language: 'en' });
     json.channels.push({ id: spanishId, name: esWatch.channelName, group: 'Baseball · Español', hlsPath: esStream.hlsPath, cardPath: '', gameId: both.id, language: 'es' });
     await route.fulfill({ response, json }).catch(() => undefined);
   });
@@ -143,7 +143,7 @@ const playing = (page: Page) =>
     .poll(() => page.evaluate(() => ((document.querySelector('.player.live video') as HTMLVideoElement | null)?.currentTime ?? 0) > 1), { timeout: 45_000 })
     .toBe(true);
 
-test('RedZone: the tile leads the live row, its panel says what is on and why; OK plays it with ON REDZONE NOW, polled every 10 s only while it plays', async ({ page }, info) => {
+test('Pulse (redzone): the tile leads the live row, its panel says what is on and why; OK plays it with ON PULSE NOW, polled every 10 s only while it plays', async ({ page }, info) => {
   const s = await setUp(page);
   test.skip(s === null, 'needs two live games with streams and two spare channels on the dev board');
   if (s === null) return;
@@ -153,11 +153,13 @@ test('RedZone: the tile leads the live row, its panel says what is on and why; O
   // first in the first live row
   const firstInRow = await tile.evaluate((el) => el.parentElement?.firstElementChild === el && el.closest('.media-row')?.querySelector('.row-header .title')?.textContent);
   expect(firstInRow).toMatch(/LIVE$/);
+  await expect(tile.locator('.rz-name')).toHaveText('TALLY PULSE');
   await expect(tile.locator('.rz-title')).toHaveText(title(s.both));
   await expect(tile.locator('.rz-reason')).toHaveText('RED ZONE');
   await focusCard(page, 'redzone');
   const panel = page.locator('.page:not(.hidden) .hero-panel.redzone-panel');
   await expect(panel).toBeVisible();
+  await expect(panel.locator('.hero-kicker')).toHaveText('TALLY PULSE · LIVE');
   await expect(panel.locator('.rz-hero-title')).toHaveText(title(s.both));
   await expect(panel.locator('.hero-body').first()).toContainText('lighter than multiview');
   await expect(panel.locator('.hero-body.muted')).toContainText(title(s.spanish));
@@ -172,13 +174,14 @@ test('RedZone: the tile leads the live row, its panel says what is on and why; O
   await page.keyboard.press('Enter');
   await expect(page.locator('.page:not(.hidden) .player.live')).toBeVisible();
   await playing(page);
-  await expect(page.locator('.live-top .title')).toHaveText('Tally RedZone');
-  await expect(page.locator('.live-bar .channel')).toHaveText(`ON REDZONE NOW · ${title(s.both).toUpperCase()} · RED ZONE`);
+  await expect(page.locator('.live-top .title')).toHaveText('Tally Pulse');
+  await expect(page.locator('.live-bar .channel')).toHaveText(`ON PULSE NOW · ${title(s.both).toUpperCase()} · RED ZONE`);
   await page.waitForTimeout(300);
   await shot(page, info, 'redzone-player-bar');
   await page.keyboard.press('Escape'); // hides the bar
   const now = page.locator('.player.live .redzone-now');
   await expect(now).not.toHaveClass(/faded/);
+  await expect(now.locator('.rz-kicker')).toHaveText('ON PULSE NOW');
   await expect(now.locator('.rz-title')).toHaveText(title(s.both));
   // the score bug is the game RedZone shows
   await expect(page.locator('.player.live .score-bug')).toHaveCount(1);
@@ -287,7 +290,7 @@ test('Settings: Commentary language switches English / Español, the board is fe
   await back;
 });
 
-test('RedZone: the board opens on its tile, whole; the overlay names a new game only once the picture has reached the cut', async ({ page }, info) => {
+test('Pulse (redzone): the board opens on its tile, whole; the overlay names a new game only once the picture has reached the cut', async ({ page }, info) => {
   const s = await setUp(page);
   test.skip(s === null, 'needs two live games with streams and two spare channels on the dev board');
   if (s === null) return;
@@ -362,7 +365,7 @@ test('RedZone: the board opens on its tile, whole; the overlay names a new game 
   await shot(page, info, 'redzone-overlay-after-cut');
 });
 
-test('RedZone on a 2.3 server (nothing scripted): the tile when the server says it is on the air, and the channel plays', async ({ page }, info) => {
+test('Pulse (redzone) on a 2.3 server (nothing scripted): the tile when the server says it is on the air, and the channel plays', async ({ page }, info) => {
   const real = await api<Board>('/JellyTV/Client/v1/board');
   const rz = real.channels.find((c) => c.kind === 'redzone');
   test.skip(rz === undefined, 'the server has no RedZone channel (a plugin before 2.3)');

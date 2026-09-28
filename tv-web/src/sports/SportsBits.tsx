@@ -1,5 +1,5 @@
 import type { ComponentChildren } from 'preact';
-import type { TallyGame, TallyGameRecording } from '../api/tallyModels';
+import { isLive, UPSET_ALERT, type TallyGame, type TallyGameRecording, type TallyTeam } from '../api/tallyModels';
 import { useFocusable, type FocusableOptions } from '../focus/focus';
 import { IndicatorSquare } from '../kit/Bits';
 import { TeamMark } from './GameCard';
@@ -38,6 +38,20 @@ export function situationLine(game: TallyGame): string {
 /** The name a line uses for a team: the short name ("Otters"), else the abbreviation, else the full name. */
 export function teamName(team: { shortName: string; abbr: string; name: string }): string {
   return team.shortName !== '' ? team.shortName : team.abbr !== '' ? team.abbr : team.name;
+}
+
+/** College poll rank before a team's name: a small mono "#7" (nothing for an unranked team or an older server). */
+export function TeamRank(props: { team: Pick<TallyTeam, 'rank'> }) {
+  return props.team.rank !== null ? <span class="team-rank">#{props.team.rank}</span> : null;
+}
+
+/**
+ * The server's UPSET ALERT on a live game, drawn like the RED ZONE tag (live red, framed). Never while scores are
+ * hidden: it says the favorite is losing.
+ */
+export function UpsetTag(props: { game: TallyGame; hideScores: boolean }) {
+  if (!props.game.upsetAlert || props.hideScores || !isLive(props.game)) return null;
+  return <span class="rec-tag live upset-tag">{UPSET_ALERT}</span>;
 }
 
 /** "Otters at Herons". */

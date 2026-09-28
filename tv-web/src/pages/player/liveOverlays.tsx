@@ -9,7 +9,7 @@ import { IndicatorSquare } from '../../kit/Bits';
 import { MediaRow } from '../../kit/MediaRow';
 import { GameCard } from '../../sports/GameCard';
 import { ScoreDigits } from '../../sports/ScoreDigits';
-import { BaseballDiamond, baseballCount, KeyHint, LineScore, situationLine, teamName } from '../../sports/SportsBits';
+import { BaseballDiamond, baseballCount, KeyHint, LineScore, situationLine, teamName, TeamRank } from '../../sports/SportsBits';
 import { gameStatusLabel, tallyUppercase } from '../../util/format';
 import './live.css';
 
@@ -27,9 +27,12 @@ export function ScoreBug(props: { game: TallyGame | null; hideScores: boolean; v
     <div class={'score-bug' + (props.visible ? '' : ' faded')}>
       <div class="line1">
         {g.away.possession ? <IndicatorSquare tone="accent" class="possession" /> : null}
+        <TeamRank team={g.away} />
         <span>{abbr(g.away)} </span>
         <ScoreDigits gameId={g.id} score={g.away.score} hidden={false} placeholder="–" class="bug-score" />
-        <span> · {abbr(g.home)} </span>
+        <span> · </span>
+        <TeamRank team={g.home} />
+        <span>{abbr(g.home)} </span>
         <ScoreDigits gameId={g.id} score={g.home.score} hidden={false} placeholder="–" class="bug-score" />
       </div>
       {situation !== '' ? <div class="line2 ellipsis">{situation.toUpperCase()}</div> : null}
@@ -114,7 +117,7 @@ export function EventBanner(props: { event: TallyEvent; visible: boolean; onGone
 }
 
 /**
- * What the RedZone channel shows (2.3): "ON REDZONE NOW", the game and why, bottom-start of the picture, as a lower
+ * What the RedZone channel shows (2.3): "ON PULSE NOW", the game and why, bottom-start of the picture, as a lower
  * third. Faded with opacity like the score bug: back after each cut and after a key, gone while the bar, the box
  * score or the switcher is up (the bar says the same).
  */
@@ -125,7 +128,7 @@ export function RedZoneNow(props: { title: string; reason: string; visible: bool
       <div class="lt-panel">
         <div class="rz-kicker mono-label">
           <IndicatorSquare tone="live" />
-          ON REDZONE NOW
+          ON PULSE NOW
         </div>
         <div class="rz-title ellipsis">{props.title}</div>
         {props.reason !== '' ? <div class="rz-reason mono-label">{props.reason}</div> : null}
