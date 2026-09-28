@@ -123,6 +123,26 @@ public class WebInjectionTests
         }
     }
 
+    [Fact]
+    public void Look_Goes_Transparent_While_A_Desktop_Shell_Plays_Behind_The_Page()
+    {
+        // Jellyfin Media Player draws mpv's video behind the page and relies on jellyfin-web's
+        // `.transparentDocument { background: none !important }`; the look's ground (html[data-tally-look], also
+        // !important) outranks it, which played the sound over a dark page. The look must yield with a stronger rule.
+        using var reader = new StreamReader(Resource("web-look.css")!);
+        var css = reader.ReadToEnd();
+
+        foreach (var selector in new[] { "html[data-tally-look].transparentDocument,", "html[data-tally-look].transparentDocument body," })
+        {
+            Assert.Contains(selector, css);
+        }
+
+        var rule = css[css.IndexOf("html[data-tally-look].transparentDocument,", StringComparison.Ordinal)..];
+        rule = rule[..rule.IndexOf('}')];
+        Assert.Contains("background: none !important", rule);
+        Assert.Contains("background-color: transparent !important", rule);
+    }
+
     private static Stream? Resource(string file)
         => typeof(Plugin).Assembly.GetManifestResourceStream("Jellyfin.Plugin.Tally.Web." + file);
 }
