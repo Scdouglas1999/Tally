@@ -3,6 +3,9 @@
 The Jellyfin plugin behind Tally: live channels from your own sources with a guide, live scores matched to the
 channels that carry each game, a live-channel page in Jellyfin's web client, and the install page for the Tally TV app.
 
+Tally doesn't provide any channels or streams. Use it only with sources you have the rights to watch: a paid IPTV
+service, an antenna with an HDHomeRun tuner, or streams you run yourself.
+
 ## Requirements
 
 - Jellyfin **10.10**, **10.11**, or **12.1** and later. There is one build for each line; the installers and
@@ -42,8 +45,8 @@ the side menu all open Tally in place of Jellyfin's own Live TV page, for every 
 In the app → **Settings → Sources → Add source**:
 
 ### M3U playlist (+ optional XMLTV EPG)
-- **Playlist URL**: an `.m3u`/`.m3u8` playlist URL (IPTV provider, Pluto TV export,
-  HDHomeRun/Channels DVR, etc.)
+- **Playlist URL**: an `.m3u`/`.m3u8` playlist URL (your IPTV provider's, an HDHomeRun's or Channels DVR's,
+  or your own)
 - **EPG URL**: optional XMLTV `.xml`/`.xml.gz` guide feed — powers the Guide grid
   and "up next" labels (matched via `tvg-id`).
 - **Headers**: optional `Key`/`Value` pairs sent when fetching the playlist/EPG
@@ -54,7 +57,10 @@ In the app → **Settings → Sources → Add source**:
   logo, `tvg-id`, and per-stream headers.
 
 ### Web page (auto-extract)
-- **Page URL**: paste any web page — Tally scans the HTML and inline scripts
+For a live stream that a service you subscribe to, or you yourself, publish on a web page rather than as a playlist.
+Use it only for pages whose streams you have the rights to watch. Tally doesn't get around logins, paywalls, DRM or
+bot checks.
+- **Page URL**: the page's address. Tally scans the HTML and inline scripts
   for `.m3u8`/`.mpd` manifests, player configs (`file:`, `hlsUrl`, …),
   base64-encoded URLs, follows iframes and watch/play links (up to 2 levels,
   bounded page count), then validates each candidate is a live playlist.
@@ -63,8 +69,8 @@ In the app → **Settings → Sources → Add source**:
   only appear after JavaScript runs. See [the headless browser](#the-headless-browser)
   for what it installs the first time.
 - Extracted streams are auto-named (from the event page's address or the matchup a link to it names; a page's
-  title only counts when it names a game on the scoreboard, since titles are mostly the site's own name and
-  tagline — a stream with nothing better to go on is left out) and grouped
+  title only counts when it names a game on the scoreboard, since titles are often just the site's own name — a
+  stream with nothing better to go on is left out) and grouped
   into categories (NBA, NFL, soccer leagues, UFC, sports networks, …). Captured
   Referer/Origin headers are replayed through the proxy automatically.
 - **Full site scan**: the whole site is read (at most 96 pages, 4 at a time) on start-up, whenever the sources or
@@ -74,7 +80,7 @@ In the app → **Settings → Sources → Add source**:
   scoreboard that is not over stays after a scan that no longer reaches its page until the game ends, as long as its
   playlist still answers (checked at most every 15 minutes, and by the proxy when someone plays it).
 - **Searching around game time**: on a busy day a listing's later games can be out of a scan's reach, and a game's
-  link often appears only near its start. So Tally searches for each game on the scoreboard that has no stream on its
+  page is often published only near its start. So Tally searches for each game on the scoreboard that has no stream on its
   own: 5 minutes before its start, at its start, then every 5 minutes until one turns up or the game is final (a game
   still listed as not started after its start keeps being searched for up to 3 hours). Games due at the same time
   share one search, and so do viewers pressing Watch on a game (a game searched less than a minute ago gets that
@@ -90,10 +96,9 @@ In the app → **Settings → Sources → Add source**:
   search ends that. Each search is logged in one line (`JellyTV stream search pass`: the games and which slot each
   was due at, listing reads, pages per game, requests, streams per game); a back-off is one warning. The schedule
   reads the scoreboard in the background (at most once a minute) while scores are on and a web page source is enabled.
-- **Limits**: Cloudflare challenges, heavy JS obfuscation, DRM, and login walls
-  can defeat extraction. If the scan finds nothing, the source shows an error
-  in Settings → Sources — try the headless fallback, or fall back to a Direct
-  stream (grab the `.m3u8` from browser devtools → Network → filter `m3u8`).
+- **Limits**: pages behind a login or a bot check (a Cloudflare challenge) and DRM-protected streams aren't
+  supported, and heavily obfuscated players can hide their stream. If the scan finds nothing, the source shows an
+  error in Settings → Sources. For a stream of your own, a Direct stream with its `.m3u8` address is simpler.
 
 ### The headless browser
 Web page sources use a headless browser for the fallback above and, for the few CDNs that only answer real browsers,
@@ -184,6 +189,14 @@ play, sorted by a *heat* score so late, close games rise to the top. Each game
 lists the channels carrying it — matched by channel name ("Chiefs vs Bills"),
 by the channel's current EPG programme, or by broadcaster ("ESPN HD"; tagged
 `NET`, since a network can be showing a different regional game).
+
+**Tally Whip-Around** is a channel of its own, first in Live TV: one stream that cuts to the hottest live game (a
+score, a drive inside the 20, a two-minute drill, overtime), put together on the server from the games' own channels
+with no transcoding. It stays on a game at least a minute unless something bigger happens elsewhere, keeps the next
+games' streams warm so a cut is instant, and shows a "No games live" card when nothing is on. It runs only while
+someone watches, needs live scores, and is listed as `kind: "redzone"`, id `redzone` in the client API
+(`GET /JellyTV/Client/v1/redzone` says what it shows now, for the "On Whip-Around now" line). Admins see its cuts at
+`/JellyTV/Ladder`.
 
 Built on the same data: a live score bug in the player and on multiview tiles,
 **switch alerts** while you're watching ("RED ZONE — Switch to FS1"),

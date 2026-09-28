@@ -70,6 +70,8 @@ the clock. When a team scores, the numbers roll over like an old stadium scorebo
 - **Watch from any game card.** Tally opens the channel the game is on.
 - **A score bug in the player**, a box score one press away, and a list of whatever else is on right now.
 - **Multiview.** Up to four games at once. The sound follows the one you've selected.
+- **Tally Whip-Around.** One channel that cuts to whichever game is hottest right now: a score, a drive inside the
+  20, a two-minute drill, overtime. Your server makes it from your own channels, and it's in Jellyfin's Live TV too.
 - **A game in the corner.** Keep one game small in the corner while you watch something else full screen.
 - **Your teams first.** Follow a team and its games move to the front. Catching up on a game later? Turn scores off.
 - **A scores screensaver**, for when the TV is on and nobody's watching.
@@ -95,6 +97,12 @@ reach your screen.
 records in the background, stops when the game is over, not when the listing ends, and checks there's room
 first. You can start watching from the beginning while the game is still going. A recorded game never shows you the
 score before you've watched it.
+
+### Sources and rights
+
+Tally is a player and a guide, not a source of TV. It shows the scores and matches them to channels you already
+have. Use it only with sources you have the rights to watch: a paid IPTV service, an antenna with an HDHomeRun tuner,
+or streams you run yourself. Tally doesn't come with any channels, and it doesn't point you to any.
 
 ## Watching together
 
@@ -154,6 +162,7 @@ Tally is a complete Jellyfin app on its own. The server plugin adds the parts th
 - live scores and the game-to-channel matching behind the Sports section
 - live TV channels from your sources, with a guide, for Jellyfin and every app that uses it
 - several streams per game, with the switch to a working one when a stream struggles
+- the Tally Whip-Around channel, which cuts to the hottest game
 - the install page and the short Downloader code
 - **Play on TV**: start something on your TV from Jellyfin in your phone's browser
 - recording games in the background (the DVR)
@@ -179,11 +188,15 @@ Tally changes it only at marked places so it can keep taking Wholphin's updates.
 [tally/UI.md](tally/UI.md) describes the design, and [CONTRIBUTING.md](CONTRIBUTING.md) covers bug reports and pull
 requests.
 
-## Support Tally
+## Help and support
 
-Tally is free, and it will stay free. If it's become part of your evenings and you're able to chip in, you can
-support its development on [Patreon](https://www.patreon.com/SeanDouglas). It pays for the time that goes into it.
-Either way, thanks for using it.
+**Something wrong, or an idea?** Open an issue on [GitHub Issues](https://github.com/Scdouglas1999/Tally/issues).
+The bug form asks for the few things that help most: your device, the app and plugin versions, and your Jellyfin
+version. [CONTRIBUTING.md](CONTRIBUTING.md) has more on reporting problems and sending changes.
+
+**Support Tally.** Tally is free, and it will stay free. If it's become part of your evenings and you're able to chip
+in, you can support its development on [Patreon](https://www.patreon.com/SeanDouglas). It pays for the time that goes
+into it. Either way, thanks for using it.
 
 ## Credits
 
