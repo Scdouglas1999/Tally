@@ -3,7 +3,7 @@ import { isFinal, isLive, isUpcoming, isSpanish, noStreamLabel, otherFeed, type 
 import { IndicatorSquare } from '../../kit/Bits';
 import { TeamMark } from '../../sports/GameCard';
 import { ScoreDigits } from '../../sports/ScoreDigits';
-import { BaseballDiamond, baseballCount, KeyHint, LangTag, LineScore } from '../../sports/SportsBits';
+import { BaseballDiamond, baseballCount, KeyHint, LangTag, LineScore, TeamRank, UpsetTag } from '../../sports/SportsBits';
 import { gameStatusLabel, hasNoResult, tallyUppercase } from '../../util/format';
 
 function HeroTeamLine(props: { team: TallyTeam; game: TallyGame; home: boolean; hideScores: boolean }) {
@@ -16,7 +16,10 @@ function HeroTeamLine(props: { team: TallyTeam; game: TallyGame; home: boolean; 
     <div class={'hero-team' + (loser ? ' loser' : '')}>
       <TeamMark team={team} size={125} />
       <div class="who">
-        <div class="name ellipsis">{team.shortName !== '' ? team.shortName : team.abbr}</div>
+        <div class="name ellipsis">
+          <TeamRank team={team} />
+          {team.shortName !== '' ? team.shortName : team.abbr}
+        </div>
         <div class="record mono-label">{record}</div>
       </div>
       {team.possession && isLive(game) ? <IndicatorSquare tone="accent" class="possession" /> : null}
@@ -115,6 +118,11 @@ export function FocusedGamePanel(props: { game: TallyGame | null; hideScores: bo
           ) : (
             <>
               <Situation game={game} />
+              {game.upsetAlert ? (
+                <div class="hero-tags">
+                  <UpsetTag game={game} hideScores={hidden} />
+                </div>
+              ) : null}
               {game.lastPlay !== null ? <div class="hero-body clamp-2">{game.lastPlay}</div> : null}
             </>
           )}

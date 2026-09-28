@@ -1,7 +1,8 @@
 /*
  * The Tally Client API v1 contract (server: Jellyfin.Plugin.Tally, Client/BoardModels.cs; the Android app's
  * api/TallyModels.kt is the reference client). Decode leniently: unknown keys are ignored, missing keys take the
- * defaults below. `heat` and `tags` exist in the payload for other clients and are deliberately not modeled.
+ * defaults below. `heat` and `tags` exist in the payload for other clients and are deliberately not modeled, except the
+ * one tag the app shows (`upsetAlert`).
  * Never decide what the server already decided: which channel to watch is `watch`, full stop.
  */
 
@@ -27,6 +28,8 @@ export interface TallyTeam {
   periods: number[];
   color: string;
   altColor: string;
+  /** Poll ranking (college: the AP Top 25, 1-25), shown "#7" before the name; null when unranked, the league has no poll, or the server is older. */
+  rank: number | null;
 }
 
 export interface TallyWatch {
@@ -113,6 +116,11 @@ export interface TallyGame {
   search: TallySearch | null;
   /** The game's commentary languages when it has more than one (see TallyFeed); empty otherwise and on older plugins. */
   feeds: TallyFeed[];
+  /**
+   * The server tagged the game UPSET ALERT (`tags`, college: a ranked team trails an unranked one, or one ranked ten or
+   * more places below it, from the third period on). False when the tag is absent and on older servers.
+   */
+  upsetAlert: boolean;
 }
 
 export interface TallyProgramme {
@@ -244,7 +252,21 @@ function decodeTeam(v: unknown): TallyTeam {
     periods: arr(o.periods).filter((p): p is number => typeof p === 'number'),
     color: str(o.color),
     altColor: str(o.altColor),
+    rank: pollRank(o.rank),
   };
+}
+
+/** A poll rank is a whole number from 1; anything else (missing, 0, a string) is no rank. */
+function pollRank(v: unknown): number | null {
+  return typeof v === 'number' && isFinite(v) && v >= 1 && Math.floor(v) === v ? v : null;
+}
+
+/** The server's tag for an upset in the making. */
+export const UPSET_ALERT = 'UPSET ALERT';
+
+/** Whether the game's `tags` carry UPSET ALERT (any case; a missing or odd `tags` is none). */
+function hasUpsetTag(v: unknown): boolean {
+  return arr(v).some((t) => typeof t === 'string' && t.trim().toUpperCase() === UPSET_ALERT);
 }
 
 export function decodeWatch(v: unknown): TallyWatch | null {
@@ -310,6 +332,7 @@ export function decodeGame(v: unknown): TallyGame {
     recording: decodeRecording(o.recording),
     search: decodeSearch(o.search),
     feeds: decodeFeeds(o.feeds),
+    upsetAlert: hasUpsetTag(o.tags),
   };
 }
 

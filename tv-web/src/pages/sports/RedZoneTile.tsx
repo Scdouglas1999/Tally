@@ -32,9 +32,9 @@ export function redZoneReason(status: TallyRedZone, hideScores: boolean): string
   return hideScores ? '' : redZoneReasonLabel(status.reason);
 }
 
-const NAME = 'Tally RedZone';
+const NAME = 'Tally Pulse';
 
-/** The tile (a game card's size and frame): TALLY REDZONE · LIVE, what is on now and why, the channel's bar. */
+/** The tile (a game card's size and frame): TALLY PULSE · LIVE, what is on now and why, the channel's bar. */
 export function RedZoneCard(props: { onAir: RedZoneOnAir; games: readonly TallyGame[]; hideScores: boolean; onWatch: () => void; onFocus: () => void }) {
   const reveal = useRowReveal();
   const f = useFocusable<HTMLDivElement>({

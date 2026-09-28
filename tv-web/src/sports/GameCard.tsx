@@ -6,7 +6,7 @@ import { IndicatorSquare, LabelBar } from '../kit/Bits';
 import { useRowReveal } from '../kit/MediaRow';
 import { gameStatusLabel, hasNoResult } from '../util/format';
 import { ScoreDigits } from './ScoreDigits';
-import { LangTag, RecTag } from './SportsBits';
+import { LangTag, RecTag, TeamRank, UpsetTag } from './SportsBits';
 import { startsIn, startsInText } from './startsIn';
 import { markFont, sizedLogo } from './teamMark';
 import './sports.css';
@@ -41,7 +41,10 @@ function TeamLine(props: { team: TallyTeam; game: TallyGame; hideScores: boolean
   return (
     <div class={'team' + (loser ? ' loser' : '')}>
       <TeamMark team={team} size={51} />
-      <span class="name ellipsis">{team.shortName !== '' ? team.shortName : team.abbr}</span>
+      <span class="name ellipsis">
+        <TeamRank team={team} />
+        {team.shortName !== '' ? team.shortName : team.abbr}
+      </span>
       {team.possession && isLive(game) ? <IndicatorSquare tone="accent" class="possession" /> : null}
       {showScore ? (
         props.rolling ? (
@@ -123,6 +126,7 @@ export function GameCard(props: {
           ) : null}
           {extras ? <RecTag recording={game.recording} /> : null}
           <LangTag language={game.watch?.language} />
+          <UpsetTag game={game} hideScores={hideScores} />
           <span class="status mono-label" style={{ color: statusColor }}>
             {soon !== null ? startsInText(soon) : gameStatusLabel(game)}
           </span>

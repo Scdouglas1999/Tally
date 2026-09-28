@@ -11,6 +11,8 @@
 .player.live .score-bug .line1 { display: flex; align-items: center; justify-content: flex-end; font-family: var(--mono); font-weight: 500; font-size: 42px; line-height: 54px; color: var(--text); white-space: pre; }
 .player.live .score-bug .line1 .possession { margin-right: 16px; }
 .player.live .score-bug .bug-score { font-weight: 600; }
+/* college poll rank before an abbreviation ("#7 IND"): smaller and quieter than the line */
+.player.live .score-bug .team-rank { font-size: 28px; margin-right: 10px; }
 .player.live .score-bug .line2 { max-width: 900px; font-family: var(--mono); font-weight: 500; font-size: 26px; line-height: 34px; color: var(--accent); }
 
 /* ---- Box score (BoxScoreOverlay.kt): dark behind the text, then a fade ---- */
