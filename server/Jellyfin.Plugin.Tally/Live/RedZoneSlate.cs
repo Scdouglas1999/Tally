@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.Tally.Live;
 
 /// <summary>
-/// "No games live · Tally Whip-Around": what the Whip-Around channel shows when no live game has a stream, so a player keeps
+/// "No games live · Tally Pulse": what the Pulse channel shows when no live game has a stream, so a player keeps
 /// playing instead of erroring out. One short MPEG-TS segment (H.264 still + silent AAC, the layout of nearly every
 /// sports stream, so it splices onto a game and back) served over and over, each time continuing the timeline. Made
 /// once with Jellyfin's ffmpeg from the Tally title card and kept in the plugin's data folder.
@@ -19,7 +19,7 @@ namespace Jellyfin.Plugin.Tally.Live;
 public sealed class RedZoneSlate
 {
     /// <summary>Bump when the picture or the encoding changes: the cached file is made again.</summary>
-    public const string FileName = "redzone-slate-v3.ts";
+    public const string FileName = "redzone-slate-v4.ts";
 
     /// <summary>128 frames at 30 fps and 200 AAC frames at 48 kHz last exactly as long, so the loop joins onto itself
     /// within a frame (the encoder's priming frame starts the audio 21 ms early; with plain seconds it drifted by 65 ms a
@@ -59,7 +59,7 @@ public sealed class RedZoneSlate
             ffmpeg = ToolPath.Resolve(ffmpeg);
             if (ffmpeg == null)
             {
-                logger.LogWarning("JellyTV Whip-Around: Jellyfin's ffmpeg was not found, so there is no \"No games live\" slate");
+                logger.LogWarning("JellyTV Pulse: Jellyfin's ffmpeg was not found, so there is no \"No games live\" slate");
                 return null;
             }
 
@@ -71,7 +71,7 @@ public sealed class RedZoneSlate
             File.Delete(png);
             if (error != null || !File.Exists(tmp))
             {
-                logger.LogWarning("JellyTV Whip-Around: making the slate failed: {Error}", error ?? "no output");
+                logger.LogWarning("JellyTV Pulse: making the slate failed: {Error}", error ?? "no output");
                 return null;
             }
 
@@ -82,12 +82,12 @@ public sealed class RedZoneSlate
                 File.Delete(old); // an earlier version's
             }
 
-            logger.LogInformation("JellyTV Whip-Around: made the \"No games live\" slate ({Kb} KB)", bytes.Length / 1024);
+            logger.LogInformation("JellyTV Pulse: made the \"No games live\" slate ({Kb} KB)", bytes.Length / 1024);
             return new RedZoneSlate(bytes);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException or System.ComponentModel.Win32Exception)
         {
-            logger.LogWarning("JellyTV Whip-Around: no slate: {Message}", ex.Message);
+            logger.LogWarning("JellyTV Pulse: no slate: {Message}", ex.Message);
             return null;
         }
     }

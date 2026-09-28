@@ -70,7 +70,7 @@ the clock. When a team scores, the numbers roll over like an old stadium scorebo
 - **Watch from any game card.** Tally opens the channel the game is on.
 - **A score bug in the player**, a box score one press away, and a list of whatever else is on right now.
 - **Multiview.** Up to four games at once. The sound follows the one you've selected.
-- **Tally Whip-Around.** One channel that cuts to whichever game is hottest right now: a score, a drive inside the
+- **Tally Pulse.** One channel that cuts to whichever game is hottest right now: a score, a drive inside the
   20, a two-minute drill, overtime. Your server makes it from your own channels, and it's in Jellyfin's Live TV too.
 - **A game in the corner.** Keep one game small in the corner while you watch something else full screen.
 - **Your teams first.** Follow a team and its games move to the front. Catching up on a game later? Turn scores off.
@@ -162,7 +162,7 @@ Tally is a complete Jellyfin app on its own. The server plugin adds the parts th
 - live scores and the game-to-channel matching behind the Sports section
 - live TV channels from your sources, with a guide, for Jellyfin and every app that uses it
 - several streams per game, with the switch to a working one when a stream struggles
-- the Tally Whip-Around channel, which cuts to the hottest game
+- the Tally Pulse channel, which cuts to the hottest game
 - the install page and the short Downloader code
 - **Play on TV**: start something on your TV from Jellyfin in your phone's browser
 - recording games in the background (the DVR)

@@ -503,7 +503,7 @@ public class RedZoneChannelTests
         Assert.Equal(RedZoneService.ChannelId, channels[0].Id);
         Assert.Single(channels, c => c.IsSynthetic);
         var rz = m.GetChannel("redzone")!;
-        Assert.Equal(("Tally Whip-Around", "Whip-Around", "redzone"), (rz.Name, rz.Group, rz.Kind));
+        Assert.Equal(("Tally Pulse", "Pulse", "redzone"), (rz.Name, rz.Group, rz.Kind));
         Assert.Equal("http://127.0.0.1:8096/JellyTV/Live/redzone.m3u8?s=sig", rz.StreamUrl);
         Assert.Equal("redzone", m.ResolveId("redzone"));
         Assert.Equal(2, heard.Count);
@@ -520,7 +520,7 @@ public class RedZoneChannelTests
     }
 
     [Fact]
-    public async Task Cards_Drawn_Under_The_Old_RedZone_Name_Draw_The_Whip_Around_Channel()
+    public async Task Cards_Drawn_Under_The_Old_RedZone_Name_Draw_The_Pulse_Channel()
     {
         var source = new SourceDefinition
         {
@@ -538,7 +538,7 @@ public class RedZoneChannelTests
         // Jellyfin keeps the card address it was given before the rename (the key of "Tally RedZone")
         var old = Jellyfin.Plugin.Tally.Services.CardArtService.StableKey("Tally RedZone");
         Assert.Equal("redzone", Jellyfin.Plugin.Tally.Api.CardController.FindChannel(m, old)?.Id);
-        var now = Jellyfin.Plugin.Tally.Services.CardArtService.StableKey("Tally Whip-Around");
+        var now = Jellyfin.Plugin.Tally.Services.CardArtService.StableKey("Tally Pulse");
         Assert.Equal("redzone", Jellyfin.Plugin.Tally.Api.CardController.FindChannel(m, now)?.Id);
         Assert.Null(Jellyfin.Plugin.Tally.Api.CardController.FindChannel(m, "0123456789abcdef"));
     }

@@ -190,12 +190,12 @@ lists the channels carrying it — matched by channel name ("Chiefs vs Bills"),
 by the channel's current EPG programme, or by broadcaster ("ESPN HD"; tagged
 `NET`, since a network can be showing a different regional game).
 
-**Tally Whip-Around** is a channel of its own, first in Live TV: one stream that cuts to the hottest live game (a
+**Tally Pulse** is a channel of its own, first in Live TV: one stream that cuts to the hottest live game (a
 score, a drive inside the 20, a two-minute drill, overtime), put together on the server from the games' own channels
 with no transcoding. It stays on a game at least a minute unless something bigger happens elsewhere, keeps the next
 games' streams warm so a cut is instant, and shows a "No games live" card when nothing is on. It runs only while
 someone watches, needs live scores, and is listed as `kind: "redzone"`, id `redzone` in the client API
-(`GET /JellyTV/Client/v1/redzone` says what it shows now, for the "On Whip-Around now" line). Admins see its cuts at
+(`GET /JellyTV/Client/v1/redzone` says what it shows now, for the "On Pulse now" line). Admins see its cuts at
 `/JellyTV/Ladder`.
 
 Built on the same data: a live score bug in the player and on multiview tiles,

@@ -20,7 +20,7 @@ public class CardController : ControllerBase
 
     /// <summary>The key of cards drawn under the channel's old name (<see cref="Live.RedZoneService.LegacyChannelName"/>):
     /// Jellyfin and the apps hold on to those addresses, and they now draw the channel as it is named today.</summary>
-    private static readonly string LegacyWhipAroundKey = CardArtService.StableKey(Live.RedZoneService.LegacyChannelName);
+    private static readonly string LegacyRedZoneKey = CardArtService.StableKey(Live.RedZoneService.LegacyChannelName);
 
     public CardController(SourceManager sourceManager, CardArtService cards)
     {
@@ -29,11 +29,11 @@ public class CardController : ControllerBase
     }
 
     /// <summary>The channel a card address names: by its name's key (see <see cref="CardArtService.StableKey"/>), a raw
-    /// channel id, or the Whip-Around channel's key from before it was renamed.</summary>
+    /// channel id, or the Pulse channel's key from before it was renamed.</summary>
     public static SourceChannel? FindChannel(SourceManager sources, string key)
         => sources.GetChannels().FirstOrDefault(c => CardArtService.StableKey(c.Name) == key)
             ?? sources.GetChannel(key)
-            ?? (key == LegacyWhipAroundKey ? sources.GetChannel(Live.RedZoneService.ChannelId) : null);
+            ?? (key == LegacyRedZoneKey ? sources.GetChannel(Live.RedZoneService.ChannelId) : null);
 
     /// <param name="key">Stable name key (see <see cref="CardArtService.StableKey"/>); a raw channel id is still accepted.</param>
     /// <param name="n">Channel name, used only when the channel no longer exists.</param>

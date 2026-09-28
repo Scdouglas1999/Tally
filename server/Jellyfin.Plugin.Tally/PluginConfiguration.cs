@@ -159,7 +159,7 @@ public class PluginConfiguration : BasePluginConfiguration
     /// switch with #EXT-X-DISCONTINUITY (kept to compare the two).</summary>
     public string LiveSwitchMode { get; set; } = string.Empty;
 
-    /// <summary>The "Tally Whip-Around" channel: one full-screen stream that cuts to the hottest live game, made on this
+    /// <summary>The "Tally Pulse" channel: one full-screen stream that cuts to the hottest live game, made on this
     /// server from the games' own streams without transcoding (see Live/RedZoneService.cs). Needs live scores.</summary>
     public bool RedZoneEnabled { get; set; } = true;
 

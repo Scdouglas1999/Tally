@@ -123,9 +123,9 @@ public sealed class LiveCardRefreshService : BackgroundService
         }
 
         // after an upgrade that renamed the channel, Jellyfin's item has its old name until the guide refresh below
-        if (byName.TryGetValue(Live.RedZoneService.ChannelName, out var whipAround))
+        if (byName.TryGetValue(Live.RedZoneService.ChannelName, out var pulse))
         {
-            byName.TryAdd(Live.RedZoneService.LegacyChannelName, whipAround);
+            byName.TryAdd(Live.RedZoneService.LegacyChannelName, pulse);
         }
 
         var items = _libraryManager.GetItemList(new InternalItemsQuery { IncludeItemTypes = new[] { BaseItemKind.LiveTvChannel } });

@@ -73,7 +73,7 @@ public class BoardChannel
     /// null until the plugin has probed the channel.</summary>
     [JsonPropertyName("stream")] public Live.StreamStatus? Stream { get; set; }
 
-    /// <summary>"redzone" for the Tally Whip-Around channel (what is on: <c>GET redzone</c>); absent for every other channel.</summary>
+    /// <summary>"redzone" for the Tally Pulse channel (what is on: <c>GET redzone</c>); absent for every other channel.</summary>
     [JsonPropertyName("kind")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Kind { get; set; }
