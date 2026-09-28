@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using Jellyfin.Plugin.Tally.Client;
 using Jellyfin.Plugin.Tally.Scores;
 using Jellyfin.Plugin.Tally.Services;
 using Jellyfin.Plugin.Tally.Sources;
 using MediaBrowser.Controller;
+using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -87,6 +89,15 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         services.AddHostedService(sp => sp.GetRequiredService<StreamSearchService>());
         services.AddHostedService(sp => sp.GetRequiredService<LeagueDetector>());
         services.AddHostedService<LiveTvRegistrationService>();
+        // Live TV: the real bitrate of Tally's channels, so clients under 20 Mbps get them remuxed, not transcoded.
+        // A plugin's tuner hosts are asked before Jellyfin's own; this one fills in the media info of Tally's channels
+        // and passes every other channel on (see TallyTunerHost).
+        services.AddSingleton<LiveStreamFacts>();
+        services.AddSingleton<ITunerHost>(sp => new TallyTunerHost(
+            () => sp.GetService<ITunerHostManager>()?.TunerHosts
+                .FirstOrDefault(h => h is not TallyTunerHost && string.Equals(h.Type, "m3u", StringComparison.OrdinalIgnoreCase)),
+            () => sp.GetService<LiveStreamFacts>(),
+            sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TallyTunerHost>>()));
         services.AddHostedService<LiveCardRefreshService>();
         services.AddHostedService<PluginRepositoryService>();
 
