@@ -106,6 +106,16 @@ html[data-tally-look] .noBackdropTransparency .detailPageWrapperContainer {
   background-image: none;
 }
 html[data-tally-look] .backgroundContainer.withBackdrop { background-color: rgba(14, 15, 14, .9); opacity: 1; }
+/* Playback in a desktop shell (Jellyfin Media Player, Jellyfin Desktop): mpv draws the video behind the page, and
+   jellyfin-web marks the page .transparentDocument so it shows through. The ground above outranks jellyfin's own
+   rule, which left the picture hidden behind it (sound, no video); while the page is transparent, so is the look. */
+html[data-tally-look].transparentDocument,
+html[data-tally-look].transparentDocument body,
+html[data-tally-look].transparentDocument .skinBody,
+html[data-tally-look].transparentDocument .backgroundContainer:not(.withBackdrop) {
+  background: none !important;
+  background-color: transparent !important;
+}
 html[data-tally-look] body,
 html[data-tally-look] button,
 html[data-tally-look] input,
