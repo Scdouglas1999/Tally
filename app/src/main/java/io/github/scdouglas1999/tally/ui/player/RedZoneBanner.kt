@@ -39,10 +39,10 @@ private val matchupText =
     )
 
 /**
- * While the RedZone channel plays: ON REDZONE NOW, the game it is on ("Chiefs at Bills") and why (RED ZONE, SCORE, …),
- * as a lower third in the event banner's black panel with a `ruleStrong` hairline (an event's is live red). It comes in
- * when RedZone cuts to another game and when the viewer touches the remote, like the score bug; [visible] = false
- * closes it. Nothing while [status] is null or inactive (the slate, or an older server).
+ * While the RedZone channel (Pulse to the viewer) plays: ON PULSE NOW, the game it is on ("Chiefs at
+ * Bills") and why (RED ZONE, SCORE, …), as a lower third in the event banner's black panel with a `ruleStrong` hairline
+ * (an event's is live red). It comes in when Pulse cuts to another game and when the viewer touches the remote,
+ * like the score bug; [visible] = false closes it. Nothing while [status] is null or inactive (the slate, or an older server).
  */
 @Composable
 fun RedZoneBanner(

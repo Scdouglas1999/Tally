@@ -233,6 +233,8 @@ fun GameCard(
             LabelBar(
                 text = game.watch?.channelName ?: noStreamLabel(game),
                 live = game.isLive && watchable,
+                // UPSET ALERT sits where the Pulse tile shows RED ZONE.
+                trailing = upsetAlertLabel(game, scoresHidden),
             )
         }
     }
@@ -259,7 +261,7 @@ private fun GameCardTeamLine(
     ) {
         TeamMark(team = team, size = 32.dp)
         Text(
-            text = team.shortName.ifBlank { team.abbr },
+            text = rankedName(team, team.shortName.ifBlank { team.abbr }, TallyType.teamCard.fontSize),
             style = TallyType.teamCard,
             color = if (loser) TallyColors.muted else TallyColors.text,
             maxLines = 1,

@@ -51,6 +51,7 @@ import io.github.scdouglas1999.tally.data.BoardOrganizer
 import io.github.scdouglas1999.tally.lan.TallyServerRoute
 import io.github.scdouglas1999.tally.ui.components.LabelBar
 import io.github.scdouglas1999.tally.ui.components.TallySamples
+import io.github.scdouglas1999.tally.ui.components.rankedText
 import io.github.scdouglas1999.tally.ui.multiview.MultiviewTilePlayback
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
@@ -383,14 +384,14 @@ private fun CornerTile(
     }
 }
 
-/** "IND 7 · KC 0 · 8:25 1ST" — only for a live game when scores are visible. */
+/** "IND 7 · #7 KC 0 · 8:25 1ST" (a ranked team led by its rank) — only for a live game when scores are visible. */
 internal fun cornerScoreLine(
     game: TallyGame?,
     hideScores: Boolean,
 ): String? {
     if (game == null || !game.isLive || hideScores) return null
-    val away = "${game.away.abbr} ${game.away.score?.toString() ?: "\u2013"}"
-    val home = "${game.home.abbr} ${game.home.score?.toString() ?: "\u2013"}"
+    val away = "${rankedText(game.away, game.away.abbr)} ${game.away.score?.toString() ?: "\u2013"}"
+    val home = "${rankedText(game.home, game.home.abbr)} ${game.home.score?.toString() ?: "\u2013"}"
     val detail = game.detail.replace(" - ", " ").takeIf { it.isNotBlank() }
     return listOfNotNull(away, home, detail).joinToString(" · ").uppercase()
 }

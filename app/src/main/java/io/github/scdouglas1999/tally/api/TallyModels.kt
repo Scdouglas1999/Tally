@@ -10,7 +10,8 @@ import kotlinx.serialization.json.JsonElement
  * Rules every client follows:
  *  - decode leniently: unknown keys are ignored, missing keys take the defaults below;
  *  - never decide what the server already decided (which channel to watch is `watch`, full stop);
- *  - `heat` and `tags` exist in the payload for other clients and are deliberately NOT modeled here.
+ *  - `heat` exists in the payload for other clients and is deliberately NOT modeled here; `tags` is read only for the
+ *    UPSET ALERT tag ([TallyGame.isUpsetAlert]), which the app shows as the web app does.
  */
 
 val TallyJson: Json =
@@ -52,6 +53,11 @@ data class TallyTeam(
     val logo: String = "",
     val score: Int? = null,
     val record: String? = null,
+    /**
+     * Poll rank (college football: the AP Top 25, 1–25); null when unranked, for a league with no poll, or from a
+     * server that predates it. Read [pollRank], which drops a value that is not a rank.
+     */
+    val rank: Int? = null,
     val possession: Boolean = false,
     val winner: Boolean = false,
     /** Points per period (quarter, inning, …) in order; empty before the game starts. */
@@ -60,7 +66,10 @@ data class TallyTeam(
     val color: String = "",
     /** Alternate team color, same format. */
     val altColor: String = "",
-)
+) {
+    /** [rank] when it is one (1 or more); null otherwise. */
+    val pollRank: Int? get() = rank?.takeIf { it > 0 }
+}
 
 /** Where to watch a game. Resolved on the server. */
 @Serializable
@@ -151,14 +160,27 @@ data class TallyGame(
      * that predates it.
      */
     val feeds: List<TallyFeed> = emptyList(),
+    /**
+     * The server's short reasons the game is worth watching, most important first ("RED ZONE", "UPSET ALERT", …).
+     * Only [isUpsetAlert] reads it; empty from a server that predates it.
+     */
+    val tags: List<String> = emptyList(),
 ) {
     val isLive: Boolean get() = state == "in"
+
+    /** A ranked college team is losing late to a lower-ranked or unranked one (the server's UPSET ALERT tag). */
+    val isUpsetAlert: Boolean get() = tags.any { it.equals(TAG_UPSET_ALERT, ignoreCase = true) }
 
     /** The settings key under which [team] is followed. */
     fun teamKey(team: TallyTeam): String = "${league.uppercase()}:${team.abbr.uppercase()}"
 
     val isUpcoming: Boolean get() = state == "pre"
     val isFinal: Boolean get() = state == "post"
+
+    companion object {
+        /** The server's tag for a likely upset (GameHeat). */
+        const val TAG_UPSET_ALERT = "UPSET ALERT"
+    }
 }
 
 /** Where the server's search for a game's stream stands. */

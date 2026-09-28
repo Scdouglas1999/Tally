@@ -95,20 +95,34 @@ fun FocusedGamePanel(
                                     drawRect(TallyColors.rule, size = Size(1.dp.toPx(), size.height))
                                 }.padding(start = 28.dp),
                     ) {
-                        Text(
-                            text =
-                                stringResource(
-                                    when {
-                                        game.isLive -> R.string.tally_situation
-                                        game.hasNoResult -> R.string.tally_hero_status
-                                        game.isFinal -> R.string.tally_hero_final
-                                        else -> R.string.tally_hero_starts
-                                    },
-                                ).uppercase(),
-                            style = TallyType.label,
-                            color = TallyColors.muted,
-                            maxLines = 1,
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                        ) {
+                            Text(
+                                text =
+                                    stringResource(
+                                        when {
+                                            game.isLive -> R.string.tally_situation
+                                            game.hasNoResult -> R.string.tally_hero_status
+                                            game.isFinal -> R.string.tally_hero_final
+                                            else -> R.string.tally_hero_starts
+                                        },
+                                    ).uppercase(),
+                                style = TallyType.label,
+                                color = TallyColors.muted,
+                                maxLines = 1,
+                            )
+                            // A situation tag, as the Pulse banner shows RED ZONE.
+                            upsetAlertLabel(game, scoresHidden)?.let {
+                                Text(
+                                    text = it,
+                                    style = TallyType.label,
+                                    color = TallyColors.liveText,
+                                    maxLines = 1,
+                                )
+                            }
+                        }
                         Spacer(Modifier.height(8.dp))
                         if (scoresHidden) {
                             Text(
@@ -202,7 +216,7 @@ private fun HeroTeamLine(
         TeamMark(team = team, size = 78.dp)
         Column(Modifier.weight(1f)) {
             Text(
-                text = team.shortName.ifBlank { team.abbr },
+                text = rankedName(team, team.shortName.ifBlank { team.abbr }, TallyType.teamHero.fontSize),
                 style = TallyType.teamHero,
                 color = if (loser) TallyColors.muted else TallyColors.text,
                 maxLines = 1,

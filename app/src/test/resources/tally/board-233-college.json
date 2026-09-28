@@ -1,0 +1,33 @@
+{
+  "serverTime": "2026-09-26T21:40:05.118Z",
+  "games": [
+    {
+      "id": "401752101", "sport": "football", "league": "NCAAF", "name": "VAN @ ALA", "start": "2026-09-26T19:30:00+00:00",
+      "state": "in", "detail": "6:41 - 4th", "period": 4, "clock": "6:41", "clockSeconds": 401,
+      "home": { "id": "333", "abbr": "ALA", "name": "Alabama Crimson Tide", "shortName": "Alabama", "nickname": "Crimson Tide",
+                "location": "Alabama", "logo": "", "score": 17, "record": "3-1", "rank": 5, "possession": false, "winner": false,
+                "periods": [7, 3, 7, 0], "color": "9e1b32", "altColor": "ffffff" },
+      "away": { "id": "238", "abbr": "VAN", "name": "Vanderbilt Commodores", "shortName": "Vanderbilt", "nickname": "Commodores",
+                "location": "Vanderbilt", "logo": "", "score": 24, "record": "4-0", "rank": null, "possession": true, "winner": false,
+                "periods": [3, 14, 0, 7], "color": "000000", "altColor": "a8996e" },
+      "lastPlay": "Vanderbilt ball at their own 35.", "lastPlayType": "Rush", "lastPlayScore": 0,
+      "downDistance": "2nd & 4 at VAN 41", "redZone": false, "broadcasts": ["SEC Network"],
+      "channels": [], "heat": 78, "tags": ["UPSET ALERT", "ONE-SCORE GAME"], "extras": {}
+    },
+    {
+      "id": "401752102", "sport": "football", "league": "NCAAF", "name": "OSU @ PSU", "start": "2026-09-26T23:30:00+00:00",
+      "state": "pre", "detail": "Sat, September 26th at 7:30 PM EDT", "period": 0, "clock": "0:00",
+      "home": { "id": "213", "abbr": "PSU", "name": "Penn State Nittany Lions", "shortName": "Penn State", "logo": "", "record": "4-0", "rank": 7 },
+      "away": { "id": "194", "abbr": "OSU", "name": "Ohio State Buckeyes", "shortName": "Ohio State", "logo": "", "record": "4-0", "rank": 1 },
+      "broadcasts": ["NBC"], "channels": [], "heat": 0, "tags": ["STARTING SOON"], "extras": {}
+    },
+    {
+      "id": "401752103", "sport": "football", "league": "NCAAF", "name": "UGA @ AUB", "start": "2026-09-26T19:30:00+00:00",
+      "state": "in", "detail": "12:02 - 3rd", "period": 3, "clock": "12:02",
+      "home": { "id": "2", "abbr": "AUB", "name": "Auburn Tigers", "shortName": "Auburn", "logo": "", "score": 10, "rank": 0 },
+      "away": { "id": "61", "abbr": "UGA", "name": "Georgia Bulldogs", "shortName": "Georgia", "logo": "", "score": 14, "rank": 12 },
+      "broadcasts": ["CBS"], "channels": [], "heat": 40, "tags": ["red zone", "upset alert"], "extras": {}
+    }
+  ],
+  "channels": [], "events": [], "modules": {}, "errors": {}
+}

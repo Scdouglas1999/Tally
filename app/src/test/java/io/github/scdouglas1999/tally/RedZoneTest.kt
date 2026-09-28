@@ -25,7 +25,7 @@ class RedZoneTest {
         val channel = RedZone.channel(board)
         assertNotNull(channel)
         assertEquals("redzone", channel!!.id)
-        assertEquals("Tally RedZone", channel.name)
+        assertEquals("Tally Pulse", channel.name)
         assertTrue(channel.isRedZone)
         assertEquals(1, board.channels.count { it.isRedZone })
     }
