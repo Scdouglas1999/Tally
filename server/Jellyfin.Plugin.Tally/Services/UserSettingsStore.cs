@@ -11,6 +11,10 @@ namespace Jellyfin.Plugin.Tally.Services;
 /// This is where per-profile fantasy league config will live later.</summary>
 public class UserSettingsStore
 {
+    /// <summary>The largest settings body a user may save (favorites, hidden channels, preferences: a few KB in practice),
+    /// so one account cannot fill the server's disk.</summary>
+    public const int MaxBytes = 256 * 1024;
+
     private readonly ILogger<UserSettingsStore> _logger;
     private readonly object _lock = new();
 

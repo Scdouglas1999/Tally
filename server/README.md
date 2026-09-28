@@ -173,8 +173,10 @@ XMLTV endpoints served by the plugin). Once registered:
 
 If the tuner fails to appear after install, check `log_*.log` for a Tally
 LiveTV registration warning — you can also add it manually:
-Dashboard → Live TV → Tuner Devices → `http://127.0.0.1:8096/JellyTV/livetv.m3u`
-(type M3U), then a Guide provider (XMLTV) → `http://127.0.0.1:8096/JellyTV/epg.xml`.
+Dashboard → Live TV → Tuner Devices → `http://127.0.0.1:8096/JellyTV/livetv.m3u?k=KEY`
+(type M3U), then a Guide provider (XMLTV) → `http://127.0.0.1:8096/JellyTV/epg.xml?k=KEY`.
+Both answer only Jellyfin itself: requests over loopback that carry the key. An admin finds the key as
+`liveTvFeedKey` in `/JellyTV/Status`.
 
 ## Games board (live scores)
 

@@ -82,7 +82,7 @@ public class DirectSourceAdapter : ISourceAdapter
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "JellyTV: failed to load EPG {Url}", Definition.EpgUrl);
+                _logger.LogWarning(ex, "JellyTV: failed to load EPG {Url}", Services.Redact.Url(Definition.EpgUrl));
             }
         }
 

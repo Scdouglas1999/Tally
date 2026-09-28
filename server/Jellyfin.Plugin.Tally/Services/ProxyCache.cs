@@ -110,7 +110,9 @@ public class ProxyCache
                 return null;
             }
 
-            using var outcome = await _fetcher.FetchBufferedAsync(uri, headers, CancellationToken.None).ConfigureAwait(false);
+            // shared by every waiting player, so not tied to any one request; bounded so a stalled upstream is let go
+            using var timeout = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            using var outcome = await _fetcher.FetchBufferedAsync(uri, headers, timeout.Token).ConfigureAwait(false);
             var body = outcome.Body;
             if (outcome.Status is < 200 or >= 300 || body == null)
             {

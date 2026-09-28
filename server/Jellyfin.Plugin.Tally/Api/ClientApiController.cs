@@ -24,6 +24,7 @@ namespace Jellyfin.Plugin.Tally.Api;
 [ApiController]
 [Route("JellyTV/Client/v1")]
 [Authorize]
+[TallyUsers]
 public class ClientApiController : ControllerBase
 {
     public const int Version = 1;
@@ -220,6 +221,7 @@ public class ClientApiController : ControllerBase
 
     /// <summary>Same per-user store as the web UI: a favorite starred on the phone is starred on the TV.</summary>
     [HttpPut("settings")]
+    [RequestSizeLimit(UserSettingsStore.MaxBytes)]
     public async Task<IActionResult> PutSettings([FromBody] JsonObject settings)
     {
         var auth = await _authContext.GetAuthorizationInfo(Request).ConfigureAwait(false);
