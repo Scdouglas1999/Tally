@@ -136,7 +136,7 @@ export function GamesBoard(props: {
       <div class="board-rows">
         <ScrollPage>
           {rz !== null && rzRow === null ? (
-            <MediaRow key="redzone" focusKey="sgr-redzone" title="RedZone / Live">
+            <MediaRow key="redzone" focusKey="sgr-redzone" title="Pulse / Live">
               {redZoneCard(rz)}
             </MediaRow>
           ) : null}

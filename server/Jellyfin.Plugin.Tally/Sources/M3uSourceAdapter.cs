@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Tally.Models;
+using Jellyfin.Plugin.Tally.Services;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.Tally.Sources;
@@ -32,7 +33,7 @@ public class M3uSourceAdapter : ISourceAdapter
         var playlist = await GetStringAsync(client, Definition.PlaylistUrl, cancellationToken).ConfigureAwait(false);
         if (playlist == null)
         {
-            snapshot.Error = $"Failed to fetch playlist {Definition.PlaylistUrl}";
+            snapshot.Error = $"Failed to fetch playlist {Redact.Url(Definition.PlaylistUrl)}";
             return snapshot;
         }
 
@@ -69,7 +70,7 @@ public class M3uSourceAdapter : ISourceAdapter
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "JellyTV: failed to load EPG {Url}", epgUrl);
+                _logger.LogWarning(ex, "JellyTV: failed to load EPG {Url}", Redact.Url(epgUrl));
             }
         }
 
@@ -87,7 +88,7 @@ public class M3uSourceAdapter : ISourceAdapter
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "JellyTV: GET {Url} failed", url);
+            _logger.LogWarning(ex, "JellyTV: GET {Url} failed", Redact.Url(url));
             return null;
         }
     }
@@ -111,7 +112,7 @@ public class M3uSourceAdapter : ISourceAdapter
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "JellyTV: GET {Url} failed", url);
+            _logger.LogWarning(ex, "JellyTV: GET {Url} failed", Redact.Url(url));
             return null;
         }
     }

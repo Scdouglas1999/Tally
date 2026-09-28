@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { session } from '../api/jellyfin';
 import { currentFocusKey, FocusGroup, focusExists, setFocus, useFocusable } from '../focus/focus';
-import { back, stack, type Entry } from '../router/router';
+import { back, resetTo, stack, type Entry } from '../router/router';
 import { loadNav } from '../state/nav';
 import { useStore } from '../util/store';
 import { SignInPage } from '../pages/signin/SignInPage';
@@ -99,5 +99,12 @@ export function App(props: { onFirstScreen: () => void }) {
   useEffect(() => {
     props.onFirstScreen();
   }, []);
+  // Signed out (Settings' SIGN OUT, or the shell's server became another one): the pages of that session go with it,
+  // so the next sign-in (Quick Connect or password) opens on Home, as a first launch does, never on the page the
+  // sign-out was pressed on.
+  const signedOut = s === null;
+  useEffect(() => {
+    if (signedOut) resetTo({ name: 'home' });
+  }, [signedOut]);
   return s === null ? <SignInPage /> : <Frame key={s.serverId + s.userId} />;
 }

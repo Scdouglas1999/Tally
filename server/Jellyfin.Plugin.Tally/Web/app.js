@@ -1028,13 +1028,13 @@ function renderGames(content) {
   const rzTitle = rzGame ? (rzGame.away.shortName || rzGame.away.abbr) + ' at ' + (rzGame.home.shortName || rzGame.home.abbr) : (rz && rz.title) || '';
   const rzReason = !hide && rz && rz.reason ? rz.reason.toUpperCase() : '';
   const rzRow = rzChan && rz && rz.active
-    ? `<div class="g-sec"><span class="jtv-k">RedZone</span></div>
+    ? `<div class="g-sec"><span class="jtv-k">Pulse</span></div>
       <div class="game live can rz" data-rz="${esc(rzChan.id)}">
-        <div class="g-status"><div class="jtv-k live">${esc(rzChan.name || 'Tally RedZone')}</div><div class="g-clock">Live</div></div>
+        <div class="g-status"><div class="jtv-k live">${esc(rzChan.name || 'Tally Pulse')}</div><div class="g-clock">Live</div></div>
         <div class="g-teams"><div class="rz-on jtv-k">On now</div><div class="g-name">${esc(rzTitle || 'The hottest game')}</div></div>
         <div class="g-sit">${rzReason ? `<div class="g-tags"><span class="jtv-tag live">${esc(rzReason)}</span></div>` : ''}
           <div class="g-play">Cuts to the hottest game: red zones, scores, two-minute drills, overtime. One stream instead of several, so it is lighter than multiview.</div></div>
-        <div class="g-watch"><button class="g-chan first" data-watch="${esc(rzChan.id)}" title="Watch"><i class="led live"></i><span class="nm">Watch RedZone</span></button></div>
+        <div class="g-watch"><button class="g-chan first" data-watch="${esc(rzChan.id)}" title="Watch"><i class="led live"></i><span class="nm">Watch Pulse</span></button></div>
       </div>` : '';
   const lang = prefLang();
 
@@ -1170,7 +1170,7 @@ function tvMessage(header, text) {
   jf('Sessions/' + encodeURIComponent(tv.id) + '/Message', { method: 'POST', body: { Header: header, Text: text, TimeoutMs: 9000 } }).catch(() => {});
 }
 
-// "Follow the hottest game": RedZone-style whip-around using the TV app's own player. Runs while
+// "Follow the hottest game": switches between games like Pulse, using the TV app's own player. Runs while
 // JellyTV is open here. Switches only for a clearly hotter game, and never more than every 90 s.
 function autoDirect() {
   if (!state.tv || !state.follow || spoilerFree()) return;
@@ -1413,7 +1413,7 @@ async function play(id) {
     const rzGame = rz ? state.games.find(x => x.id === rz.gameId) : null;
     const rzTitle = rz ? (rzGame ? rzGame.away.name + ' at ' + rzGame.home.name : rz.title || '') : '';
     $('#jp-info', overlay).innerHTML =
-      (rzTitle ? `<div class="jp-title"><span class="jtv-k live">On RedZone now</span> ${esc(rzTitle)}${rz.reason && !spoilerFree() ? ` · <span class="jtv-k">${esc(rz.reason.toUpperCase())}</span>` : ''}</div>`
+      (rzTitle ? `<div class="jp-title"><span class="jtv-k live">On Pulse now</span> ${esc(rzTitle)}${rz.reason && !spoilerFree() ? ` · <span class="jtv-k">${esc(rz.reason.toUpperCase())}</span>` : ''}</div>`
         : `<div class="jp-title">${cc.now ? esc(cc.now.title || 'Untitled') : g ? esc(g.away.name + ' at ' + g.home.name) : 'Live'}</div>`)
       + (g && (g.downDistance || g.lastPlay) ? `<div class="jp-play">${g.downDistance ? `<b>${esc(g.downDistance)}</b>` : ''}${esc(g.lastPlay || '')}</div>` : '')
       + progReadout(cc.now, cc.next, new Date(), true);

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tally 2.3.3: college football (app-233). American English. -->
+<resources>
+    <!-- A situation tag on a live college game: a ranked team is losing late to a lower-ranked or unranked one. Shown uppercase. -->
+    <string name="tally_233_upset_alert">Upset alert</string>
+</resources>

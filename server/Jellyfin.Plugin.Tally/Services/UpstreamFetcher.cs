@@ -25,9 +25,13 @@ public sealed class UpstreamFetcher
     private static readonly string[] MediaMarkers = { "/redirect/", ".ts", ".m4s", ".mp4", ".aac", ".vtt", ".key", ".cmfv", ".cmfa" };
     private static readonly string[] VolatileHeaders = { "Referer", "Origin" };
 
+    /// <summary>The most a buffered fetch (a segment for the cache) reads: far above any real segment.</summary>
+    public const int MaxBufferedBytes = 64 * 1024 * 1024;
+
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly BrowserFetchService _browser;
     private readonly ILogger<UpstreamFetcher> _logger;
+    private readonly UpstreamGuard? _guard;
 
     /// <summary>Learned per-host quirks (strip Referer / browser relay only) — survives restarts.</summary>
     private readonly HostKnowledge _hosts = new();
@@ -40,8 +44,9 @@ public sealed class UpstreamFetcher
     /// <summary>"Did not answer" warnings: at most one a minute per host.</summary>
     private readonly HostLogGate _failureLog = new(TimeSpan.FromMinutes(1));
 
-    public UpstreamFetcher(IHttpClientFactory httpClientFactory, BrowserFetchService browser, ILogger<UpstreamFetcher> logger, BrowserRuntime? runtime = null)
+    public UpstreamFetcher(IHttpClientFactory httpClientFactory, BrowserFetchService browser, ILogger<UpstreamFetcher> logger, BrowserRuntime? runtime = null, UpstreamGuard? guard = null)
     {
+        _guard = guard;
         _httpClientFactory = httpClientFactory;
         _browser = browser;
         _logger = logger;
@@ -235,8 +240,30 @@ public sealed class UpstreamFetcher
                 return new FetchOutcome { Status = outcome.Status };
             }
 
-            var body = await outcome.Response.Content.ReadAsByteArrayAsync(ct).ConfigureAwait(false);
-            return new FetchOutcome { Status = outcome.Status, ContentType = outcome.ContentType, Body = body };
+            // bounded: an upstream must not be able to fill the server's memory with one endless "segment"
+            if (outcome.Response.Content.Headers.ContentLength > MaxBufferedBytes)
+            {
+                return new FetchOutcome { Status = 502 };
+            }
+
+            using var ms = new MemoryStream();
+            var stream = await outcome.Response.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+            await using (stream.ConfigureAwait(false))
+            {
+                var buffer = new byte[81920];
+                int read;
+                while ((read = await stream.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+                {
+                    if (ms.Length + read > MaxBufferedBytes)
+                    {
+                        return new FetchOutcome { Status = 502 };
+                    }
+
+                    ms.Write(buffer, 0, read);
+                }
+            }
+
+            return new FetchOutcome { Status = outcome.Status, ContentType = outcome.ContentType, Body = ms.ToArray() };
         }
     }
 
@@ -255,7 +282,7 @@ public sealed class UpstreamFetcher
             var req = new HttpRequestMessage(HttpMethod.Get, uri);
             foreach (var kv in headers)
             {
-                if (stripVolatile && VolatileHeaders.Contains(kv.Key, StringComparer.OrdinalIgnoreCase))
+                if ((stripVolatile && VolatileHeaders.Contains(kv.Key, StringComparer.OrdinalIgnoreCase)) || !IsSafeHeader(kv.Key, kv.Value))
                 {
                     continue;
                 }
@@ -284,6 +311,16 @@ public sealed class UpstreamFetcher
         }
     }
 
+    /// <summary>A header a source may set on upstream requests: a plain name and a value without line breaks (no
+    /// request splitting), and none of the headers that frame the message.</summary>
+    public static bool IsSafeHeader(string name, string? value)
+        => !string.IsNullOrEmpty(name)
+           && name.All(c => c > 32 && c < 127 && c != ':')
+           && (value ?? string.Empty).All(c => c != '\r' && c != '\n' && c != '\0')
+           && !name.Equals("Content-Length", StringComparison.OrdinalIgnoreCase)
+           && !name.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase)
+           && !name.Equals("Connection", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>"HttpRequestException: Connection refused (SocketException: Connection refused)": the exception's type
     /// and message and its inner one's, with the request's address cut down to its host.</summary>
     public static string DescribeFailure(Exception ex, Uri uri)
@@ -307,6 +344,12 @@ public sealed class UpstreamFetcher
 
     private async Task<FetchOutcome?> FetchViaBrowserAsync(Uri uri, Dictionary<string, string> headers, CancellationToken ct)
     {
+        // the browser does not connect through the guarded HTTP client: check the address first (NetworkGuard)
+        if (_guard != null && !await _guard.AllowsUriAsync(uri, ct).ConfigureAwait(false))
+        {
+            return new FetchOutcome { Status = 403 };
+        }
+
         string? origin = null;
         if (headers.TryGetValue("Referer", out var referer)
             && Uri.TryCreate(referer, UriKind.Absolute, out var refUri))

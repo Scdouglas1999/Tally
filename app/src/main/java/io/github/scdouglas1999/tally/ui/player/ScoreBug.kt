@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -23,7 +24,9 @@ import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.RollingText
 import io.github.scdouglas1999.tally.ui.components.TallySamples
+import io.github.scdouglas1999.tally.ui.components.rankedName
 import io.github.scdouglas1999.tally.ui.components.rememberScoreColor
+import io.github.scdouglas1999.tally.ui.components.upsetAlertLabel
 import io.github.scdouglas1999.tally.ui.theme.TallyColors
 import io.github.scdouglas1999.tally.ui.theme.TallyDimens
 import io.github.scdouglas1999.tally.ui.theme.TallySurface
@@ -59,15 +62,31 @@ fun ScoreBug(
             ScoreLine(game)
         }
         val situation = situationLine(game)
-        if (situation.isNotBlank()) {
-            Text(
-                text = situation.uppercase(),
-                style = TallyType.clock,
-                color = TallyColors.accent,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+        val upset = upsetAlertLabel(game, hideScores)
+        if (situation.isNotBlank() || upset != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.align(Alignment.End),
-            )
+            ) {
+                upset?.let {
+                    Text(
+                        text = it,
+                        style = TallyType.clock,
+                        color = TallyColors.liveText,
+                        maxLines = 1,
+                    )
+                }
+                if (situation.isNotBlank()) {
+                    Text(
+                        text = situation.uppercase(),
+                        style = TallyType.clock,
+                        color = TallyColors.accent,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
         }
     }
 }
@@ -82,14 +101,18 @@ private fun ScoreLine(game: TallyGame) {
     key(game.id) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = game.away.abbr.ifBlank { game.away.shortName } + " ",
+                text = rankedName(game.away, game.away.abbr.ifBlank { game.away.shortName } + " ", TallyType.situation.fontSize),
                 style = TallyType.situation,
                 color = TallyColors.text,
                 maxLines = 1,
             )
             BugScore(game.away.score)
             Text(
-                text = " · " + game.home.abbr.ifBlank { game.home.shortName } + " ",
+                text =
+                    buildAnnotatedString {
+                        append(" · ")
+                        append(rankedName(game.home, game.home.abbr.ifBlank { game.home.shortName } + " ", TallyType.situation.fontSize))
+                    },
                 style = TallyType.situation,
                 color = TallyColors.text,
                 maxLines = 1,

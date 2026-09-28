@@ -65,16 +65,18 @@ public sealed class RedZoneRecentCut
 }
 
 /// <summary>
-/// The "Tally RedZone" channel: one full-screen stream that cuts to the hottest live game, put together on this server
-/// from the games' own streams, with no transcoding. A viewer's TV plays one stream instead of the two or three of a
-/// multiview.
+/// The "Tally Pulse" channel: one full-screen stream that cuts to the hottest live game, put together on this
+/// server from the games' own streams, with no transcoding. A viewer's TV plays one stream instead of the two or three
+/// of a multiview. People see the name "Pulse" only; everything internal keeps "RedZone" (the channel id
+/// <c>redzone</c>, <c>kind: "redzone"</c>, the <c>redzone</c> routes, the <c>RedZone*</c> settings and these class
+/// names), so installs, favorites and apps keep working.
 /// <list type="bullet">
 /// <item>Always listed (id <see cref="ChannelId"/>, first in Live TV) once the sources have channels: it re-injects
 /// itself into every refresh of <see cref="SourceManager"/>.</item>
 /// <item>While someone watches it (a request in the last 45 s, like <see cref="LiveSession"/>) it polls the scoreboard
 /// every 10 s, lets <see cref="RedZoneDirector"/> pick the game, keeps that game's live session and the next two's
 /// running (warm) so a cut is instant, and serves their segments from memory through <see cref="RedZoneSession"/>. The
-/// games' sessions are the same ones their own viewers share: RedZone adds no upstream load beyond the games it keeps
+/// games' sessions are the same ones their own viewers share: Pulse adds no upstream load beyond the games it keeps
 /// warm. Unwatched, it does nothing at all.</item>
 /// <item>No live game with a stream: the "No games live" slate (<see cref="RedZoneSlate"/>).</item>
 /// </list>
@@ -82,8 +84,13 @@ public sealed class RedZoneRecentCut
 public sealed class RedZoneService : IHostedService, IDisposable
 {
     public const string ChannelId = "redzone";
-    public const string ChannelName = "Tally RedZone";
-    public const string ChannelGroup = "RedZone";
+    public const string ChannelName = "Tally Pulse";
+    public const string ChannelGroup = "Pulse";
+
+    /// <summary>The channel's name before 2.3.3. Jellyfin's Live TV item for it (tvg-id <c>redzone</c>, so the same
+    /// item) keeps this name until Jellyfin's next guide refresh, and cards drawn before carry it in their address:
+    /// both are still recognized as this channel.</summary>
+    public const string LegacyChannelName = "Tally RedZone";
 
     public static readonly TimeSpan PollEvery = TimeSpan.FromSeconds(10);
 
@@ -366,7 +373,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
             _cts?.Dispose();
             _cts = new CancellationTokenSource();
             var token = _cts.Token;
-            _logger.LogInformation("JellyTV RedZone: a viewer tuned in, starting");
+            _logger.LogInformation("JellyTV Pulse: a viewer tuned in, starting");
 
             // the first pick before the first playlist: the scoreboard's answer is usually a memory hit
             try
@@ -397,7 +404,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
                 var now = DateTimeOffset.UtcNow;
                 if (now - LastTouched > LiveSession.IdleTimeout)
                 {
-                    _logger.LogInformation("JellyTV RedZone: idle, stopping after {Minutes:0.0} min", (now - _startedAt).TotalMinutes);
+                    _logger.LogInformation("JellyTV Pulse: idle, stopping after {Minutes:0.0} min", (now - _startedAt).TotalMinutes);
                     break;
                 }
 
@@ -423,7 +430,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
                 if (Session.LastSwitch is { How: not null } shown && !ReferenceEquals(shown, _logged))
                 {
                     _logged = shown;
-                    _logger.LogInformation("JellyTV RedZone: now showing {What} ({How})", shown.Title ?? "the slate", shown.How);
+                    _logger.LogInformation("JellyTV Pulse: now showing {What} ({How})", shown.Title ?? "the slate", shown.How);
                 }
 
                 if (Session.Starved(now) > StarvedAfter)
@@ -432,7 +439,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
                     if (channel != null)
                     {
                         _failing[channel] = now + FailedFor;
-                        _logger.LogInformation("JellyTV RedZone: {Game}: its stream gave nothing for {Seconds:0} s, leaving it", _director.CurrentTitle, Session.Starved(now).TotalSeconds);
+                        _logger.LogInformation("JellyTV Pulse: {Game}: its stream gave nothing for {Seconds:0} s, leaving it", _director.CurrentTitle, Session.Starved(now).TotalSeconds);
                         Apply(now, null);
                     }
                 }
@@ -445,7 +452,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "JellyTV RedZone: failed");
+            _logger.LogWarning(ex, "JellyTV Pulse: failed");
         }
     }
 
@@ -459,7 +466,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
-            _logger.LogDebug(ex, "JellyTV RedZone: scoreboard poll failed");
+            _logger.LogDebug(ex, "JellyTV Pulse: scoreboard poll failed");
             return null;
         }
     }
@@ -520,7 +527,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
                     _cuts.RemoveAt(0);
                 }
 
-                _logger.LogInformation("JellyTV RedZone: cut to {Game} ({Reason}); next: {Next}", cut.ToTitle ?? "the slate", cut.Reason,
+                _logger.LogInformation("JellyTV Pulse: cut to {Game} ({Reason}); next: {Next}", cut.ToTitle ?? "the slate", cut.Reason,
                     string.Join(", ", _director.Next.Select(g => g.Title)));
             }
 
@@ -568,7 +575,7 @@ public sealed class RedZoneService : IHostedService, IDisposable
                 if (!session.Running)
                 {
                     _failing[channel.Id] = DateTimeOffset.UtcNow + FailedFor;
-                    _logger.LogInformation("JellyTV RedZone: {Channel}: no stream answered, skipping it for now", channel.Name);
+                    _logger.LogInformation("JellyTV Pulse: {Channel}: no stream answered, skipping it for now", channel.Name);
                 }
             }, CancellationToken.None);
         }

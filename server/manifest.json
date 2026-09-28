@@ -3,7 +3,7 @@
     "guid": "91920c7b-e920-46ee-b4d3-421f05d3761b",
     "name": "Tally",
     "description": "Live channels from your own M3U, XMLTV, HLS and web page sources, with a guide; live scores matched to the channels showing each game; a live TV page in Jellyfin's web client; and the install page for the Tally TV app.",
-    "overview": "Live TV and live sports for Jellyfin and the Tally app",
+    "overview": "Live TV, a guide, scores and DVR for the sources you already have, in Jellyfin and the Tally app",
     "owner": "Tally",
     "category": "Live TV",
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
@@ -34,7 +34,7 @@
       },
       {
         "version": "2.3.1.12",
-        "changelog": "Tally 2.3.1: RedZone's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 12.1.",
+        "changelog": "Tally 2.3.1: Pulse's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
         "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.1/Tally-server-2.3.1-jf12.zip",
         "checksum": "e8e1a8723c8c5ee879f617a89a46c26a",
@@ -42,7 +42,7 @@
       },
       {
         "version": "2.3.1.11",
-        "changelog": "Tally 2.3.1: RedZone's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 10.11.",
+        "changelog": "Tally 2.3.1: Pulse's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 10.11.",
         "targetAbi": "10.11.0.0",
         "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.1/Tally-server-2.3.1-jf10.11.zip",
         "checksum": "fd27471a5e0c587fc2d5986eaf9cd1a1",
@@ -50,7 +50,7 @@
       },
       {
         "version": "2.3.1.10",
-        "changelog": "Tally 2.3.1: RedZone's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 10.10.",
+        "changelog": "Tally 2.3.1: Pulse's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 10.10.",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.1/Tally-server-2.3.1-jf10.10.zip",
         "checksum": "33616aeca87280bfbce18d03fe45ae78",
@@ -58,7 +58,7 @@
       },
       {
         "version": "2.3.0.12",
-        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a RedZone channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 12.1.",
+        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a Pulse channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
         "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.0/Tally-server-2.3.0-jf12.zip",
         "checksum": "6edecac13221b30aa24198e0ac39225a",
@@ -66,7 +66,7 @@
       },
       {
         "version": "2.3.0.11",
-        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a RedZone channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 10.11.",
+        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a Pulse channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 10.11.",
         "targetAbi": "10.11.0.0",
         "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.0/Tally-server-2.3.0-jf10.11.zip",
         "checksum": "09d842b2e940b86fa3a3ee16fd9f4e7a",
@@ -74,7 +74,7 @@
       },
       {
         "version": "2.3.0.10",
-        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a RedZone channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 10.10.",
+        "changelog": "Tally 2.3: English and Spanish commentary kept apart with a Spanish option, a Pulse channel that cuts to the hottest game, and college football.\n\nBuild for Jellyfin 10.10.",
         "targetAbi": "10.10.0.0",
         "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.0/Tally-server-2.3.0-jf10.10.zip",
         "checksum": "fa6f08b6c4f9704183b26a9fd38594c9",

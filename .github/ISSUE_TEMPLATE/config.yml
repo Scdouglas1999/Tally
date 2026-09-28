@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Support Tally on Patreon
+    url: https://www.patreon.com/SeanDouglas
+    about: Tally is free. If it's useful to you, you can chip in toward its development.
   - name: A problem that also happens in Wholphin
     url: https://github.com/damontecres/Wholphin/issues
     about: If you can reproduce it in Wholphin with one of its own themes, it probably belongs there. Please say so here too, so Tally can pick up the fix.

@@ -6,6 +6,7 @@ test.use({ storageState: AUTH_STATE });
 interface BoardGame {
   id: string;
   state: string;
+  sport?: string;
   league: string;
   home: { shortName: string; abbr: string };
   away: { shortName: string; abbr: string };
@@ -35,6 +36,15 @@ test('Sports: the games board, its tabs and the focused-game panel', async ({ pa
   expect(await tabs.allTextContents()).toEqual(['GAMES', 'CHANNELS', 'MULTIVIEW', 'RECORDINGS', 'SETTINGS']);
   // the first card of the first row takes focus; the panel describes it
   await expect(page.locator('.game-card[data-focused]')).toBeVisible();
+  // the Pulse tile comes with the server's Pulse answer, which can land after the first game card took focus; a
+  // first visit then moves to the tile (GamesBoard, useTabArrival), so read the focus only once the tile is there
+  const pulse = await api<{ active?: boolean }>('/JellyTV/Client/v1/redzone').catch(() => null);
+  if (pulse?.active === true) {
+    await expect(page.locator('.game-card[data-game="redzone"]')).toBeVisible();
+    await page.waitForTimeout(300);
+  }
+  // a 2.3 server's Pulse tile leads the live row while it is on the air (its panel is its own): the first game is next
+  if ((await page.locator('.game-card[data-focused]').getAttribute('data-game')) === 'redzone') await page.keyboard.press('ArrowRight');
   await expect(page.locator('.hero-panel .hero-team')).toHaveCount(2);
   await shot(page, info, 'sports-games');
   // RIGHT moves along the row and the panel follows
@@ -276,6 +286,12 @@ test('Multiview: four live tiles, audio follows focus, OK toggles the layout, HO
   await expect.poll(() => page.evaluate(() => document.querySelectorAll('.mv-tile video').length)).toBe(0);
 });
 
+/** The simulator's --league for a game (an abbreviation can name teams in two leagues: KC, the Chiefs and the Royals). */
+function simLeague(g: { sport?: string; league: string }): string {
+  if (g.league === 'NCAAF') return '--league football/college-football ';
+  return g.sport ? `--league ${g.sport}/${g.league.toLowerCase()} ` : '';
+}
+
 /** Runs the score simulator (tally/dev/score-sim.py in its container), when the run has it (TALLY_SIM=1). */
 async function sim(args: string): Promise<void> {
   const { execSync } = await import('node:child_process');
@@ -326,13 +342,13 @@ test('Live: score bug, UP box score, DOWN switcher with HOLD for the game menu, 
 
   if (process.env.TALLY_SIM === '1') {
     // a run in the other game: a banner (the plugin re-reads a live league every ~12 s, the app polls every 15 s)
-    await sim(`bump ${other.away.abbr}`);
+    await sim(`bump ${simLeague(other)}${other.away.abbr}`);
     await expect(page.locator('.event-banner .lt-panel.open')).toBeVisible({ timeout: 60_000 });
     await page.waitForTimeout(400);
     await shot(page, info, 'live-banner');
     // a run in this game: the bug comes back, the score rolls and flashes amber
     const before = await page.locator('.score-bug .line1').textContent();
-    await sim(`bump ${game.away.abbr}`);
+    await sim(`bump ${simLeague(game)}${game.away.abbr}`);
     await expect(page.locator('.score-bug .score-hot')).toBeVisible({ timeout: 60_000 });
     await shot(page, info, 'live-bug-scored');
     expect(await page.locator('.score-bug .line1').textContent()).not.toBe(before);

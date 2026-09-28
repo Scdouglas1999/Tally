@@ -339,6 +339,11 @@ public sealed class LgDevModeService : BackgroundService
             var path = _path();
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.WriteAllText(path, JsonSerializer.Serialize(tvs));
+            if (!OperatingSystem.IsWindows())
+            {
+                // session tokens: readable by the Jellyfin account only
+                File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

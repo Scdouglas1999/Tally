@@ -24,6 +24,7 @@ namespace Jellyfin.Plugin.Tally.Api;
 [ApiController]
 [Route("JellyTV/Client/v1")]
 [Authorize]
+[TallyUsers]
 public class ClientApiController : ControllerBase
 {
     public const int Version = 1;
@@ -194,8 +195,8 @@ public class ClientApiController : ControllerBase
         return c == null ? NotFound() : Ok(ToChannel(c, null, DateTimeOffset.UtcNow));
     }
 
-    /// <summary>The game on the Tally RedZone channel right now (or the one it would open on while nobody watches).
-    /// Apps show "On RedZone now: …" from it, polling every 10 s while they play the channel.</summary>
+    /// <summary>The game on the Tally Pulse channel right now (or the one it would open on while nobody watches).
+    /// Apps show "On Pulse now: …" from it, polling every 10 s while they play the channel.</summary>
     [HttpGet("redzone")]
     public async Task<IActionResult> RedZone(CancellationToken cancellationToken)
         => Ok(await _redZone.StatusAsync(cancellationToken).ConfigureAwait(false));
@@ -220,6 +221,7 @@ public class ClientApiController : ControllerBase
 
     /// <summary>Same per-user store as the web UI: a favorite starred on the phone is starred on the TV.</summary>
     [HttpPut("settings")]
+    [RequestSizeLimit(UserSettingsStore.MaxBytes)]
     public async Task<IActionResult> PutSettings([FromBody] JsonObject settings)
     {
         var auth = await _authContext.GetAuthorizationInfo(Request).ConfigureAwait(false);

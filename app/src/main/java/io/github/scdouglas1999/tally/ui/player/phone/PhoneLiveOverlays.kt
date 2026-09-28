@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -51,8 +52,10 @@ import io.github.scdouglas1999.tally.api.TallyGame
 import io.github.scdouglas1999.tally.ui.components.IndicatorSquare
 import io.github.scdouglas1999.tally.ui.components.LowerThird
 import io.github.scdouglas1999.tally.ui.components.RollingText
+import io.github.scdouglas1999.tally.ui.components.rankedName
 import io.github.scdouglas1999.tally.ui.components.rememberScoreColor
 import io.github.scdouglas1999.tally.ui.components.tallyUppercase
+import io.github.scdouglas1999.tally.ui.components.upsetAlertLabel
 import io.github.scdouglas1999.tally.ui.phone.PhoneTopBarAction
 import io.github.scdouglas1999.tally.ui.theme.PhoneDimens
 import io.github.scdouglas1999.tally.ui.theme.PhoneType
@@ -100,14 +103,18 @@ fun PhoneScoreBug(
             key(game.id) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = game.away.abbr.ifBlank { game.away.shortName } + " ",
+                        text = rankedName(game.away, game.away.abbr.ifBlank { game.away.shortName } + " ", BugScore.fontSize),
                         style = BugScore,
                         color = TallyColors.text,
                         maxLines = 1,
                     )
                     BugDigits(game.away.score)
                     Text(
-                        text = " · " + game.home.abbr.ifBlank { game.home.shortName } + " ",
+                        text =
+                            buildAnnotatedString {
+                                append(" · ")
+                                append(rankedName(game.home, game.home.abbr.ifBlank { game.home.shortName } + " ", BugScore.fontSize))
+                            },
                         style = BugScore,
                         color = TallyColors.text,
                         maxLines = 1,
@@ -118,14 +125,30 @@ fun PhoneScoreBug(
             if (game.home.possession) IndicatorSquare(color = TallyColors.accent, size = 6.dp)
         }
         val situation = bugSituation(game)
-        if (situation.isNotBlank()) {
-            Text(
-                text = situation.tallyUppercase(),
-                style = PhoneType.meta,
-                color = TallyColors.accent,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+        val upset = upsetAlertLabel(game, hideScores)
+        if (situation.isNotBlank() || upset != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                upset?.let {
+                    Text(
+                        text = it,
+                        style = PhoneType.meta,
+                        color = TallyColors.liveText,
+                        maxLines = 1,
+                    )
+                }
+                if (situation.isNotBlank()) {
+                    Text(
+                        text = situation.tallyUppercase(),
+                        style = PhoneType.meta,
+                        color = TallyColors.accent,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
         }
     }
 }

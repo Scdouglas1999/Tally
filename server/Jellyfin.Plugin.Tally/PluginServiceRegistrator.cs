@@ -1,10 +1,13 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using Jellyfin.Plugin.Tally.Client;
 using Jellyfin.Plugin.Tally.Scores;
 using Jellyfin.Plugin.Tally.Services;
 using Jellyfin.Plugin.Tally.Sources;
+using MediaBrowser.Common.Net;
 using MediaBrowser.Controller;
+using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,19 +19,24 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     public void RegisterServices(IServiceCollection services, IServerApplicationHost applicationHost)
     {
         services.AddHttpClient("jellytv")
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
                 AutomaticDecompression = System.Net.DecompressionMethods.All,
                 // Sites often gate pages behind a Set-Cookie + redirect dance —
                 // without a jar the request loops until redirect-limit errors.
                 UseCookies = true,
-                CookieContainer = new System.Net.CookieContainer()
+                CookieContainer = new System.Net.CookieContainer(),
+                // logos and pages named by sources: never the cloud metadata service (see NetworkGuard)
+                ConnectCallback = NetworkGuard.ConnectCallback((_, address, _) => !NetworkGuard.IsForbidden(address))
             })
             .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(30));
 
         services.AddHttpClient("jellytv-proxy")
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            .ConfigurePrimaryHttpMessageHandler(sp => new SocketsHttpHandler
             {
+                // what upstream playlists name is fetched for viewers: never the server's own network, unless a
+                // source is there (NetworkGuard)
+                ConnectCallback = NetworkGuard.ConnectCallback(sp.GetRequiredService<UpstreamGuard>().Allows),
                 // Raw pass-through: no Accept-Encoding advertised, so upstreams
                 // never gzip — avoids decompression latency on multi-MB segments
                 // and content-length mismatches.
@@ -42,6 +50,16 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             // a slow 6s segment must not be aborted mid-body.
             .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(120));
 
+        // Jellyfin's own client (its M3U tuner reads Tally's playlist with it): the feed key goes along as a header on
+        // loopback reads of Tally's playlist and guide, so the tuner's address, from which Jellyfin derives every
+        // channel's Live TV id, stays keyless (see FeedKeyHandler, LiveTvRegistrationService)
+        services.AddHttpClient(NamedClient.Default)
+            .AddHttpMessageHandler(sp =>
+            {
+                var signer = sp.GetRequiredService<StreamSigner>();
+                return new FeedKeyHandler(() => Api.LiveTvFeedController.FeedKey(signer));
+            });
+
         // First-time download of the headless browser for web page sources (Playwright driver ~60 MB, Chromium ~120 MB):
         // no overall timeout, slow links just take longer; BrowserRuntime cancels after 30 minutes.
         services.AddHttpClient("jellytv-download")
@@ -50,6 +68,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         services.AddTransient<IStartupFilter, WebInjectionStartupFilter>();
 
         services.AddSingleton<StreamSigner>();
+        services.AddSingleton<UpstreamGuard>();
         services.AddSingleton<BrowserRuntime>();
         services.AddSingleton<BrowserFetchService>();
         services.AddSingleton<UpstreamFetcher>();
@@ -81,6 +100,15 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         services.AddHostedService(sp => sp.GetRequiredService<StreamSearchService>());
         services.AddHostedService(sp => sp.GetRequiredService<LeagueDetector>());
         services.AddHostedService<LiveTvRegistrationService>();
+        // Live TV: the real bitrate of Tally's channels, so clients under 20 Mbps get them remuxed, not transcoded.
+        // A plugin's tuner hosts are asked before Jellyfin's own; this one fills in the media info of Tally's channels
+        // and passes every other channel on (see TallyTunerHost).
+        services.AddSingleton<LiveStreamFacts>();
+        services.AddSingleton<ITunerHost>(sp => new TallyTunerHost(
+            () => sp.GetService<ITunerHostManager>()?.TunerHosts
+                .FirstOrDefault(h => h is not TallyTunerHost && string.Equals(h.Type, "m3u", StringComparison.OrdinalIgnoreCase)),
+            () => sp.GetService<LiveStreamFacts>(),
+            sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<TallyTunerHost>>()));
         services.AddHostedService<LiveCardRefreshService>();
         services.AddHostedService<PluginRepositoryService>();
 

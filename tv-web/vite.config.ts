@@ -4,9 +4,12 @@ import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { execSync } from 'node:child_process';
 import { defineConfig, type Plugin } from 'vite';
+import { releaseVersion } from './src/buildVersion';
 
 const require = createRequire(import.meta.url);
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
+/** The release version (TALLY_VERSION from server/build.sh), else package.json's (src/buildVersion.ts). */
+const APP_VERSION = releaseVersion(process.env.TALLY_VERSION, pkg.version);
 const hlsPkg = require('hls.js/package.json') as { version: string };
 const HLS_FILE = `hls-${hlsPkg.version}.min.js`;
 /** Oldest installed shell this bundle runs in (src/shell-contract/shell.ts MIN_SHELL_VERSION). */
@@ -57,7 +60,7 @@ function tallyBundle(): Plugin {
       this.emitFile({ type: 'asset', fileName: 'fonts-OFL.txt', source: readFileSync(resolve(__dirname, '../IBM-PLEX-OFL.txt')) });
       const manifest = {
         name: 'tally-tv',
-        version: pkg.version,
+        version: APP_VERSION,
         revision: gitRevision(),
         built: new Date().toISOString(),
         minShell: MIN_SHELL,
@@ -73,7 +76,7 @@ function tallyBundle(): Plugin {
 export default defineConfig({
   base: './',
   define: {
-    __TALLY_VERSION__: JSON.stringify(pkg.version),
+    __TALLY_VERSION__: JSON.stringify(APP_VERSION),
     __HLS_FILE__: JSON.stringify(HLS_FILE),
   },
   server: {

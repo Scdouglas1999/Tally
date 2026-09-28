@@ -183,9 +183,29 @@ public class ProxyController : ControllerBase
         return ServeAsync(u, uri, StreamSigner.DecodeHeaders(h));
     }
 
+    /// <summary>
+    /// The content type an upstream answer is served with. The proxy answers on Jellyfin's own origin, so a page an
+    /// upstream labels text/html (or an SVG, or JavaScript) must never reach a browser as such: it would run with the
+    /// viewer's Jellyfin session. Media, playlists, subtitles and raster images keep their type; anything else is
+    /// served as bytes.
+    /// </summary>
+    public static string SafeContentType(string? upstream)
+    {
+        var type = (upstream ?? string.Empty).Split(';')[0].Trim().ToLowerInvariant();
+        var media = type.StartsWith("video/", StringComparison.Ordinal) || type.StartsWith("audio/", StringComparison.Ordinal)
+                    || (type.StartsWith("image/", StringComparison.Ordinal) && !type.Contains("svg", StringComparison.Ordinal))
+                    || type is "application/vnd.apple.mpegurl" or "application/x-mpegurl" or "application/mp4" or "application/mp2t"
+                        or "text/vtt" or "application/octet-stream" or "binary/octet-stream";
+        return media ? type : "application/octet-stream";
+    }
+
     private async Task<IActionResult> ServeAsync(string u, Uri uri, Dictionary<string, string> headers)
     {
         var ct = HttpContext.RequestAborted;
+
+        // whatever an upstream sends, a browser opening this address must not run it (see SafeContentType)
+        Response.Headers["X-Content-Type-Options"] = "nosniff";
+        Response.Headers["Content-Security-Policy"] = "default-src 'none'; sandbox";
 
         // Media segments go through the single-flight cache: one upstream fetch
         // per URL, shared by prefetch + players + retries + multiview tiles.
@@ -214,7 +234,7 @@ public class ProxyController : ControllerBase
                 return Content(rewritten, "application/vnd.apple.mpegurl");
             }
 
-            return File(entry.Data, entry.ContentType ?? "application/octet-stream");
+            return File(entry.Data, SafeContentType(entry.ContentType));
         }
 
         // Playlists: never cached (they roll) — direct streaming fetch.
@@ -240,7 +260,7 @@ public class ProxyController : ControllerBase
             }
 
             Response.Headers.CacheControl = "no-store";
-            return File(outcome.Body, outcome.ContentType ?? "application/octet-stream");
+            return File(outcome.Body, SafeContentType(outcome.ContentType));
         }
 
         using (outcome.Response)
@@ -272,7 +292,7 @@ public class ProxyController : ControllerBase
                 }
 
                 Response.StatusCode = 200;
-                Response.ContentType = mediaType ?? "application/octet-stream";
+                Response.ContentType = SafeContentType(mediaType);
                 // No Content-Length forward: AutomaticDecompression rewrites the
                 // body, so the upstream length is often wrong — sending it would
                 // truncate/hang the client.

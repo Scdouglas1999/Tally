@@ -35,7 +35,7 @@
     }
   ],
   "channels": [
-    { "id": "redzone", "name": "Tally RedZone", "group": "RedZone", "kind": "redzone", "language": "en", "liveTvItemId": null, "hlsPath": "/JellyTV/Live/redzone.m3u8?s=r", "cardPath": "", "gameId": null, "now": { "title": "Colts at Texans", "start": "2026-09-27T18:29:10+00:00", "end": "2026-09-27T18:40:00+00:00" } },
+    { "id": "redzone", "name": "Tally Pulse", "group": "Pulse", "kind": "redzone", "language": "en", "liveTvItemId": null, "hlsPath": "/JellyTV/Live/redzone.m3u8?s=r", "cardPath": "", "gameId": null, "now": { "title": "Colts at Texans", "start": "2026-09-27T18:29:10+00:00", "end": "2026-09-27T18:40:00+00:00" } },
     { "id": "c-colts-texans", "name": "Colts at Texans", "group": "American Football", "language": "en", "hlsPath": "/JellyTV/Live/c-colts-texans.m3u8?s=a", "cardPath": "/JellyTV/Card/a.png", "gameId": "401772001" },
     { "id": "c-colts-texans-es", "name": "Colts at Texans (Español)", "group": "American Football · Español", "language": "es", "hlsPath": "/JellyTV/Live/c-colts-texans-es.m3u8?s=b", "cardPath": "/JellyTV/Card/b.png", "gameId": "401772001" },
     { "id": "c-chiefs-bills-es", "name": "Chiefs at Bills (Español)", "group": "American Football · Español", "language": "es", "hlsPath": "/JellyTV/Live/c-chiefs-bills-es.m3u8?s=c", "cardPath": "/JellyTV/Card/c.png", "gameId": "401772002" }

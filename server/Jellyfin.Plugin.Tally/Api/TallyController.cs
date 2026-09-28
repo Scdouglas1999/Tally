@@ -66,6 +66,7 @@ public class TallyController : ControllerBase
     public async Task<IActionResult> Status()
     {
         var auth = await _authContext.GetAuthorizationInfo(Request).ConfigureAwait(false);
+        var isAdmin = auth.User?.HasPermission(PermissionKind.IsAdministrator) ?? false;
         return Ok(new
         {
             name = "JellyTV",
@@ -75,7 +76,9 @@ public class TallyController : ControllerBase
             loadedAt = _sourceManager.LoadedAt,
             channelCount = _sourceManager.GetChannels().Count,
             sourceErrors = _sourceManager.SourceErrors,
-            isAdmin = auth.User?.HasPermission(PermissionKind.IsAdministrator) ?? false,
+            isAdmin,
+            // the key of the Live TV feeds (livetv.m3u, epg.xml), for adding the tuner by hand; admins only
+            liveTvFeedKey = isAdmin ? LiveTvFeedController.FeedKey(_signer) : null,
             allowNonAdmin = Plugin.Instance?.Configuration.AllowNonAdminUsers ?? true,
             scoresEnabled = Plugin.Instance?.Configuration.ScoresEnabled ?? true,
             replaceLiveTv = Plugin.Instance?.Configuration.ReplaceLiveTv ?? true,
@@ -110,6 +113,7 @@ public class TallyController : ControllerBase
 
     [HttpGet("Channels")]
     [Authorize]
+    [TallyUsers]
     public IActionResult Channels()
     {
         var now = DateTimeOffset.UtcNow;
@@ -138,6 +142,7 @@ public class TallyController : ControllerBase
 
     [HttpGet("Guide")]
     [Authorize]
+    [TallyUsers]
     public IActionResult Guide([FromQuery] DateTimeOffset? start, [FromQuery] DateTimeOffset? end, [FromQuery] string? channelId)
     {
         var s = start ?? DateTimeOffset.UtcNow.AddHours(-1);
@@ -161,6 +166,7 @@ public class TallyController : ControllerBase
 
     [HttpGet("Stream/{channelId}")]
     [Authorize]
+    [TallyUsers]
     public IActionResult Stream(string channelId)
     {
         var channel = _sourceManager.GetChannel(channelId);
@@ -179,6 +185,7 @@ public class TallyController : ControllerBase
     /// <summary>Live games with score, situation, last play, heat and the channels carrying them.</summary>
     [HttpGet("Scores")]
     [Authorize]
+    [TallyUsers]
     public async Task<IActionResult> Scores()
     {
         var now = DateTimeOffset.UtcNow;
@@ -231,6 +238,7 @@ public class TallyController : ControllerBase
 
     [HttpPut("UserSettings")]
     [Authorize]
+    [RequestSizeLimit(UserSettingsStore.MaxBytes)]
     public async Task<IActionResult> SaveUserSettings([FromBody] JsonObject settings)
     {
         var auth = await _authContext.GetAuthorizationInfo(Request).ConfigureAwait(false);

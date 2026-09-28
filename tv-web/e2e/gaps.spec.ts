@@ -348,7 +348,7 @@ test("Live: the score bug follows Android's rule (open, score change, key; 8 s; 
     // a run in this game with the controls hidden: the bug comes back by itself, the score rolls, and fades 8 s later
     await expect(page.locator('.live-bar')).toHaveCount(0);
     const before = (await bug.locator('.line1').textContent()) ?? '';
-    await sim(`bump ${game.away.abbr}`);
+    await sim(`bump ${game.league === 'NCAAF' ? '--league football/college-football ' : `--league ${game.sport}/${game.league.toLowerCase()} `}${game.away.abbr}`);
     await expect.poll(faded, { timeout: 60_000 }).toBe(false);
     const shownAt = Date.now();
     await expect(page.locator('.live-bar')).toHaveCount(0);
@@ -444,8 +444,16 @@ test('Plugin art: game backdrops and channel cards ask for their drawn width and
     expect(u.searchParams.get('tz')).toBe(zone);
   }
   await debugPush(page, { name: 'sports' });
+  // the board places focus on arrival, and again when the Pulse answer lands a moment later (its tile leads the live
+  // row): keys pressed before that can land on a game and play it. Wait for the board, then walk the tabs to CHANNELS.
+  await expect(visible(page, '.sports-page .game-card[data-focused]')).toBeVisible();
+  if ((await api<{ active?: boolean }>('/JellyTV/Client/v1/redzone').catch(() => null))?.active === true) {
+    await expect(visible(page, '.sports-page .game-card[data-game="redzone"]')).toBeVisible();
+    await page.waitForTimeout(300);
+  }
   await page.keyboard.press('ArrowUp');
-  await page.keyboard.press('ArrowRight');
+  for (let i = 0; i < 6 && ((await page.locator('.sports-tab[data-focused] .label').textContent()) ?? '') !== 'CHANNELS'; i++) await page.keyboard.press('ArrowRight');
+  await expect(page.locator('.sports-tab[data-focused] .label')).toHaveText('CHANNELS');
   await page.keyboard.press('Enter');
   const u = new URL((await cards).url());
   expect(u.searchParams.get('w')).toBe('384');
