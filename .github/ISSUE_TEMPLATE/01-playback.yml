@@ -1,5 +1,5 @@
 name: "Playback problem"
-description: A video won't start, stutters, has no sound, or the subtitles are wrong
+description: A video won't start, stutters, has no sound, or the subtitles are wrong (any Tally app)
 labels: ["bug", "playback"]
 body:
   - type: textarea
@@ -33,9 +33,17 @@ body:
     attributes:
       label: Tally version
       description: At the bottom of Settings.
-      placeholder: "v1.0.8-156-gd202ea17"
+      placeholder: "v2.3.3"
     validations:
       required: true
+  - type: input
+    id: plugin-version
+    attributes:
+      label: Tally server plugin version
+      description: In Jellyfin, Dashboard → Plugins → Tally. Write "not installed" if the server doesn't have it.
+      placeholder: "2.3.3.12"
+    validations:
+      required: false
   - type: input
     id: server
     attributes:
@@ -46,8 +54,8 @@ body:
   - type: input
     id: device
     attributes:
-      label: TV or streaming box
-      placeholder: "Chromecast with Google TV, Fire TV Stick 4K, Nvidia Shield..."
+      label: Device
+      placeholder: "Chromecast with Google TV, Fire TV Stick 4K, Samsung QN90B (2022), LG C2..."
     validations:
       required: false
   - type: textarea

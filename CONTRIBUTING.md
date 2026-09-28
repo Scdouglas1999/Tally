@@ -4,9 +4,9 @@ Bug reports, ideas and pull requests are all welcome. Tally is a small project, 
 
 ## Reporting a problem
 
-Open an [issue](https://github.com/Scdouglas1999/Tally/issues/new/choose). The form asks for your Tally version (it's
-at the bottom of Settings), your TV or streaming box, and whether the server has the Tally plugin. A photo of the
-screen is often the quickest way to show what's wrong.
+Open an [issue](https://github.com/Scdouglas1999/Tally/issues/new/choose). The form asks where it happens (Android,
+a Samsung or LG TV, the web, the server plugin), your Tally app and plugin versions, and your Jellyfin version. A photo
+of the screen is often the quickest way to show what's wrong.
 
 Tally is built on [Wholphin](https://github.com/damontecres/Wholphin). If something also goes wrong in Wholphin with
 one of its own themes, it's most likely Wholphin's to fix. Report it there as well, and link the two.

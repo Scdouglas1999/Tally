@@ -1,4 +1,4 @@
-name: "An idea"
+name: "Feature request"
 description: Something Tally could do, or do better
 labels: ["idea"]
 body:
@@ -9,3 +9,24 @@ body:
       description: What you'd like to be able to do, and when it would come up. The situation matters more than the solution.
     validations:
       required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Where
+      multiple: true
+      options:
+        - Android TV, Google TV or Fire TV
+        - Android phone or tablet
+        - Samsung or LG TV (Tally TV)
+        - Jellyfin in a web browser
+        - The server plugin
+        - Anywhere
+    validations:
+      required: false
+  - type: textarea
+    id: more
+    attributes:
+      label: Anything else
+      description: How you get by today, other apps that do it well, a sketch or a screenshot.
+    validations:
+      required: false
