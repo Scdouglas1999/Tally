@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
     "versions": [
       {
+        "version": "2.3.3.12",
+        "changelog": "Tally 2.3.3: the RedZone channel is now Tally Pulse, the server is hardened for use over the internet, and fewer Live TV streams are transcoded.\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.3/Tally-server-2.3.3-jf12.zip",
+        "checksum": "02f1568a200b01a3fd1f4227384dc049",
+        "timestamp": "2026-09-28T19:09:30.0000000Z"
+      },
+      {
+        "version": "2.3.3.11",
+        "changelog": "Tally 2.3.3: the RedZone channel is now Tally Pulse, the server is hardened for use over the internet, and fewer Live TV streams are transcoded.\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.3/Tally-server-2.3.3-jf10.11.zip",
+        "checksum": "ee5e2cbf4ffadec670297aa8364ed2e2",
+        "timestamp": "2026-09-28T19:09:30.0000000Z"
+      },
+      {
+        "version": "2.3.3.10",
+        "changelog": "Tally 2.3.3: the RedZone channel is now Tally Pulse, the server is hardened for use over the internet, and fewer Live TV streams are transcoded.\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.3/Tally-server-2.3.3-jf10.10.zip",
+        "checksum": "fb31394e54186ea1030753ac65b4765e",
+        "timestamp": "2026-09-28T19:09:30.0000000Z"
+      },
+      {
         "version": "2.3.2.12",
         "changelog": "Tally 2.3.2: video shows again in Jellyfin Media Player and Jellyfin Desktop when the Tally look is on.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
