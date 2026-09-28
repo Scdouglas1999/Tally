@@ -122,6 +122,12 @@ public sealed class LiveCardRefreshService : BackgroundService
             byName.TryAdd(c.Name, c);
         }
 
+        // after an upgrade that renamed the channel, Jellyfin's item has its old name until the guide refresh below
+        if (byName.TryGetValue(Live.RedZoneService.ChannelName, out var whipAround))
+        {
+            byName.TryAdd(Live.RedZoneService.LegacyChannelName, whipAround);
+        }
+
         var items = _libraryManager.GetItemList(new InternalItemsQuery { IncludeItemTypes = new[] { BaseItemKind.LiveTvChannel } });
         var baseUrl = _config.GetNetworkConfiguration().BaseUrl?.Trim('/') ?? string.Empty;
         var prefix = string.IsNullOrEmpty(baseUrl) ? string.Empty : "/" + baseUrl;

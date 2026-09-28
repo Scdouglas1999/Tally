@@ -39,7 +39,14 @@ public sealed class LiveTvItemIndex
                 _builtAt = DateTimeOffset.UtcNow;
             }
 
-            return _byName.TryGetValue(channelName, out var id) ? id : null;
+            if (_byName.TryGetValue(channelName, out var id))
+            {
+                return id;
+            }
+
+            // renamed in 2.3.3: Jellyfin's item keeps the old name until its next guide refresh
+            return string.Equals(channelName, Live.RedZoneService.ChannelName, StringComparison.OrdinalIgnoreCase)
+                && _byName.TryGetValue(Live.RedZoneService.LegacyChannelName, out var legacy) ? legacy : null;
         }
     }
 }

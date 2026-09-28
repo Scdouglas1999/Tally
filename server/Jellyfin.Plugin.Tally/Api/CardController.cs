@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.Tally.Models;
 using Jellyfin.Plugin.Tally.Services;
 using Jellyfin.Plugin.Tally.Sources;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,22 @@ public class CardController : ControllerBase
     private readonly SourceManager _sourceManager;
     private readonly CardArtService _cards;
 
+    /// <summary>The key of cards drawn under the channel's old name (<see cref="Live.RedZoneService.LegacyChannelName"/>):
+    /// Jellyfin and the apps hold on to those addresses, and they now draw the channel as it is named today.</summary>
+    private static readonly string LegacyWhipAroundKey = CardArtService.StableKey(Live.RedZoneService.LegacyChannelName);
+
     public CardController(SourceManager sourceManager, CardArtService cards)
     {
         _sourceManager = sourceManager;
         _cards = cards;
     }
+
+    /// <summary>The channel a card address names: by its name's key (see <see cref="CardArtService.StableKey"/>), a raw
+    /// channel id, or the Whip-Around channel's key from before it was renamed.</summary>
+    public static SourceChannel? FindChannel(SourceManager sources, string key)
+        => sources.GetChannels().FirstOrDefault(c => CardArtService.StableKey(c.Name) == key)
+            ?? sources.GetChannel(key)
+            ?? (key == LegacyWhipAroundKey ? sources.GetChannel(Live.RedZoneService.ChannelId) : null);
 
     /// <param name="key">Stable name key (see <see cref="CardArtService.StableKey"/>); a raw channel id is still accepted.</param>
     /// <param name="n">Channel name, used only when the channel no longer exists.</param>
@@ -31,8 +43,7 @@ public class CardController : ControllerBase
     public async Task<IActionResult> Get(string key, [FromQuery] string? n, [FromQuery] string? w, [FromQuery] string? tz, [FromQuery] string? v, CancellationToken cancellationToken)
     {
         var width = ArtRequest.SnapWidth(w, CardArtService.Width);
-        var channel = _sourceManager.GetChannels().FirstOrDefault(c => CardArtService.StableKey(c.Name) == key)
-            ?? _sourceManager.GetChannel(key);
+        var channel = FindChannel(_sourceManager, key);
 
         // Never 404: Jellyfin and the apps hold on to card URLs long after a game's stream has gone, and a
         // missing image is an error in the server log plus a broken tile on the TV. Draw a plain card instead.
