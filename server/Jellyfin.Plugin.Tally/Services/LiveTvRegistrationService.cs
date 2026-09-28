@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.Tally.Sources;
@@ -34,6 +35,7 @@ public class LiveTvRegistrationService : BackgroundService
     private readonly IServerApplicationHost _appHost;
     private readonly SourceManager _sourceManager;
     private readonly StreamSigner _signer;
+    private readonly IHttpClientFactory _http;
     private readonly ILogger<LiveTvRegistrationService> _logger;
 
     public LiveTvRegistrationService(
@@ -43,9 +45,11 @@ public class LiveTvRegistrationService : BackgroundService
         IServerApplicationHost appHost,
         SourceManager sourceManager,
         StreamSigner signer,
+        IHttpClientFactory http,
         ILogger<LiveTvRegistrationService> logger)
     {
         _signer = signer;
+        _http = http;
         _tunerHostManager = tunerHostManager;
         _listingsManager = listingsManager;
         _config = config;
@@ -94,9 +98,19 @@ public class LiveTvRegistrationService : BackgroundService
     private async Task RegisterAsync()
     {
         var baseUrl = LoopbackBaseUrl();
-        // the feeds answer only loopback requests with the feed key (see LiveTvFeedController)
+        // The feeds answer only loopback requests with the feed key (see LiveTvFeedController). The guide's address
+        // carries it. The tuner's address must not change: Jellyfin derives every M3U channel's id from it, so a new
+        // address would make every Tally channel a new Live TV item (favorites, recording rules and watch history
+        // lost). Jellyfin's own client sends the key as a header instead (FeedKeyHandler); only if that does not
+        // reach the feed does the tuner get the key in its address, so Live TV keeps working either way.
         var key = "?k=" + Api.LiveTvFeedController.FeedKey(_signer);
-        var playlistUrl = baseUrl + PlaylistMarker + key;
+        var playlistUrl = baseUrl + PlaylistMarker;
+        if (await FeedRefusesWithoutKeyAsync(playlistUrl).ConfigureAwait(false))
+        {
+            _logger.LogWarning("JellyTV: Jellyfin's client does not send the Live TV feed key; the tuner address carries it (Live TV channel ids change once)");
+            playlistUrl += key;
+        }
+
         var epgUrl = baseUrl + EpgMarker + key;
 
         var options = _config.GetConfiguration<LiveTvOptions>("livetv") ?? new LiveTvOptions();
@@ -149,6 +163,27 @@ public class LiveTvRegistrationService : BackgroundService
         _logger.LogInformation(
             "JellyTV: registered Live TV tuner '{Playlist}' and xmltv guide '{Epg}'",
             baseUrl + PlaylistMarker, baseUrl + EpgMarker);
+    }
+
+    /// <summary>Whether the playlist refuses Jellyfin's own HTTP client (the one its M3U tuner reads it with) at the
+    /// keyless address (403: <see cref="FeedKeyHandler"/> did not send the key along). Anything else, including a
+    /// failed read, keeps the keyless address: a passing hiccup must never change every channel's id.</summary>
+    private async Task<bool> FeedRefusesWithoutKeyAsync(string playlistUrl)
+    {
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var request = new HttpRequestMessage(HttpMethod.Get, playlistUrl);
+            using var response = await _http.CreateClient(NamedClient.Default)
+                .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token)
+                .ConfigureAwait(false);
+            return response.StatusCode == System.Net.HttpStatusCode.Forbidden;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "JellyTV: could not read the Live TV playlist at its keyless address");
+            return false;
+        }
     }
 
     private string LoopbackBaseUrl()

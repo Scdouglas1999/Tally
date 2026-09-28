@@ -5,6 +5,7 @@ using Jellyfin.Plugin.Tally.Client;
 using Jellyfin.Plugin.Tally.Scores;
 using Jellyfin.Plugin.Tally.Services;
 using Jellyfin.Plugin.Tally.Sources;
+using MediaBrowser.Common.Net;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.LiveTv;
 using MediaBrowser.Controller.Plugins;
@@ -48,6 +49,16 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             // Generous: the timeout CTS stays armed through body streaming —
             // a slow 6s segment must not be aborted mid-body.
             .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(120));
+
+        // Jellyfin's own client (its M3U tuner reads Tally's playlist with it): the feed key goes along as a header on
+        // loopback reads of Tally's playlist and guide, so the tuner's address, from which Jellyfin derives every
+        // channel's Live TV id, stays keyless (see FeedKeyHandler, LiveTvRegistrationService)
+        services.AddHttpClient(NamedClient.Default)
+            .AddHttpMessageHandler(sp =>
+            {
+                var signer = sp.GetRequiredService<StreamSigner>();
+                return new FeedKeyHandler(() => Api.LiveTvFeedController.FeedKey(signer));
+            });
 
         // First-time download of the headless browser for web page sources (Playwright driver ~60 MB, Chromium ~120 MB):
         // no overall timeout, slow links just take longer; BrowserRuntime cancels after 30 minutes.

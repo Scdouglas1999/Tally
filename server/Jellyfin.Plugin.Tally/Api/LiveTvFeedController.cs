@@ -19,9 +19,10 @@ namespace Jellyfin.Plugin.Tally.Api;
 /// Feeds consumed by Jellyfin's built-in Live TV stack: an M3U tuner playlist and an XMLTV guide. No [Authorize]:
 /// Jellyfin's tuner fetches them as an anonymous client. But the playlist hands out every channel's signed stream
 /// address (which plays the owner's paid sources through this server), so both answer only Jellyfin itself: a
-/// request over loopback that carries the feed key (<see cref="FeedKey"/>), which only the registered tuner and
-/// guide addresses have (<see cref="LiveTvRegistrationService"/>). The key keeps out the rest of the internet
-/// even behind a reverse proxy on the same machine, where every visitor arrives over loopback.
+/// request over loopback that carries the feed key (<see cref="FeedKey"/>). Jellyfin's requests carry it as a header
+/// (<see cref="FeedKeyHandler"/>, so the tuner's address and with it every channel's Live TV id stay as they were) or,
+/// for the guide, in its registered address (<see cref="LiveTvRegistrationService"/>). The key keeps out the rest of
+/// the internet even behind a reverse proxy on the same machine, where every visitor arrives over loopback.
 /// </summary>
 [ApiController]
 [Route("JellyTV")]
@@ -55,7 +56,11 @@ public class LiveTvFeedController : ControllerBase
         return System.Net.IPAddress.IsLoopback(ip) && signer.Validate("feed:livetv", string.Empty, key);
     }
 
-    private bool Allowed(string? key) => IsFeedRequestAllowed(HttpContext.Connection.RemoteIpAddress, key, _signer);
+    private bool Allowed(string? key)
+        => IsFeedRequestAllowed(
+            HttpContext.Connection.RemoteIpAddress,
+            string.IsNullOrEmpty(key) ? Request.Headers[FeedKeyHandler.HeaderName].ToString() : key,
+            _signer);
 
     /// <summary>M3U playlist fetched by Jellyfin's "m3u" tuner host.</summary>
     [HttpGet("livetv.m3u")]

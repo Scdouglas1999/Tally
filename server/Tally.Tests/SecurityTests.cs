@@ -46,6 +46,40 @@ public class SecurityTests
         Assert.False(signer.Validate("live:feed", string.Empty, key));
     }
 
+    [Theory]
+    [InlineData("http://127.0.0.1:8096/JellyTV/livetv.m3u", true)]
+    [InlineData("http://127.0.0.1:8096/jellyfin/JellyTV/epg.xml", true)]
+    [InlineData("http://localhost:8096/JellyTV/livetv.m3u", true)]
+    [InlineData("http://[::1]:8096/JellyTV/livetv.m3u", true)]
+    [InlineData("http://192.168.1.20:8096/JellyTV/livetv.m3u", false)] // never off this machine
+    [InlineData("https://iptv.example.com/JellyTV/livetv.m3u", false)]
+    [InlineData("http://127.0.0.1:8096/JellyTV/Live/redzone.m3u8", false)] // channel streams carry no key
+    [InlineData("http://127.0.0.1:8096/System/Info", false)]
+    public void Feed_Key_Header_Goes_Only_To_Loopback_Feeds(string url, bool expected)
+        => Assert.Equal(expected, FeedKeyHandler.IsFeedRequest(new Uri(url)));
+
+    [Fact]
+    public async Task Feed_Key_Handler_Adds_The_Header_To_Feed_Reads_Only()
+    {
+        var seen = new List<(string Url, string? Key)>();
+        using var client = new HttpClient(new FeedKeyHandler(() => "k1") { InnerHandler = new Recorder(seen) });
+        await client.GetAsync("http://127.0.0.1:8096/JellyTV/livetv.m3u");
+        await client.GetAsync("http://127.0.0.1:8096/JellyTV/Live/abc.m3u8?s=x");
+        await client.GetAsync("https://example.com/JellyTV/epg.xml");
+        Assert.Equal("k1", seen[0].Key);
+        Assert.Null(seen[1].Key);
+        Assert.Null(seen[2].Key);
+    }
+
+    private sealed class Recorder(List<(string Url, string? Key)> seen) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            seen.Add((request.RequestUri!.ToString(), request.Headers.TryGetValues(FeedKeyHandler.HeaderName, out var v) ? v.Single() : null));
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+        }
+    }
+
     [Fact]
     public void Guide_Text_Drops_Characters_Xml_Cannot_Hold()
     {

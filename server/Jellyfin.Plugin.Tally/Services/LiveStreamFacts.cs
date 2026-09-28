@@ -270,7 +270,7 @@ public sealed class LiveStreamFacts : IStreamFactsSource
         return req;
     }
 
-    /// <summary>The fastest rung the ladder may play on this channel; for the Whip-Around channel, on any channel the
+    /// <summary>The fastest rung the ladder may play on this channel; for the Pulse channel, on any channel the
     /// ladder is playing now (it cuts between them).</summary>
     private long? Ceiling(string id)
     {
