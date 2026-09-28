@@ -114,6 +114,9 @@ ls -lh "$OUT"
 ASSETS=("$OUT"/Tally.apk "$OUT"/Tally-arm64-v8a.apk "$OUT"/Tally-armeabi-v7a.apk "$OUT"/Tally-x86_64.apk "$OUT"/Wholphin-release*.apk
         "$OUT"/Tally-server-"$SERVER_VERSION"-jf*.zip "$OUT"/Tally-Server-Setup.exe "$OUT"/docker-compose.yml "$OUT"/install-linux.sh
         "${TV_INSTALLERS[@]/#/$OUT/}")
+# SHA-256 of every download, published with them (INSTALL.md points people at it: the installers are not code-signed)
+( cd "$OUT" && sha256sum "${ASSETS[@]#$OUT/}" > SHA256SUMS.txt )
+ASSETS+=("$OUT"/SHA256SUMS.txt)
 # After the release exists (so its zips can be downloaded), main gets the plugin repository entry and the new
 # default version for the Docker and Linux installs.
 publish_repository() {
