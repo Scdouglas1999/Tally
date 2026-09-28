@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · Tally</title>
+<meta name="description" content="Tally has no service of its own and collects nothing. What the app stores and who it talks to, what the server plugin requests, and what this website does.">
+<link rel="canonical" href="https://tally.example/privacy">
+<meta name="theme-color" content="#0e0f0e">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tally">
+<meta property="og:title" content="Tally privacy policy">
+<meta property="og:description" content="Tally has no service of its own and collects nothing. What the app stores and who it talks to, what the server plugin requests, and what this website does.">
+<meta property="og:url" content="https://tally.example/privacy">
+<meta property="og:image" content="https://tally.example/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tally: a Jellyfin app with a live sports board, score bug and multiview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tally privacy policy">
+<meta name="twitter:description" content="Tally has no service of its own and collects nothing. What the app stores and who it talks to, what the server plugin requests, and what this website does.">
+<meta name="twitter:image" content="https://tally.example/assets/og.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plex-mono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav"><span class="bars" aria-hidden="true"></span>Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="features.html"><span class="sq" aria-hidden="true"></span>Features</a><a href="live-sports.html"><span class="sq" aria-hidden="true"></span>Live sports</a><a href="how-it-works.html"><span class="sq" aria-hidden="true"></span>How it works</a><a href="download.html"><span class="sq" aria-hidden="true"></span>Download</a><a href="faq.html"><span class="sq" aria-hidden="true"></span>FAQ</a><a href="changelog.html" class="nav-extra"><span class="sq" aria-hidden="true"></span>Changelog</a><a href="support.html"><span class="sq" aria-hidden="true"></span>Support</a>
+    </nav>
+    <div class="head-cta">
+      <a class="ver-chip" href="changelog.html"><span class="sq" aria-hidden="true"></span>V<span data-version>2.3.3</span><span class="visually-hidden">, what's new</span></a>
+      <a class="btn btn-primary btn-sm" href="download.html">Get Tally</a>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker amber"><span class="sq on" aria-hidden="true"></span>Privacy</p>
+    <h1>Nothing to collect.</h1>
+    <p class="lede">Tally is an open-source client for a Jellyfin server that you, or someone you know, runs. Its developer runs no service that the app talks to and receives no data from it.</p>
+    <p class="label" style="margin-top:24px">App policy last updated September 21, 2026 · the app's policy is also in the repository as <a href="https://github.com/Scdouglas1999/Tally/blob/main/tally/PRIVACY.md" rel="noopener">PRIVACY.md</a></p>
+  </div>
+</section>
+
+<section class="band flush">
+  <div class="wrap rundown">
+    <div class="slug"><b>Policy</b><span>Tally apps and plugin</span></div>
+    <div class="prose">
+      <h2>What the app stores, and where</h2>
+      <p>The addresses of the Jellyfin servers you add, the access token each server issues when you sign in, and your app settings. On phones, also the films, episodes and albums you choose to download. All of it stays on your device. Uninstalling the app deletes it.</p>
+
+      <h2>Who the app talks to</h2>
+      <ul>
+        <li><strong>The Jellyfin servers you add.</strong> Everything you browse and watch is requested from that server, and playback progress is reported to it, as with any Jellyfin client. What that server logs is up to whoever runs it.</li>
+        <li><strong>A Seerr server</strong>, if you switch on the optional Discover feature and enter its address.</li>
+        <li><strong>api.github.com</strong>, from builds installed from outside an app store, to check for a newer release. The request contains nothing about you or your device beyond what any web request carries (your IP address).</li>
+      </ul>
+
+      <h2>Crash reports</h2>
+      <p>If the app crashes, it asks whether to send a report. Saying yes sends it to your own Jellyfin server, never to the developer. Saying no sends nothing.</p>
+
+      <h2>What the app does not do</h2>
+      <p>No advertising, no analytics, no tracking, no accounts with the developer, no location, contacts, camera or microphone access. Voice search uses your TV's own search, outside the app.</p>
+
+      <h2>The server plugin</h2>
+      <p>The plugin runs on your Jellyfin server and sends nothing to the developer. It makes these requests of its own:</p>
+      <ul>
+        <li><strong>Your live TV sources</strong>: the playlists, guides and streams you add, with the headers you set.</li>
+        <li><strong>A public scoreboard feed</strong>, for today's games, only while someone has Tally open or a recording needs it. An admin can switch live scores off, and then the server makes no such requests. Browsers showing the Sports page load team logos from the scoreboard provider's image server.</li>
+        <li><strong>GitHub</strong>, for the plugin repository Jellyfin checks for updates, and for a copy of the newest app release for the install page.</li>
+        <li><strong>For LG TVs</strong>, LG's Developer Mode service, to keep Developer Mode on for TVs signed in to Tally. The TV's session token is stored on your server and never returned by any endpoint.</li>
+      </ul>
+      <p>Per-user settings (favorites, default view, switch alerts, Hide scores) are stored on your server, keyed by Jellyfin user.</p>
+
+      <h2>Children</h2>
+      <p>The app has no content of its own; it shows what the connected server offers.</p>
+
+      <h2 id="site">This website</h2>
+      <p>No cookies, no analytics, no tracking pixels, no third-party fonts. Each page asks <code>api.github.com</code> once per visit for the latest release number, and your browser keeps the answer for that session only. Download buttons link to files on GitHub, which has its own <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">privacy statement</a>. The site's host may keep standard server logs, like any web server.</p>
+
+      <h2>Contact</h2>
+      <p>Open an issue at <a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">github.com/Scdouglas1999/Tally/issues</a>.</p>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+        <p>A free, open-source Jellyfin app for TVs and phones, with a server plugin for live TV and sports. No ads, no accounts, no tracking.</p>
+        <a class="btn btn-sm" href="https://www.patreon.com/SeanDouglas" rel="noopener"><span class="sq" aria-hidden="true"></span>Support on Patreon</a>
+      </div>
+      <div>
+        <h2>Tally</h2>
+        <ul>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="live-sports.html">Live sports</a></li>
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="download.html">Download and install</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Help</h2>
+        <ul>
+          <li><a href="faq.html">FAQ and troubleshooting</a></li>
+          <li><a href="download.html#server">Server setup</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">Report a bug</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="support.html">Support Tally</a></li>
+          <li><a href="legal.html">Open source and legal</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally" rel="noopener">Source code</a></li>
+          <li><a href="https://github.com/damontecres/Wholphin" rel="noopener">Wholphin, the app Tally builds on</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>Tally is free software under the GNU General Public License, version 2, and a fork of Wholphin. Jellyfin is a trademark of the Jellyfin project. Tally isn't affiliated with or endorsed by Jellyfin, Wholphin, or any league, team, network or data provider. Tally provides no channels or streams. The teams and scores on this site are made up.</p>
+      <p class="mono">No cookies · No tracking</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

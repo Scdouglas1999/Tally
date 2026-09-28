@@ -1,0 +1,9 @@
+# Cloudflare Pages and Netlify read this file; GitHub Pages ignores it.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: browsing-topics=()
+/assets/*
+  Cache-Control: public, max-age=604800
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable

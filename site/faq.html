@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FAQ and troubleshooting · Tally</title>
+<meta name="description" content="Answers about Tally: what it needs, which sources work, where scores come from, Tally Pulse, commentary language, recordings, why a stream transcodes, the Jellyfin Media Player dark screen, and fixes for common problems.">
+<link rel="canonical" href="https://tally.example/faq">
+<meta name="theme-color" content="#0e0f0e">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tally">
+<meta property="og:title" content="Tally FAQ and troubleshooting">
+<meta property="og:description" content="Answers about Tally: what it needs, which sources work, where scores come from, Tally Pulse, commentary language, recordings, why a stream transcodes, the Jellyfin Media Player dark screen, and fixes for common problems.">
+<meta property="og:url" content="https://tally.example/faq">
+<meta property="og:image" content="https://tally.example/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tally: a Jellyfin app with a live sports board, score bug and multiview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tally FAQ and troubleshooting">
+<meta name="twitter:description" content="Answers about Tally: what it needs, which sources work, where scores come from, Tally Pulse, commentary language, recordings, why a stream transcodes, the Jellyfin Media Player dark screen, and fixes for common problems.">
+<meta name="twitter:image" content="https://tally.example/assets/og.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plex-mono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav"><span class="bars" aria-hidden="true"></span>Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="features.html"><span class="sq" aria-hidden="true"></span>Features</a><a href="live-sports.html"><span class="sq" aria-hidden="true"></span>Live sports</a><a href="how-it-works.html"><span class="sq" aria-hidden="true"></span>How it works</a><a href="download.html"><span class="sq" aria-hidden="true"></span>Download</a><a href="faq.html" aria-current="page"><span class="sq" aria-hidden="true"></span>FAQ</a><a href="changelog.html" class="nav-extra"><span class="sq" aria-hidden="true"></span>Changelog</a><a href="support.html"><span class="sq" aria-hidden="true"></span>Support</a>
+    </nav>
+    <div class="head-cta">
+      <a class="ver-chip" href="changelog.html"><span class="sq" aria-hidden="true"></span>V<span data-version>2.3.3</span><span class="visually-hidden">, what's new</span></a>
+      <a class="btn btn-primary btn-sm" href="download.html">Get Tally</a>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker amber"><span class="sq on" aria-hidden="true"></span>FAQ and troubleshooting</p>
+    <h1>Questions, answered straight.</h1>
+    <p class="lede">If yours isn't here, <a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">open an issue</a> and say what you tried. <a href="support.html#bugs">What to include</a> makes it quicker.</p>
+    <nav class="index" aria-label="On this page"><a class="tag plain" href="#basics">The basics</a><a class="tag plain" href="#live">Live TV and sports</a><a class="tag plain" href="#playback">Playback</a><a class="tag plain" href="#install">Installing and updating</a><a class="tag live" href="#trouble">Troubleshooting</a></nav>
+  </div>
+</section>
+
+<section class="band flush">
+  <div class="wrap">
+
+    <div class="faq-group" id="basics">
+      <h2><span class="sq on" aria-hidden="true"></span>The basics</h2>
+      <div class="faq">
+        <details><summary>What is Tally?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Tally is a Jellyfin app for Android TV, Google TV, Fire TV, Android phones and tablets, and Samsung and LG TVs, with a plugin for your Jellyfin server. The app plays your films, shows and music. The plugin adds live channels from your own sources, a guide, live scores matched to those channels, multiview, Tally Pulse, recordings and a Tally look for Jellyfin in the browser.</p></div></details>
+        <details><summary>Is it really free?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Yes. No price, no subscription, no ads and no account with anyone but your own Jellyfin server. It's open source under the GNU GPL, version 2. If you'd like to support its development, there's a <a href="support.html">Patreon</a>, and it's entirely optional.</p></div></details>
+        <details><summary>Do I need my own Jellyfin server?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>You need an account on one: yours, or one a friend runs. Tally is a client; everything you watch comes from that server. If a friend runs it, ask them for the server's address and your account, and you only need the app.</p><p>The Sports section, Samsung and LG TVs, and the Tally look for Jellyfin web also need the Tally plugin on that server. Without it, Tally hides the Sports section and works like any other Jellyfin app.</p></div></details>
+        <details><summary>Does Tally come with channels or sports streams?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>No, and it never will. Tally provides no channels and no streams, and doesn't point you to any. Live video comes from sources you already have the rights to watch: a paid IPTV service, an HDHomeRun or antenna, or your own M3U or HLS streams. The plugin adds game information from a public scoreboard feed and matches it to your channels.</p></div></details>
+        <details><summary>Which devices does it run on?<span class="pm" aria-hidden="true"></span></summary><div class="a"><ul><li>Android TV and Google TV, including the Chromecast with Google TV and the Nvidia Shield.</li><li>Fire TV.</li><li>Android phones and tablets, Android 6 or newer.</li><li>Samsung TVs from 2020 on (Tizen) and LG TVs from 2020 on (webOS 5 and newer), through the plugin.</li><li>Any browser, Jellyfin Media Player and the Xbox app, through the Tally look for Jellyfin web.</li></ul><p>See <a href="download.html">Download and install</a> for each one.</p></div></details>
+        <details><summary>Is there an iPhone, Apple TV or Roku version?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>There's no Tally app for them yet. The official Jellyfin apps work with your server as usual. With the plugin, Apple TV and Roku apps still get Tally's live channels, guide entries and game cards through Jellyfin's Live TV, and the Jellyfin app for iPhone and iPad, which is built on the web client, gets the Tally look.</p></div></details>
+        <details><summary>Will it replace my Jellyfin app, or Wholphin?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>No. Tally has its own name and app id, so it installs next to the official Jellyfin app and Wholphin and changes neither. Your server, account, watch history and favorites are the same in every app.</p></div></details>
+        <details><summary>How is Tally related to Wholphin?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Tally started as a fork of <a href="https://github.com/damontecres/Wholphin" rel="noopener">Wholphin</a>, the open-source Android TV client for Jellyfin by damontecres and its contributors. The player, the library and most of what happens between pressing play and a picture appearing are Wholphin's work. Tally adds its own design, the sports features and the phone layout, and keeps its changes small so it can keep taking Wholphin's updates. Tally isn't affiliated with or endorsed by the Wholphin project: please report Tally problems to Tally.</p></div></details>
+        <details><summary>Is Tally affiliated with a league or with Jellyfin?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>No. Tally is an independent project. It isn't affiliated with or endorsed by Jellyfin, any league, team, network or data provider. Jellyfin is a trademark of the Jellyfin project.</p></div></details>
+      </div>
+    </div>
+
+    <div class="faq-group" id="live">
+      <h2><span class="sq live" aria-hidden="true"></span>Live TV and sports</h2>
+      <div class="faq">
+        <details id="sources"><summary>Which live TV sources work?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Anything you can give the plugin as a playlist or a stream address, as long as you have the rights to watch it:</p><ul><li><strong>An M3U playlist</strong> (<code>.m3u</code> or <code>.m3u8</code>) from your IPTV service, with an optional <strong>XMLTV guide</strong> (<code>.xml</code> or <code>.xml.gz</code>). The guide powers the guide grid and "up next", matched by each channel's <code>tvg-id</code>. You can add headers the provider needs, like a User-Agent.</li><li><strong>An HDHomeRun or other network tuner</strong>, through the M3U lineup it publishes.</li><li><strong>Single HLS streams</strong> (<code>.m3u8</code>) by name and address, with an optional group, logo and <code>tvg-id</code>.</li></ul><p>Add them in the Tally page on your server: <strong>Settings → Sources → Add source</strong>.</p></div></details>
+        <details><summary>What do I need for the Sports section?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>The Tally plugin on your Jellyfin server, with live scores switched on (they are by default). Games appear on the board as soon as the plugin is installed. To watch them, you need channels from your own sources that carry them; the plugin matches each game to those channels by name, by guide listing or by network.</p></div></details>
+        <details><summary>Where do the scores come from?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>From a public scoreboard feed that your server reads, never the apps. It sends one cached request per league, about every 12 seconds while a game is live, and only while someone has Tally open or a recording is scheduled. An admin can switch live scores off under Settings → Live scores; then the server makes no such requests at all.</p></div></details>
+        <details><summary>Which leagues are covered?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>By default the NFL, college football and MLB. When your channels are named after games of another league, Tally adds that league by itself: the NBA, WNBA, NHL, men's college basketball, MLS and the major European soccer leagues. An admin can add any other league the feed covers, or remove one. Settings → Live scores shows every league on the board and why it's there. <a href="live-sports.html#leagues">More on leagues</a>.</p></div></details>
+        <details><summary>What is Tally Pulse?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>A channel your server builds that follows the pulse of every live game and cuts full screen to the hottest one. It cuts at once when a game gets into the red zone, a team scores or a game goes to overtime; otherwise it stays on a game at least a minute. A lower third says which game it's on and why.</p><p>It's lighter than multiview: your TV plays one stream, and the server does the cutting without transcoding. It's first in the live row of the games board and channel 1 in Jellyfin's Live TV. With no game live, it shows a "No games live" card.</p></div></details>
+        <details><summary>Can I watch with Spanish commentary?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Yes, if your sources carry a Spanish feed. Tally keeps English and Spanish apart, each with its own channel, so a game never switches language partway through. Choose Español under <strong>Settings → Commentary language</strong> in any Tally app, or use <strong>Watch in Español</strong> in a game's menu, or the Commentary switch in the player. Streams in other languages are left out.</p></div></details>
+        <details><summary>A game says NO STREAM YET. Why?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>None of your channels has been matched to that game yet. Around game time the server looks through your sources for it: shortly before the start, at the start and every few minutes after, and while it looks the card says LOOKING FOR A STREAM. Press Watch and Tally checks right then, and plays as soon as one turns up. If your sources don't carry the game, it stays that way. Turn on <strong>Only games with a stream</strong> to hide those games.</p></div></details>
+        <details><summary>Can I avoid spoilers?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Turn on <strong>Hide scores</strong> and the board and the player keep scores out of sight. Recorded games never show the score before you watch: not in the title, the art or the details.</p></div></details>
+        <details><summary>How does recording work, and where do recordings go?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Press and hold a game and choose <strong>Record</strong>, or record every game of a team. The server records in the background: it starts when the game goes live (or up to 15 minutes before, once a channel carries it), follows the stream ladder through any switch, and stops when the game is final plus a few minutes, not when the listing ends. You can watch from the start while it's still recording.</p><p>Finished games are saved as MP4 files in a <strong>Tally Recordings</strong> folder next to Jellyfin's data (pick another drive in Settings → Recordings) and appear in a <strong>Sports Recordings</strong> library. A recording starts only if there's room for it and a reserve (10 GB by default). Users need Jellyfin's permission to manage Live TV recordings.</p></div></details>
+        <details><summary>Does the plugin work with my other Jellyfin apps?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Yes. The plugin registers as a Jellyfin Live TV tuner, so every Jellyfin app sees the channels and the guide. Each channel gets a card with its game and live score, redrawn every couple of minutes, and channels are numbered hottest game first. Only the Tally apps get the games board, score bug and multiview.</p></div></details>
+      </div>
+    </div>
+
+    <div class="faq-group" id="playback">
+      <h2><span class="sq on" aria-hidden="true"></span>Playback</h2>
+      <div class="faq">
+        <details id="transcode"><summary>Why does my stream transcode?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Open the player's settings, then <strong>Quality</strong>. The top line says what's happening now, <strong>DIRECT PLAY</strong> or <strong>TRANSCODING</strong>, with the resolution and bitrate, and under it the reason Jellyfin gave. The common ones:</p><ul><li><strong>Over the quality limit.</strong> The file's bitrate is above the maximum set for your user or in the app. Raise it, or choose Original in Quality.</li><li><strong>You picked a quality step.</strong> Any step below Original always transcodes: that's how it gets smaller. Choose <strong>Original</strong> to go back, and check that <strong>Use as my default on this TV</strong> is off.</li><li><strong>Subtitles burned in.</strong> Picture subtitles (PGS, DVD, DVB) have to be drawn into the video by the server. Text subtitles (SRT, ASS) don't. Turn subtitles off or pick a text track.</li><li><strong>Audio format not supported by this TV.</strong> Often DTS or TrueHD. Usually only the audio is converted, which costs the server little.</li><li><strong>Video codec, profile, level, bit depth or HDR format not supported.</strong> The device can't decode the file as it is (for example HEVC 10-bit or Dolby Vision on an older TV), so the server converts it.</li></ul><p>Live channels are usually remuxed, not re-encoded: Jellyfin repackages the stream without changing the picture, which costs almost nothing. Tally Pulse cuts between games without transcoding, and recordings are saved without re-encoding.</p></div></details>
+        <details><summary>A live channel buffers or stutters. What can I do?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>The plugin's stream ladder already does most of the work: it ranks every copy of a game by quality and steadiness, switches when one struggles, and starts further behind live when a stream arrives in bursts. If it still stutters:</p><ul><li>Pick a lower step in <strong>Quality</strong>; it works on live channels too.</li><li>Add a second source for the same games, so the ladder has somewhere to go.</li><li>Admins can open <code>/JellyTV/Ladder</code> on the server to see each stream, its probes and each switch, and the Jellyfin log has a one-line health summary per watched channel every minute (<code>JellyTV ladder</code>).</li></ul></div></details>
+        <details><summary>Which player engine should I use?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>ExoPlayer, the default, is the right choice for most devices. MPV is there as an alternative that can help with some files and subtitle formats. You can switch in settings and compare.</p></div></details>
+      </div>
+    </div>
+
+    <div class="faq-group" id="install">
+      <h2><span class="sq on" aria-hidden="true"></span>Installing and updating</h2>
+      <div class="faq">
+        <details><summary>Why do I get security warnings when I install?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Tally isn't in an app store yet, and its installers aren't signed with a paid code-signing certificate. So Android asks you to allow installs from Downloader or your browser, Windows SmartScreen shows "Windows protected your PC" (click <strong>More info</strong>, then <strong>Run anyway</strong>), and macOS won't open the installer by double-click (the <a href="download.html#samsung">install guide</a> has the Terminal lines). Download only from this site or the official GitHub release; every release is built from the public source at its tag.</p></div></details>
+        <details><summary>How do updates work?<span class="pm" aria-hidden="true"></span></summary><div class="a"><ul><li><strong>Android apps</strong> check for a new release when they open and show an update screen: press <strong>Download &amp; Update</strong>. You stay signed in.</li><li><strong>The server plugin</strong> updates through Jellyfin's own plugin updates (Dashboard → Plugins), whichever way you installed it.</li><li><strong>Samsung and LG TVs</strong> load Tally from your server, so they update when the plugin does, the next time the app starts.</li></ul></div></details>
+        <details><summary>Which plugin build do I need?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>There's one build per Jellyfin line: 10.10, 10.11, and 12.1 and later. The installers and Jellyfin's catalog pick the right one. Jellyfin 12.0 has no build: update it to 12.1 first. After you upgrade Jellyfin to a new line, Jellyfin's plugin updates swap in the matching build and ask for one more restart; your Tally settings are kept.</p></div></details>
+        <details><summary>How do I remove the plugin?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p><strong>Dashboard → Plugins → Tally → Uninstall</strong>, then restart Jellyfin. Tally's settings stay in <code>plugins/configurations/Jellyfin.Plugin.JellyTV.xml</code>; delete that file too for a clean slate. To stop update offers, remove the Tally entry from Jellyfin's plugin repositories.</p></div></details>
+      </div>
+    </div>
+
+    <div class="faq-group" id="trouble">
+      <h2><span class="sq live" aria-hidden="true"></span>Troubleshooting</h2>
+      <div class="faq">
+        <details id="jmp"><summary>Jellyfin Media Player plays sound but the screen stays dark<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Update the Tally plugin to <strong>2.3.2 or newer</strong> (Dashboard → Plugins), restart Jellyfin, and reload Jellyfin Media Player or Jellyfin Desktop.</p><p>What was happening: these desktop apps draw the video <em>behind</em> the web page, and with <strong>Tally look for Jellyfin web</strong> on, the page stayed dark on top of it, so you heard every video but saw nothing. Since 2.3.2 the look clears while a video plays. If you can't update yet, switch <strong>Tally look for Jellyfin web</strong> off in the plugin's Settings → Jellyfin web client.</p></div></details>
+        <details><summary>The Sports section doesn't appear in the app<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Tally shows Sports only when the server has the Tally plugin. Check <strong>Dashboard → Plugins</strong> for Tally, and that it isn't marked "Not supported" or "Malfunctioned". Then close and reopen the app.</p></div></details>
+        <details><summary>The plugin shows "Not supported" or "Malfunctioned"<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>"Not supported" means the build is for another Jellyfin line: install the one for your version, or let Jellyfin's plugin updates swap it. Jellyfin 12.0 needs to go to 12.1 first. "Malfunctioned" means it failed to load: the Jellyfin log (<code>log_*.log</code>) says why.</p></div></details>
+        <details><summary>Jellyfin web doesn't look like Tally, or the Tally page is blank<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Reload the browser tab once after installing or updating the plugin, and if it's still off, hard-refresh (<kbd>Ctrl</kbd> + <kbd>F5</kbd>, or <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>R</kbd>) to drop old cached files. Check that <strong>Tally look for Jellyfin web</strong> is on in the plugin's settings.</p></div></details>
+        <details><summary>The channel list is empty<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Open <strong>Settings → Sources</strong> in the Tally page. Each source shows its own error: a playlist address that doesn't answer, a provider that wants a header, or an expired link. Press <strong>Refresh now</strong> after fixing it.</p></div></details>
+        <details><summary>The guide is empty, or channels show "Live" instead of a program<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>The source needs an XMLTV guide URL, and its channels need <code>tvg-id</code> values that match the guide. Channels that carry a game get a real guide entry from the scoreboard even without one.</p></div></details>
+        <details><summary>Times in the guide or on channel cards are hours off<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Your server's time zone is wrong, which is common in Docker: containers run in UTC unless told otherwise. Set <code>TZ</code> in the compose file (for example <code>America/Chicago</code>) and recreate the container. The Tally apps ask for their own time zone, so they're usually right already.</p></div></details>
+        <details><summary>The Live TV row doesn't show on Jellyfin's home screen<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Make sure Live TV is enabled under Dashboard → Live TV, and turn the row on under your user icon → Display → Home screen sections → Live TV. If the Tally tuner didn't register, you can add it by hand: an M3U tuner at <code>http://127.0.0.1:8096/JellyTV/livetv.m3u</code> and an XMLTV guide at <code>http://127.0.0.1:8096/JellyTV/epg.xml</code>.</p></div></details>
+        <details><summary>A stream fails with an error or a 403<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>The provider refused the request, or a signed address expired. Check the source's headers (some providers need a User-Agent or Referer), then press Refresh now. If you add a second source for the same channel, the ladder can fall back to it.</p></div></details>
+        <details><summary>The Samsung installer can't find my TV<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Do the Developer Mode step again: <strong>Host PC IP</strong> must be exactly the address the installer shows, and the TV must be restarted fully (hold the power button about 5 seconds). The computer and TV need to be on the same network. You can also type the TV's IP address, from Settings → General → Network → Network Status → IP Settings. If it says the TV's clock is behind, set the date and time on the TV.</p></div></details>
+        <details><summary>Tally disappeared from my LG TV<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>LG's Developer Mode ran out and LG removed the app. Once someone has signed in to Tally, your server renews Developer Mode daily, but it can't if the server was off for a long stretch or the TV never checked in. Turn Developer Mode on again and rerun the installer from the same computer. To keep it on by hand, open the Developer Mode app and press <strong>EXTEND</strong> before it runs out.</p></div></details>
+        <details><summary>The TV shows a code, but I can't find Quick Connect<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>In Jellyfin on your phone or computer, open your profile (the picture or initial at the top), then <strong>Quick Connect</strong>. If it's not there, the server's owner has to turn it on under Dashboard → General. You can also choose <strong>Use username/password</strong> on the TV.</p></div></details>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:56px"><p class="label">Still stuck?</p><p><a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">Open an issue on GitHub</a> with your device, the Tally and Jellyfin versions, what you did and what happened. For installer problems, attach <code>Tally-Samsung-Installer.log</code> or <code>Tally-LG-Installer.log</code> from the computer's temp folder.</p></div>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+        <p>A free, open-source Jellyfin app for TVs and phones, with a server plugin for live TV and sports. No ads, no accounts, no tracking.</p>
+        <a class="btn btn-sm" href="https://www.patreon.com/SeanDouglas" rel="noopener"><span class="sq" aria-hidden="true"></span>Support on Patreon</a>
+      </div>
+      <div>
+        <h2>Tally</h2>
+        <ul>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="live-sports.html">Live sports</a></li>
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="download.html">Download and install</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Help</h2>
+        <ul>
+          <li><a href="faq.html">FAQ and troubleshooting</a></li>
+          <li><a href="download.html#server">Server setup</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">Report a bug</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="support.html">Support Tally</a></li>
+          <li><a href="legal.html">Open source and legal</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally" rel="noopener">Source code</a></li>
+          <li><a href="https://github.com/damontecres/Wholphin" rel="noopener">Wholphin, the app Tally builds on</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>Tally is free software under the GNU General Public License, version 2, and a fork of Wholphin. Jellyfin is a trademark of the Jellyfin project. Tally isn't affiliated with or endorsed by Jellyfin, Wholphin, or any league, team, network or data provider. Tally provides no channels or streams. The teams and scores on this site are made up.</p>
+      <p class="mono">No cookies · No tracking</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

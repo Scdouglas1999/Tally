@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tally: the Jellyfin app with live sports, for TVs and phones</title>
+<meta name="description" content="Tally is a free, open-source Jellyfin app for Android TV, Fire TV, phones, and Samsung and LG TVs. With its server plugin, your own live TV becomes a games board with live scores, a score bug, multiview and Tally Pulse.">
+<link rel="canonical" href="https://tally.example/">
+<meta name="theme-color" content="#0e0f0e">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tally">
+<meta property="og:title" content="Tally: your library and tonight&#x27;s games, on one calm screen">
+<meta property="og:description" content="Tally is a free, open-source Jellyfin app for Android TV, Fire TV, phones, and Samsung and LG TVs. With its server plugin, your own live TV becomes a games board with live scores, a score bug, multiview and Tally Pulse.">
+<meta property="og:url" content="https://tally.example/">
+<meta property="og:image" content="https://tally.example/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tally: a Jellyfin app with a live sports board, score bug and multiview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Tally: your library and tonight&#x27;s games, on one calm screen">
+<meta name="twitter:description" content="Tally is a free, open-source Jellyfin app for Android TV, Fire TV, phones, and Samsung and LG TVs. With its server plugin, your own live TV becomes a games board with live scores, a score bug, multiview and Tally Pulse.">
+<meta name="twitter:image" content="https://tally.example/assets/og.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plex-mono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "Tally", "operatingSystem": "Android, Android TV, Fire OS, Tizen, webOS", "applicationCategory": "MultimediaApplication", "description": "Tally is a free, open-source Jellyfin app for Android TV, Fire TV, phones, and Samsung and LG TVs. With its server plugin, your own live TV becomes a games board with live scores, a score bug, multiview and Tally Pulse.", "url": "https://tally.example/", "license": "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "softwareVersion": "2.3.3", "downloadUrl": "https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk", "sameAs": ["https://github.com/Scdouglas1999/Tally", "https://www.patreon.com/SeanDouglas"]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav"><span class="bars" aria-hidden="true"></span>Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="features.html"><span class="sq" aria-hidden="true"></span>Features</a><a href="live-sports.html"><span class="sq" aria-hidden="true"></span>Live sports</a><a href="how-it-works.html"><span class="sq" aria-hidden="true"></span>How it works</a><a href="download.html"><span class="sq" aria-hidden="true"></span>Download</a><a href="faq.html"><span class="sq" aria-hidden="true"></span>FAQ</a><a href="changelog.html" class="nav-extra"><span class="sq" aria-hidden="true"></span>Changelog</a><a href="support.html"><span class="sq" aria-hidden="true"></span>Support</a>
+    </nav>
+    <div class="head-cta">
+      <a class="ver-chip" href="changelog.html"><span class="sq" aria-hidden="true"></span>V<span data-version>2.3.3</span><span class="visually-hidden">, what's new</span></a>
+      <a class="btn btn-primary btn-sm" href="download.html">Get Tally</a>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="hero" aria-labelledby="hero-h">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>A Jellyfin app for TVs and phones</p>
+      <h1 id="hero-h">Your library. Tonight's games. <span class="l2">One calm screen.</span></h1>
+      <p class="lede">Tally plays your Jellyfin films, shows and music in a quiet, type-led design. Add its server plugin and the live TV you already have becomes a games board with live scores, a score bug, box scores, multiview and Tally Pulse.</p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://github.com/Scdouglas1999/Tally/releases/latest/download/Tally.apk"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v9m0 0L4.5 6.5M8 10l3.5-3.5M2 13.5h12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></svg>Download for Android</a>
+        <a class="btn" href="download.html"><span class="sq" aria-hidden="true"></span>All platforms</a>
+      </div>
+      <p class="hero-meta"><span>Version <span data-version>2.3.3</span></span><span>Free</span><span>Open source, GPL-2</span><span>Jellyfin 10.10 to 12.1</span></p>
+    </div>
+
+    <div class="tv-frame reveal d1">
+      <div class="tv" id="hero-tv" data-scene="board" role="img" aria-label="A demo with made-up teams: the Tally games board shows Foxes at Gulls tied at 3. The Gulls score. The game opens full screen with a score bug. Then Tally Pulse cuts to Bison at Captains in the red zone, and the Bison score a touchdown.">
+        <div class="scene sc-board" aria-hidden="true">
+          <div class="b-top"><span class="t">SPORTS</span><span class="tab on"><i></i>GAMES</span><span class="tab"><i></i>CHANNELS</span><span class="tab"><i></i>MULTIVIEW</span><span class="tab"><i></i>RECORDINGS</span><span class="clock" data-clock>8:14 PM</span></div>
+          <div class="b-rule"></div>
+          <div class="b-feat">
+            <div class="l">
+              <div class="b-lg"><i></i>BASEBALL · BOT 7TH</div>
+              <div class="b-team"><span class="ab">RDG</span><span class="nm">Foxes<small>91-66 · AWAY</small></span><span class="sc">3</span></div>
+              <div class="b-team"><span class="ab">HCG</span><span class="nm">Gulls<small>80-77 · HOME</small></span><span class="sc"><span class="roll" data-home-score data-roll-init="3">3</span></span></div>
+            </div>
+            <div class="r">
+              <div class="b-sit">SITUATION</div>
+              <div class="b-count"><span class="bases"><i class="b2" data-b="2"></i><i class="b3" data-b="3"></i><i class="b1" data-b="1"></i></span><span data-count>2-1 · 1 OUT</span></div>
+              <div class="b-play" data-lastplay>R. Whitcombe walks. D. Castellano to third.</div>
+              <div class="b-line">
+                <span class="hd"></span><span class="hd">1</span><span class="hd">2</span><span class="hd">3</span><span class="hd">4</span><span class="hd">5</span><span class="hd">6</span><span class="hd">7</span><span class="hd">8</span><span class="hd">9</span><span class="hd">T</span>
+                <span>RDG</span><span>0</span><span>1</span><span>0</span><span>0</span><span>2</span><span>0</span><span>0</span><span>–</span><span>–</span><span class="t">3</span>
+                <span>HCG</span><span>1</span><span>0</span><span>0</span><span>2</span><span>0</span><span>0</span><span data-l7>0</span><span>–</span><span>–</span><span class="t"><span class="roll" data-home-score data-roll-init="3">3</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="b-row-h">LIVE NOW<span>6</span></div>
+          <div class="b-keys"><b class="ok">OK</b>Watch<b>HOLD</b>Add to multiview</div>
+          <div class="b-cards">
+            <div class="b-card focus">
+              <div class="h"><span>BASEBALL</span><span class="st">Bot 7th</span></div>
+              <div class="row"><span class="ab">RDG</span><span class="n">Foxes</span><span class="s">3</span></div>
+              <div class="row"><span class="ab">HCG</span><span class="n">Gulls</span><span class="s"><span class="roll" data-home-score data-roll-init="3">3</span></span></div>
+              <div class="ft"><i></i>RIDGEVIEW FOXES HARBOR CITY GULLS</div>
+            </div>
+            <div class="b-card wa">
+              <div class="kick">TALLY PULSE</div>
+              <div class="on">ON NOW</div>
+              <div class="g">Bison at Captains</div>
+              <span class="why">RED ZONE</span>
+              <div class="ft"><i></i>TALLY PULSE · ONE STREAM</div>
+            </div>
+            <div class="b-card">
+              <div class="h"><span>BASEBALL</span><span class="st">Top 5th</span></div>
+              <div class="row"><span class="ab">EVC</span><span class="n">Comets</span><span class="s">4</span></div>
+              <div class="row"><span class="ab">MBH</span><span class="n">Herons</span><span class="s">2</span></div>
+              <div class="ft"><i></i>EASTVALE COMETS MARLOW BAY HERONS</div>
+            </div>
+            <div class="b-card">
+              <div class="h"><span>BASEBALL</span><span class="st">Mid 3rd</span></div>
+              <div class="row"><span class="ab">PHW</span><span class="n">Woodsmen</span><span class="s">1</span></div>
+              <div class="row"><span class="ab">STB</span><span class="n">Owls</span><span class="s">1</span></div>
+              <div class="ft"><i></i>PINE HOLLOW WOODSMEN STONEBRIDGE OWLS</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="scene sc-play" aria-hidden="true">
+          <img class="foot" src="assets/img/foot-baseball.webp" alt="" width="1024" height="576" decoding="async">
+          <div class="scan"></div>
+          <div class="p-title"><div class="k">LIVE</div><div class="n">Foxes at Gulls</div></div>
+          <div class="bug"><div class="l1">RDG 3<span class="dot">·</span>HCG 4</div><div class="l2">BOT 7TH · 0-0 · 1 OUT</div></div>
+          <div class="p-bar"><span class="lv"><i></i>LIVE</span><span class="keys"><span><b>DOWN</b>Games</span><span><b>UP</b>Box score</span><span><b>CH +/-</b>Channel</span></span></div>
+        </div>
+
+        <div class="scene sc-pulse" aria-hidden="true">
+          <img class="foot" src="assets/img/foot-football.webp" alt="" width="1024" height="382" decoding="async">
+          <div class="scan"></div>
+          <div class="ch-bug"><b>CH 1</b>TALLY PULSE</div>
+          <div class="bug"><div class="l1"><span class="poss"></span>BWB <span class="roll" data-fb-away data-roll-init="10">10</span><span class="dot">·</span>CSC 17</div><div class="l2" data-fb-l2>3RD 8:42 · 2ND &amp; 7 AT CSC 14</div></div>
+          <div class="l3"><div class="k">ON PULSE NOW</div><div class="n">Bison at Captains</div><div class="why" data-why>RED ZONE</div></div>
+        </div>
+
+        <div class="tune" aria-hidden="true"><i></i><span class="k">TUNING IN</span><span class="n">Foxes at Gulls</span></div>
+        <div class="wipe" aria-hidden="true"></div>
+        <span class="slate-tag" aria-hidden="true">DEMO · MADE-UP TEAMS</span>
+      </div>
+      <div class="tv-under">
+        <div class="tv-steps" role="group" aria-label="Jump to a part of the demo">
+          <button class="tv-step" type="button"><b>01</b>Games board<span class="fill"></span></button>
+          <button class="tv-step" type="button"><b>02</b>A score<span class="fill"></span></button>
+          <button class="tv-step" type="button"><b>03</b>Score bug<span class="fill"></span></button>
+          <button class="tv-step" type="button"><b>04</b>Tally Pulse<span class="fill"></span></button>
+        </div>
+        <button class="tv-pause" type="button" aria-pressed="false" aria-label="Pause the demo">
+          <svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/></svg>
+          <svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker" role="region" aria-label="Sample scoreboard with made-up teams">
+  <div class="ticker-label"><span class="sq" aria-hidden="true"></span>Scores</div>
+  <div class="ticker-view">
+    <div class="ticker-track">
+      <div class="tk" data-sport="baseball" data-key="a"><span class="lg">BASEBALL</span><span class="t">RDG</span><span class="s roll">3</span><span class="t">HCG</span><span class="s roll">4</span><span class="st">BOT 7TH</span><span class="tag live">LATE DRAMA</span></div>
+      <div class="tk" data-sport="football" data-key="b"><span class="lg">FOOTBALL</span><span class="t">BWB</span><span class="s roll">16</span><span class="t">CSC</span><span class="s roll">17</span><span class="st">3RD 8:31</span><span class="tag live">RED ZONE</span></div>
+      <div class="tk" data-sport="football" data-key="c"><span class="lg">COLLEGE</span><span class="rk">(4)</span><span class="t">NTU</span><span class="s roll">20</span><span class="t">LKS</span><span class="s roll">24</span><span class="st">4TH 1:52</span><span class="tag live">UPSET ALERT</span></div>
+      <div class="tk" data-sport="basketball" data-key="d"><span class="lg">BASKETBALL</span><span class="t">KRT</span><span class="s roll">88</span><span class="t">SPR</span><span class="s roll">86</span><span class="st">4TH 2:10</span><span class="tag live">CLUTCH TIME</span></div>
+      <div class="tk" data-sport="hockey" data-key="e"><span class="lg">HOCKEY</span><span class="t">ALB</span><span class="s roll">2</span><span class="t">FJD</span><span class="s roll">2</span><span class="st">OT 3:10</span><span class="tag accent">OVERTIME</span></div>
+      <div class="tk" data-sport="baseball" data-key="f"><span class="lg">BASEBALL</span><span class="t">EVC</span><span class="s roll">4</span><span class="t">MBH</span><span class="s roll">2</span><span class="st">TOP 5TH</span></div>
+      <div class="tk" data-sport="soccer" data-key="g"><span class="lg">SOCCER</span><span class="t">NRV</span><span class="s roll">1</span><span class="t">WSP</span><span class="s roll">0</span><span class="st">78'</span></div>
+      <div class="tk" data-sport="baseball" data-key="h"><span class="lg">BASEBALL</span><span class="t">PHW</span><span class="s roll">1</span><span class="t">STB</span><span class="s roll">1</span><span class="st">MID 3RD</span></div>
+      <div class="tk" data-final><span class="lg">FOOTBALL</span><span class="t">TMR</span><span class="s">27</span><span class="t">OKV</span><span class="s">24</span><span class="st" style="color:var(--muted)">FINAL</span></div>
+      <div class="tk"><span class="lg">COLLEGE</span><span class="t">GRS</span><span class="t">at</span><span class="t">PNV</span><span class="st">7:30 PM</span><span class="tag plain">STARTING SOON</span></div>
+    </div>
+  </div>
+  <span class="ticker-note">Made-up teams</span>
+  <button class="ticker-pause" type="button" aria-pressed="false" aria-label="Pause the scores">
+    <svg class="i-pause" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/></svg>
+    <svg class="i-play" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg>
+  </button>
+</div>
+
+<section class="band flush" aria-labelledby="what-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>A1</b><span>What Tally is</span><span class="rt">00:30</span></div>
+    <div>
+      <h2 id="what-h" class="statement reveal">A Jellyfin app first. <em>A sports broadcast</em> when there's a game on.</h2>
+      <div class="pillars">
+        <div class="pillar reveal"><span class="n">01 · LIBRARY</span><h3>Your films, shows and music</h3><p>Tally connects to your Jellyfin server and plays nearly anything Jellyfin can serve: direct play when your device can, a transcode when it can't. Film pages, season rundowns, album pages and synced lyrics, in a design that stays out of the way.</p></div>
+        <div class="pillar reveal d1"><span class="n">02 · LIVE</span><h3>Tonight's games, properly</h3><p>With the Tally plugin, your server knows what's being played today and which of your channels carries it. You get a games board, a score bug, box scores, a game switcher, multiview, recordings and Tally Pulse.</p></div>
+        <div class="pillar reveal d2"><span class="n">03 · YOURS</span><h3>Your server, your sources</h3><p>Tally provides no channels. Live video comes from sources you already have: a paid IPTV service, an HDHomeRun or antenna, your own M3U or HLS streams. Tally makes them feel like one clean broadcast.</p></div>
+      </div>
+      <div class="lamp-story reveal">
+        <span class="big-lamp" aria-hidden="true"></span>
+        <div>
+          <p class="label amber" style="margin-bottom:10px">Why it's called Tally</p>
+          <p>A tally light is the small lamp on top of a studio camera. When it's lit, that camera is on air. Tally borrows the whole feel of a control room: a dark screen, square edges, clear type, and a single amber light for whatever has your attention, the thing you've selected or the game that's live right now. When the app starts, its light sputters for a moment and catches once your server answers.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band tight raised" aria-labelledby="plat-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>A2</b><span>Where it runs</span></div>
+    <div>
+      <h2 id="plat-h" class="sec-title wide reveal" style="font-size:clamp(26px,3vw,38px)">On the TV, the phone and the browser you already use.</h2>
+      <div class="platforms reveal">
+        <a class="plat" href="download.html#android-tv"><svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="7" width="32" height="20"/><path d="M14 33h12M20 27v6"/></svg><b>Android TV and Google TV</b><span>Chromecast, Nvidia Shield</span></a>
+        <a class="plat" href="download.html#android-tv"><svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="7" width="32" height="20"/><rect x="26" y="29" width="10" height="4"/></svg><b>Fire TV</b><span>Sticks and Cube</span></a>
+        <a class="plat" href="download.html#phones"><svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="12" y="4" width="16" height="32"/><path d="M17 31h6"/></svg><b>Android phones and tablets</b><span>Android 6 or newer</span></a>
+        <a class="plat" href="download.html#samsung"><svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="36" height="21"/><path d="M8 33h24"/><rect x="7" y="13" width="8" height="5" fill="currentColor" stroke="none"/></svg><b>Samsung TVs</b><span>Tizen · 2020 and newer</span></a>
+        <a class="plat" href="download.html#lg"><svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="8" width="36" height="21"/><path d="M8 33h24"/><path d="M25 14l6 6-3 1-1 3z" fill="currentColor" stroke="none"/></svg><b>LG TVs</b><span>webOS 5+ · 2020 and newer</span></a>
+        <a class="plat" href="download.html#other"><svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="7" width="32" height="26"/><path d="M4 13h32"/><path d="M8 10h2M12 10h2"/></svg><b>Jellyfin in a browser</b><span>The Tally look, with the plugin</span></a>
+        <a class="plat" href="download.html#other"><svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="8" width="26" height="18"/><path d="M12 31h8M16 26v5"/><rect x="31" y="12" width="6" height="19"/></svg><b>Jellyfin Media Player, Xbox</b><span>Through the web client</span></a>
+        <a class="plat" href="download.html#server"><svg viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="6" y="6" width="28" height="9"/><rect x="6" y="18" width="28" height="9"/><path d="M11 10.5h2M11 22.5h2M20 30v5M12 35h16"/></svg><b>Your Jellyfin server</b><span>Windows, Docker, Linux</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="fx-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>A3</b><span>The rundown</span><span class="rt">01:45</span></div>
+    <div>
+      <h2 id="fx-h" class="sec-title reveal">Everything, in running order.</h2>
+      <p class="lede reveal" style="margin-bottom:40px">Eight things Tally does, playing on the monitor. Pick one, or let it run.</p>
+      <div class="fx reveal">
+        <ul class="fx-list" role="tablist" aria-orientation="vertical" aria-label="Features">
+          <li role="presentation"><button class="fx-item" role="tab" id="fx-t1" aria-controls="fx-p1" aria-selected="true" data-cap="Home · the library"><span class="no">01</span><span class="ttl">Home and your library</span><span class="dsc">Home opens on what you were in the middle of, today's games, then what's new in each library. Every library sorts, filters and jumps by letter.</span><span class="bar"><i></i></span></button></li>
+          <li role="presentation"><button class="fx-item" role="tab" id="fx-t2" aria-controls="fx-p2" aria-selected="false" data-cap="A film's page"><span class="no">02</span><span class="ttl">Pages that tell you what you'll get</span><span class="dsc">Title art, cast, the format and every audio and subtitle track, so you know what you're about to play before you press it.</span><span class="bar"><i></i></span></button></li>
+          <li role="presentation"><button class="fx-item" role="tab" id="fx-t3" aria-controls="fx-p3" aria-selected="false" data-cap="Sports · games"><span class="no">03</span><span class="ttl">A games board that rolls</span><span class="dsc">Every game your channels carry, hottest first. When a team scores, the numbers roll over like an old stadium scoreboard.</span><span class="bar"><i></i></span></button></li>
+          <li role="presentation"><button class="fx-item" role="tab" id="fx-t4" aria-controls="fx-p4" aria-selected="false" data-cap="Player · box score"><span class="no">04</span><span class="ttl">Score bug and box score</span><span class="dsc">A mono score bug over the picture, and the full box score one press away, with the situation and the last play.</span><span class="bar"><i></i></span></button></li>
+          <li role="presentation"><button class="fx-item" role="tab" id="fx-t5" aria-controls="fx-p5" aria-selected="false" data-cap="Player · also on now"><span class="no">05</span><span class="ttl">The game switcher</span><span class="dsc">Press Down while you watch to see everything else that's live, and jump to it. Channel up and down work too.</span><span class="bar"><i></i></span></button></li>
+          <li role="presentation"><button class="fx-item" role="tab" id="fx-t6" aria-controls="fx-p6" aria-selected="false" data-cap="Multiview · four games"><span class="no">06</span><span class="ttl">Multiview</span><span class="dsc">Up to four games at once. The sound follows the one you've selected, and one button fills it with the hottest games.</span><span class="bar"><i></i></span></button></li>
+          <li role="presentation"><button class="fx-item" role="tab" id="fx-t7" aria-controls="fx-p7" aria-selected="false" data-cap="Watch together"><span class="no">07</span><span class="ttl">Watch together</span><span class="dsc">Start a watch party and friends on your server join from their own TVs or phones. Play, pause and skip happen for everyone.</span><span class="bar"><i></i></span></button></li>
+          <li role="presentation"><button class="fx-item" role="tab" id="fx-t8" aria-controls="fx-p8" aria-selected="false" data-cap="Phone · portrait pages, landscape player"><span class="no">08</span><span class="ttl">The same app on your phone</span><span class="dsc">A bottom bar, touch everywhere, music with the screen off, and downloads for when there's no connection.</span><span class="bar"><i></i></span></button></li>
+        </ul>
+        <div class="fx-monitor">
+          <div class="fx-screen">
+            <div class="fx-panel on" id="fx-p1" role="tabpanel" aria-labelledby="fx-t1"><video muted playsinline loop preload="none" poster="assets/media/tour-poster.webp" width="1280" height="720" aria-label="Moving through Tally: the home screen with today's games, then a film's page"><source src="assets/media/tour.mp4" type="video/mp4"></video></div>
+            <div class="fx-panel" id="fx-p2" role="tabpanel" aria-labelledby="fx-t2"><img src="assets/img/film.webp" srcset="assets/img/film-640.webp 640w, assets/img/film.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="A film's page with its title art, rating, runtime, tracks and cast" width="1280" height="720" loading="lazy" decoding="async"></div>
+            <div class="fx-panel" id="fx-p3" role="tabpanel" aria-labelledby="fx-t3"><video muted playsinline loop preload="none" poster="assets/media/score-poster.webp" width="1280" height="720" aria-label="The Sports section: a live game's score rolls from 3 to 4 as the Gulls score"><source src="assets/media/score.mp4" type="video/mp4"></video></div>
+            <div class="fx-panel" id="fx-p4" role="tabpanel" aria-labelledby="fx-t4"><img src="assets/img/boxscore.webp" srcset="assets/img/boxscore-640.webp 640w, assets/img/boxscore.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="The box score over the player: inning by inning, the count, the outs and the last play" width="1280" height="720" loading="lazy" decoding="async"></div>
+            <div class="fx-panel" id="fx-p5" role="tabpanel" aria-labelledby="fx-t5"><img src="assets/img/switcher.webp" srcset="assets/img/switcher-640.webp 640w, assets/img/switcher.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="The game switcher: a row of other live games under the player, with the score bug in the corner" width="1280" height="720" loading="lazy" decoding="async"></div>
+            <div class="fx-panel" id="fx-p6" role="tabpanel" aria-labelledby="fx-t6"><img src="assets/img/multiview.webp" srcset="assets/img/multiview-640.webp 640w, assets/img/multiview.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="Multiview with four games, the selected one marked AUDIO" width="1280" height="720" loading="lazy" decoding="async"></div>
+            <div class="fx-panel" id="fx-p7" role="tabpanel" aria-labelledby="fx-t7"><img src="assets/img/together.webp" srcset="assets/img/together-640.webp 640w, assets/img/together.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="The Watch together dialog over a playing film" width="1280" height="720" loading="lazy" decoding="async"></div>
+            <div class="fx-panel" id="fx-p8" role="tabpanel" aria-labelledby="fx-t8"><img src="assets/img/phone.webp" srcset="assets/img/phone-800.webp 800w, assets/img/phone.webp 1600w" sizes="(max-width: 900px) 100vw, 700px" alt="Tally on a phone: home, a film's page, a game's sheet and now playing with lyrics" width="1600" height="833" loading="lazy" decoding="async" style="object-fit:contain"></div>
+          </div>
+          <div class="fx-cap"><span class="t">Home · the library</span><span class="ch">CH 01</span></div>
+        </div>
+      </div>
+      <p class="reveal" style="margin-top:32px"><a class="btn" href="features.html"><span class="sq" aria-hidden="true"></span>Every feature, in detail</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" aria-labelledby="live-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>B1</b><span>Live sports</span><span class="rt">02:30</span></div>
+    <div>
+      <p class="kicker live reveal"><span class="sq live" aria-hidden="true"></span>With the Tally server plugin</p>
+      <h2 id="live-h" class="sec-title wide reveal">The games board your channels were missing.</h2>
+      <p class="lede reveal" style="margin-bottom:40px">The plugin reads a public scoreboard feed and matches every game to the channel that carries it: by the channel's name, by what its guide says is on, or by the network. Your channel list turns into a scoreboard where every card is a play button.</p>
+      <div class="showcase">
+        <div class="reveal">
+          <div class="hotspots" data-list="hs-list">
+            <figure class="shot"><img src="assets/img/board.webp" srcset="assets/img/board-640.webp 640w, assets/img/board.webp 1280w" sizes="(max-width: 960px) 100vw, 620px" alt="The Sports section on a TV: the Foxes and Gulls tied at 3 in the bottom of the 7th, the situation and box score beside the score, and a row of live games below" width="1280" height="720" loading="lazy" decoding="async"><figcaption><span class="sq" aria-hidden="true"></span>Sports · games · Android TV</figcaption></figure>
+            <button class="hs" type="button" style="left:55.7%;top:25%" aria-label="1: the live score">1</button>
+            <button class="hs" type="button" style="left:64%;top:20%" aria-label="2: the situation">2</button>
+            <button class="hs" type="button" style="left:84%;top:40%" aria-label="3: the box score">3</button>
+            <button class="hs" type="button" style="left:24%;top:78%" aria-label="4: every live game as a card">4</button>
+          </div>
+        </div>
+        <div class="reveal d1">
+          <ol class="hs-list" id="hs-list">
+            <li><div><strong>A score that rolls</strong>Big, readable from the sofa, and it turns over when a team scores.</div></li>
+            <li><div><strong>The situation</strong>Count, outs and runners. Down, distance and the ball on. Clock and period.</div></li>
+            <li><div><strong>Box score and last play</strong>Inning by inning, quarter by quarter, and what just happened.</div></li>
+            <li><div><strong>Hottest first</strong>Late, close games rise to the top. Follow a team and its games come first.</div></li>
+          </ol>
+          <div style="margin-top:28px">
+            <p class="label" style="margin-bottom:10px">The score bug, through a night of games</p>
+            <div class="sitbug" data-sitbug aria-live="off">
+              <div class="top"><span data-f="a">BWB</span> <span class="roll" data-f="as">10</span><span class="dot">·</span><span data-f="h">CSC</span> <span class="roll" data-f="hs">17</span></div>
+              <div class="bot" data-f="l2">3RD 8:42 · 2ND &amp; 7 AT CSC 14</div>
+              <div class="tagline"><span class="tag live" data-f="tag">RED ZONE</span></div>
+            </div>
+          </div>
+          <p style="margin-top:28px"><a class="btn btn-primary" href="live-sports.html">See live sports</a></p>
+        </div>
+      </div>
+      <div class="note live reveal" style="margin-top:48px"><p class="label">Your sources, your rights</p><p>Tally doesn't provide channels or streams, and doesn't point you to any. The video comes from live TV you already have the rights to watch: a paid IPTV service, an HDHomeRun or antenna, or your own M3U playlists and HLS streams. Tally only adds the scores and the way it all looks.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="how-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>B2</b><span>How it works</span><span class="rt">00:45</span></div>
+    <div>
+      <h2 id="how-h" class="sec-title reveal">Your server does the work.</h2>
+      <p class="lede reveal" style="margin-bottom:40px">The Tally plugin runs inside your Jellyfin server. It turns your sources into channels with a guide, picks the best stream for each game, follows the scores and hands every screen the same picture. The apps just play.</p>
+      <div class="arch reveal" id="arch-home"><svg class="h" viewBox="0 0 1000 500" role="img" aria-labelledby="arch-h-t arch-h-d"><title id="arch-h-t">How Tally fits together</title><desc id="arch-h-d">Video comes from your own sources (paid IPTV, an HDHomeRun or antenna, your own streams) into the Tally plugin on your Jellyfin server. The plugin also reads a public scoreboard feed for scores, clocks and situations. It runs the live ladder, the guide and channels, game matching, Tally Pulse, the DVR and a signed proxy, and serves the Tally apps on Android TV, Fire TV, phones, Samsung and LG TVs, Jellyfin in a browser and other Jellyfin apps.</desc><text class="k" x="20" y="72" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">SOURCES YOU HAVE RIGHTS TO</text><text class="k" x="750" y="50" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">YOUR SCREENS</text><path class="wire" d="M250 128 C300 128 290 228 340 228"/><path class="flow vid" id="hs0" d="M250 128 C300 128 290 228 340 228"/><path class="wire" d="M250 216 C300 216 290 284 340 284"/><path class="flow vid" id="hs1" d="M250 216 C300 216 290 284 340 284"/><path class="wire" d="M250 304 C300 304 290 340 340 340"/><path class="flow vid" id="hs2" d="M250 304 C300 304 290 340 340 340"/><path class="wire" d="M660 238 C705 238 705 98 750 98"/><path class="flow vid" id="ha0" d="M660 238 C705 238 705 98 750 98"/><path class="wire" d="M660 282 C705 282 705 174 750 174"/><path class="flow vid" id="ha1" d="M660 282 C705 282 705 174 750 174"/><path class="wire" d="M660 326 C705 326 705 250 750 250"/><path class="flow vid" id="ha2" d="M660 326 C705 326 705 250 750 250"/><path class="wire" d="M660 370 C705 370 705 326 750 326"/><path class="flow vid" id="ha3" d="M660 370 C705 370 705 326 750 326"/><path class="wire" d="M660 414 C705 414 705 402 750 402"/><path class="flow vid" id="ha4" d="M660 414 C705 414 705 402 750 402"/><path class="wire" d="M500 96 L500 152"/><path class="flow sc" id="hf0" d="M500 96 L500 152"/><g class="node g-sources"><rect x="20" y="96" width="230" height="64"/><text class="k " x="34" y="118">M3U + XMLTV GUIDE</text><text x="34" y="140">Paid IPTV</text></g><g class="node g-sources"><rect x="20" y="184" width="230" height="64"/><text class="k " x="34" y="206">TUNER LINEUP</text><text x="34" y="228">HDHomeRun, antenna</text></g><g class="node g-sources"><rect x="20" y="272" width="230" height="64"/><text class="k " x="34" y="294">M3U · HLS</text><text x="34" y="316">Your own streams</text></g><g class="node g-feed"><rect x="380" y="20" width="240" height="76"/><text class="k a" x="394" y="42">PUBLIC SCOREBOARD FEED</text><text x="394" y="64">Scores, clocks, situations</text></g><g class="node core g-plugin"><rect x="340" y="152" width="320" height="300"/><text class="k a" x="360" y="182">INSIDE YOUR JELLYFIN SERVER</text><text x="360" y="212" style="font-size:24px;font-weight:600">Tally plugin</text><rect class="lamp-dot" x="630" y="170" width="10" height="10"/><g class="chip"><rect x="360" y="236" width="135" height="30"/><text x="370" y="255">LIVE LADDER</text></g><g class="chip"><rect x="505" y="236" width="135" height="30"/><text x="515" y="255">GUIDE + CHANNELS</text></g><g class="chip"><rect x="360" y="278" width="135" height="30"/><text x="370" y="297">GAME MATCHING</text></g><g class="chip"><rect x="505" y="278" width="135" height="30"/><text x="515" y="297">TALLY PULSE</text></g><g class="chip"><rect x="360" y="320" width="135" height="30"/><text x="370" y="339">DVR</text></g><g class="chip"><rect x="505" y="320" width="135" height="30"/><text x="515" y="339">SIGNED PROXY</text></g><text class="k" x="360" y="382">ONE CHANNEL PER GAME,</text><text class="k" x="360" y="400">THE BEST STREAM, SCORES MATCHED</text><text class="k" x="360" y="418">TO EVERY CHANNEL</text></g><g class="node g-apps"><rect x="750" y="70" width="230" height="56"/><text class="k " x="764" y="92">TALLY APP</text><text x="764" y="114">Android TV, Fire TV</text></g><g class="node g-apps"><rect x="750" y="146" width="230" height="56"/><text class="k " x="764" y="168">TALLY APP</text><text x="764" y="190">Phones and tablets</text></g><g class="node g-apps"><rect x="750" y="222" width="230" height="56"/><text class="k " x="764" y="244">TALLY TV</text><text x="764" y="266">Samsung and LG TVs</text></g><g class="node g-apps"><rect x="750" y="298" width="230" height="56"/><text class="k " x="764" y="320">TALLY LOOK</text><text x="764" y="342">Jellyfin in a browser</text></g><g class="node g-apps"><rect x="750" y="374" width="230" height="56"/><text class="k " x="764" y="396">LIVE TV + GUIDE</text><text x="764" y="418">Other Jellyfin apps</text></g><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.2s" begin="0.00s" repeatCount="indefinite"><mpath href="#hs0"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.2s" begin="0.37s" repeatCount="indefinite"><mpath href="#hs1"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.2s" begin="0.74s" repeatCount="indefinite"><mpath href="#hs2"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="0.30s" repeatCount="indefinite"><mpath href="#ha0"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="0.67s" repeatCount="indefinite"><mpath href="#ha1"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="1.04s" repeatCount="indefinite"><mpath href="#ha2"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="1.41s" repeatCount="indefinite"><mpath href="#ha3"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="1.78s" repeatCount="indefinite"><mpath href="#ha4"/></animateMotion></rect><rect class="pkt " x="-4" y="-4" width="8" height="8"><animateMotion dur="1.4s" begin="0.00s" repeatCount="indefinite"><mpath href="#hf0"/></animateMotion></rect><rect class="pkt " x="-4" y="-4" width="8" height="8"><animateMotion dur="1.4s" begin="0.37s" repeatCount="indefinite"><mpath href="#hf0"/></animateMotion></rect><g transform="translate(20 476)"><path d="M0 0 H34" class="flow vid"/><text x="44" y="4" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">VIDEO FROM YOUR SOURCES</text><path d="M260 0 H294" class="flow sc"/><text x="304" y="4" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">SCORES AND GAME DATA</text></g></svg><svg class="v" viewBox="0 0 400 1010" role="img" aria-labelledby="arch-v-t arch-v-d"><title id="arch-v-t">How Tally fits together</title><desc id="arch-v-d">Your own video sources and a public scoreboard feed go into the Tally plugin on your Jellyfin server, which serves every Tally app and other Jellyfin apps.</desc><text x="10" y="112" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">SOURCES YOU HAVE RIGHTS TO</text><path class="wire" d="M70 172 L70 218 L130 218 L130 262"/><path class="flow vid" id="vs0" d="M70 172 L70 218 L130 218 L130 262"/><path class="wire" d="M200 172 L200 218 L200 218 L200 262"/><path class="flow vid" id="vs1" d="M200 172 L200 218 L200 218 L200 262"/><path class="wire" d="M330 172 L330 218 L270 218 L270 262"/><path class="flow vid" id="vs2" d="M330 172 L330 218 L270 218 L270 262"/><path class="wire" d="M390 52 C398 52 398 60 398 70 L398 300 C398 310 394 312 390 312"/><path class="flow sc" id="vf0" d="M390 52 C398 52 398 60 398 70 L398 300 C398 310 394 312 390 312"/><g class="node g-feed"><rect x="10" y="10" width="360" height="64"/><text class="k a" x="24" y="32">PUBLIC SCOREBOARD FEED</text><text x="24" y="54">Scores, clocks, situations</text></g><g class="node g-sources"><rect x="10" y="124" width="120" height="48"/><text class="k" x="20" y="144">IPTV</text><text x="20" y="162" style="font-size:13.5px">Paid IPTV</text></g><g class="node g-sources"><rect x="140" y="124" width="120" height="48"/><text class="k" x="150" y="144">TUNER</text><text x="150" y="162" style="font-size:13.5px">HDHomeRun</text></g><g class="node g-sources"><rect x="270" y="124" width="120" height="48"/><text class="k" x="280" y="144">M3U · HLS</text><text x="280" y="162" style="font-size:13.5px">Your streams</text></g><g class="node core g-plugin"><rect x="10" y="262" width="380" height="250"/><text class="k a" x="28" y="290">INSIDE YOUR JELLYFIN SERVER</text><text x="28" y="320" style="font-size:22px;font-weight:600">Tally plugin</text><rect class="lamp-dot" x="362" y="280" width="10" height="10"/><g class="chip"><rect x="28" y="342" width="167" height="30"/><text x="38" y="361">LIVE LADDER</text></g><g class="chip"><rect x="205" y="342" width="167" height="30"/><text x="215" y="361">GUIDE + CHANNELS</text></g><g class="chip"><rect x="28" y="384" width="167" height="30"/><text x="38" y="403">GAME MATCHING</text></g><g class="chip"><rect x="205" y="384" width="167" height="30"/><text x="215" y="403">TALLY PULSE</text></g><g class="chip"><rect x="28" y="426" width="167" height="30"/><text x="38" y="445">DVR</text></g><g class="chip"><rect x="205" y="426" width="167" height="30"/><text x="215" y="445">SIGNED PROXY</text></g><text class="k" x="28" y="488">THE BEST STREAM PER GAME</text></g><text x="48" y="566" style="fill:var(--muted);font:500 10.5px var(--mono);letter-spacing:.14em">YOUR SCREENS</text><path class="wire" d="M24 512 L24 608 L48 608"/><path class="flow vid" id="va0" d="M24 512 L24 608 L48 608"/><path class="wire" d="M24 512 L24 688 L48 688"/><path class="flow vid" id="va1" d="M24 512 L24 688 L48 688"/><path class="wire" d="M24 512 L24 768 L48 768"/><path class="flow vid" id="va2" d="M24 512 L24 768 L48 768"/><path class="wire" d="M24 512 L24 848 L48 848"/><path class="flow vid" id="va3" d="M24 512 L24 848 L48 848"/><path class="wire" d="M24 512 L24 928 L48 928"/><path class="flow vid" id="va4" d="M24 512 L24 928 L48 928"/><g class="node g-apps"><rect x="48" y="580" width="342" height="60"/><text class="k " x="62" y="602">TALLY APP</text><text x="62" y="624">Android TV, Fire TV</text></g><g class="node g-apps"><rect x="48" y="660" width="342" height="60"/><text class="k " x="62" y="682">TALLY APP</text><text x="62" y="704">Phones and tablets</text></g><g class="node g-apps"><rect x="48" y="740" width="342" height="60"/><text class="k " x="62" y="762">TALLY TV</text><text x="62" y="784">Samsung and LG TVs</text></g><g class="node g-apps"><rect x="48" y="820" width="342" height="60"/><text class="k " x="62" y="842">TALLY LOOK</text><text x="62" y="864">Jellyfin in a browser</text></g><g class="node g-apps"><rect x="48" y="900" width="342" height="60"/><text class="k " x="62" y="922">LIVE TV + GUIDE</text><text x="62" y="944">Other Jellyfin apps</text></g><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="1.8s" begin="0.00s" repeatCount="indefinite"><mpath href="#vs0"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="1.8s" begin="0.37s" repeatCount="indefinite"><mpath href="#vs1"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="1.8s" begin="0.74s" repeatCount="indefinite"><mpath href="#vs2"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="0.20s" repeatCount="indefinite"><mpath href="#va0"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="0.57s" repeatCount="indefinite"><mpath href="#va1"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="0.94s" repeatCount="indefinite"><mpath href="#va2"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="1.31s" repeatCount="indefinite"><mpath href="#va3"/></animateMotion></rect><rect class="pkt w" x="-4" y="-4" width="8" height="8"><animateMotion dur="2.4s" begin="1.68s" repeatCount="indefinite"><mpath href="#va4"/></animateMotion></rect><rect class="pkt " x="-4" y="-4" width="8" height="8"><animateMotion dur="2.0s" begin="0.00s" repeatCount="indefinite"><mpath href="#vf0"/></animateMotion></rect><g transform="translate(10 990)"><path d="M0 0 H30" class="flow vid"/><text x="38" y="4" style="fill:var(--muted);font:500 10px var(--mono);letter-spacing:.12em">VIDEO</text><path d="M110 0 H140" class="flow sc"/><text x="148" y="4" style="fill:var(--muted);font:500 10px var(--mono);letter-spacing:.12em">SCORES + GAME DATA</text></g></svg></div>
+      <p class="reveal" style="margin-top:32px"><a class="btn" href="how-it-works.html"><span class="sq" aria-hidden="true"></span>How it fits together</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" aria-labelledby="inst-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>C1</b><span>Install</span><span class="rt">00:20</span></div>
+    <div>
+      <h2 id="inst-h" class="sec-title reveal">On air in three steps.</h2>
+      <p class="lede reveal" style="margin-bottom:40px">Someone else runs your server? Skip to step three: you only need the app, the server's address and your Jellyfin account.</p>
+      <div class="three reveal">
+        <div><h3>Add the plugin to Jellyfin</h3><p>A Windows setup, a Docker Compose file, a one-line Linux script, or Tally's repository in Jellyfin's plugin catalog. About five minutes, and it updates through Jellyfin from then on.</p><a class="btn btn-sm" href="download.html#server"><span class="sq" aria-hidden="true"></span>Server setup</a></div>
+        <div><h3>Point it at your live TV</h3><p>Add your IPTV service's M3U playlist and XMLTV guide, your HDHomeRun's lineup, or your own HLS streams. Optional: without live TV, Tally is still a complete Jellyfin app.</p><a class="btn btn-sm" href="faq.html#sources"><span class="sq" aria-hidden="true"></span>Which sources work</a></div>
+        <div><h3>Install Tally on your screens</h3><p>Downloader on Android TV and Fire TV, a tap on a phone, an installer for Samsung and LG. Sign in with a 6-digit code from your phone, and nobody types a password with a remote.</p><a class="btn btn-primary btn-sm" href="download.html">Download</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="sup-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>C2</b><span>Support</span></div>
+    <div class="support">
+      <div class="reveal">
+        <h2 id="sup-h" class="sec-title">Free, and it stays free.</h2>
+        <p class="lede">No ads, no subscription, no account with anyone but your own server. If Tally has become part of your evenings and you're able to chip in, Patreon pays for the time that goes into it.</p>
+      </div>
+      <div class="patreon-card reveal d1">
+        <p class="label"><span class="sq on" aria-hidden="true"></span>Patreon</p>
+        <p>Support funds new features, testing across Jellyfin versions and TVs, and keeping Tally in step with Wholphin and Jellyfin releases.</p>
+        <div class="btn-row"><a class="btn btn-primary" href="https://www.patreon.com/SeanDouglas" rel="noopener">Support on Patreon</a><a class="btn" href="support.html"><span class="sq" aria-hidden="true"></span>Other ways to help</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" aria-labelledby="faq-h">
+  <div class="wrap rundown">
+    <div class="slug"><b>C3</b><span>Questions</span></div>
+    <div>
+      <h2 id="faq-h" class="sec-title reveal">Before you ask.</h2>
+      <div class="faq reveal">
+        <details><summary>Does Tally come with channels or sports streams?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>No. Tally is a Jellyfin app. Live video comes from sources you already have the rights to watch: a paid IPTV service, an HDHomeRun or antenna, your own M3U or HLS streams. The plugin adds scores and game information from a public scoreboard feed and matches them to your channels.</p></div></details>
+        <details><summary>Do I need my own Jellyfin server?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>You need access to one: yours, or a friend's who gives you an account. Tally plays everything Jellyfin serves. The Sports section, Samsung and LG TVs, and the Tally look for Jellyfin web need the Tally plugin on that server.</p></div></details>
+        <details><summary>Does it replace the official Jellyfin app?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>It installs alongside it, and alongside Wholphin, and changes neither. Your server, your accounts and your watch history are the same in every app.</p></div></details>
+        <details><summary>Is there an iPhone, Apple TV or Roku version?<span class="pm" aria-hidden="true"></span></summary><div class="a"><p>Not yet. The official Jellyfin apps work on those devices as usual, and with the plugin they still get Tally's live channels, guide and game cards through Jellyfin's own Live TV.</p></div></details>
+      </div>
+      <p class="reveal" style="margin-top:32px"><a class="btn" href="faq.html"><span class="sq" aria-hidden="true"></span>All questions and troubleshooting</a></p>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+        <p>A free, open-source Jellyfin app for TVs and phones, with a server plugin for live TV and sports. No ads, no accounts, no tracking.</p>
+        <a class="btn btn-sm" href="https://www.patreon.com/SeanDouglas" rel="noopener"><span class="sq" aria-hidden="true"></span>Support on Patreon</a>
+      </div>
+      <div>
+        <h2>Tally</h2>
+        <ul>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="live-sports.html">Live sports</a></li>
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="download.html">Download and install</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Help</h2>
+        <ul>
+          <li><a href="faq.html">FAQ and troubleshooting</a></li>
+          <li><a href="download.html#server">Server setup</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">Report a bug</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="support.html">Support Tally</a></li>
+          <li><a href="legal.html">Open source and legal</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally" rel="noopener">Source code</a></li>
+          <li><a href="https://github.com/damontecres/Wholphin" rel="noopener">Wholphin, the app Tally builds on</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>Tally is free software under the GNU General Public License, version 2, and a fork of Wholphin. Jellyfin is a trademark of the Jellyfin project. Tally isn't affiliated with or endorsed by Jellyfin, Wholphin, or any league, team, network or data provider. Tally provides no channels or streams. The teams and scores on this site are made up.</p>
+      <p class="mono">No cookies · No tracking</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

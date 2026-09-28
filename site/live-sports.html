@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live sports · Tally</title>
+<meta name="description" content="With the Tally server plugin, your own live TV becomes a sports broadcast: a games board, score bug, box scores, game switcher, multiview, Tally Pulse, English or Spanish commentary, a stream ladder that keeps playback smooth, and game recordings.">
+<link rel="canonical" href="https://tally.example/live-sports">
+<meta name="theme-color" content="#0e0f0e">
+<meta name="color-scheme" content="dark">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Tally">
+<meta property="og:title" content="Live sports in Tally: a games board, score bug, multiview and Tally Pulse">
+<meta property="og:description" content="With the Tally server plugin, your own live TV becomes a sports broadcast: a games board, score bug, box scores, game switcher, multiview, Tally Pulse, English or Spanish commentary, a stream ladder that keeps playback smooth, and game recordings.">
+<meta property="og:url" content="https://tally.example/live-sports">
+<meta property="og:image" content="https://tally.example/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tally: a Jellyfin app with a live sports board, score bug and multiview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Live sports in Tally: a games board, score bug, multiview and Tally Pulse">
+<meta name="twitter:description" content="With the Tally server plugin, your own live TV becomes a sports broadcast: a games board, score bug, box scores, game switcher, multiview, Tally Pulse, English or Spanish commentary, a stream ladder that keeps playback smooth, and game recordings.">
+<meta name="twitter:image" content="https://tally.example/assets/og.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plex-mono-500.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav"><span class="bars" aria-hidden="true"></span>Menu</button>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="features.html"><span class="sq" aria-hidden="true"></span>Features</a><a href="live-sports.html" aria-current="page"><span class="sq" aria-hidden="true"></span>Live sports</a><a href="how-it-works.html"><span class="sq" aria-hidden="true"></span>How it works</a><a href="download.html"><span class="sq" aria-hidden="true"></span>Download</a><a href="faq.html"><span class="sq" aria-hidden="true"></span>FAQ</a><a href="changelog.html" class="nav-extra"><span class="sq" aria-hidden="true"></span>Changelog</a><a href="support.html"><span class="sq" aria-hidden="true"></span>Support</a>
+    </nav>
+    <div class="head-cta">
+      <a class="ver-chip" href="changelog.html"><span class="sq" aria-hidden="true"></span>V<span data-version>2.3.3</span><span class="visually-hidden">, what's new</span></a>
+      <a class="btn btn-primary btn-sm" href="download.html">Get Tally</a>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="page-head">
+  <div class="wrap">
+    <p class="kicker live"><span class="sq live" aria-hidden="true"></span>Live sports</p>
+    <h1>Your channels, called like a broadcast.</h1>
+    <p class="lede">With the Tally plugin on your Jellyfin server, Tally knows what's being played today, which of your channels carries each game, and what's happening in it right now. Everything below works on Android TV, Fire TV, phones, Samsung and LG TVs, and most of it in Jellyfin in the browser.</p>
+    <nav class="index" aria-label="On this page">
+      <a class="tag plain" href="#board">Games board</a><a class="tag plain" href="#bug">Score bug</a><a class="tag plain" href="#boxscore">Box score</a><a class="tag plain" href="#switcher">Switcher</a><a class="tag plain" href="#multiview">Multiview</a><a class="tag live" href="#pulse">Tally Pulse</a><a class="tag plain" href="#commentary">Commentary</a><a class="tag plain" href="#ladder">Stream ladder</a><a class="tag plain" href="#dvr">Recording</a><a class="tag plain" href="#college">College football</a><a class="tag plain" href="#leagues">Leagues</a>
+    </nav>
+    <div class="note live" style="margin-top:40px;max-width:78ch"><p class="label">Sources and rights</p><p>Tally provides no channels and no streams. The video comes from live TV you already have the rights to watch: a paid IPTV service's M3U playlist and XMLTV guide, an HDHomeRun or other antenna tuner, or your own HLS streams. Tally adds the scores, the matching and the way it looks. The teams on this page are made up.</p></div>
+  </div>
+</section>
+
+<section class="band" id="board" aria-labelledby="board-h">
+  <div class="wrap split flip">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>The games board</p>
+      <h2 id="board-h">Every game your channels carry, hottest first.</h2>
+      <p>Today's games show up on the home screen and get a section of their own: live and upcoming, as big cards you can read from the sofa, with a panel for the game in focus: the score, the clock or inning, the situation and the last play.</p>
+      <ul class="points">
+        <li><strong>Sorted by heat.</strong> Late, close games rise to the top. Tags say why: LATE DRAMA, RED ZONE, BASES LOADED, CLUTCH TIME, OVERTIME.</li>
+        <li><strong>Matched to your channels</strong> by the channel's name, by what its guide says is on, or by the network. A network match is marked NET, since a network can be showing another region's game.</li>
+        <li><strong>Watch from any card.</strong> Tally opens the channel the game is on. No stream yet? It says NO STREAM YET, or LOOKING FOR A STREAM while the server checks your sources, and plays as soon as one turns up.</li>
+        <li><strong>Your teams first.</strong> Follow a team and its games move to the front.</li>
+        <li><strong>Hide scores</strong> when you're catching up on a game later, and <strong>Only games with a stream</strong> to see just what you can watch.</li>
+      </ul>
+    </div>
+    <div class="split-media reveal d1">
+      <figure class="shot"><video data-inview muted playsinline loop preload="none" poster="assets/media/score-poster.webp" width="1280" height="720" aria-label="The Sports section: the Gulls score and the number rolls from 3 to 4"><source src="assets/media/score.mp4" type="video/mp4"></video><button class="play-toggle" type="button">Play</button><figcaption><span class="sq" aria-hidden="true"></span>Sports · a score rolls in</figcaption></figure>
+      <figure class="shot"><img src="assets/img/home-tv.webp" srcset="assets/img/home-tv-640.webp 640w, assets/img/home-tv.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="The home screen with a live game at the top and a Live now row" width="1280" height="720" loading="lazy" decoding="async"><figcaption><span class="sq" aria-hidden="true"></span>Home · live now</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" id="bug" aria-labelledby="bug-h">
+  <div class="wrap split">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>The score bug</p>
+      <h2 id="bug-h">A score bug that knows the situation.</h2>
+      <p>Over every live game sits a small mono score bug: the teams and the score on top, and underneath, in amber, the part that matters right now. Count and outs. Down, distance and where the ball is. The clock and the period. A square marks who has the ball.</p>
+      <p>It fades in and out on its own, so it's there when you look for it and gone when you don't. With Hide scores on, the scores stay hidden.</p>
+      <div style="margin-top:28px">
+        <div class="sitbug" data-sitbug aria-live="off">
+          <div class="top"><span data-f="a">BWB</span> <span class="roll" data-f="as">10</span><span class="dot">·</span><span data-f="h">CSC</span> <span class="roll" data-f="hs">17</span></div>
+          <div class="bot" data-f="l2">3RD 8:42 · 2ND &amp; 7 AT CSC 14</div>
+          <div class="tagline"><span class="tag live" data-f="tag">RED ZONE</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="split-media reveal d1">
+      <figure class="shot"><img src="assets/img/bug-baseball.webp" srcset="assets/img/bug-baseball-640.webp 640w, assets/img/bug-baseball.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="A live baseball game with the score bug: RDG 3, HCG 4, bottom of the 7th, 0 and 0, 1 out" width="1280" height="720" loading="lazy" decoding="async"><figcaption><span class="sq" aria-hidden="true"></span>Baseball · count and outs</figcaption></figure>
+      <figure class="shot"><img src="assets/img/bug-football.webp" srcset="assets/img/bug-football-640.webp 640w, assets/img/bug-football.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="The player on a football channel with the score bug showing the clock, quarter, down and distance" width="1280" height="720" loading="lazy" decoding="async"><figcaption><span class="sq" aria-hidden="true"></span>Football · down and distance</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="boxscore" aria-labelledby="box-h">
+  <div class="wrap split flip">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>Box score · press Up</p>
+      <h2 id="box-h">The whole game, one press away.</h2>
+      <p>Press Up while you watch and the box score comes down over the picture: inning by inning or quarter by quarter, the situation with the runners on base, and the last play in plain words. Press Back and it's gone.</p>
+    </div>
+    <div class="split-media reveal d1">
+      <figure class="shot"><img src="assets/img/boxscore.webp" srcset="assets/img/boxscore-640.webp 640w, assets/img/boxscore.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="The box score over the player: runs by inning, the count, outs, runners and the last play" width="1280" height="720" loading="lazy" decoding="async"><figcaption><span class="sq" aria-hidden="true"></span>Box score</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" id="switcher" aria-labelledby="sw-h">
+  <div class="wrap split">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>Game switcher · press Down</p>
+      <h2 id="sw-h">Everything else that's on, without leaving.</h2>
+      <p>Press Down while you watch and a row of every other live game slides up, each with its score and clock. Press OK to switch, or hold for more. Channel up and down step through your live channels.</p>
+      <p>Keep a game small in the corner while you watch something else full screen, and let switch alerts tell you when another game gets interesting.</p>
+    </div>
+    <div class="split-media reveal d1">
+      <figure class="shot"><img src="assets/img/switcher.webp" srcset="assets/img/switcher-640.webp 640w, assets/img/switcher.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="The Also on now row of live games under the player" width="1280" height="720" loading="lazy" decoding="async"><figcaption><span class="sq" aria-hidden="true"></span>Also on now</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="multiview" aria-labelledby="mv-h">
+  <div class="wrap split flip">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>Multiview</p>
+      <h2 id="mv-h">Four games. The sound follows you.</h2>
+      <p>Put up to four games on screen at once. The tile you've selected has the sound, marked AUDIO; the rest say MUTED, each with its own live score under it. Swap any tile for another channel from the list beside them.</p>
+      <ul class="points">
+        <li><strong>Fill multiview with the hottest games</strong> in one press.</li>
+        <li><strong>On LG TVs</strong>, which play one video at a time, multiview plays the tile you're on and shows live cards for the others.</li>
+      </ul>
+    </div>
+    <div class="split-media reveal d1">
+      <figure class="shot"><img src="assets/img/multiview.webp" srcset="assets/img/multiview-640.webp 640w, assets/img/multiview.webp 1280w" sizes="(max-width: 900px) 100vw, 700px" alt="Multiview with four games; the selected tile is marked AUDIO and the others MUTED" width="1280" height="720" loading="lazy" decoding="async"><figcaption><span class="sq" aria-hidden="true"></span>Multiview · four up</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" id="pulse" aria-labelledby="pulse-h">
+  <div class="wrap">
+    <div class="split" style="align-items:start">
+      <div class="split-text reveal">
+        <p class="kicker live"><span class="sq live" aria-hidden="true"></span>Tally Pulse · new in 2.3</p>
+        <h2 id="pulse-h">One channel that follows the pulse of every game.</h2>
+        <p>Tally Pulse is a channel your server builds. It watches every live game and cuts full screen to the hottest one. While it plays, a lower third says which game it's on and why.</p>
+        <p>It's lighter than multiview: your TV plays one stream, and your server does the cutting, without transcoding. It reads the games' own streams, so it adds no load on your sources, and while nobody watches it, it checks nothing.</p>
+        <ul class="points">
+          <li><strong>First in the live row</strong> of the games board, and channel 1 in Jellyfin's Live TV for every other Jellyfin app.</li>
+          <li><strong>A slate when it's quiet.</strong> With no game live, it shows a "No games live" card.</li>
+          <li><strong>Its reasons</strong>: red zone, score, two-minute drill, overtime, close game, top game. Admins can see its recent cuts, and why, on the plugin's Ladder page.</li>
+        </ul>
+      </div>
+      <div class="reveal d1">
+        <div class="tv-frame">
+          <div class="tv" id="pulse-tv" data-scene="pulse" data-foot="a" role="img" aria-label="A demo of Tally Pulse with made-up teams: it shows Bison at Captains in the red zone, the Bison score, then it cuts to Foxes at Gulls, a close game.">
+            <div class="scene sc-pulse" aria-hidden="true">
+              <img class="foot fa" src="assets/img/foot-football.webp" alt="" width="1024" height="382" loading="lazy" decoding="async">
+              <img class="foot fb" src="assets/img/foot-baseball.webp" alt="" width="1024" height="576" loading="lazy" decoding="async">
+              <div class="scan"></div>
+              <div class="ch-bug"><b>CH 1</b>TALLY PULSE</div>
+              <div class="bug"><div class="l1"><span data-w-a>BWB</span> <span class="roll" data-w-as>10</span><span class="dot">·</span><span data-w-h>CSC</span> <span class="roll" data-w-hs>17</span></div><div class="l2" data-w-l2>3RD 8:42 · 2ND &amp; 7 AT CSC 14</div></div>
+              <div class="l3"><div class="k">ON PULSE NOW</div><div class="n" data-w-title>Bison at Captains</div><div class="why" data-w-why>RED ZONE</div></div>
+            </div>
+            <div class="wipe" aria-hidden="true"></div>
+            <span class="slate-tag" aria-hidden="true">DEMO · MADE-UP TEAMS</span>
+          </div>
+        </div>
+        <div class="cut-rules">
+          <div><span class="tag live">Cuts at once</span><p>A game gets into the red zone, a team scores, or a game goes to overtime.</p></div>
+          <div><span class="tag accent">Stays put</span><p>Otherwise it stays on a game at least a minute, so it never flickers between two.</p></div>
+          <div><span class="tag plain">One stream</span><p>The TV plays a single continuous stream. The cut happens on the server.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="commentary" aria-labelledby="com-h">
+  <div class="wrap split flip">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>Commentary language · new in 2.3</p>
+      <h2 id="com-h">English or Español, and it stays that way.</h2>
+      <p>Tally keeps English and Spanish commentary apart. Each language gets its own channel, so a game never switches to the other language halfway through.</p>
+      <ul class="points">
+        <li><strong>English by default.</strong> Choose Español under Settings → Commentary language, in every Tally app.</li>
+        <li><strong>Watch in Español</strong>, or Watch in English, in a game's menu when it has both, a Commentary switch in the player, and an ES mark on the card when the Spanish feed is the one on offer.</li>
+        <li><strong>For server owners:</strong> Spanish channels are named after their game with "(Español)" and sit after the English ones. A setting hides them from Jellyfin's Live TV while the Tally apps still list them. Streams in other languages are left out.</li>
+      </ul>
+    </div>
+    <div class="split-media reveal d1">
+      <div class="mock">
+        <div class="menu-mock" aria-hidden="true">
+          <div class="h">BASEBALL · TOP 1ST</div>
+          <div class="t">Comets at Herons</div>
+          <div class="it">Watch <b>OK</b></div>
+          <div class="it f">Watch in Español <b>OK</b></div>
+          <div class="it">Add to multiview <b>OK</b></div>
+        </div>
+        <div style="margin-top:22px;display:flex;justify-content:flex-end">
+          <span class="chip-es"><svg viewBox="0 0 18 18" aria-hidden="true" fill="currentColor"><path d="M2 7h3l4-3.5v11L5 11H2z"/><path d="M11.5 6.2a4 4 0 0 1 0 5.6M13.6 4.2a7 7 0 0 1 0 9.6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Commentary: <span class="lang-swap" data-lang-swap>ESPAÑOL</span></span>
+        </div>
+        <p class="label" style="margin-top:18px">A game's menu, and the Commentary switch in the player</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" id="ladder" aria-labelledby="lad-h">
+  <div class="wrap split">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>The stream ladder</p>
+      <h2 id="lad-h">When a stream stumbles, the picture doesn't.</h2>
+      <p>When your sources have more than one stream of the same game, the plugin makes them one channel and keeps them all. It plays the best one: the highest frame rate and resolution your server can download fast enough, arriving steadily and live.</p>
+      <p>If that stream starts to stall, the next part of the game comes from the next stream in line, and the picture keeps going without a reload. After a few steady minutes it steps back up to the better stream, if that one has recovered.</p>
+      <ul class="points">
+        <li><strong>Bursty streams, handled.</strong> A stream that arrives in stop-and-go bursts gives way to a steadier copy of the game. With no steadier copy, Tally starts a little further behind live, so the pauses never reach your screen.</li>
+        <li><strong>Seamless switches.</strong> The next segments continue the old stream's timeline, so players and Jellyfin see one unbroken channel.</li>
+        <li><strong>Visible to admins.</strong> The Ladder page shows every stream, its probes, how steadily it arrives, and each switch.</li>
+      </ul>
+    </div>
+    <div class="split-media reveal d1">
+      <div class="ladder" data-ladder aria-hidden="true">
+        <div class="lh"><span>Ladder · Foxes at Gulls</span><span>3 streams</span></div>
+        <div class="rung" data-name="1080p60"><span class="ix"></span><div><div class="nm">1080p60 · 7.8 Mbps<small>Stream A</small></div><div class="seg"></div></div><span class="st">On air</span></div>
+        <div class="rung" data-name="1080p30"><span class="ix"></span><div><div class="nm">1080p30 · 5.1 Mbps<small>Stream B</small></div><div class="seg"></div></div><span class="st">Ready</span></div>
+        <div class="rung" data-name="720p60"><span class="ix"></span><div><div class="nm">720p60 · 4.2 Mbps<small>Stream C</small></div><div class="seg"></div></div><span class="st">Ready</span></div>
+        <div class="out"><span class="sq" aria-hidden="true"></span>The channel plays: <span class="v amber">1080p60</span></div>
+        <div class="log-line">Playing 1080p60 · 7.8 Mbps · arriving steadily</div>
+      </div>
+      <p class="muted" style="font-size:14px">An illustration of the plugin's rules. Each bar is a segment of video: amber on air, gray ready, red late.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="dvr" aria-labelledby="dvr-h">
+  <div class="wrap split flip">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>Recording games</p>
+      <h2 id="dvr-h">A DVR that knows when the game ends.</h2>
+      <p>Press and hold a game and choose Record, or record every game of a team you follow. The server records in the background from the channel the game is on, following the stream ladder through any switch.</p>
+      <ul class="points">
+        <li><strong>Stops when the game is over</strong>, not when the listing ends, plus a few minutes after. Postponed and canceled games cancel themselves.</li>
+        <li><strong>Watch from the start</strong> while the game is still going, and catch up.</li>
+        <li><strong>Never spoils it.</strong> A recorded game's title, art and details never show the score.</li>
+        <li><strong>Checks for room first</strong>, from the stream's real bitrate and the length of a typical game, and keeps a reserve free on the drive.</li>
+        <li><strong>Into your library.</strong> Finished games become MP4 files in a Sports Recordings library, with art drawn from the game. Keep the last few games per team, or delete after a number of days.</li>
+      </ul>
+    </div>
+    <div class="split-media reveal d1">
+      <div class="mock">
+        <div class="menu-mock" aria-hidden="true">
+          <div class="h">BASEBALL · BOT 7TH</div>
+          <div class="t">Foxes at Gulls</div>
+          <div class="it">Watch <b>OK</b></div>
+          <div class="it">Add to multiview <b>OK</b></div>
+          <p class="label" style="margin:6px 0 2px">~286 MB · 327 GB free on the server</p>
+          <div class="it f">Record <b>OK</b></div>
+          <div class="it">Follow the Foxes <b>OK</b></div>
+          <div class="it">Record every Foxes game <b>OK</b></div>
+        </div>
+        <p class="label" style="margin-top:18px">Hold OK on any game</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" id="college" aria-labelledby="cfb-h">
+  <div class="wrap split">
+    <div class="split-text reveal">
+      <p class="kicker"><span class="sq live" aria-hidden="true"></span>College football · new in 2.3</p>
+      <h2 id="cfb-h">Ranks, and a warning when one's about to fall.</h2>
+      <p>College football is on the board by default. On the Sports page in Jellyfin's web app, games show each team's AP Top 25 rank, and an UPSET ALERT when a ranked team is losing late. College streams get their own College Football group.</p>
+      <p>Team matching knows that "Texas" and "Texas Tech" are different schools, and handles nicknames that several schools share. Follow a college team and its games follow you across sports.</p>
+    </div>
+    <div class="split-media reveal d1">
+      <div class="mock" aria-hidden="true" style="font-family:var(--mono)">
+        <div style="display:flex;justify-content:space-between;font-size:11px;letter-spacing:.16em;color:var(--muted);margin-bottom:14px"><span>NCAAF</span><span style="color:var(--accent)">4TH 1:52</span></div>
+        <div style="display:grid;grid-template-columns:auto 1fr auto;gap:10px 14px;align-items:center;font-size:20px">
+          <span style="font-size:12px;color:var(--muted)">(4)</span><span style="font-family:var(--sans);font-weight:500">North Ridge Tech</span><span>20</span>
+          <span style="font-size:12px;color:var(--muted)"></span><span style="font-family:var(--sans);font-weight:500">Lakeshore</span><span style="color:var(--accent)">24</span>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap"><span class="tag live">Upset alert</span><span class="tag plain">College football</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="more-live" aria-labelledby="ml-h">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="sq live" aria-hidden="true"></span>Also</p>
+    <h2 id="ml-h" class="sec-title wide reveal">The small things that make game night.</h2>
+    <div class="grid-3" style="margin-top:32px">
+      <div class="card reveal"><p class="label">Other apps</p><h3>Live cards for every Jellyfin app</h3><p>Each channel gets a picture of its game, with the live score, redrawn every couple of minutes, and a real guide entry. Channels are numbered hottest first, so even apps that aren't Tally get a scoreboard.</p></div>
+      <div class="card reveal d1"><p class="label">From the phone</p><h3>Play on TV</h3><p>In Jellyfin on your phone, tap the screen icon and pick a TV. Every Watch then plays there. Follow the hottest game flips the TV for you.</p></div>
+      <div class="card reveal d2"><p class="label">Idle</p><h3>A scores screensaver</h3><p>When the TV is on and nobody's watching, today's games, updating quietly.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band raised" id="leagues" aria-labelledby="lg-h">
+  <div class="wrap">
+    <p class="kicker reveal"><span class="sq live" aria-hidden="true"></span>Supported leagues</p>
+    <h2 id="lg-h" class="sec-title wide reveal">The leagues follow your sources.</h2>
+    <p class="lede reveal" style="margin-bottom:32px">The board starts with three leagues. When your channels are named after games of another league the feed covers, Tally adds that league by itself, and lets it go after three days without such a channel. Settings → Live scores lists every league on the board and why it's there.</p>
+    <div class="leagues">
+      <div class="card reveal"><p class="label amber">On by default</p><ul><li class="tag plain">NFL</li><li class="tag plain">College football</li><li class="tag plain">MLB</li></ul></div>
+      <div class="card reveal d1"><p class="label">Added when your sources carry them</p><ul><li class="tag plain">NBA</li><li class="tag plain">WNBA</li><li class="tag plain">NHL</li><li class="tag plain">Men's college basketball</li><li class="tag plain">MLS</li><li class="tag plain">Major European soccer</li></ul></div>
+      <div class="card reveal d2"><p class="label">Added by an admin</p><p>Any other league the scoreboard feed covers, by its short name or path. A league an admin removes isn't added back. Or switch live scores off, and the server makes no requests of its own for them.</p></div>
+    </div>
+    <p class="muted reveal" style="font-size:14px;margin-top:28px">League names are used only to say which schedules Tally reads. Tally isn't affiliated with or endorsed by any league, team, network or data provider, and this site shows none of their marks.</p>
+    <p class="reveal" style="margin-top:28px"><a class="btn btn-primary" href="download.html#server">Set up the server plugin</a></p>
+  </div>
+</section>
+</main>
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-about">
+        <a class="brand" href="./" aria-label="Tally, home"><span class="lamp" aria-hidden="true"></span>TALLY</a>
+        <p>A free, open-source Jellyfin app for TVs and phones, with a server plugin for live TV and sports. No ads, no accounts, no tracking.</p>
+        <a class="btn btn-sm" href="https://www.patreon.com/SeanDouglas" rel="noopener"><span class="sq" aria-hidden="true"></span>Support on Patreon</a>
+      </div>
+      <div>
+        <h2>Tally</h2>
+        <ul>
+          <li><a href="features.html">Features</a></li>
+          <li><a href="live-sports.html">Live sports</a></li>
+          <li><a href="how-it-works.html">How it works</a></li>
+          <li><a href="download.html">Download and install</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Help</h2>
+        <ul>
+          <li><a href="faq.html">FAQ and troubleshooting</a></li>
+          <li><a href="download.html#server">Server setup</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally/issues" rel="noopener">Report a bug</a></li>
+          <li><a href="privacy.html">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Project</h2>
+        <ul>
+          <li><a href="support.html">Support Tally</a></li>
+          <li><a href="legal.html">Open source and legal</a></li>
+          <li><a href="https://github.com/Scdouglas1999/Tally" rel="noopener">Source code</a></li>
+          <li><a href="https://github.com/damontecres/Wholphin" rel="noopener">Wholphin, the app Tally builds on</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-legal">
+      <p>Tally is free software under the GNU General Public License, version 2, and a fork of Wholphin. Jellyfin is a trademark of the Jellyfin project. Tally isn't affiliated with or endorsed by Jellyfin, Wholphin, or any league, team, network or data provider. Tally provides no channels or streams. The teams and scores on this site are made up.</p>
+      <p class="mono">No cookies · No tracking</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
