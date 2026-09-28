@@ -210,7 +210,8 @@ private fun ServerBlock(
                 text =
                     stringResource(
                         R.string.tally_server_features,
-                        info.features.joinToString(", ").ifBlank { "\u2014" },
+                        // the Pulse channel's feature id is still "redzone" on the wire
+                        info.features.joinToString(", ") { if (it == "redzone") "pulse" else it }.ifBlank { "\u2014" },
                     ),
                 style = if (phone) PhoneType.bodySmall else TallyType.hint,
                 color = TallyColors.muted,
