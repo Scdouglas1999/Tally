@@ -9,6 +9,30 @@
     "imageUrl": "https://raw.githubusercontent.com/Scdouglas1999/Tally/main/server/icon.png",
     "versions": [
       {
+        "version": "2.3.2.12",
+        "changelog": "Tally 2.3.2: video shows again in Jellyfin Media Player and Jellyfin Desktop when the Tally look is on.\n\nBuild for Jellyfin 12.1.",
+        "targetAbi": "12.1.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.2/Tally-server-2.3.2-jf12.zip",
+        "checksum": "865e189fc1a5636e1cc1907f460b09b9",
+        "timestamp": "2026-09-28T01:50:23.0000000Z"
+      },
+      {
+        "version": "2.3.2.11",
+        "changelog": "Tally 2.3.2: video shows again in Jellyfin Media Player and Jellyfin Desktop when the Tally look is on.\n\nBuild for Jellyfin 10.11.",
+        "targetAbi": "10.11.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.2/Tally-server-2.3.2-jf10.11.zip",
+        "checksum": "1ca4f28ddb134b0cb0997cd878c98424",
+        "timestamp": "2026-09-28T01:50:23.0000000Z"
+      },
+      {
+        "version": "2.3.2.10",
+        "changelog": "Tally 2.3.2: video shows again in Jellyfin Media Player and Jellyfin Desktop when the Tally look is on.\n\nBuild for Jellyfin 10.10.",
+        "targetAbi": "10.10.0.0",
+        "sourceUrl": "https://github.com/Scdouglas1999/Tally/releases/download/tally-v2.3.2/Tally-server-2.3.2-jf10.10.zip",
+        "checksum": "f0060f7f407f9622de1cdaa5bb3384ab",
+        "timestamp": "2026-09-28T01:50:23.0000000Z"
+      },
+      {
         "version": "2.3.1.12",
         "changelog": "Tally 2.3.1: RedZone's \"No games live\" card, recordings and stream checks work on servers whose ffmpeg is found by name.\n\nBuild for Jellyfin 12.1.",
         "targetAbi": "12.1.0.0",
